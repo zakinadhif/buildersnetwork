@@ -5,23 +5,16 @@
  * inject an in-memory db mock and a configurable auth mock via middleware.
  * No module-level vi.mock() needed — just swap state between tests.
  *
- * The `makeQueryResult` helper is the key trick: it returns an object that
- * satisfies both Drizzle usage patterns at once:
+ * The `makeQueryResult` helper satisfies both Drizzle usage patterns at once:
  *
  *   await db.select().from(table)                    → list query (awaitable)
  *   await db.select().from(table).where(...).limit(1) → single-row query
  */
 
-import { items as itemsTable } from "@myapp/db/schema";
-import { Hono } from "hono";
-import itemsRouter from "../../src/routes/items";
-
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
 
-export type ItemRow = { id: string; name: string; createdAt: number };
-export type DbSeed = { items?: ItemRow[] };
 export type MockUser = { id: string; email: string };
 
 // ---------------------------------------------------------------------------
@@ -34,7 +27,7 @@ export type MockUser = { id: string; email: string };
  * - Awaitable directly as a list  (`await db.select().from(table)`)
  * - Chainable `.limit(n)`          (`await db.select().from(table).where(...).limit(1)`)
  */
-const makeQueryResult = <T>(rows: T[]): QueryResult<T> => ({
+export const makeQueryResult = <T>(rows: T[]): QueryResult<T> => ({
   limit: (_n: number) => makeQueryResult(rows),
   // biome-ignore lint/suspicious/noThenProperty: intentional thenable — mocks Drizzle's awaitable query builder
   then: <R>(resolve: (value: T[]) => R, reject?: (reason: unknown) => R) =>
@@ -50,43 +43,10 @@ type QueryResult<T> = {
 };
 
 // ---------------------------------------------------------------------------
-// In-memory db mock
+// Auth mock factory
 // ---------------------------------------------------------------------------
 
-export const createDbMock = (seed: DbSeed = {}) => {
-  const state = {
-    items: seed.items ? [...seed.items] : ([] as ItemRow[]),
-  };
-
-  const db = {
-    select: (_fields?: unknown) => ({
-      from: (table: unknown) => {
-        const rows = table === itemsTable ? state.items : [];
-        return {
-          where: (_condition?: unknown) => makeQueryResult(rows),
-          ...makeQueryResult(rows),
-        };
-      },
-    }),
-    insert: (_table: unknown) => ({
-      values: (values: ItemRow) => {
-        state.items.push(values);
-        return Promise.resolve(undefined);
-      },
-    }),
-    delete: (_table: unknown) => ({
-      where: (_condition?: unknown) => Promise.resolve(undefined),
-    }),
-  };
-
-  return { db, state };
-};
-
-// ---------------------------------------------------------------------------
-// Test app factory
-// ---------------------------------------------------------------------------
-
-type MockAuth = {
+export type MockAuth = {
   api: {
     getSession: () => Promise<{
       user: MockUser;
@@ -96,33 +56,12 @@ type MockAuth = {
 };
 
 /**
- * Creates a minimal Hono app with only the items router mounted.
- * Pass a `user` to simulate an authenticated request; omit for anonymous.
+ * Returns a mock auth object. Pass a `user` to simulate an authenticated
+ * request; omit (or pass null) for anonymous.
  */
-export const createItemsTestApp = (
-  db: ReturnType<typeof createDbMock>["db"],
-  user: MockUser | null = null,
-) => {
-  const mockAuth: MockAuth = {
-    api: {
-      getSession: async () =>
-        user ? { user, session: { id: "test-session-id" } } : null,
-    },
-  };
-
-  const app = new Hono<{
-    Variables: { db: typeof db; auth: typeof mockAuth };
-  }>();
-
-  app.use("*", async (c, next) => {
-    c.set("db", db);
-    c.set("auth", mockAuth);
-    await next();
-  });
-
-  app.route("/", itemsRouter);
-
-  return {
-    request: (path: string, init?: RequestInit) => app.request(path, init),
-  };
-};
+export const createAuthMock = (user: MockUser | null = null): MockAuth => ({
+  api: {
+    getSession: async () =>
+      user ? { user, session: { id: "test-session-id" } } : null,
+  },
+});

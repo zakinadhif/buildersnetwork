@@ -1,0 +1,140 @@
+import { useEffect, useRef, useState } from "react";
+import { Dots } from "@/components/ui-atoms";
+import { type Member, callClaude, firstName } from "@/lib/members";
+
+interface ChatMessage {
+  role: "ai" | "user";
+  text: string;
+}
+
+export default function CommunityHome({
+  user,
+  members,
+  onView,
+}: {
+  user: Member;
+  members: Member[];
+  onView: (m: Member) => void;
+}) {
+  const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
+  const [msgs, setMsgs] = useState<ChatMessage[]>([{ role: "ai", text: greeting }]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const endRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [msgs, busy]);
+
+  async function query() {
+    const text = input.trim();
+    if (!text || busy) return;
+    setMsgs((p) => [...p, { role: "user", text }]);
+    setInput("");
+    setBusy(true);
+
+    const dir = members
+      .map(
+        (m) =>
+          `${m.name} (${m.year}, ${m.major})\nSkills: ${m.skills.join(", ")}\nLagi bikin: ${m.building}\nPengen: ${m.wants}\nVibe: ${m.vibe}`,
+      )
+      .join("\n\n");
+
+    const prompt = `Kamu adalah AI discovery untuk komunitas builder Al-Fath Berkarya.
+
+Direktori anggota:
+${dir}
+
+Pertanyaan: "${text}"
+
+Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota yang relevan beserta nama dan 1-2 kalimat kenapa mereka cocok. Kalau ga ada yang cocok, bilang aja terus terang. Singkat padat.`;
+
+    try {
+      const reply = await callClaude([{ role: "user", content: prompt }]);
+      setBusy(false);
+      setMsgs((p) => [...p, { role: "ai", text: reply }]);
+    } catch {
+      setBusy(false);
+      setMsgs((p) => [...p, { role: "ai", text: "ada yang error — coba lagi?" }]);
+    }
+  }
+
+  const onKey = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      query();
+    }
+  };
+
+  return (
+    <div className="screen" style={{ display: "flex", flexDirection: "column" }}>
+      <div className="nav">
+        <div className="nav-inner">
+          <span
+            style={{
+              fontSize: 12,
+              fontWeight: 500,
+              letterSpacing: "0.05em",
+              textTransform: "uppercase",
+              color: "var(--ink3)",
+            }}
+          >
+            Al-Fath Berkarya
+          </span>
+          <span style={{ fontSize: 13, color: "var(--ink2)" }}>
+            {user.name} · {user.year}
+          </span>
+        </div>
+      </div>
+
+      <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>
+        <div className="wrap" style={{ padding: 0 }}>
+          <div className="chat" style={{ marginBottom: 48 }}>
+            {msgs.map((m, i) => (
+              <div key={i} className={`msg-${m.role}`}>
+                {m.text}
+              </div>
+            ))}
+            {busy && (
+              <div className="msg-ai">
+                <Dots />
+              </div>
+            )}
+            <div ref={endRef} />
+          </div>
+
+          <p className="sec-head">Anggota ({members.length})</p>
+          {members.map((m) => (
+            <div key={m.id} className="member-row" onClick={() => onView(m)}>
+              <div className="member-top">
+                <span className="member-name">{m.name}</span>
+                <span className="member-year">{m.year}</span>
+              </div>
+              <p className="member-skills">{m.skills.slice(0, 3).join(" · ")}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="input-bar">
+        <div className="input-inner">
+          <textarea
+            className="chat-textarea"
+            rows={1}
+            placeholder="siapa yang lagi kerja di ML? ada yang jago backend?"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={onKey}
+          />
+          <button
+            className="send-btn"
+            onClick={query}
+            disabled={!input.trim() || busy}
+          >
+            ↑
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

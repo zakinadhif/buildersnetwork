@@ -12,6 +12,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@myapp/ai": "workspace:^",
     "@myapp/api-client-react": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",

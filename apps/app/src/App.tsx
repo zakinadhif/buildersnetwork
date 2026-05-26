@@ -1,44 +1,66 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "sonner";
-import { Route, Switch, Router as WouterRouter } from "wouter";
-import { ProtectedRoute } from "./components/protected-route";
-import Home from "./pages/Home";
-import Login from "./pages/Login";
-import NotFound from "./pages/NotFound";
+import { useState } from "react";
+import { type Member, SEED_MEMBERS } from "@/lib/members";
+import CommunityHome from "@/pages/CommunityHome";
+import Matches from "@/pages/Matches";
+import MemberProfile from "@/pages/MemberProfile";
+import Onboarding from "@/pages/Onboarding";
+import Review from "@/pages/Review";
+import Welcome from "@/pages/Welcome";
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-      staleTime: 5 * 60 * 1000,
-    },
-  },
-});
+type Screen = "welcome" | "onboarding" | "review" | "matches" | "home" | "profile";
 
-function Router() {
+export default function App() {
+  const [screen, setScreen] = useState<Screen>("welcome");
+  const [user, setUser] = useState<Member | null>(null);
+  const [matches, setMatches] = useState<Member[]>([]);
+  const [members, setMembers] = useState<Member[]>(SEED_MEMBERS);
+  const [viewing, setViewing] = useState<Member | null>(null);
+  const [prevScreen, setPrev] = useState<Screen>("home");
+
+  const viewMember = (m: Member) => {
+    setPrev(screen);
+    setViewing(m);
+    setScreen("profile");
+  };
+
+  const back = () => {
+    setScreen(prevScreen);
+    setViewing(null);
+  };
+
+  const onOnboardDone = (profile: Member) => {
+    setUser(profile);
+    setScreen("review");
+  };
+
+  const onPublish = (profile: Member, matched: Member[]) => {
+    setUser(profile);
+    setMatches(matched);
+    setMembers([...SEED_MEMBERS, { ...profile, id: "user" }]);
+    setScreen("matches");
+  };
+
   return (
-    <Switch>
-      <Route path="/login" component={Login} />
-      <Route path="/">
-        <ProtectedRoute>
-          <Home />
-        </ProtectedRoute>
-      </Route>
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      {screen === "welcome" && <Welcome onStart={() => setScreen("onboarding")} />}
+      {screen === "onboarding" && <Onboarding onDone={onOnboardDone} />}
+      {screen === "review" && user && (
+        <Review draft={user} onPublish={onPublish} />
+      )}
+      {screen === "matches" && user && (
+        <Matches
+          matches={matches}
+          user={user}
+          onContinue={() => setScreen("home")}
+          onView={viewMember}
+        />
+      )}
+      {screen === "home" && user && (
+        <CommunityHome user={user} members={members} onView={viewMember} />
+      )}
+      {screen === "profile" && viewing && (
+        <MemberProfile member={viewing} onBack={back} />
+      )}
+    </>
   );
 }
-
-function App() {
-  return (
-    <QueryClientProvider client={queryClient}>
-      <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-        <Router />
-      </WouterRouter>
-      <Toaster />
-    </QueryClientProvider>
-  );
-}
-
-export default App;

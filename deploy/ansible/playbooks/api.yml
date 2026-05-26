@@ -1,0 +1,7 @@
+---
+- name: Provision backend API VM
+  hosts: api
+  become: true
+  roles:
+    - common
+    - backend-api

@@ -16,6 +16,10 @@
     "test:api:watch": "pnpm --filter api run test:watch",
     "test:e2e": "pnpm --filter app run test:e2e",
     "test:e2e:ui": "pnpm --filter app run test:e2e:ui",
+    "build:frontend": "pnpm codegen && pnpm --filter landing build && pnpm --filter app build",
+    "build:cf": "pnpm build:frontend && pnpm --filter api build && pnpm cf:copy-assets",
+    "cf:copy-assets": "node -e \"const fs=require('fs');fs.cpSync('apps/landing/dist','apps/api/public/landing',{recursive:true});fs.cpSync('apps/app/dist','apps/api/public/app',{recursive:true});\"",
+    "cf:deploy": "pnpm build:cf && wrangler deploy",
     "format": "biome format --write .",
     "lint": "biome check .",
     "lint:fix": "biome check --write ."
@@ -26,6 +30,7 @@
   "packageManager": "pnpm@10.18.1",
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "wrangler": "^4.94.0"
   }
 }

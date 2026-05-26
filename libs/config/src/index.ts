@@ -44,6 +44,15 @@ const schema = z.object({
 
   /** Comma-separated CORS allowlist. Defaults to APP_URL when unset. */
   ALLOWED_ORIGINS: z.string().optional(),
+
+  /** Anthropic API key — required when AI_PROVIDER=anthropic. */
+  ANTHROPIC_API_KEY: z.string().optional(),
+
+  /** Which AI backend to use. Defaults to "anthropic". */
+  AI_PROVIDER: z.enum(["anthropic", "workers-ai"]).default("anthropic"),
+
+  /** Workers AI model override (only used when AI_PROVIDER=workers-ai). */
+  AI_WORKERS_MODEL: z.string().optional(),
 });
 
 export type Config = z.infer<typeof schema>;

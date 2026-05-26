@@ -1,0 +1,7 @@
+---
+- name: Provision database VM
+  hosts: db
+  become: true
+  roles:
+    - common
+    - postgres

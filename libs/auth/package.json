@@ -1,6 +1,7 @@
 {
   "name": "@myapp/auth",
   "private": true,
+  "type": "module",
   "exports": {
     ".": "./src/index.ts"
   },

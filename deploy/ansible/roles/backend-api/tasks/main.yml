@@ -1,0 +1,47 @@
+---
+- name: Create app directory
+  file:
+    path: /opt/{{ app_name }}
+    state: directory
+    mode: "0755"
+
+- name: Template env file
+  template:
+    src: env.j2
+    dest: /opt/{{ app_name }}/.env
+    mode: "0600"
+
+- name: Pull API image (build locally and push, or use registry)
+  community.docker.docker_image:
+    name: "{{ api_image | default(app_name + '-api:latest') }}"
+    source: pull
+    force_source: "{{ force_pull | default(false) }}"
+  when: api_image is defined
+
+- name: Run API container
+  community.docker.docker_container:
+    name: "{{ app_name }}-api"
+    image: "{{ api_image | default(app_name + '-api:latest') }}"
+    state: started
+    restart_policy: unless-stopped
+    env_file: /opt/{{ app_name }}/.env
+    ports:
+      - "{{ api_port }}:8080"
+
+- name: Run database migrations
+  community.docker.docker_container:
+    name: "{{ app_name }}-migrate"
+    image: "{{ api_image | default(app_name + '-api:latest') }}"
+    state: started
+    restart_policy: "no"
+    env_file: /opt/{{ app_name }}/.env
+    command: node dist/scripts/migrate.js
+  register: migrate_result
+
+- name: Wait for migrations to complete
+  community.docker.docker_container_info:
+    name: "{{ app_name }}-migrate"
+  register: migrate_info
+  until: migrate_info.container.State.Status != 'running'
+  retries: 30
+  delay: 5

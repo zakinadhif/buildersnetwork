@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "@myapp/ai": "workspace:^",
     "@myapp/auth": "workspace:^",
     "@myapp/config": "workspace:^",
     "@myapp/db": "workspace:^",
@@ -21,9 +22,11 @@
     "hono": "^4.7.11"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250525.0",
     "@types/node": "catalog:",
     "tsup": "^8.5.0",
     "tsx": "^4.19.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "wrangler": "^4.0.0"
   }
 }

@@ -1,0 +1,6 @@
+# Shared variables — override in group_vars/web.yml, group_vars/api.yml, etc.
+app_name: buildersnetwork
+app_domain: "{{ hostvars[groups['api'][0]].ansible_host }}"  # replace with your domain
+app_url: "http://{{ app_domain }}"
+api_port: 8080
+frontend_port: 80

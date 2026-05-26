@@ -2,132 +2,132 @@ openapi: 3.1.0
 info:
   title: Api
   version: 0.1.0
-  description: API specification for my-app
+  description: Al-Fath Berkarya API
 servers:
   - url: /api
-    description: Base API path
-  - url: http://localhost:8080/api
-    description: Local dev server
+    description: Same-origin (production / single-container)
+  - url: http://localhost:3000/api
+    description: Local dev API server
 tags:
+  - name: ai
+    description: AI completion
   - name: health
-    description: Health check operations
-  - name: items
-    description: Item CRUD operations
+    description: Health check
+
 paths:
   /healthz:
     get:
       operationId: healthCheck
-      tags:
-        - health
+      tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
-          description: Healthy
+          description: Server is healthy
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
-  /items:
-    get:
-      operationId: listItems
-      tags:
-        - items
-      summary: List items
-      description: Returns all items
-      responses:
-        "200":
-          description: A list of items
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Item"
+
+  /ai/stream:
     post:
-      operationId: createItem
-      tags:
-        - items
-      summary: Create an item
-      description: Creates a new item
+      operationId: aiStream
+      tags: [ai]
+      summary: Stream a chat completion
+      description: >
+        Returns a `text/plain` chunked response. Consume with the `useStream`
+        hook from `@myapp/ai/react` — not the generated client function.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateItemRequest"
-      responses:
-        "201":
-          description: Created item
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Item"
-  /items/{itemId}:
-    get:
-      operationId: getItem
-      tags:
-        - items
-      summary: Get an item
-      description: Returns a specific item by id
-      parameters:
-        - $ref: "#/components/parameters/ItemId"
+              $ref: "#/components/schemas/CompleteRequest"
       responses:
         "200":
-          description: Item details
+          description: Streamed plain-text chunks
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: Bad request
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Item"
-        "404":
-          description: Item not found
-    delete:
-      operationId: deleteItem
-      tags:
-        - items
-      summary: Delete an item
-      description: Deletes a specific item by id
-      parameters:
-        - $ref: "#/components/parameters/ItemId"
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai/complete:
+    post:
+      operationId: aiComplete
+      tags: [ai]
+      summary: Complete a chat conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CompleteRequest"
       responses:
-        "204":
-          description: Item deleted
-        "404":
-          description: Item not found
+        "200":
+          description: AI response text
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompleteResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: AI provider not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
-  parameters:
-    ItemId:
-      name: itemId
-      in: path
-      required: true
-      schema:
-        type: string
   schemas:
     HealthStatus:
       type: object
       properties:
-        status:
+        ok:
+          type: boolean
+        version:
           type: string
-      required:
-        - status
-    Item:
+      required: [ok, version]
+
+    Message:
       type: object
       properties:
-        id:
+        role:
           type: string
-        name:
+          enum: [user, assistant]
+        content:
           type: string
-        createdAt:
-          type: integer
-          description: Unix epoch milliseconds
-      required:
-        - id
-        - name
-        - createdAt
-    CreateItemRequest:
+      required: [role, content]
+
+    CompleteRequest:
       type: object
       properties:
-        name:
+        messages:
+          type: array
+          items:
+            $ref: "#/components/schemas/Message"
+          minItems: 1
+      required: [messages]
+
+    CompleteResponse:
+      type: object
+      properties:
+        text:
           type: string
-      required:
-        - name
+      required: [text]
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]

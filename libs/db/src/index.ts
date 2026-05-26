@@ -1,16 +1,25 @@
+import { neon } from "@neondatabase/serverless";
+import { drizzle as drizzleNeon } from "drizzle-orm/neon-http";
 import { drizzle } from "drizzle-orm/postgres-js";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import postgres from "postgres";
 import * as schema from "./schema";
 
+export type DbDriver = "postgres-js" | "neon-http";
+
 /**
- * Creates a Drizzle client backed by postgres-js.
+ * Creates a Drizzle client.
  *
- * `url` is a standard Postgres connection string (`postgres://...`), so the
- * same code points at Neon, Supabase, Cloud SQL, or a self-hosted Postgres
- * with no change.
+ * - `postgres-js` (default): full TCP connection via postgres-js. Works in
+ *   Node.js / Docker / EC2.
+ * - `neon-http`: Neon's serverless HTTP driver. Works in Cloudflare Workers
+ *   (no raw TCP sockets). Requires a Neon database URL.
  */
-export const createDb = (url: string) => {
+export const createDb = (url: string, driver: DbDriver = "postgres-js") => {
+  if (driver === "neon-http") {
+    const sql = neon(url);
+    return drizzleNeon(sql, { schema });
+  }
   const client = postgres(url);
   return drizzle(client, { schema });
 };
@@ -18,9 +27,8 @@ export const createDb = (url: string) => {
 export type Db = ReturnType<typeof createDb>;
 
 /**
- * Runs pending SQL migrations from `migrationsFolder`, then closes the
- * connection. Intended for a one-shot deploy step (Fly release command,
- * Railway/Render predeploy, Cloud Run Job) — never on app startup.
+ * Runs pending SQL migrations. Always uses postgres-js (TCP) — intended for
+ * one-shot deploy steps, not runtime request handling.
  */
 export async function runMigrations(url: string, migrationsFolder: string) {
   const client = postgres(url, { max: 1 });

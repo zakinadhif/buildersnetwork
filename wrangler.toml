@@ -1,0 +1,34 @@
+# Cloudflare Workers deployment configuration.
+# Run `pnpm build:cf` first to populate apps/api/public/ with built assets,
+# then deploy with `wrangler deploy`.
+#
+# Secrets (never commit these) — set via:
+#   wrangler secret put DATABASE_URL
+#   wrangler secret put BETTER_AUTH_SECRET
+#   wrangler secret put ANTHROPIC_API_KEY   # not needed when AI_PROVIDER=workers-ai
+
+name = "buildersnetwork"
+main = "apps/api/src/worker.ts"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers Assets — serves the built SPA and landing from apps/api/public/.
+# Requests matching a static file are served directly; everything else falls
+# through to the Worker's fetch handler.
+[assets]
+directory = "apps/api/public"
+binding = "ASSETS"
+
+# Workers AI — free daily quota for inference.
+[ai]
+binding = "AI"
+
+# Non-secret vars. Secrets go via `wrangler secret put`.
+[vars]
+AI_WORKERS_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+APP_URL = "https://buildersnetwork.muh-zakinadhif.workers.dev"
+
+# --- Per-environment overrides ---
+
+[env.production.vars]
+# APP_URL = "https://yourapp.example.com"

@@ -1,0 +1,10 @@
+ai_provider: anthropic
+# anthropic_api_key and better_auth_secret are secrets — store in ansible-vault:
+#   ansible-vault encrypt_string 'sk-ant-...' --name anthropic_api_key
+# anthropic_api_key: !vault |
+#   $ANSIBLE_VAULT;1.1;AES256
+#   ...
+# better_auth_secret: !vault | ...
+# database_url is set at deploy time referencing the db host:
+database_url: "postgres://app:{{ postgres_password }}@{{ hostvars[groups['db'][0]].ansible_host }}:5432/{{ app_name }}"
+serve_static: "false"
