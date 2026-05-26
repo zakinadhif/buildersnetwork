@@ -1,0 +1,30 @@
+node_modules
+.cloudflare-state
+
+# Local environment and Wrangler dev vars
+**/.env.local
+**/.env.*.local
+**/.dev.vars
+**/.dev.vars.*
+!**/.env.example
+!**/.dev.vars.example
+
+# Playwright
+**/test-results/
+**/playwright-report/
+**/blob-report/
+**/.playwright/
+
+# Build outputs
+dist/
+.astro/
+
+# TypeScript build info
+*.tsbuildinfo
+
+# Claude Code chat dumps and handoff documents
+/.claude-chat/
+
+# Generated API client and Zod schemas
+libs/api-client-react/src/generated/
+libs/api-zod/src/generated/

@@ -1,0 +1,18 @@
+{
+  "name": "@myapp/auth",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "better-auth:generate": "auth generate --config ./src/index.ts --output ../db/src/schema/auth.ts --yes"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "auth": "^1.5.5"
+  },
+  "dependencies": {
+    "@myapp/db": "workspace:^",
+    "better-auth": "^1.5.5"
+  }
+}

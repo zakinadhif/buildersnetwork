@@ -1,0 +1,170 @@
+name: Release
+
+on:
+  push:
+    branches: [main]
+  # Or gate on tags instead:
+  # push:
+  #   tags: ["v*"]
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  build-push:
+    name: Build & push image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      sha: ${{ steps.meta.outputs.short_sha }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Short SHA
+        id: meta
+        run: echo "short_sha=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push (multi-arch)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: deploy/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:sha-${{ steps.meta.outputs.short_sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # --- Platform deploys: each gated on its secret, so you enable them one at a
+  # time. A failure in one does not cascade to the others. ---
+
+  deploy-fly:
+    name: Deploy to Fly.io
+    needs: build-push
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Guard on FLY_API_TOKEN
+        id: guard
+        run: |
+          if [ -n "${{ secrets.FLY_API_TOKEN }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Setup flyctl
+        if: steps.guard.outputs.enabled == 'true'
+        uses: superfly/flyctl-actions/setup-flyctl@master
+      - name: Deploy
+        if: steps.guard.outputs.enabled == 'true'
+        run: flyctl deploy --config deploy/fly.toml --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+
+  deploy-cloud-run:
+    name: Deploy to Cloud Run
+    needs: build-push
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Guard on GCP_SA_KEY
+        id: guard
+        run: |
+          if [ -n "${{ secrets.GCP_SA_KEY }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Authenticate to Google Cloud
+        if: steps.guard.outputs.enabled == 'true'
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Set up gcloud
+        if: steps.guard.outputs.enabled == 'true'
+        uses: google-github-actions/setup-gcloud@v2
+      - name: Run migration job + deploy revision
+        if: steps.guard.outputs.enabled == 'true'
+        run: |
+          gcloud run jobs execute comfort-stack-migrate --region "${GCP_REGION:-asia-southeast1}" --wait
+          gcloud run services replace deploy/cloudrun.service.yaml --region "${GCP_REGION:-asia-southeast1}"
+        env:
+          GCP_REGION: ${{ secrets.GCP_REGION }}
+
+  deploy-app-runner:
+    name: Deploy to AWS App Runner
+    needs: build-push
+    if: ${{ github.event_name == 'push' }}
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    steps:
+      - name: Guard on AWS_ROLE_TO_ASSUME
+        id: guard
+        run: |
+          if [ -n "${{ secrets.AWS_ROLE_TO_ASSUME }}" ] \
+            && [ -n "${{ secrets.AWS_REGION }}" ] \
+            && [ -n "${{ secrets.APP_RUNNER_SERVICE_ARN }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Configure AWS credentials (OIDC)
+        if: steps.guard.outputs.enabled == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ secrets.AWS_REGION }}
+      - name: Login to Amazon ECR
+        if: steps.guard.outputs.enabled == 'true'
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Mirror GHCR image into ECR
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          GHCR_IMAGE: ${{ env.IMAGE }}:sha-${{ needs.build-push.outputs.sha }}
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          SHA: ${{ needs.build-push.outputs.sha }}
+        run: |
+          docker pull "$GHCR_IMAGE"
+          docker tag  "$GHCR_IMAGE" "$ECR_REGISTRY/comfort-stack:latest"
+          docker tag  "$GHCR_IMAGE" "$ECR_REGISTRY/comfort-stack:sha-$SHA"
+          docker push "$ECR_REGISTRY/comfort-stack:latest"
+          docker push "$ECR_REGISTRY/comfort-stack:sha-$SHA"
+      - name: Run database migrations
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: |
+          docker run --rm \
+            -e DATABASE_URL="$DATABASE_URL" \
+            "$ECR_REGISTRY/comfort-stack:latest" \
+            node dist/scripts/migrate.js
+      - name: Trigger App Runner deployment
+        if: steps.guard.outputs.enabled == 'true'
+        run: |
+          aws apprunner start-deployment \
+            --region "${{ secrets.AWS_REGION }}" \
+            --service-arn "${{ secrets.APP_RUNNER_SERVICE_ARN }}"
