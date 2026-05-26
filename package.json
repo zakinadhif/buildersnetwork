@@ -18,7 +18,7 @@
     "test:e2e:ui": "pnpm --filter app run test:e2e:ui",
     "build:frontend": "pnpm codegen && pnpm --filter landing build && pnpm --filter app build",
     "build:cf": "pnpm build:frontend && pnpm --filter api build && pnpm cf:copy-assets",
-    "cf:copy-assets": "node -e \"const fs=require('fs');fs.cpSync('apps/landing/dist','apps/api/public/landing',{recursive:true});fs.cpSync('apps/app/dist','apps/api/public/app',{recursive:true});\"",
+    "cf:copy-assets": "node -e \"const fs=require('fs');fs.cpSync('apps/landing/dist','apps/api/public',{recursive:true});fs.cpSync('apps/app/dist','apps/api/public/app',{recursive:true});\"",
     "cf:deploy": "pnpm build:cf && wrangler deploy",
     "format": "biome format --write .",
     "lint": "biome check .",

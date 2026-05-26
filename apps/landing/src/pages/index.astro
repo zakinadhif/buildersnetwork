@@ -4,77 +4,397 @@ const appUrl = import.meta.env.PUBLIC_APP_URL || "http://localhost:5173";
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>My App</title>
-    <meta name="description" content="My App — built on the Cloudflare stack" />
+    <title>Al-Fath Berkarya — Komunitas Builder Telkom University</title>
+    <meta name="description" content="Platform komunitas untuk builder mahasiswa Telkom University. Kenalan lewat AI, dapat match, temukan kolaborator." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
     <style>
       *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg:       #f1efe9;
+        --ink:      #1a1916;
+        --ink2:     #6b6860;
+        --ink3:     #9b9890;
+        --line:     #dedad1;
+        --ai-bg:    rgba(26, 25, 22, 0.055);
+        --user-bg:  #1a1916;
+        --user-ink: #f1efe9;
+        --sans:     'Plus Jakarta Sans', system-ui, sans-serif;
+        --mono:     'IBM Plex Mono', monospace;
+      }
+
+      html { scroll-behavior: smooth; }
       body {
-        font-family: system-ui, -apple-system, sans-serif;
-        background: #09090b;
-        color: #fafafa;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        gap: 2rem;
-        padding: 2rem;
-        text-align: center;
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
       }
-      h1 { font-size: 3rem; font-weight: 700; letter-spacing: -0.02em; }
-      p { color: #a1a1aa; font-size: 1.125rem; max-width: 36rem; line-height: 1.7; }
-      .cta {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: #fafafa;
-        color: #09090b;
-        padding: 0.75rem 1.5rem;
-        border-radius: 0.5rem;
-        font-weight: 600;
-        text-decoration: none;
-        transition: opacity 0.15s;
+
+      /* ─── Layout ───────────────────────────────── */
+      .wrap { max-width: 720px; margin: 0 auto; padding: 0 36px; }
+
+      /* ─── Nav ──────────────────────────────────── */
+      nav { padding: 36px 0 0; display: flex; align-items: center; justify-content: space-between; }
+      .nav-brand {
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--ink); text-decoration: none;
       }
-      .cta:hover { opacity: 0.85; }
-      .stack {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-        margin-top: 1rem;
+      .nav-link {
+        font-size: 13px; font-weight: 600;
+        color: var(--ink2); text-decoration: none;
+        transition: color 0.15s;
       }
-      .badge {
-        background: #18181b;
-        border: 1px solid #27272a;
-        color: #a1a1aa;
-        padding: 0.25rem 0.75rem;
-        border-radius: 9999px;
-        font-size: 0.8rem;
+      .nav-link:hover { color: var(--ink); }
+
+      /* ─── Hero ─────────────────────────────────── */
+      .hero { padding: 108px 0 120px; }
+      .eyebrow {
+        font-size: 11px; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 24px;
+      }
+      .hero-h1 {
+        font-size: clamp(48px, 7.5vw, 84px);
+        font-weight: 700; line-height: 1.0;
+        letter-spacing: -0.03em;
+        color: var(--ink); margin-bottom: 24px;
+      }
+      .hero-sub {
+        font-size: 16px; line-height: 1.7;
+        color: var(--ink2); max-width: 400px;
+        margin-bottom: 44px;
+      }
+      .btn-dark {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--ink); color: var(--bg);
+        padding: 13px 26px; border-radius: 4px;
+        font-family: var(--sans); font-size: 14px; font-weight: 600;
+        text-decoration: none; letter-spacing: 0.01em;
+        transition: opacity 0.15s, transform 0.15s;
+      }
+      .btn-dark:hover { opacity: 0.82; transform: translateY(-1px); }
+
+      /* ─── Sections ─────────────────────────────── */
+      .section { padding: 88px 0; border-top: 1px solid var(--line); }
+      .section-label {
+        font-size: 11px; font-weight: 600;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 28px;
+      }
+      .section-h2 {
+        font-size: clamp(26px, 3.8vw, 38px);
+        font-weight: 700; line-height: 1.15;
+        letter-spacing: -0.025em;
+        color: var(--ink); margin-bottom: 14px;
+        max-width: 500px;
+      }
+      .section-sub {
+        font-size: 15px; line-height: 1.7;
+        color: var(--ink2); max-width: 460px;
+        margin-bottom: 48px;
+      }
+
+      /* ─── Chat mockup ──────────────────────────── */
+      .chat-shell {
+        background: rgba(255, 255, 255, 0.42);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 26px;
+        display: flex; flex-direction: column; gap: 12px;
+        max-width: 500px;
+      }
+      .bbl {
+        font-family: var(--mono);
+        font-size: 13px; line-height: 1.6;
+        border-radius: 3px; padding: 10px 14px;
+        max-width: 86%;
+        opacity: 0; transform: translateY(5px);
+        transition: opacity 0.38s ease, transform 0.38s ease;
+      }
+      .bbl.show { opacity: 1; transform: translateY(0); }
+      .bbl-ai  { background: var(--ai-bg);   color: var(--ink);      align-self: flex-start; }
+      .bbl-usr { background: var(--user-bg); color: var(--user-ink); align-self: flex-end; }
+      .cursor {
+        display: inline-block; width: 2px; height: 12px;
+        background: var(--ink3); vertical-align: middle;
+        margin-left: 2px;
+        animation: blink 1.1s step-end infinite;
+      }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+      /* ─── Profile card ─────────────────────────── */
+      .profile-card {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 30px; max-width: 400px;
+        background: rgba(255, 255, 255, 0.42);
+      }
+      .p-name {
+        font-size: 21px; font-weight: 700;
+        letter-spacing: -0.02em; color: var(--ink);
+        margin-bottom: 4px;
+      }
+      .p-meta { font-size: 12px; color: var(--ink3); font-family: var(--mono); margin-bottom: 24px; }
+      .p-row { margin-bottom: 16px; }
+      .p-row:last-child { margin-bottom: 0; }
+      .p-label {
+        font-size: 10.5px; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 6px;
+      }
+      .p-val { font-size: 13px; line-height: 1.55; color: var(--ink2); font-family: var(--mono); }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 5px; }
+      .tag {
+        font-size: 12px; font-family: var(--mono); color: var(--ink2);
+        border: 1px solid var(--line); border-radius: 3px;
+        padding: 3px 9px; background: var(--bg);
+      }
+
+      /* ─── Match cards ──────────────────────────── */
+      .matches { display: flex; flex-direction: column; gap: 14px; max-width: 500px; }
+      .match-card {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 22px 26px; background: rgba(255, 255, 255, 0.42);
+        display: flex; flex-direction: column; gap: 7px;
+      }
+      .m-name { font-size: 15px; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+      .m-meta { font-size: 11.5px; font-family: var(--mono); color: var(--ink3); }
+      .m-reason { font-size: 13px; line-height: 1.6; color: var(--ink2); font-style: italic; }
+
+      /* ─── Discovery mockup ─────────────────────── */
+      .discovery-shell {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 26px; max-width: 500px;
+        background: rgba(255, 255, 255, 0.42);
+      }
+      .d-query {
+        font-family: var(--mono); font-size: 13.5px;
+        color: var(--ink); padding-bottom: 18px;
+        border-bottom: 1px solid var(--line); margin-bottom: 18px;
+      }
+      .d-query::before { content: '> '; color: var(--ink3); }
+      .d-reply { font-family: var(--mono); font-size: 12.5px; line-height: 1.75; color: var(--ink2); }
+      .d-reply strong { color: var(--ink); font-weight: 500; }
+
+      /* ─── Footer CTA ───────────────────────────── */
+      .footer-cta { padding: 108px 0 88px; }
+      .footer-h2 {
+        font-size: clamp(34px, 5vw, 52px);
+        font-weight: 700; letter-spacing: -0.03em;
+        line-height: 1.1; color: var(--ink); margin-bottom: 18px;
+      }
+      .footer-sub {
+        font-size: 15px; color: var(--ink2);
+        margin-bottom: 40px; line-height: 1.65;
+        max-width: 360px;
+      }
+      .footer-note {
+        margin-top: 72px; padding-top: 28px;
+        border-top: 1px solid var(--line);
+        font-size: 12px; color: var(--ink3);
+        display: flex; justify-content: space-between; align-items: center;
+      }
+
+      /* ─── Scroll fade-in ───────────────────────── */
+      .fi {
+        opacity: 0; transform: translateY(18px);
+        transition: opacity 0.6s ease, transform 0.6s ease;
+      }
+      .fi.show { opacity: 1; transform: translateY(0); }
+      .fi.d1 { transition-delay: 0.08s; }
+      .fi.d2 { transition-delay: 0.16s; }
+      .fi.d3 { transition-delay: 0.24s; }
+      .fi.d4 { transition-delay: 0.32s; }
+
+      @media (max-width: 580px) {
+        .wrap { padding: 0 20px; }
+        .hero { padding: 72px 0 88px; }
+        .section { padding: 64px 0; }
+        .footer-cta { padding: 72px 0 64px; }
+        .footer-note { flex-direction: column; gap: 8px; align-items: flex-start; }
       }
     </style>
   </head>
   <body>
-    <h1>My App</h1>
-    <p>
-      A full-stack application running entirely on Cloudflare's infrastructure.
-      Fast, global, and serverless by default.
-    </p>
-    <a href={appUrl} class="cta">
-      Open App &rarr;
-    </a>
-    <div class="stack">
-      <span class="badge">Cloudflare Workers</span>
-      <span class="badge">Hono</span>
-      <span class="badge">React 19</span>
-      <span class="badge">Drizzle ORM</span>
-      <span class="badge">Better Auth</span>
-      <span class="badge">Orval</span>
-      <span class="badge">TanStack Query</span>
-      <span class="badge">Astro</span>
+    <div class="wrap">
+
+      <!-- Nav -->
+      <nav>
+        <span class="nav-brand">Al-Fath Berkarya</span>
+        <a href={appUrl} class="nav-link">masuk →</a>
+      </nav>
+
+      <!-- Hero -->
+      <section class="hero">
+        <p class="eyebrow fi">Komunitas Builder · Telkom University</p>
+        <h1 class="hero-h1 fi d1">
+          Temukan builder<br />yang kamu butuhin.
+        </h1>
+        <p class="hero-sub fi d2">
+          Orang-orang di sini lagi ngerjain sesuatu yang nyata. Kenalan lewat AI, dapat rekomendasi, dan mulai kolaborasi.
+        </p>
+        <a href={appUrl} class="btn-dark fi d3">Mulai sekarang →</a>
+      </section>
+
+      <!-- 01 — Onboarding -->
+      <section class="section">
+        <p class="section-label fi">01 — onboarding</p>
+        <h2 class="section-h2 fi d1">AI yang nanya dulu,<br />bukan form yang kamu isi.</h2>
+        <p class="section-sub fi d2">
+          Kamu ngobrol sama AI — soal skill yang beneran kamu pakai, proyek yang lagi dikerjain, dan cara kerja sama orang. Santai, natural, maksimal 10 giliran.
+        </p>
+        <div class="chat-shell fi d3" id="chat1">
+          <div class="bbl bbl-ai">hei — selamat datang di al-fath berkarya. aku mau kenalan dulu. siapa nama kamu?</div>
+          <div class="bbl bbl-usr">Rafi Aulia</div>
+          <div class="bbl bbl-ai">oke Rafi — kamu di tingkat berapa sekarang?</div>
+          <div class="bbl bbl-usr">tingkat 3, informatika</div>
+          <div class="bbl bbl-ai">nice. skill teknis kamu apa — bukan yang di CV, yang beneran kamu pakai waktu ngoding?<span class="cursor"></span></div>
+        </div>
+      </section>
+
+      <!-- 02 — Profile -->
+      <section class="section">
+        <p class="section-label fi">02 — profil</p>
+        <h2 class="section-h2 fi d1">Profil kamu langsung<br />terbentuk dari obrolan.</h2>
+        <p class="section-sub fi d2">
+          Abis ngobrol, AI langsung nyusun profil lengkap — jujur, spesifik, bisa kamu edit sebelum dipublish ke komunitas.
+        </p>
+        <div class="profile-card fi d3">
+          <p class="p-name">Rafi Aulia</p>
+          <p class="p-meta">Tingkat 3 · Informatika</p>
+          <div class="p-row">
+            <p class="p-label">Skills</p>
+            <div class="tags">
+              <span class="tag">React</span>
+              <span class="tag">Go</span>
+              <span class="tag">PostgreSQL</span>
+              <span class="tag">Docker</span>
+            </div>
+          </div>
+          <div class="p-row">
+            <p class="p-label">Lagi bikin</p>
+            <p class="p-val">sistem manajemen tugas akhir berbasis AI — buat bantu koordinasi mahasiswa dan dosen jadi lebih gampang.</p>
+          </div>
+          <div class="p-row">
+            <p class="p-label">Pengen</p>
+            <p class="p-val">nyentuh IoT dan ketemu yang jago hardware atau embedded system.</p>
+          </div>
+          <div class="p-row">
+            <p class="p-label">Vibe kerja</p>
+            <p class="p-val">suka pair programming, terbuka sama feedback langsung.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 — Matches -->
+      <section class="section">
+        <p class="section-label fi">03 — match</p>
+        <h2 class="section-h2 fi d1">Tiga orang yang<br />kayaknya perlu kamu kenal.</h2>
+        <p class="section-sub fi d2">
+          Begitu profilmu masuk, AI langsung nyariin tiga anggota yang paling nyambung — berdasarkan skill, proyek, dan vibe kerja. Bukan sekadar jurusan sama.
+        </p>
+        <div class="matches">
+          <div class="match-card fi d1">
+            <p class="m-name">Dina Kusumawati</p>
+            <p class="m-meta">Tingkat 3 · Informatika</p>
+            <p class="m-reason">"juga lagi bangun platform edukasi AI — kamu berdua kayaknya bisa saling isi celah satu sama lain."</p>
+          </div>
+          <div class="match-card fi d2">
+            <p class="m-name">Bima Ardiansyah</p>
+            <p class="m-meta">Tingkat 4 · Teknik Elektro</p>
+            <p class="m-reason">"jago hardware dan embedded — pas banget sama yang kamu bilang soal IoT tadi."</p>
+          </div>
+          <div class="match-card fi d3">
+            <p class="m-name">Nadia Permata</p>
+            <p class="m-meta">Tingkat 2 · Informatika</p>
+            <p class="m-reason">"backend-heavy, suka pair dan review kode orang — vibe-nya cocok sama cara kerja kamu."</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — Community Discovery -->
+      <section class="section">
+        <p class="section-label fi">04 — komunitas</p>
+        <h2 class="section-h2 fi d1">Tanya langsung.<br />Temukan siapa aja.</h2>
+        <p class="section-sub fi d2">
+          Punya kebutuhan spesifik? Tanya AI komunitas langsung — "siapa yang lagi kerja di ML?" — dan dapat rekomendasi dalam hitungan detik, bukan daftar nama yang harus kamu filter sendiri.
+        </p>
+        <div class="discovery-shell fi d3">
+          <p class="d-query">siapa yang lagi kerja di machine learning atau data science?</p>
+          <div class="d-reply">
+            ada tiga yang relevan:<br /><br />
+            <strong>Fajar Nugroho</strong> (T3, Informatika) — lagi ngebangun model rekomendasi untuk e-commerce lokal, pakai PyTorch.<br /><br />
+            <strong>Sari Wijayanti</strong> (T2, Informatika) — fokus di NLP, lagi riset sentiment analysis buat tesis.<br /><br />
+            <strong>Rizky Pratama</strong> (T4, Informatika) — udah deploy beberapa model ke produksi, bisa bantu soal MLOps juga.
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer CTA -->
+      <section class="footer-cta">
+        <h2 class="footer-h2 fi">Siap masuk?</h2>
+        <p class="footer-sub fi d1">
+          Onboarding butuh sekitar lima menit. Komunitas kamu sudah menunggu di dalem.
+        </p>
+        <a href={appUrl} class="btn-dark fi d2">Mulai sekarang →</a>
+        <div class="footer-note fi d3">
+          <span>Al-Fath Berkarya · Telkom University</span>
+          <span>eksklusif untuk mahasiswa aktif</span>
+        </div>
+      </section>
+
     </div>
+
+    <script>
+      // Scroll-triggered fade-in for .fi elements
+      const fadeObs = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('show');
+              fadeObs.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -36px 0px' }
+      );
+
+      for (const el of document.querySelectorAll('.fi')) {
+        fadeObs.observe(el);
+      }
+
+      // Hero appears immediately on load
+      for (const el of document.querySelectorAll('.hero .fi')) {
+        el.classList.add('show');
+      }
+
+      // Staggered chat bubble reveal
+      const chatObs = new IntersectionObserver(
+        (entries) => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              const bubbles = e.target.querySelectorAll('.bbl');
+              bubbles.forEach((bbl, i) => {
+                setTimeout(() => bbl.classList.add('show'), i * 300);
+              });
+              chatObs.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.25 }
+      );
+
+      for (const chat of document.querySelectorAll('.chat-shell')) {
+        chatObs.observe(chat);
+      }
+    </script>
   </body>
 </html>
