@@ -48,6 +48,9 @@ const schema = z.object({
   /** Anthropic API key — required when AI_PROVIDER=anthropic. */
   ANTHROPIC_API_KEY: z.string().optional(),
 
+  /** Google Gemini API key — required when AI_PROVIDER=gemini. */
+  GEMINI_API_KEY: z.string().optional(),
+
   // --- Email (Node.js / non-CF runtimes) ---
   // In the Workers runtime the [[send_email]] binding is used; these are not needed there.
   /** Resend API key — preferred for Node.js / Docker deployments. */

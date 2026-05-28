@@ -16,5 +16,6 @@ export interface AIProvider {
 }
 
 export { createAnthropicAI } from "./anthropic";
+export { createGeminiAI } from "./gemini";
 export type { WorkersAIBinding } from "./workers-ai";
 export { createWorkersAI } from "./workers-ai";

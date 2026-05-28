@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { loadConfig } from "@myapp/config";
 import { runSeedCli, seeders } from "@myapp/db";
 

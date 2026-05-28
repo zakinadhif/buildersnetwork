@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { createAnthropicAI } from "@myapp/ai";
+import { createGeminiAI } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { loadConfig } from "@myapp/config";
 import { createDb } from "@myapp/db";
@@ -23,7 +23,7 @@ const auth = createAuth({
   BETTER_AUTH_URL: config.BETTER_AUTH_URL ?? config.APP_URL,
   BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET,
 });
-const ai = createAnthropicAI(config.ANTHROPIC_API_KEY ?? "");
+const ai = createGeminiAI(config.GEMINI_API_KEY ?? "");
 
 const email = config.RESEND_API_KEY
   ? createResendEmail({ apiKey: config.RESEND_API_KEY })
