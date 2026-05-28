@@ -1,11 +1,11 @@
 import { createContext, useContext, useState } from "react";
-import type { Member } from "./members";
+import type { Member, MemberMatch } from "./members";
 
 interface OnboardingCtxValue {
   draft: Member | null;
-  matches: Member[];
+  matches: MemberMatch[];
   setDraft: (m: Member) => void;
-  setMatches: (m: Member[]) => void;
+  setMatches: (m: MemberMatch[]) => void;
   clear: () => void;
 }
 
@@ -17,7 +17,7 @@ export function OnboardingProvider({
   children: React.ReactNode;
 }) {
   const [draft, setDraft] = useState<Member | null>(null);
-  const [matches, setMatches] = useState<Member[]>([]);
+  const [matches, setMatches] = useState<MemberMatch[]>([]);
 
   const clear = () => {
     setDraft(null);

@@ -1,9 +1,14 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  getGetMeQueryKey,
+  saveMatches,
+  saveProfile,
+  useListMembers,
+} from "@myapp/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { EditField, Loading, SkillsEditor } from "@/components/ui-atoms";
-import { fetchMembers, saveMatches, saveProfile } from "@/lib/api";
-import { type Member, callClaude, cleanJSON } from "@/lib/members";
+import { type Member, type MemberMatch, callClaude, cleanJSON } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 export default function Review() {
@@ -27,10 +32,7 @@ export default function Review() {
   const set = <K extends keyof Member>(k: K, v: Member[K]) =>
     setP((x) => ({ ...x, [k]: v }));
 
-  const { data: members = [] } = useQuery({
-    queryKey: ["members"],
-    queryFn: fetchMembers,
-  });
+  const { data: members = [] } = useListMembers();
 
   async function publish() {
     setBusy(true);
@@ -58,11 +60,11 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
       const memberMap = new Map(members.map((m) => [m.id, m]));
       const matched = parsed
         .map((x) => ({ ...memberMap.get(x.memberId), reason: x.reason }))
-        .filter((x) => x.id != null) as Member[];
+        .filter((x) => x.id != null) as MemberMatch[];
 
       await saveProfile({ name: p.name, year: p.year, major: p.major, skills: p.skills, building: p.building, wants: p.wants, vibe: p.vibe });
-      await saveMatches(parsed.map((x) => ({ memberId: x.memberId, reason: x.reason })));
-      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      await saveMatches({ matches: parsed.map((x) => ({ memberId: x.memberId, reason: x.reason })) });
+      await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
 
       setMatches(matched);
       setBusy(false);

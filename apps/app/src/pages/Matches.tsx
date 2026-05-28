@@ -1,23 +1,20 @@
-import { useQuery } from "@tanstack/react-query";
+import { useGetMatches, useGetMe } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
-import { fetchMatches, fetchMe } from "@/lib/api";
-import { type Member, firstName } from "@/lib/members";
+import { type MemberMatch, firstName } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 export default function Matches() {
   const { matches: contextMatches } = useOnboarding();
   const [, navigate] = useLocation();
 
-  const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+  const { data: me } = useGetMe();
 
-  const { data: savedMatches = [], isLoading } = useQuery({
-    queryKey: ["matches"],
-    queryFn: fetchMatches,
-    enabled: contextMatches.length === 0,
+  const { data: savedMatches = [], isLoading } = useGetMatches({
+    query: { enabled: contextMatches.length === 0 },
   });
 
-  const matches: Member[] =
+  const matches: MemberMatch[] =
     contextMatches.length > 0 ? contextMatches : savedMatches;
 
   if (isLoading && contextMatches.length === 0) return <Loading />;

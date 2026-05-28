@@ -1,16 +1,7 @@
+import type { Member, MemberMatch } from "@myapp/api-client-react";
 import { aiComplete } from "@myapp/api-client-react";
 
-export interface Member {
-  id: string;
-  name: string;
-  year: string;
-  major: string;
-  skills: string[];
-  building: string;
-  wants: string;
-  vibe: string;
-  reason?: string;
-}
+export type { Member, MemberMatch };
 
 export const SEED_MEMBERS: Member[] = [
   {

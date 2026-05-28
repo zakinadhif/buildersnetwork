@@ -1,7 +1,7 @@
+import { sendOtp } from "@myapp/api-client-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
-import { sendOtp } from "@/lib/api";
 
 type Mode = "signup" | "signin";
 
@@ -39,7 +39,7 @@ export default function Welcome() {
         setLoading(false);
         return;
       }
-      await sendOtp(email).catch(() => null);
+      await sendOtp({ email }).catch(() => null);
       navigate(`/verify-email?email=${encodeURIComponent(email)}`);
       return;
     } else {

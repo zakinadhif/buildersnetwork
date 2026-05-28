@@ -1,7 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useGetMe } from "@myapp/api-client-react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
-import { fetchMe } from "@/lib/api";
 import { useSession } from "@/lib/auth-client";
 import { OnboardingProvider } from "@/lib/onboarding-ctx";
 import CommunityHome from "@/pages/CommunityHome";
@@ -16,10 +15,10 @@ import Welcome from "@/pages/Welcome";
 function AppRoutes() {
   const { data: session, isPending } = useSession();
   const [location] = useLocation();
-  const { data: me, isLoading: meLoading } = useQuery({
-    queryKey: ["me"],
-    queryFn: fetchMe,
-    enabled: !!session?.user && !!session?.user?.emailVerified,
+  const { data: me, isLoading: meLoading } = useGetMe({
+    query: {
+      enabled: !!session?.user && !!session?.user?.emailVerified,
+    },
   });
 
   if (isPending || (!!session?.user?.emailVerified && meLoading)) {
@@ -61,7 +60,7 @@ function AppRoutes() {
         ) : !hasProfile ? (
           <Redirect to="/onboarding" />
         ) : (
-          <CommunityHome user={me} />
+          <CommunityHome user={me!} />
         )}
       </Route>
       <Route path="/member/:id">

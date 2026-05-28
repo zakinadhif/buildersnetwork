@@ -1,16 +1,12 @@
-import { useQuery } from "@tanstack/react-query";
+import { useListMembers } from "@myapp/api-client-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dots } from "@/components/ui-atoms";
-import { fetchMembers } from "@/lib/api";
 import { type Member, callClaude, firstName } from "@/lib/members";
 
 export default function CommunityHome({ user }: { user: Member }) {
   const [, navigate] = useLocation();
-  const { data: members = [] } = useQuery({
-    queryKey: ["members"],
-    queryFn: fetchMembers,
-  });
+  const { data: members = [] } = useListMembers();
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
   const [msgs, setMsgs] = useState([{ role: "ai" as const, text: greeting }]);

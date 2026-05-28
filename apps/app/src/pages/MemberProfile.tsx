@@ -1,14 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useGetMember } from "@myapp/api-client-react";
 import { Loading } from "@/components/ui-atoms";
-import { fetchMember } from "@/lib/api";
 
 export default function MemberProfilePage({ id }: { id: string }) {
-  const [, navigate] = useLocation();
-  const { data: member, isLoading } = useQuery({
-    queryKey: ["member", id],
-    queryFn: () => fetchMember(id),
-    enabled: !!id,
-  });
+  const { data: member, isLoading } = useGetMember(id);
 
   if (isLoading) return <Loading />;
   if (!member) {

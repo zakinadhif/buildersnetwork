@@ -1,6 +1,14 @@
+import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
-import { sendOtp, verifyOtp } from "@/lib/api";
+
+function extractApiError(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    const data = err.data as { error?: string } | null;
+    return data?.error ?? fallback;
+  }
+  return err instanceof Error ? err.message : fallback;
+}
 
 export default function VerifyEmail() {
   const search = useSearch();
@@ -26,11 +34,11 @@ export default function VerifyEmail() {
   async function handleSend() {
     setError(null);
     try {
-      await sendOtp(email);
+      await sendOtp({ email });
       setSent(true);
       setCooldown(60);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Gagal mengirim kode.");
+      setError(extractApiError(err, "Gagal mengirim kode."));
     }
   }
 
@@ -39,11 +47,11 @@ export default function VerifyEmail() {
     setLoading(true);
     setError(null);
     try {
-      await verifyOtp(email, code);
+      await verifyOtp({ email, code });
       // Hard reload so the session re-fetches with emailVerified: true
       window.location.href = "/";
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Kode tidak valid.");
+      setError(extractApiError(err, "Kode tidak valid."));
       setLoading(false);
     }
   }
