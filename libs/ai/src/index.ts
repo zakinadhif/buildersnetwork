@@ -8,10 +8,13 @@ export interface CompleteOptions {
 }
 
 export interface AIProvider {
-  complete(messages: Message[], opts?: CompleteOptions): Promise<{ text: string }>;
+  complete(
+    messages: Message[],
+    opts?: CompleteOptions,
+  ): Promise<{ text: string }>;
   stream(messages: Message[], opts?: CompleteOptions): AsyncGenerator<string>;
 }
 
-export type { WorkersAIBinding } from "./workers-ai";
 export { createAnthropicAI } from "./anthropic";
+export type { WorkersAIBinding } from "./workers-ai";
 export { createWorkersAI } from "./workers-ai";

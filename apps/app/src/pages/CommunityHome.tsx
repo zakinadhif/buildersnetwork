@@ -2,18 +2,22 @@ import { useListMembers } from "@myapp/api-client-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { Dots } from "@/components/ui-atoms";
-import { type Member, callClaude, firstName } from "@/lib/members";
+import { callClaude, firstName, type Member } from "@/lib/members";
 
 export default function CommunityHome({ user }: { user: Member }) {
   const [, navigate] = useLocation();
   const { data: members = [] } = useListMembers();
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
-  const [msgs, setMsgs] = useState([{ role: "ai" as const, text: greeting }]);
+  const msgId = useRef(0);
+  const [msgs, setMsgs] = useState([
+    { id: msgId.current, role: "ai" as const, text: greeting },
+  ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: msgs/busy are intentional scroll triggers
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, busy]);
@@ -21,7 +25,10 @@ export default function CommunityHome({ user }: { user: Member }) {
   async function query() {
     const text = input.trim();
     if (!text || busy) return;
-    setMsgs((p) => [...p, { role: "user" as const, text }]);
+    setMsgs((p) => [
+      ...p,
+      { id: ++msgId.current, role: "user" as const, text },
+    ]);
     setInput("");
     setBusy(true);
 
@@ -44,10 +51,20 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
     try {
       const reply = await callClaude([{ role: "user", content: prompt }]);
       setBusy(false);
-      setMsgs((p) => [...p, { role: "ai" as const, text: reply }]);
+      setMsgs((p) => [
+        ...p,
+        { id: ++msgId.current, role: "ai" as const, text: reply },
+      ]);
     } catch {
       setBusy(false);
-      setMsgs((p) => [...p, { role: "ai" as const, text: "ada yang error — coba lagi?" }]);
+      setMsgs((p) => [
+        ...p,
+        {
+          id: ++msgId.current,
+          role: "ai" as const,
+          text: "ada yang error — coba lagi?",
+        },
+      ]);
     }
   }
 
@@ -59,7 +76,10 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
   };
 
   return (
-    <div className="screen" style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      className="screen"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
       <div className="nav">
         <div className="nav-inner">
           <span
@@ -82,8 +102,8 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>
         <div className="wrap" style={{ padding: 0 }}>
           <div className="chat" style={{ marginBottom: 48 }}>
-            {msgs.map((m, i) => (
-              <div key={i} className={`msg-${m.role}`}>
+            {msgs.map((m) => (
+              <div key={m.id} className={`msg-${m.role}`}>
                 {m.text}
               </div>
             ))}
@@ -97,16 +117,24 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
 
           <p className="sec-head">Anggota ({members.length})</p>
           {members.map((m) => (
+            // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
             <div
               key={m.id}
               className="member-row"
+              role="button"
+              tabIndex={0}
               onClick={() => navigate(`/member/${m.id}`)}
+              onKeyDown={(e) =>
+                e.key === "Enter" && navigate(`/member/${m.id}`)
+              }
             >
               <div className="member-top">
                 <span className="member-name">{m.name}</span>
                 <span className="member-year">{m.year}</span>
               </div>
-              <p className="member-skills">{m.skills.slice(0, 3).join(" · ")}</p>
+              <p className="member-skills">
+                {m.skills.slice(0, 3).join(" · ")}
+              </p>
             </div>
           ))}
         </div>
@@ -123,6 +151,7 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
             onKeyDown={onKey}
           />
           <button
+            type="button"
             className="send-btn"
             onClick={query}
             disabled={!input.trim() || busy}

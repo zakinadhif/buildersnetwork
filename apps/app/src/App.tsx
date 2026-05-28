@@ -57,10 +57,10 @@ function AppRoutes() {
       <Route path="/home">
         {!loggedIn ? (
           <Redirect to="/welcome" />
-        ) : !hasProfile ? (
+        ) : !me ? (
           <Redirect to="/onboarding" />
         ) : (
-          <CommunityHome user={me!} />
+          <CommunityHome user={me} />
         )}
       </Route>
       <Route path="/member/:id">

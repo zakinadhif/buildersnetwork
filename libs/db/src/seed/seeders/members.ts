@@ -26,7 +26,12 @@ const SEED_PROFILES = [
     name: "Fatimah Zahra",
     year: "Tingkat 3",
     major: "Informatika",
-    skills: ["Python", "Machine Learning", "FastAPI", "scikit-learn"] as string[],
+    skills: [
+      "Python",
+      "Machine Learning",
+      "FastAPI",
+      "scikit-learn",
+    ] as string[],
     building:
       "Rekomendasi kuliner lokal berbasis ML — privacy-first, konteks Indonesia.",
     wants: "Deep learning, MLOps, inference pipeline yang scalable.",

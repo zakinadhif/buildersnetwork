@@ -11,6 +11,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
         <div className="wrap">
           <p className="sub">anggota tidak ditemukan.</p>
           <button
+            type="button"
             className="btn btn-outline"
             style={{ marginTop: 24 }}
             onClick={() => window.history.back()}
@@ -26,6 +27,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
     <div className="screen" style={{ overflowY: "auto" }}>
       <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
         <button
+          type="button"
           onClick={() => window.history.back()}
           style={{
             background: "none",
@@ -62,8 +64,8 @@ export default function MemberProfilePage({ id }: { id: string }) {
         <div className="pf">
           <p className="label">Skills</p>
           <div className="skills-wrap">
-            {(member.skills ?? []).map((s, i) => (
-              <span key={i} className="chip" style={{ cursor: "default" }}>
+            {(member.skills ?? []).map((s) => (
+              <span key={s} className="chip" style={{ cursor: "default" }}>
                 {s}
               </span>
             ))}

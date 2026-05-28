@@ -1,6 +1,6 @@
+import { profiles } from "@myapp/db/schema";
 import { eq } from "drizzle-orm";
 import { Hono } from "hono";
-import { profiles } from "@myapp/db/schema";
 import type { AppEnv } from "../app";
 
 const app = new Hono<AppEnv>();

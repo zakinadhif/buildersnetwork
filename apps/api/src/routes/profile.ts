@@ -1,7 +1,7 @@
+import { matches as matchesTable, profiles } from "@myapp/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
-import { matches as matchesTable, profiles } from "@myapp/db/schema";
 import type { AppEnv } from "../app";
 
 const app = new Hono<AppEnv>();

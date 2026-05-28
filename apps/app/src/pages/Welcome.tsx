@@ -16,7 +16,7 @@ export default function Welcome() {
 
   useEffect(() => {
     if (session?.user) navigate("/");
-  }, [session?.user]);
+  }, [session?.user, navigate]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +25,9 @@ export default function Welcome() {
 
     if (mode === "signup") {
       if (!email.endsWith("@student.telkomuniversity.ac.id")) {
-        setError("Gunakan email student Telkom (@student.telkomuniversity.ac.id).");
+        setError(
+          "Gunakan email student Telkom (@student.telkomuniversity.ac.id).",
+        );
         setLoading(false);
         return;
       }
@@ -70,10 +72,7 @@ export default function Welcome() {
           </p>
         )}
 
-        <form
-          onSubmit={handleSubmit}
-          style={{ marginTop: isSignup ? 0 : 40 }}
-        >
+        <form onSubmit={handleSubmit} style={{ marginTop: isSignup ? 0 : 40 }}>
           <div style={{ marginBottom: 12 }}>
             <input
               type="email"
@@ -116,6 +115,7 @@ export default function Welcome() {
         <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 20 }}>
           {isSignup ? "sudah anggota? " : "belum anggota? "}
           <button
+            type="button"
             onClick={() => {
               setMode(isSignup ? "signin" : "signup");
               setError(null);

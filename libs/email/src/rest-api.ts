@@ -13,9 +13,13 @@ function toRestBody(options: SendEmailOptions) {
     from:
       typeof options.from === "string"
         ? options.from
-        : { address: (options.from as EmailAddress).email, name: (options.from as EmailAddress).name },
+        : {
+            address: (options.from as EmailAddress).email,
+            name: (options.from as EmailAddress).name,
+          },
     ...(replyTo !== undefined && {
-      reply_to: typeof replyTo === "string" ? replyTo : (replyTo as EmailAddress).email,
+      reply_to:
+        typeof replyTo === "string" ? replyTo : (replyTo as EmailAddress).email,
     }),
   };
 }

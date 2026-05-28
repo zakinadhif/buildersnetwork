@@ -32,13 +32,16 @@ export interface EmailProvider {
 export function createNoopEmail(): EmailProvider {
   return {
     async send(options) {
-      console.log("[email:noop] send suppressed", { to: options.to, subject: options.subject });
+      console.log("[email:noop] send suppressed", {
+        to: options.to,
+        subject: options.subject,
+      });
     },
   };
 }
 
-export type { WorkersEmailBinding } from "./workers-binding";
-export { createWorkersEmail } from "./workers-binding";
-export { createRestEmail } from "./rest-api";
 export type { ResendConfig } from "./resend";
 export { createResendEmail } from "./resend";
+export { createRestEmail } from "./rest-api";
+export type { WorkersEmailBinding } from "./workers-binding";
+export { createWorkersEmail } from "./workers-binding";

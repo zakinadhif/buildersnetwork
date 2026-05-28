@@ -6,7 +6,9 @@ export interface WorkersEmailBinding {
   send(message: SendEmailOptions): Promise<{ messageId: string }>;
 }
 
-export function createWorkersEmail(binding: WorkersEmailBinding): EmailProvider {
+export function createWorkersEmail(
+  binding: WorkersEmailBinding,
+): EmailProvider {
   return {
     async send(options: SendEmailOptions): Promise<void> {
       await binding.send(options);

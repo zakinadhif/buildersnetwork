@@ -3,7 +3,7 @@ import { createAuth } from "@myapp/auth";
 import { createDb, type Db } from "@myapp/db";
 import { createWorkersEmail, type WorkersEmailBinding } from "@myapp/email";
 
-import { createApp, type AppServices } from "./app";
+import { type AppServices, createApp } from "./app";
 
 // Cloudflare Workers environment bindings + secrets.
 // Secrets (DATABASE_URL, BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
@@ -43,7 +43,9 @@ function getServices(env: Env): AppServices {
   const email = createWorkersEmail(env.EMAIL);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
-    ? env.ALLOWED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
+    ? env.ALLOWED_ORIGINS.split(",")
+        .map((o) => o.trim())
+        .filter(Boolean)
     : [env.APP_URL];
 
   services = { db, auth, ai, email, allowedOrigins };
@@ -56,11 +58,10 @@ export default {
 
     // Workers Assets serves exact static file matches before this handler runs.
     // For client-side routes under /app/ (no file extension), serve the SPA shell.
-    if (
-      url.pathname.startsWith("/app/") &&
-      !url.pathname.match(/\.\w+$/)
-    ) {
-      return env.ASSETS.fetch(new Request(new URL("/app/index.html", url.origin), request));
+    if (url.pathname.startsWith("/app/") && !url.pathname.match(/\.\w+$/)) {
+      return env.ASSETS.fetch(
+        new Request(new URL("/app/index.html", url.origin), request),
+      );
     }
 
     return createApp(getServices(env)).fetch(request, env);

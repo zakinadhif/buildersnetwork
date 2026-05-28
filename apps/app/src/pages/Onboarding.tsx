@@ -1,8 +1,8 @@
+import { useStream } from "@myapp/ai/react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { useStream } from "@myapp/ai/react";
 import { Dots, Loading } from "@/components/ui-atoms";
-import { type Member, callClaude, cleanJSON } from "@/lib/members";
+import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 const INTRO =
@@ -20,6 +20,7 @@ Aturan:
 - JANGAN bilang "oke, biar aku susun profil kamu sekarang" sebelum semua area tercakup.`;
 
 interface ChatMessage {
+  id: number;
   role: "ai" | "user";
   text: string;
 }
@@ -32,7 +33,10 @@ interface ApiMessage {
 export default function Onboarding() {
   const { setDraft } = useOnboarding();
   const [, navigate] = useLocation();
-  const [msgs, setMsgs] = useState<ChatMessage[]>([{ role: "ai", text: INTRO }]);
+  const msgId = useRef(0);
+  const [msgs, setMsgs] = useState<ChatMessage[]>([
+    { id: msgId.current, role: "ai", text: INTRO },
+  ]);
   const [history, setHistory] = useState<ApiMessage[]>([]);
   const [input, setInput] = useState("");
   const [genning, setGenning] = useState(false);
@@ -41,6 +45,7 @@ export default function Onboarding() {
 
   const busy = streamingText !== null;
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: msgs/streamingText are intentional scroll triggers
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [msgs, streamingText]);
@@ -63,7 +68,11 @@ Percakapan:\n${transcript}`;
     try {
       const raw = await callClaude([{ role: "user", content: prompt }]);
       const parsed = cleanJSON(raw) as Member;
-      const profile: Member = { ...parsed, id: "user", skills: parsed.skills ?? [] };
+      const profile: Member = {
+        ...parsed,
+        id: "user",
+        skills: parsed.skills ?? [],
+      };
       setDraft(profile);
       navigate("/review");
     } catch (e) {
@@ -76,7 +85,7 @@ Percakapan:\n${transcript}`;
     const text = input.trim();
     if (!text || busy || genning) return;
     const newHist: ApiMessage[] = [...history, { role: "user", content: text }];
-    setMsgs((p) => [...p, { role: "user", text }]);
+    setMsgs((p) => [...p, { id: ++msgId.current, role: "user", text }]);
     setHistory(newHist);
     setInput("");
 
@@ -95,13 +104,20 @@ Percakapan:\n${transcript}`;
         ...newHist,
         { role: "assistant", content: reply },
       ];
-      setMsgs((p) => [...p, { role: "ai", text: reply }]);
+      setMsgs((p) => [...p, { id: ++msgId.current, role: "ai", text: reply }]);
       setHistory(updatedHist);
       if (isEndSignal(reply)) {
         setTimeout(() => genProfile(updatedHist), 600);
       }
     } catch {
-      setMsgs((p) => [...p, { role: "ai", text: "ada yang error — coba lagi?" }]);
+      setMsgs((p) => [
+        ...p,
+        {
+          id: ++msgId.current,
+          role: "ai",
+          text: "ada yang error — coba lagi?",
+        },
+      ]);
     }
   }
 
@@ -115,7 +131,10 @@ Percakapan:\n${transcript}`;
   if (genning) return <Loading label="lagi nyusun profil kamu" />;
 
   return (
-    <div className="screen" style={{ display: "flex", flexDirection: "column" }}>
+    <div
+      className="screen"
+      style={{ display: "flex", flexDirection: "column" }}
+    >
       <div
         style={{
           padding: "18px 28px",
@@ -129,15 +148,13 @@ Percakapan:\n${transcript}`;
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>
         <div className="wrap" style={{ padding: 0 }}>
           <div className="chat">
-            {msgs.map((m, i) => (
-              <div key={i} className={`msg-${m.role}`}>
+            {msgs.map((m) => (
+              <div key={m.id} className={`msg-${m.role}`}>
                 {m.text}
               </div>
             ))}
             {streamingText !== null && (
-              <div className="msg-ai">
-                {streamingText || <Dots />}
-              </div>
+              <div className="msg-ai">{streamingText || <Dots />}</div>
             )}
             <div ref={endRef} />
           </div>
@@ -155,6 +172,7 @@ Percakapan:\n${transcript}`;
             onKeyDown={onKey}
           />
           <button
+            type="button"
             className="send-btn"
             onClick={send}
             disabled={!input.trim() || busy}

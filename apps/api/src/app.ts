@@ -33,8 +33,7 @@ export function createApp(services: AppServices) {
 
   const app = new Hono<AppEnv>();
 
-  const health = (c: Context) =>
-    c.json({ ok: true, version: gitSha ?? "dev" });
+  const health = (c: Context) => c.json({ ok: true, version: gitSha ?? "dev" });
   app.get("/healthz", health);
   app.get("/api/healthz", health);
 
@@ -64,13 +63,18 @@ export function createApp(services: AppServices) {
   // Block sign-up for non-student emails before Better Auth processes the request.
   app.use("/api/auth/sign-up/email", async (c, next) => {
     if (c.req.method === "POST") {
-      const body = await c.req.raw
+      const body = (await c.req.raw
         .clone()
         .json()
-        .catch(() => ({})) as { email?: string };
-      if (!String(body.email ?? "").endsWith("@student.telkomuniversity.ac.id")) {
+        .catch(() => ({}))) as { email?: string };
+      if (
+        !String(body.email ?? "").endsWith("@student.telkomuniversity.ac.id")
+      ) {
         return c.json(
-          { message: "Hanya email @student.telkomuniversity.ac.id yang diizinkan." },
+          {
+            message:
+              "Hanya email @student.telkomuniversity.ac.id yang diizinkan.",
+          },
           400,
         );
       }
@@ -88,7 +92,9 @@ export function createApp(services: AppServices) {
     ) {
       return next();
     }
-    const session = await c.get("auth").api.getSession({ headers: c.req.raw.headers });
+    const session = await c
+      .get("auth")
+      .api.getSession({ headers: c.req.raw.headers });
     if (session?.user && !session.user.emailVerified) {
       return c.json({ error: "email_not_verified" }, 403);
     }

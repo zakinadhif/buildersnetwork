@@ -14,9 +14,19 @@ export function Loading({ label }: { label: string }) {
   return (
     <div
       className="screen"
-      style={{ display: "flex", alignItems: "center", justifyContent: "center" }}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+      }}
     >
-      <span style={{ fontFamily: "var(--mono)", fontSize: 13, color: "var(--ink2)" }}>
+      <span
+        style={{
+          fontFamily: "var(--mono)",
+          fontSize: 13,
+          color: "var(--ink2)",
+        }}
+      >
         {label}
         <Dots />
       </span>
@@ -41,9 +51,10 @@ export function SkillsEditor({
   return (
     <div className="skills-wrap">
       {skills.map((s, i) => (
-        <span key={i} className="chip">
+        <span key={s} className="chip">
           {s}
           <button
+            type="button"
             className="chip-rm"
             onClick={() => onChange(skills.filter((_, j) => j !== i))}
           >
@@ -74,9 +85,13 @@ export function EditField({
   const [editing, setEditing] = useState(false);
   if (!editing)
     return (
-      <span className="field-val" onClick={() => setEditing(true)}>
+      <button
+        type="button"
+        className="field-val"
+        onClick={() => setEditing(true)}
+      >
         {value || <span style={{ color: "var(--ink3)" }}>ketuk buat edit</span>}
-      </span>
+      </button>
     );
   return multiline ? (
     <textarea
@@ -85,6 +100,7 @@ export function EditField({
       rows={3}
       onChange={(e) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}
+      // biome-ignore lint/a11y/noAutofocus: intentional focus when edit mode activates
       autoFocus
     />
   ) : (
@@ -93,6 +109,7 @@ export function EditField({
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}
+      // biome-ignore lint/a11y/noAutofocus: intentional focus when edit mode activates
       autoFocus
     />
   );

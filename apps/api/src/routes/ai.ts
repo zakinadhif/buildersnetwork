@@ -13,7 +13,10 @@ app.post("/complete", async (c) => {
   const raw = await c.req.json();
   const parsed = AiCompleteBody.safeParse(raw);
   if (!parsed.success) {
-    return c.json({ error: parsed.error.issues[0]?.message ?? "invalid request" }, 400);
+    return c.json(
+      { error: parsed.error.issues[0]?.message ?? "invalid request" },
+      400,
+    );
   }
 
   const { text } = await ai.complete(parsed.data.messages);
@@ -26,7 +29,10 @@ app.post("/stream", async (c) => {
   const raw = await c.req.json();
   const parsed = AiCompleteBody.safeParse(raw);
   if (!parsed.success) {
-    return c.json({ error: parsed.error.issues[0]?.message ?? "invalid request" }, 400);
+    return c.json(
+      { error: parsed.error.issues[0]?.message ?? "invalid request" },
+      400,
+    );
   }
 
   return streamText(c, async (stream) => {

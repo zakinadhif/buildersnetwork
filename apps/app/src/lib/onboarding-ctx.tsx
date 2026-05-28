@@ -25,7 +25,9 @@ export function OnboardingProvider({
   };
 
   return (
-    <OnboardingCtx.Provider value={{ draft, matches, setDraft, setMatches, clear }}>
+    <OnboardingCtx.Provider
+      value={{ draft, matches, setDraft, setMatches, clear }}
+    >
       {children}
     </OnboardingCtx.Provider>
   );
@@ -33,6 +35,7 @@ export function OnboardingProvider({
 
 export function useOnboarding() {
   const ctx = useContext(OnboardingCtx);
-  if (!ctx) throw new Error("useOnboarding must be used within OnboardingProvider");
+  if (!ctx)
+    throw new Error("useOnboarding must be used within OnboardingProvider");
   return ctx;
 }

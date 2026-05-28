@@ -1,4 +1,9 @@
-import type { Attachment, EmailAddress, EmailProvider, SendEmailOptions } from "./index";
+import type {
+  Attachment,
+  EmailAddress,
+  EmailProvider,
+  SendEmailOptions,
+} from "./index";
 
 export interface ResendConfig {
   apiKey: string;
@@ -12,15 +17,21 @@ function formatAddress(addr: string | EmailAddress): string {
   return addr.name ? `${addr.name} <${addr.email}>` : addr.email;
 }
 
-function normalizeToArray(val: string | string[] | undefined): string[] | undefined {
+function normalizeToArray(
+  val: string | string[] | undefined,
+): string[] | undefined {
   if (val === undefined) return undefined;
   return Array.isArray(val) ? val : [val];
 }
 
 // Resend attachments use `filename` + `content` (base64 string or Buffer-like).
-function normalizeAttachments(
-  attachments: Attachment[] | undefined,
-): Array<{ filename: string; content: string | ArrayBuffer; content_type?: string }> | undefined {
+function normalizeAttachments(attachments: Attachment[] | undefined):
+  | Array<{
+      filename: string;
+      content: string | ArrayBuffer;
+      content_type?: string;
+    }>
+  | undefined {
   if (!attachments) return undefined;
   return attachments.map(({ filename, content, type }) => ({
     filename,
@@ -41,8 +52,12 @@ export function createResendEmail(config: ResendConfig): EmailProvider {
         ...(options.html !== undefined && { html: options.html }),
         ...(options.text !== undefined && { text: options.text }),
         ...(options.cc !== undefined && { cc: normalizeToArray(options.cc) }),
-        ...(options.bcc !== undefined && { bcc: normalizeToArray(options.bcc) }),
-        ...(options.replyTo !== undefined && { reply_to: formatAddress(options.replyTo) }),
+        ...(options.bcc !== undefined && {
+          bcc: normalizeToArray(options.bcc),
+        }),
+        ...(options.replyTo !== undefined && {
+          reply_to: formatAddress(options.replyTo),
+        }),
         ...(options.headers !== undefined && { headers: options.headers }),
         ...(options.attachments !== undefined && {
           attachments: normalizeAttachments(options.attachments),
@@ -63,7 +78,9 @@ export function createResendEmail(config: ResendConfig): EmailProvider {
           message?: string;
           name?: string;
         };
-        throw new Error(`[resend] ${err.name ?? res.status}: ${err.message ?? res.statusText}`);
+        throw new Error(
+          `[resend] ${err.name ?? res.status}: ${err.message ?? res.statusText}`,
+        );
       }
     },
   };

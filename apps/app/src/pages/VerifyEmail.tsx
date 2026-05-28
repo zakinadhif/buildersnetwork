@@ -21,6 +21,7 @@ export default function VerifyEmail() {
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only send
   useEffect(() => {
     if (email) handleSend();
   }, []);
@@ -60,7 +61,9 @@ export default function VerifyEmail() {
     <div className="screen" style={{ display: "flex", alignItems: "center" }}>
       <div className="wrap" style={{ paddingTop: 0 }}>
         <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1" style={{ marginBottom: 16 }}>Cek email kamu.</h1>
+        <h1 className="h1" style={{ marginBottom: 16 }}>
+          Cek email kamu.
+        </h1>
         <p className="sub" style={{ marginBottom: 40, maxWidth: 360 }}>
           {sent
             ? `Kode 6 digit dikirim ke ${email}.`
@@ -78,6 +81,7 @@ export default function VerifyEmail() {
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
               required
+              // biome-ignore lint/a11y/noAutofocus: intentional focus on OTP input
               autoFocus
               className="chat-textarea"
               style={{

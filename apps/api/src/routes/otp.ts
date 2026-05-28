@@ -1,6 +1,6 @@
+import { users, verifications } from "@myapp/db/schema";
 import { and, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
-import { users, verifications } from "@myapp/db/schema";
 import type { AppEnv } from "../app";
 
 const DOMAIN = "@student.telkomuniversity.ac.id";
@@ -68,7 +68,10 @@ app.post("/verify", async (c) => {
   }
 
   await db.delete(verifications).where(eq(verifications.identifier, email));
-  await db.update(users).set({ emailVerified: true }).where(eq(users.email, email));
+  await db
+    .update(users)
+    .set({ emailVerified: true })
+    .where(eq(users.email, email));
 
   return c.json({ ok: true });
 });

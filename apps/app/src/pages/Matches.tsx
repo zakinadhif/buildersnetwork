@@ -1,7 +1,7 @@
 import { useGetMatches, useGetMe } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
-import { type MemberMatch, firstName } from "@/lib/members";
+import { firstName, type MemberMatch } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 export default function Matches() {
@@ -26,7 +26,9 @@ export default function Matches() {
       <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
         <p className="eyebrow mb8">Al-Fath Berkarya</p>
         {user && (
-          <p className="sub">Dipublish. Selamat datang, {firstName(user.name)}.</p>
+          <p className="sub">
+            Dipublish. Selamat datang, {firstName(user.name)}.
+          </p>
         )}
         <h1 className="h1 mt8" style={{ marginBottom: 40 }}>
           Tiga orang yang kayaknya perlu kamu kenal.
@@ -46,6 +48,7 @@ export default function Matches() {
               </p>
               <p className="match-reason">"{m.reason}"</p>
               <button
+                type="button"
                 className="btn btn-outline"
                 style={{ fontSize: 13, padding: "7px 14px" }}
                 onClick={() => navigate(`/member/${m.id}`)}
@@ -57,7 +60,11 @@ export default function Matches() {
         </div>
 
         <div className="row-end mt40">
-          <button className="btn btn-dark" onClick={() => navigate("/home")}>
+          <button
+            type="button"
+            className="btn btn-dark"
+            onClick={() => navigate("/home")}
+          >
             Ke komunitas →
           </button>
         </div>

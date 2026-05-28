@@ -7,7 +7,15 @@
   },
   "files": {
     "ignoreUnknown": false,
-    "includes": ["**", "!plans"]
+    "includes": [
+      "**",
+      "!plans",
+      "!**/dist",
+      "!libs/api-client-react/src/generated",
+      "!libs/api-zod/src/generated",
+      "!.wrangler",
+      "!apps/api/public"
+    ]
   },
   "formatter": {
     "enabled": true,

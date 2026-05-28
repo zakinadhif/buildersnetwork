@@ -8,7 +8,12 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { EditField, Loading, SkillsEditor } from "@/components/ui-atoms";
-import { type Member, type MemberMatch, callClaude, cleanJSON } from "@/lib/members";
+import {
+  callClaude,
+  cleanJSON,
+  type Member,
+  type MemberMatch,
+} from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 export default function Review() {
@@ -62,8 +67,21 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         .map((x) => ({ ...memberMap.get(x.memberId), reason: x.reason }))
         .filter((x) => x.id != null) as MemberMatch[];
 
-      await saveProfile({ name: p.name, year: p.year, major: p.major, skills: p.skills, building: p.building, wants: p.wants, vibe: p.vibe });
-      await saveMatches({ matches: parsed.map((x) => ({ memberId: x.memberId, reason: x.reason })) });
+      await saveProfile({
+        name: p.name,
+        year: p.year,
+        major: p.major,
+        skills: p.skills,
+        building: p.building,
+        wants: p.wants,
+        vibe: p.vibe,
+      });
+      await saveMatches({
+        matches: parsed.map((x) => ({
+          memberId: x.memberId,
+          reason: x.reason,
+        })),
+      });
       await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
 
       setMatches(matched);
@@ -129,7 +147,7 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
 
         <hr className="hr" />
         <div className="row-end">
-          <button className="btn btn-dark" onClick={publish}>
+          <button type="button" className="btn btn-dark" onClick={publish}>
             Publish profil →
           </button>
         </div>
