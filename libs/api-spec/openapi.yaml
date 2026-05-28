@@ -13,6 +13,12 @@ tags:
     description: AI completion
   - name: health
     description: Health check
+  - name: members
+    description: Community member profiles
+  - name: matches
+    description: Member matches
+  - name: otp
+    description: Email OTP verification
 
 paths:
   /healthz:
@@ -87,6 +93,180 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /me:
+    get:
+      operationId: getMe
+      tags: [members]
+      summary: Get the current user's profile
+      responses:
+        "200":
+          description: Profile if it exists, null otherwise
+          content:
+            application/json:
+              schema:
+                anyOf:
+                  - $ref: "#/components/schemas/Member"
+                  - type: "null"
+
+  /profile:
+    post:
+      operationId: saveProfile
+      tags: [members]
+      summary: Create or update the current user's profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileInput"
+      responses:
+        "200":
+          description: Profile saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /members:
+    get:
+      operationId: listMembers
+      tags: [members]
+      summary: List all community members
+      responses:
+        "200":
+          description: Array of member profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+
+  /members/{id}:
+    get:
+      operationId: getMember
+      tags: [members]
+      summary: Get a member by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Member profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+        "404":
+          description: Member not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /matches:
+    get:
+      operationId: getMatches
+      tags: [matches]
+      summary: Get the current user's matches
+      responses:
+        "200":
+          description: Array of matched member profiles with match reasons
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MemberMatch"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: saveMatches
+      tags: [matches]
+      summary: Save the current user's matches
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SaveMatchesRequest"
+      responses:
+        "200":
+          description: Matches saved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /otp/send:
+    post:
+      operationId: sendOtp
+      tags: [otp]
+      summary: Send a 6-digit OTP to the given student email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpSendRequest"
+      responses:
+        "200":
+          description: OTP sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          description: Invalid or non-student email
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /otp/verify:
+    post:
+      operationId: verifyOtp
+      tags: [otp]
+      summary: Verify an OTP code and mark the email as verified
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OtpVerifyRequest"
+      responses:
+        "200":
+          description: Email verified
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "400":
+          description: Invalid or expired code
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -131,3 +311,97 @@ components:
         error:
           type: string
       required: [error]
+
+    OkResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+
+    Member:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        year:
+          type: string
+        major:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        building:
+          type: string
+        wants:
+          type: string
+        vibe:
+          type: string
+      required: [id, name, year, major, skills, building, wants, vibe]
+
+    MemberMatch:
+      allOf:
+        - $ref: "#/components/schemas/Member"
+        - type: object
+          properties:
+            reason:
+              type: string
+          required: [reason]
+
+    ProfileInput:
+      type: object
+      properties:
+        name:
+          type: string
+        year:
+          type: string
+        major:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        building:
+          type: string
+        wants:
+          type: string
+        vibe:
+          type: string
+      required: [name, year, major, skills, building, wants, vibe]
+
+    MatchEntry:
+      type: object
+      properties:
+        memberId:
+          type: string
+        reason:
+          type: string
+      required: [memberId, reason]
+
+    SaveMatchesRequest:
+      type: object
+      properties:
+        matches:
+          type: array
+          items:
+            $ref: "#/components/schemas/MatchEntry"
+      required: [matches]
+
+    OtpSendRequest:
+      type: object
+      properties:
+        email:
+          type: string
+      required: [email]
+
+    OtpVerifyRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        code:
+          type: string
+      required: [email, code]
