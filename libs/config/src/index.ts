@@ -48,6 +48,14 @@ const schema = z.object({
   /** Anthropic API key — required when AI_PROVIDER=anthropic. */
   ANTHROPIC_API_KEY: z.string().optional(),
 
+  // --- Email (Node.js / non-CF runtimes) ---
+  // In the Workers runtime the [[send_email]] binding is used; these are not needed there.
+  /** Resend API key — preferred for Node.js / Docker deployments. */
+  RESEND_API_KEY: z.string().optional(),
+  /** Cloudflare Email REST API fallback (alternative to Resend). */
+  CF_EMAIL_ACCOUNT_ID: z.string().optional(),
+  CF_EMAIL_API_TOKEN: z.string().optional(),
+
   /** Which AI backend to use. Defaults to "anthropic". */
   AI_PROVIDER: z.enum(["anthropic", "workers-ai"]).default("anthropic"),
 

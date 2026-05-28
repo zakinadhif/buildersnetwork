@@ -1,66 +1,100 @@
-import { useState } from "react";
-import { type Member, SEED_MEMBERS } from "@/lib/members";
+import { useQuery } from "@tanstack/react-query";
+import { Redirect, Route, Router, Switch, useLocation } from "wouter";
+import { Loading } from "@/components/ui-atoms";
+import { fetchMe } from "@/lib/api";
+import { useSession } from "@/lib/auth-client";
+import { OnboardingProvider } from "@/lib/onboarding-ctx";
 import CommunityHome from "@/pages/CommunityHome";
+import Login from "@/pages/Login";
 import Matches from "@/pages/Matches";
-import MemberProfile from "@/pages/MemberProfile";
+import MemberProfilePage from "@/pages/MemberProfile";
 import Onboarding from "@/pages/Onboarding";
 import Review from "@/pages/Review";
+import VerifyEmail from "@/pages/VerifyEmail";
 import Welcome from "@/pages/Welcome";
 
-type Screen = "welcome" | "onboarding" | "review" | "matches" | "home" | "profile";
+function AppRoutes() {
+  const { data: session, isPending } = useSession();
+  const [location] = useLocation();
+  const { data: me, isLoading: meLoading } = useQuery({
+    queryKey: ["me"],
+    queryFn: fetchMe,
+    enabled: !!session?.user && !!session?.user?.emailVerified,
+  });
 
-export default function App() {
-  const [screen, setScreen] = useState<Screen>("welcome");
-  const [user, setUser] = useState<Member | null>(null);
-  const [matches, setMatches] = useState<Member[]>([]);
-  const [members, setMembers] = useState<Member[]>(SEED_MEMBERS);
-  const [viewing, setViewing] = useState<Member | null>(null);
-  const [prevScreen, setPrev] = useState<Screen>("home");
+  if (isPending || (!!session?.user?.emailVerified && meLoading)) {
+    return <Loading />;
+  }
 
-  const viewMember = (m: Member) => {
-    setPrev(screen);
-    setViewing(m);
-    setScreen("profile");
-  };
+  const loggedIn = !!session?.user;
+  const emailVerified = !!session?.user?.emailVerified;
+  const hasProfile = me != null;
 
-  const back = () => {
-    setScreen(prevScreen);
-    setViewing(null);
-  };
-
-  const onOnboardDone = (profile: Member) => {
-    setUser(profile);
-    setScreen("review");
-  };
-
-  const onPublish = (profile: Member, matched: Member[]) => {
-    setUser(profile);
-    setMatches(matched);
-    setMembers([...SEED_MEMBERS, { ...profile, id: "user" }]);
-    setScreen("matches");
-  };
+  if (loggedIn && !emailVerified && location !== "/verify-email") {
+    const email = encodeURIComponent(session?.user?.email ?? "");
+    return <Redirect to={`/verify-email?email=${email}`} />;
+  }
 
   return (
-    <>
-      {screen === "welcome" && <Welcome onStart={() => setScreen("onboarding")} />}
-      {screen === "onboarding" && <Onboarding onDone={onOnboardDone} />}
-      {screen === "review" && user && (
-        <Review draft={user} onPublish={onPublish} />
-      )}
-      {screen === "matches" && user && (
-        <Matches
-          matches={matches}
-          user={user}
-          onContinue={() => setScreen("home")}
-          onView={viewMember}
-        />
-      )}
-      {screen === "home" && user && (
-        <CommunityHome user={user} members={members} onView={viewMember} />
-      )}
-      {screen === "profile" && viewing && (
-        <MemberProfile member={viewing} onBack={back} />
-      )}
-    </>
+    <Switch>
+      <Route path="/verify-email">
+        <VerifyEmail />
+      </Route>
+      <Route path="/welcome">
+        <Welcome />
+      </Route>
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/onboarding">
+        {!loggedIn ? <Redirect to="/welcome" /> : <Onboarding />}
+      </Route>
+      <Route path="/review">
+        {!loggedIn ? <Redirect to="/welcome" /> : <Review />}
+      </Route>
+      <Route path="/matches">
+        {!loggedIn ? <Redirect to="/welcome" /> : <Matches />}
+      </Route>
+      <Route path="/home">
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : !hasProfile ? (
+          <Redirect to="/onboarding" />
+        ) : (
+          <CommunityHome user={me} />
+        )}
+      </Route>
+      <Route path="/member/:id">
+        {(params) =>
+          !loggedIn ? (
+            <Redirect to="/welcome" />
+          ) : (
+            <MemberProfilePage id={params.id ?? ""} />
+          )
+        }
+      </Route>
+      <Route path="/">
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : !hasProfile ? (
+          <Redirect to="/onboarding" />
+        ) : (
+          <Redirect to="/home" />
+        )}
+      </Route>
+      <Route>
+        <Redirect to="/" />
+      </Route>
+    </Switch>
+  );
+}
+
+export default function App() {
+  return (
+    <OnboardingProvider>
+      <Router>
+        <AppRoutes />
+      </Router>
+    </OnboardingProvider>
   );
 }

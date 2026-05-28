@@ -1,21 +1,36 @@
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Loading } from "@/components/ui-atoms";
+import { fetchMatches, fetchMe } from "@/lib/api";
 import { type Member, firstName } from "@/lib/members";
+import { useOnboarding } from "@/lib/onboarding-ctx";
 
-export default function Matches({
-  matches,
-  user,
-  onContinue,
-  onView,
-}: {
-  matches: Member[];
-  user: Member;
-  onContinue: () => void;
-  onView: (m: Member) => void;
-}) {
+export default function Matches() {
+  const { matches: contextMatches } = useOnboarding();
+  const [, navigate] = useLocation();
+
+  const { data: me } = useQuery({ queryKey: ["me"], queryFn: fetchMe });
+
+  const { data: savedMatches = [], isLoading } = useQuery({
+    queryKey: ["matches"],
+    queryFn: fetchMatches,
+    enabled: contextMatches.length === 0,
+  });
+
+  const matches: Member[] =
+    contextMatches.length > 0 ? contextMatches : savedMatches;
+
+  if (isLoading && contextMatches.length === 0) return <Loading />;
+
+  const user = me;
+
   return (
     <div className="screen" style={{ overflowY: "auto" }}>
       <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
         <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <p className="sub">Dipublish. Selamat datang, {firstName(user.name)}.</p>
+        {user && (
+          <p className="sub">Dipublish. Selamat datang, {firstName(user.name)}.</p>
+        )}
         <h1 className="h1 mt8" style={{ marginBottom: 40 }}>
           Tiga orang yang kayaknya perlu kamu kenal.
         </h1>
@@ -36,7 +51,7 @@ export default function Matches({
               <button
                 className="btn btn-outline"
                 style={{ fontSize: 13, padding: "7px 14px" }}
-                onClick={() => onView(m)}
+                onClick={() => navigate(`/member/${m.id}`)}
               >
                 Lihat profil →
               </button>
@@ -45,7 +60,7 @@ export default function Matches({
         </div>
 
         <div className="row-end mt40">
-          <button className="btn btn-dark" onClick={onContinue}>
+          <button className="btn btn-dark" onClick={() => navigate("/home")}>
             Ke komunitas →
           </button>
         </div>

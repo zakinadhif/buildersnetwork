@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import { useStream } from "@myapp/ai/react";
 import { Dots, Loading } from "@/components/ui-atoms";
 import { type Member, callClaude, cleanJSON } from "@/lib/members";
+import { useOnboarding } from "@/lib/onboarding-ctx";
 
 const INTRO =
   "hei — selamat datang di al-fath berkarya. aku mau kenalan dulu — abis itu kita nyusun profil kamu bareng.\n\nsiapa nama kamu?";
@@ -27,7 +29,9 @@ interface ApiMessage {
   content: string;
 }
 
-export default function Onboarding({ onDone }: { onDone: (profile: Member) => void }) {
+export default function Onboarding() {
+  const { setDraft } = useOnboarding();
+  const [, navigate] = useLocation();
   const [msgs, setMsgs] = useState<ChatMessage[]>([{ role: "ai", text: INTRO }]);
   const [history, setHistory] = useState<ApiMessage[]>([]);
   const [input, setInput] = useState("");
@@ -59,7 +63,9 @@ Percakapan:\n${transcript}`;
     try {
       const raw = await callClaude([{ role: "user", content: prompt }]);
       const parsed = cleanJSON(raw) as Member;
-      onDone({ ...parsed, id: "user", skills: parsed.skills ?? [] });
+      const profile: Member = { ...parsed, id: "user", skills: parsed.skills ?? [] };
+      setDraft(profile);
+      navigate("/review");
     } catch (e) {
       console.error(e);
       setGenning(false);

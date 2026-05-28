@@ -5,6 +5,7 @@ import { createAnthropicAI } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { loadConfig } from "@myapp/config";
 import { createDb } from "@myapp/db";
+import { createNoopEmail, createResendEmail, createRestEmail } from "@myapp/email";
 
 import { createApp } from "./app";
 
@@ -20,6 +21,12 @@ const auth = createAuth({
 });
 const ai = createAnthropicAI(config.ANTHROPIC_API_KEY ?? "");
 
+const email = config.RESEND_API_KEY
+  ? createResendEmail({ apiKey: config.RESEND_API_KEY })
+  : config.CF_EMAIL_ACCOUNT_ID && config.CF_EMAIL_API_TOKEN
+    ? createRestEmail({ accountId: config.CF_EMAIL_ACCOUNT_ID, apiToken: config.CF_EMAIL_API_TOKEN })
+    : createNoopEmail();
+
 const allowedOrigins = config.ALLOWED_ORIGINS
   ? config.ALLOWED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
   : [config.APP_URL];
@@ -28,6 +35,7 @@ const app = createApp({
   db,
   auth,
   ai,
+  email,
   allowedOrigins,
   gitSha: process.env.GIT_SHA,
 });

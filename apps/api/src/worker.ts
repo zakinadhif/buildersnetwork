@@ -1,6 +1,7 @@
 import { createWorkersAI, type WorkersAIBinding } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { createDb, type Db } from "@myapp/db";
+import { createWorkersEmail, type WorkersEmailBinding } from "@myapp/email";
 
 import { createApp, type AppServices } from "./app";
 
@@ -11,6 +12,8 @@ interface Env {
   ASSETS: Fetcher;
   // Workers AI binding (configured in wrangler.toml)
   AI: WorkersAIBinding;
+  // Cloudflare Email Service binding (configured in wrangler.toml)
+  EMAIL: WorkersEmailBinding;
   // Vars / secrets
   APP_URL: string;
   DATABASE_URL: string;
@@ -37,12 +40,13 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
+  const email = createWorkersEmail(env.EMAIL);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
     ? env.ALLOWED_ORIGINS.split(",").map((o) => o.trim()).filter(Boolean)
     : [env.APP_URL];
 
-  services = { db, auth, ai, allowedOrigins };
+  services = { db, auth, ai, email, allowedOrigins };
   return services;
 }
 

@@ -1,23 +1,19 @@
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef, useState } from "react";
+import { useLocation } from "wouter";
 import { Dots } from "@/components/ui-atoms";
+import { fetchMembers } from "@/lib/api";
 import { type Member, callClaude, firstName } from "@/lib/members";
 
-interface ChatMessage {
-  role: "ai" | "user";
-  text: string;
-}
+export default function CommunityHome({ user }: { user: Member }) {
+  const [, navigate] = useLocation();
+  const { data: members = [] } = useQuery({
+    queryKey: ["members"],
+    queryFn: fetchMembers,
+  });
 
-export default function CommunityHome({
-  user,
-  members,
-  onView,
-}: {
-  user: Member;
-  members: Member[];
-  onView: (m: Member) => void;
-}) {
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
-  const [msgs, setMsgs] = useState<ChatMessage[]>([{ role: "ai", text: greeting }]);
+  const [msgs, setMsgs] = useState([{ role: "ai" as const, text: greeting }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -29,7 +25,7 @@ export default function CommunityHome({
   async function query() {
     const text = input.trim();
     if (!text || busy) return;
-    setMsgs((p) => [...p, { role: "user", text }]);
+    setMsgs((p) => [...p, { role: "user" as const, text }]);
     setInput("");
     setBusy(true);
 
@@ -52,10 +48,10 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
     try {
       const reply = await callClaude([{ role: "user", content: prompt }]);
       setBusy(false);
-      setMsgs((p) => [...p, { role: "ai", text: reply }]);
+      setMsgs((p) => [...p, { role: "ai" as const, text: reply }]);
     } catch {
       setBusy(false);
-      setMsgs((p) => [...p, { role: "ai", text: "ada yang error — coba lagi?" }]);
+      setMsgs((p) => [...p, { role: "ai" as const, text: "ada yang error — coba lagi?" }]);
     }
   }
 
@@ -105,7 +101,11 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
 
           <p className="sec-head">Anggota ({members.length})</p>
           {members.map((m) => (
-            <div key={m.id} className="member-row" onClick={() => onView(m)}>
+            <div
+              key={m.id}
+              className="member-row"
+              onClick={() => navigate(`/member/${m.id}`)}
+            >
               <div className="member-top">
                 <span className="member-name">{m.name}</span>
                 <span className="member-year">{m.year}</span>

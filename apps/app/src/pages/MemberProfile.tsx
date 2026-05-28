@@ -1,17 +1,38 @@
-import { type Member } from "@/lib/members";
+import { useQuery } from "@tanstack/react-query";
+import { Loading } from "@/components/ui-atoms";
+import { fetchMember } from "@/lib/api";
 
-export default function MemberProfile({
-  member,
-  onBack,
-}: {
-  member: Member;
-  onBack: () => void;
-}) {
+export default function MemberProfilePage({ id }: { id: string }) {
+  const [, navigate] = useLocation();
+  const { data: member, isLoading } = useQuery({
+    queryKey: ["member", id],
+    queryFn: () => fetchMember(id),
+    enabled: !!id,
+  });
+
+  if (isLoading) return <Loading />;
+  if (!member) {
+    return (
+      <div className="screen" style={{ display: "flex", alignItems: "center" }}>
+        <div className="wrap">
+          <p className="sub">anggota tidak ditemukan.</p>
+          <button
+            className="btn btn-outline"
+            style={{ marginTop: 24 }}
+            onClick={() => window.history.back()}
+          >
+            ← balik
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="screen" style={{ overflowY: "auto" }}>
       <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
         <button
-          onClick={onBack}
+          onClick={() => window.history.back()}
           style={{
             background: "none",
             border: "none",

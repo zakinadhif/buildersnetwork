@@ -23,6 +23,11 @@ binding = "ASSETS"
 [ai]
 binding = "AI"
 
+# Cloudflare Email Service (beta) — transactional email sending.
+# Requires Workers Paid plan. Set sender domain via Cloudflare Email Routing.
+[[send_email]]
+name = "EMAIL"
+
 # Non-secret vars. Secrets go via `wrangler secret put`.
 [vars]
 AI_WORKERS_MODEL = "@cf/meta/llama-3.1-8b-instruct"

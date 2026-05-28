@@ -1,0 +1,550 @@
+---
+// biome-ignore lint/correctness/noUnusedVariables: used in the Astro template below; Biome doesn't parse Astro template expressions
+const appUrl = import.meta.env.PUBLIC_APP_URL || "http://localhost:5173";
+---
+
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Al-Fath Berkarya — Komunitas Builder Telkom University</title>
+    <meta name="description" content="Platform komunitas untuk builder mahasiswa Telkom University. Kenalan lewat AI, dapat match, temukan kolaborator." />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+      :root {
+        --bg:       #f1efe9;
+        --ink:      #1a1916;
+        --ink2:     #6b6860;
+        --ink3:     #9b9890;
+        --line:     #dedad1;
+        --ai-bg:    rgba(26, 25, 22, 0.055);
+        --user-bg:  #1a1916;
+        --user-ink: #f1efe9;
+        --sans:     'Plus Jakarta Sans', system-ui, sans-serif;
+        --mono:     'IBM Plex Mono', monospace;
+      }
+
+      html { scroll-behavior: smooth; }
+      body {
+        font-family: var(--sans);
+        background: var(--bg);
+        color: var(--ink);
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* ── Wrappers ─────────────────────────────── */
+      .hw { max-width: 1100px; margin: 0 auto; padding: 0 48px; }
+      .fw { max-width: 960px;  margin: 0 auto; padding: 0 48px; }
+
+      /* ── Nav ──────────────────────────────────── */
+      .nav {
+        padding: 36px 0 0;
+        display: flex; align-items: center; justify-content: space-between;
+      }
+      .nav-brand {
+        font-size: 12px; font-weight: 700;
+        letter-spacing: 0.06em; text-transform: uppercase;
+        color: var(--ink); text-decoration: none;
+      }
+      .nav-link {
+        font-size: 13px; font-weight: 600;
+        color: var(--ink2); text-decoration: none;
+        transition: color 0.15s;
+      }
+      .nav-link:hover { color: var(--ink); }
+
+      /* ── Hero ─────────────────────────────────── */
+      .hero-wrap {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      .hero-body {
+        flex: 1;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 64px;
+        align-items: center;
+        padding: 52px 0 100px;
+      }
+      .hero-eyebrow {
+        font-family: var(--mono);
+        font-size: 11px; font-weight: 500;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 24px;
+      }
+      .hero-h1 {
+        font-size: clamp(46px, 5.6vw, 78px);
+        font-weight: 700; line-height: 0.97;
+        letter-spacing: -0.035em;
+        color: var(--ink); margin-bottom: 24px;
+      }
+      .hero-sub {
+        font-size: 15.5px; line-height: 1.72;
+        color: var(--ink2); max-width: 370px;
+        margin-bottom: 42px;
+      }
+      .btn {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: var(--ink); color: var(--bg);
+        padding: 13px 26px; border-radius: 4px;
+        font-family: var(--sans); font-size: 14px; font-weight: 600;
+        text-decoration: none; letter-spacing: 0.01em;
+        transition: opacity 0.15s, transform 0.15s;
+      }
+      .btn:hover { opacity: 0.82; transform: translateY(-1px); }
+
+      /* ── Chat window (hero right) ─────────────── */
+      .hero-right {
+        padding-left: 52px;
+        border-left: 1px solid var(--line);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .chat-win {
+        width: 100%;
+        max-width: 400px;
+        background: rgba(255, 255, 255, 0.52);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 28px rgba(0, 0, 0, 0.055);
+      }
+      .win-chrome {
+        padding: 11px 15px;
+        border-bottom: 1px solid var(--line);
+        display: flex; align-items: center; gap: 6px;
+        background: rgba(255, 255, 255, 0.3);
+      }
+      .wd { width: 9px; height: 9px; border-radius: 50%; background: var(--line); }
+      .win-label {
+        margin-left: auto;
+        font-family: var(--mono); font-size: 10.5px;
+        color: var(--ink3); letter-spacing: 0.04em;
+      }
+      .chat-feed {
+        height: 312px;
+        overflow-y: auto;
+        padding: 18px 16px 12px;
+        display: flex; flex-direction: column; gap: 9px;
+        scroll-behavior: smooth;
+      }
+      .chat-feed::-webkit-scrollbar { display: none; }
+      .hb {
+        font-family: var(--mono);
+        font-size: 12.5px; line-height: 1.6;
+        padding: 9px 13px; border-radius: 3px;
+        max-width: 86%;
+        word-break: break-word;
+      }
+      .hb-ai   { background: var(--ai-bg); color: var(--ink); align-self: flex-start; }
+      .hb-user { background: var(--user-bg); color: var(--user-ink); align-self: flex-end; }
+      .h-cur {
+        display: inline-block; width: 2px; height: 11px;
+        background: var(--ink3); vertical-align: middle; margin-left: 1px;
+        animation: blink 1.1s step-end infinite;
+      }
+      @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+      .chat-note {
+        margin-top: 12px;
+        font-family: var(--mono); font-size: 10.5px;
+        color: var(--ink3); letter-spacing: 0.03em;
+      }
+
+      /* ── Feature sections ─────────────────────── */
+      .feature {
+        padding: 96px 0;
+        border-top: 1px solid var(--line);
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 72px;
+        align-items: start;
+      }
+      .feature.rev .fv { order: -1; }
+
+      .fn {
+        font-family: var(--mono);
+        font-size: 10.5px; font-weight: 500;
+        letter-spacing: 0.1em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 18px;
+      }
+      .fh {
+        font-size: clamp(22px, 2.9vw, 33px);
+        font-weight: 700; line-height: 1.18;
+        letter-spacing: -0.025em;
+        color: var(--ink); margin-bottom: 14px;
+      }
+      .fs {
+        font-size: 14px; line-height: 1.74;
+        color: var(--ink2);
+      }
+
+      /* ── Static chat mockup (01) ──────────────── */
+      .cs {
+        background: rgba(255, 255, 255, 0.44);
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 22px; display: flex; flex-direction: column; gap: 10px;
+      }
+      .bbl {
+        font-family: var(--mono); font-size: 12.5px; line-height: 1.6;
+        border-radius: 3px; padding: 9px 13px; max-width: 86%;
+      }
+      .bbl-ai  { background: var(--ai-bg); color: var(--ink); align-self: flex-start; }
+      .bbl-usr { background: var(--user-bg); color: var(--user-ink); align-self: flex-end; }
+      .cursor {
+        display: inline-block; width: 2px; height: 11px;
+        background: var(--ink3); vertical-align: middle;
+        margin-left: 2px; animation: blink 1.1s step-end infinite;
+      }
+
+      /* ── Profile card (02) ────────────────────── */
+      .profile-card {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 26px; background: rgba(255, 255, 255, 0.44);
+      }
+      .p-name { font-size: 19px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 3px; }
+      .p-meta { font-size: 11.5px; color: var(--ink3); font-family: var(--mono); margin-bottom: 20px; }
+      .p-row { margin-bottom: 14px; }
+      .p-row:last-child { margin-bottom: 0; }
+      .p-lbl {
+        font-size: 10px; font-weight: 700;
+        letter-spacing: 0.08em; text-transform: uppercase;
+        color: var(--ink3); margin-bottom: 5px;
+      }
+      .p-val { font-size: 12.5px; line-height: 1.55; color: var(--ink2); font-family: var(--mono); }
+      .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+      .tag {
+        font-size: 11.5px; font-family: var(--mono); color: var(--ink2);
+        border: 1px solid var(--line); border-radius: 3px;
+        padding: 2px 8px; background: var(--bg);
+      }
+
+      /* ── Match cards (03) ─────────────────────── */
+      .matches { display: flex; flex-direction: column; gap: 10px; }
+      .mc {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 18px 22px; background: rgba(255, 255, 255, 0.44);
+      }
+      .m-name { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
+      .m-meta { font-size: 11px; font-family: var(--mono); color: var(--ink3); margin-bottom: 6px; }
+      .m-why  { font-size: 12.5px; line-height: 1.6; color: var(--ink2); font-style: italic; }
+
+      /* ── Discovery (04) ───────────────────────── */
+      .disc {
+        border: 1px solid var(--line); border-radius: 8px;
+        padding: 22px; background: rgba(255, 255, 255, 0.44);
+      }
+      .d-q {
+        font-family: var(--mono); font-size: 13px;
+        color: var(--ink); padding-bottom: 16px;
+        border-bottom: 1px solid var(--line); margin-bottom: 16px;
+      }
+      .d-q::before { content: '> '; color: var(--ink3); }
+      .d-r { font-family: var(--mono); font-size: 12px; line-height: 1.76; color: var(--ink2); }
+      .d-r strong { color: var(--ink); font-weight: 500; }
+
+      /* ── Footer CTA ───────────────────────────── */
+      .footer-cta {
+        padding: 108px 0 80px;
+        border-top: 1px solid var(--line);
+      }
+      .fc-h2 {
+        font-size: clamp(32px, 5vw, 56px);
+        font-weight: 700; letter-spacing: -0.03em;
+        line-height: 1.08; color: var(--ink); margin-bottom: 16px;
+      }
+      .fc-sub {
+        font-size: 15px; color: var(--ink2);
+        margin-bottom: 40px; line-height: 1.65; max-width: 340px;
+      }
+      .footer-note {
+        margin-top: 72px; padding-top: 26px;
+        border-top: 1px solid var(--line);
+        font-size: 12px; color: var(--ink3);
+        display: flex; justify-content: space-between; align-items: center;
+      }
+
+      /* ── Scroll fade-in ───────────────────────── */
+      .fi {
+        opacity: 0; transform: translateY(16px);
+        transition: opacity 0.55s ease, transform 0.55s ease;
+      }
+      .fi.show { opacity: 1; transform: translateY(0); }
+      .fi.d1 { transition-delay: 0.08s; }
+      .fi.d2 { transition-delay: 0.16s; }
+      .fi.d3 { transition-delay: 0.24s; }
+      .fi.d4 { transition-delay: 0.32s; }
+
+      /* ── Mobile ───────────────────────────────── */
+      @media (max-width: 760px) {
+        .hw, .fw { padding: 0 20px; }
+        .hero-body {
+          grid-template-columns: 1fr;
+          padding: 44px 0 72px;
+          gap: 44px;
+        }
+        .hero-right {
+          padding-left: 0;
+          border-left: none;
+          border-top: 1px solid var(--line);
+          padding-top: 36px;
+        }
+        .feature {
+          grid-template-columns: 1fr;
+          padding: 64px 0;
+          gap: 36px;
+        }
+        .feature.rev .fv { order: 0; }
+        .footer-note { flex-direction: column; gap: 8px; align-items: flex-start; }
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ─── Hero ────────────────────────────────────── -->
+    <div class="hw">
+      <div class="hero-wrap">
+
+        <nav class="nav">
+          <span class="nav-brand">Al-Fath Berkarya</span>
+          <a href={appUrl} class="nav-link">masuk →</a>
+        </nav>
+
+        <div class="hero-body">
+
+          <!-- Left: headline -->
+          <div>
+            <p class="hero-eyebrow">komunitas builder · telkom university</p>
+            <h1 class="hero-h1">
+              temukan<br />builder<br />terbaikmu.
+            </h1>
+            <p class="hero-sub">
+              Orang-orang di sini lagi ngerjain sesuatu yang nyata. Kenalan lewat AI, dapat rekomendasi, dan mulai kolaborasi.
+            </p>
+            <a href={appUrl} class="btn">Mulai sekarang →</a>
+          </div>
+
+          <!-- Right: live chat replay -->
+          <div class="hero-right">
+            <div class="chat-win">
+              <div class="win-chrome">
+                <span class="wd"></span>
+                <span class="wd"></span>
+                <span class="wd"></span>
+                <span class="win-label">onboarding</span>
+              </div>
+              <div class="chat-feed" id="hfeed"></div>
+            </div>
+            <p class="chat-note">ai onboarding · biasanya 8–10 pesan</p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ─── Feature sections ─────────────────────────── -->
+    <div class="fw">
+
+      <!-- 01 — Onboarding -->
+      <section class="feature">
+        <div>
+          <p class="fn fi">01 — onboarding</p>
+          <h2 class="fh fi d1">AI yang nanya dulu,<br />bukan form yang kamu isi.</h2>
+          <p class="fs fi d2">
+            Kamu ngobrol sama AI — soal skill yang beneran kamu pakai, proyek yang lagi dikerjain, dan cara kerja sama orang. Santai, natural, maksimal 10 giliran.
+          </p>
+        </div>
+        <div class="fv fi d1">
+          <div class="cs">
+            <div class="bbl bbl-ai">hei — selamat datang. siapa nama kamu?</div>
+            <div class="bbl bbl-usr">Rafi Aulia</div>
+            <div class="bbl bbl-ai">skill teknis kamu — yang beneran dipake?<span class="cursor"></span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 — Profile (visual left) -->
+      <section class="feature rev">
+        <div>
+          <p class="fn fi">02 — profil</p>
+          <h2 class="fh fi d1">Profil terbentuk<br />dari obrolan.</h2>
+          <p class="fs fi d2">
+            Abis ngobrol, AI langsung nyusun profil lengkap — jujur, spesifik, bisa kamu edit sebelum dipublish ke komunitas.
+          </p>
+        </div>
+        <div class="fv fi d1">
+          <div class="profile-card">
+            <p class="p-name">Rafi Aulia</p>
+            <p class="p-meta">Tingkat 3 · Informatika</p>
+            <div class="p-row">
+              <p class="p-lbl">Skills</p>
+              <div class="tags">
+                <span class="tag">React</span>
+                <span class="tag">Go</span>
+                <span class="tag">PostgreSQL</span>
+                <span class="tag">Docker</span>
+              </div>
+            </div>
+            <div class="p-row">
+              <p class="p-lbl">Lagi bikin</p>
+              <p class="p-val">platform koordinasi TA berbasis AI — bantu koordinasi mahasiswa dan dosen.</p>
+            </div>
+            <div class="p-row">
+              <p class="p-lbl">Pengen</p>
+              <p class="p-val">nyentuh IoT dan ketemu yang jago hardware.</p>
+            </div>
+            <div class="p-row">
+              <p class="p-lbl">Vibe kerja</p>
+              <p class="p-val">pair programming, terbuka sama feedback langsung.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 03 — Match -->
+      <section class="feature">
+        <div>
+          <p class="fn fi">03 — match</p>
+          <h2 class="fh fi d1">Tiga orang yang perlu<br />kamu kenal.</h2>
+          <p class="fs fi d2">
+            Begitu profilmu masuk, AI langsung nyariin tiga anggota yang paling nyambung — berdasarkan skill, proyek, dan vibe kerja.
+          </p>
+        </div>
+        <div class="fv">
+          <div class="matches">
+            <div class="mc fi d1">
+              <p class="m-name">Dina Kusumawati</p>
+              <p class="m-meta">Tingkat 3 · Informatika</p>
+              <p class="m-why">"juga lagi bangun platform edukasi AI — bisa saling isi celah."</p>
+            </div>
+            <div class="mc fi d2">
+              <p class="m-name">Bima Ardiansyah</p>
+              <p class="m-meta">Tingkat 4 · Teknik Elektro</p>
+              <p class="m-why">"jago hardware dan embedded — pas banget sama minat IoT kamu."</p>
+            </div>
+            <div class="mc fi d3">
+              <p class="m-name">Nadia Permata</p>
+              <p class="m-meta">Tingkat 2 · Informatika</p>
+              <p class="m-why">"backend-heavy, suka pair dan review kode — vibe cocok."</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 — Community (visual left) -->
+      <section class="feature rev">
+        <div>
+          <p class="fn fi">04 — komunitas</p>
+          <h2 class="fh fi d1">Tanya langsung.<br />Temukan siapa aja.</h2>
+          <p class="fs fi d2">
+            Punya kebutuhan spesifik? Tanya AI komunitas — "siapa yang lagi kerja di ML?" — dapat rekomendasi dalam hitungan detik.
+          </p>
+        </div>
+        <div class="fv fi d1">
+          <div class="disc">
+            <p class="d-q">siapa yang lagi kerja di machine learning?</p>
+            <div class="d-r">
+              ada tiga yang relevan:<br /><br />
+              <strong>Fajar Nugroho</strong> (T3) — model rekomendasi e-commerce, PyTorch.<br /><br />
+              <strong>Sari Wijayanti</strong> (T2) — NLP, sentiment analysis untuk tesis.<br /><br />
+              <strong>Rizky Pratama</strong> (T4) — udah deploy ke produksi, bisa bantu MLOps.
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer CTA -->
+      <section class="footer-cta">
+        <h2 class="fc-h2 fi">Siap masuk?</h2>
+        <p class="fc-sub fi d1">Onboarding butuh sekitar lima menit. Komunitas kamu sudah menunggu.</p>
+        <a href={appUrl} class="btn fi d2">Mulai sekarang →</a>
+        <div class="footer-note fi d3">
+          <span>Al-Fath Berkarya · Telkom University</span>
+          <span>eksklusif untuk mahasiswa aktif</span>
+        </div>
+      </section>
+
+    </div>
+
+    <script>
+      // ── Hero: looping typewriter chat ─────────────
+      const SCRIPT = [
+        { role: 'ai',   text: 'hei — selamat datang. siapa nama kamu?' },
+        { role: 'user', text: 'Rafi Aulia' },
+        { role: 'ai',   text: 'hai Rafi! kamu tingkat berapa sekarang?' },
+        { role: 'user', text: 'tingkat 3, informatika' },
+        { role: 'ai',   text: 'skill teknis kamu — yang beneran dipake?' },
+        { role: 'user', text: 'React, Go, lagi belajar ML juga' },
+        { role: 'ai',   text: 'keren. lagi ngerjain project apa sekarang?' },
+        { role: 'user', text: 'platform koordinasi TA berbasis AI' },
+        { role: 'ai',   text: 'oke, biar aku susun profil kamu sekarang.' },
+      ];
+
+      const ms = n => new Promise(r => setTimeout(r, n));
+
+      async function typeOut(el, text, feed, speed) {
+        const cur = document.createElement('span');
+        cur.className = 'h-cur';
+        el.appendChild(cur);
+        for (const ch of text) {
+          cur.insertAdjacentText('beforebegin', ch);
+          feed.scrollTop = feed.scrollHeight;
+          await ms(speed);
+        }
+        cur.remove();
+      }
+
+      async function runChat() {
+        const feed = document.getElementById('hfeed');
+        while (true) {
+          feed.innerHTML = '';
+          for (const msg of SCRIPT) {
+            const bbl = document.createElement('div');
+            bbl.className = `hb hb-${msg.role}`;
+            feed.appendChild(bbl);
+            feed.scrollTop = feed.scrollHeight;
+            if (msg.role === 'ai') {
+              await ms(160);
+              await typeOut(bbl, msg.text, feed, 26);
+              await ms(460);
+            } else {
+              await ms(300);
+              bbl.textContent = msg.text;
+              feed.scrollTop = feed.scrollHeight;
+              await ms(580);
+            }
+          }
+          await ms(2200);
+          feed.style.transition = 'opacity 0.5s ease';
+          feed.style.opacity = '0';
+          await ms(580);
+          feed.style.transition = '';
+          feed.style.opacity = '';
+        }
+      }
+
+      runChat();
+
+      // ── Scroll fade-in ────────────────────────────
+      const obs = new IntersectionObserver(
+        entries => {
+          for (const e of entries) {
+            if (e.isIntersecting) {
+              e.target.classList.add('show');
+              obs.unobserve(e.target);
+            }
+          }
+        },
+        { threshold: 0.1, rootMargin: '0px 0px -32px 0px' }
+      );
+      for (const el of document.querySelectorAll('.fi')) obs.observe(el);
+    </script>
+  </body>
+</html>

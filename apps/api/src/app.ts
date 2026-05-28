@@ -1,15 +1,20 @@
 import type { AIProvider } from "@myapp/ai";
 import type { createAuth } from "@myapp/auth";
 import type { createDb } from "@myapp/db";
+import type { EmailProvider } from "@myapp/email";
 import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 
 import aiRouter from "./routes/ai";
+import membersRouter from "./routes/members";
+import otpRouter from "./routes/otp";
+import profileRouter from "./routes/profile";
 
 export type AppVariables = {
   auth: ReturnType<typeof createAuth>;
   db: ReturnType<typeof createDb>;
   ai: AIProvider;
+  email: EmailProvider;
 };
 
 export type AppEnv = { Variables: AppVariables };
@@ -18,12 +23,13 @@ export interface AppServices {
   db: ReturnType<typeof createDb>;
   auth: ReturnType<typeof createAuth>;
   ai: AIProvider;
+  email: EmailProvider;
   allowedOrigins: string[];
   gitSha?: string;
 }
 
 export function createApp(services: AppServices) {
-  const { db, auth, ai, allowedOrigins, gitSha } = services;
+  const { db, auth, ai, email, allowedOrigins, gitSha } = services;
 
   const app = new Hono<AppEnv>();
 
@@ -51,11 +57,49 @@ export function createApp(services: AppServices) {
     c.set("db", db);
     c.set("auth", auth);
     c.set("ai", ai);
+    c.set("email", email);
     await next();
   });
 
+  // Block sign-up for non-student emails before Better Auth processes the request.
+  app.use("/api/auth/sign-up/email", async (c, next) => {
+    if (c.req.method === "POST") {
+      const body = await c.req.raw
+        .clone()
+        .json()
+        .catch(() => ({})) as { email?: string };
+      if (!String(body.email ?? "").endsWith("@student.telkomuniversity.ac.id")) {
+        return c.json(
+          { message: "Hanya email @student.telkomuniversity.ac.id yang diizinkan." },
+          400,
+        );
+      }
+    }
+    return next();
+  });
+
+  // Gate all non-auth API routes for users who haven't verified their email yet.
+  app.use("/api/*", async (c, next) => {
+    const path = c.req.path;
+    if (
+      path === "/api/healthz" ||
+      path.startsWith("/api/auth/") ||
+      path.startsWith("/api/otp/")
+    ) {
+      return next();
+    }
+    const session = await c.get("auth").api.getSession({ headers: c.req.raw.headers });
+    if (session?.user && !session.user.emailVerified) {
+      return c.json({ error: "email_not_verified" }, 403);
+    }
+    return next();
+  });
+
   app.all("/api/auth/*", async (c) => auth.handler(c.req.raw));
+  app.route("/api/otp", otpRouter);
   app.route("/api/ai", aiRouter);
+  app.route("/api", profileRouter);
+  app.route("/api/members", membersRouter);
 
   return app;
 }

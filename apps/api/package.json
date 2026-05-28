@@ -13,6 +13,7 @@
     "@hono/node-server": "^1.14.4",
     "@myapp/ai": "workspace:^",
     "@myapp/auth": "workspace:^",
+    "@myapp/email": "workspace:^",
     "@myapp/config": "workspace:^",
     "@myapp/db": "workspace:^",
     "@myapp/api-zod": "workspace:^",
