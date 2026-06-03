@@ -1,6 +1,6 @@
-import { sendOtp } from "@myapp/api-client-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
+import { BrandLockup } from "@/components/ui-atoms";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
 
 type Mode = "signup" | "signin";
@@ -41,7 +41,6 @@ export default function Welcome() {
         setLoading(false);
         return;
       }
-      await sendOtp({ email }).catch(() => null);
       navigate(`/verify-email?email=${encodeURIComponent(email)}`);
       return;
     } else {
@@ -60,19 +59,27 @@ export default function Welcome() {
   const isSignup = mode === "signup";
 
   return (
-    <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-      <div className="wrap" style={{ paddingTop: 0 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
+    <div className="screen brand-screen">
+      <div className="wrap auth-shell" style={{ paddingTop: 0 }}>
+        <BrandLockup />
+        <p className="eyebrow mt40 mb8">
+          {isSignup ? "kenalan pertama" : "ruang anggota"}
+        </p>
         <h1 className="h1" style={{ marginBottom: 16 }}>
           {isSignup ? "Kamu masuk." : "Selamat datang kembali."}
         </h1>
         {isSignup && (
           <p className="sub" style={{ marginBottom: 40, maxWidth: 360 }}>
-            Orang-orang di sini lagi ngerjain sesuatu yang nyata. Kenalan dulu.
+            Di komunitas ini, banyak yang sedang membangun sesuatu yang nyata.
+            Kenalan dulu.
           </p>
         )}
 
-        <form onSubmit={handleSubmit} style={{ marginTop: isSignup ? 0 : 40 }}>
+        <form
+          className="auth-panel"
+          onSubmit={handleSubmit}
+          style={{ marginTop: isSignup ? 0 : 34 }}
+        >
           <div style={{ marginBottom: 12 }}>
             <input
               type="email"
@@ -80,8 +87,7 @@ export default function Welcome() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="chat-textarea"
-              style={{ width: "100%", padding: "10px 14px", resize: "none" }}
+              className="chat-textarea auth-input"
             />
           </div>
           <div style={{ marginBottom: 20 }}>
@@ -91,16 +97,11 @@ export default function Welcome() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="chat-textarea"
-              style={{ width: "100%", padding: "10px 14px", resize: "none" }}
+              className="chat-textarea auth-input"
             />
           </div>
 
-          {error && (
-            <p style={{ fontSize: 13, color: "var(--ink2)", marginBottom: 12 }}>
-              {error}
-            </p>
-          )}
+          {error && <p className="error-text">{error}</p>}
 
           <button
             type="submit"
@@ -112,7 +113,7 @@ export default function Welcome() {
           </button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 20 }}>
+        <p className="auth-footnote">
           {isSignup ? "sudah anggota? " : "belum anggota? "}
           <button
             type="button"
@@ -120,15 +121,7 @@ export default function Welcome() {
               setMode(isSignup ? "signin" : "signup");
               setError(null);
             }}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              color: "var(--ink1)",
-              textDecoration: "underline",
-              padding: 0,
-            }}
+            className="text-link"
           >
             {isSignup ? "masuk ↗" : "daftar ↗"}
           </button>

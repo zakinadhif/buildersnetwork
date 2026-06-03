@@ -1,8 +1,14 @@
 import { useListMembers } from "@myapp/api-client-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Dots } from "@/components/ui-atoms";
+import { BrandLockup, Dots } from "@/components/ui-atoms";
 import { callClaude, firstName, type Member } from "@/lib/members";
+
+type ChatMessage = {
+  id: number;
+  role: "ai" | "user";
+  text: string;
+};
 
 export default function CommunityHome({ user }: { user: Member }) {
   const [, navigate] = useLocation();
@@ -10,7 +16,7 @@ export default function CommunityHome({ user }: { user: Member }) {
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
   const msgId = useRef(0);
-  const [msgs, setMsgs] = useState([
+  const [msgs, setMsgs] = useState<ChatMessage[]>([
     { id: msgId.current, role: "ai" as const, text: greeting },
   ]);
   const [input, setInput] = useState("");
@@ -82,18 +88,8 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
     >
       <div className="nav">
         <div className="nav-inner">
-          <span
-            style={{
-              fontSize: 12,
-              fontWeight: 500,
-              letterSpacing: "0.05em",
-              textTransform: "uppercase",
-              color: "var(--ink3)",
-            }}
-          >
-            Al-Fath Berkarya
-          </span>
-          <span style={{ fontSize: 13, color: "var(--ink2)" }}>
+          <BrandLockup compact meta="komunitas builder" />
+          <span className="nav-user">
             {user.name} · {user.year}
           </span>
         </div>

@@ -24,7 +24,8 @@ calling App Runner.
 
 ## Initial setup
 1. Create one Secrets Manager secret per env var, named `comfort-stack/<NAME>`
-   (e.g. `comfort-stack/DATABASE_URL`). The manifest references them by ARN.
+   (e.g. `comfort-stack/DATABASE_URL`, `comfort-stack/GEMINI_API_KEY`).
+   The manifest references them by ARN.
 2. Edit `deploy/apprunner.json`: replace every `ACCOUNT_ID` and `REGION`
    placeholder with your values. The `ImageIdentifier` must point at your ECR
    repo.

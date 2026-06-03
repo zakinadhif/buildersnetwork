@@ -16,6 +16,7 @@ fly secrets set \
   APP_URL=https://<app>.fly.dev \
   DATABASE_URL=postgres://... \
   BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
+  GEMINI_API_KEY=... \
   STORAGE_ENDPOINT=... STORAGE_REGION=... STORAGE_BUCKET=... \
   STORAGE_ACCESS_KEY=... STORAGE_SECRET_KEY=... STORAGE_FORCE_PATH_STYLE=false
 ```

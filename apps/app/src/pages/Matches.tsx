@@ -1,6 +1,10 @@
-import { useGetMatches, useGetMe } from "@myapp/api-client-react";
+import {
+  getGetMatchesQueryOptions,
+  useGetMatches,
+  useGetMe,
+} from "@myapp/api-client-react";
 import { useLocation } from "wouter";
-import { Loading } from "@/components/ui-atoms";
+import { BrandLockup, Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
@@ -10,8 +14,12 @@ export default function Matches() {
 
   const { data: me } = useGetMe();
 
+  const getMatchesQueryOptions = getGetMatchesQueryOptions();
   const { data: savedMatches = [], isLoading } = useGetMatches({
-    query: { enabled: contextMatches.length === 0 },
+    query: {
+      ...getMatchesQueryOptions,
+      enabled: contextMatches.length === 0,
+    },
   });
 
   const matches: MemberMatch[] =
@@ -24,7 +32,8 @@ export default function Matches() {
   return (
     <div className="screen" style={{ overflowY: "auto" }}>
       <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
+        <BrandLockup compact meta="match kolaborator" />
+        <p className="eyebrow mt40 mb8">tiga rekomendasi</p>
         {user && (
           <p className="sub">
             Dipublish. Selamat datang, {firstName(user.name)}.

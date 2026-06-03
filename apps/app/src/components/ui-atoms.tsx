@@ -1,5 +1,43 @@
 import { useState } from "react";
 
+const ALFATH_LOGO = `${import.meta.env.BASE_URL}brand/logo-alfath.svg`;
+
+export function BrandMark({
+  size = "md",
+  className = "",
+}: {
+  size?: "sm" | "md" | "lg";
+  className?: string;
+}) {
+  const sizeClass =
+    size === "sm" ? "brand-mark-sm" : size === "lg" ? "brand-mark-lg" : "";
+  return (
+    <span className={`brand-mark ${sizeClass} ${className}`.trim()}>
+      <img src={ALFATH_LOGO} alt="" aria-hidden="true" />
+    </span>
+  );
+}
+
+export function BrandLockup({
+  meta = "builder community",
+  compact = false,
+}: {
+  meta?: string;
+  compact?: boolean;
+}) {
+  return (
+    <div
+      className={`brand-lockup ${compact ? "brand-lockup-compact" : ""}`.trim()}
+    >
+      <BrandMark size={compact ? "sm" : "md"} />
+      <div>
+        <span className="brand-title">Al-Fath Berkarya</span>
+        {meta && <span className="brand-meta">{meta}</span>}
+      </div>
+    </div>
+  );
+}
+
 export function Dots() {
   return (
     <span className="dots">
@@ -10,21 +48,24 @@ export function Dots() {
   );
 }
 
-export function Loading({ label }: { label: string }) {
+export function Loading({ label = "sebentar ya" }: { label?: string }) {
   return (
     <div
       className="screen"
       style={{
         display: "flex",
         alignItems: "center",
+        flexDirection: "column",
         justifyContent: "center",
       }}
     >
+      <BrandMark size="sm" />
       <span
         style={{
           fontFamily: "var(--mono)",
           fontSize: 13,
           color: "var(--ink2)",
+          marginTop: 14,
         }}
       >
         {label}

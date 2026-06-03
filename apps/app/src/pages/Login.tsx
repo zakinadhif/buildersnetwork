@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { BrandLockup } from "@/components/ui-atoms";
 import { signIn } from "@/lib/auth-client";
 
 export default function Login() {
@@ -26,60 +27,51 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="w-full max-w-sm space-y-6 rounded-lg border border-border bg-card p-8 shadow-sm">
-        <div>
-          <h1 className="text-2xl font-semibold text-foreground">Sign in</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Enter your credentials to continue
-          </p>
-        </div>
+    <div className="screen brand-screen">
+      <div className="wrap auth-shell" style={{ paddingTop: 0 }}>
+        <BrandLockup meta="ruang anggota" />
+        <p className="eyebrow mt40 mb8">masuk</p>
+        <h1 className="h1" style={{ marginBottom: 16 }}>
+          Selamat datang kembali.
+        </h1>
+        <p className="sub" style={{ maxWidth: 360 }}>
+          Masuk pakai akun yang sudah kamu daftarkan.
+        </p>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-1">
-            <label
-              htmlFor="email"
-              className="text-sm font-medium text-foreground"
-            >
-              Email
-            </label>
+        <form onSubmit={handleSubmit} className="auth-panel">
+          <div style={{ marginBottom: 12 }}>
             <input
               id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="you@example.com"
+              className="chat-textarea auth-input"
+              placeholder="email"
             />
           </div>
 
-          <div className="space-y-1">
-            <label
-              htmlFor="password"
-              className="text-sm font-medium text-foreground"
-            >
-              Password
-            </label>
+          <div style={{ marginBottom: 20 }}>
             <input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              placeholder="••••••••"
+              className="chat-textarea auth-input"
+              placeholder="password"
             />
           </div>
 
-          {error && <p className="text-sm text-destructive">{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+            className="btn btn-dark"
+            style={{ width: "100%" }}
           >
-            {loading ? "Signing in..." : "Sign in"}
+            {loading ? "…" : "Masuk →"}
           </button>
         </form>
       </div>

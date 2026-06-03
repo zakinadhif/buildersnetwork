@@ -12,8 +12,8 @@ Manifest: [`deploy/render.yaml`](../render.yaml)
    (Or: New → Web Service, runtime Docker, Dockerfile `./deploy/Dockerfile`,
    context `.`.)
 2. Set the `sync: false` env vars in the dashboard — they are intentionally not
-   committed: `APP_URL`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, `STORAGE_*`, etc.
-   See [`deploy/.env.example`](../.env.example).
+   committed: `APP_URL`, `DATABASE_URL`, `BETTER_AUTH_SECRET`,
+   `GEMINI_API_KEY`, `STORAGE_*`, etc. See [`deploy/.env.example`](../.env.example).
 
 ## First deploy
 Render builds the image and runs `preDeployCommand`

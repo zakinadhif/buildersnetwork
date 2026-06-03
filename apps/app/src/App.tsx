@@ -1,4 +1,4 @@
-import { useGetMe } from "@myapp/api-client-react";
+import { getGetMeQueryOptions, useGetMe } from "@myapp/api-client-react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
@@ -15,8 +15,10 @@ import Welcome from "@/pages/Welcome";
 function AppRoutes() {
   const { data: session, isPending } = useSession();
   const [location] = useLocation();
+  const getMeQueryOptions = getGetMeQueryOptions();
   const { data: me, isLoading: meLoading } = useGetMe({
     query: {
+      ...getMeQueryOptions,
       enabled: !!session?.user && !!session?.user?.emailVerified,
     },
   });

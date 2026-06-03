@@ -35,6 +35,10 @@ export function createNoopEmail(): EmailProvider {
       console.log("[email:noop] send suppressed", {
         to: options.to,
         subject: options.subject,
+        text:
+          process.env.NODE_ENV === "production"
+            ? undefined
+            : (options.text ?? options.html),
       });
     },
   };

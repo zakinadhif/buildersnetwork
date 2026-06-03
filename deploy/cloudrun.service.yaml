@@ -54,6 +54,13 @@ spec:
                 secretKeyRef:
                   name: comfort-stack-secrets
                   key: BETTER_AUTH_SECRET
+            - name: AI_PROVIDER
+              value: gemini
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: comfort-stack-secrets
+                  key: GEMINI_API_KEY
             - name: STORAGE_ENDPOINT
               valueFrom:
                 secretKeyRef:

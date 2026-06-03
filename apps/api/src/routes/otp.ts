@@ -1,5 +1,5 @@
 import { users, verifications } from "@myapp/db/schema";
-import { and, eq, gt } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
 
@@ -57,6 +57,7 @@ app.post("/verify", async (c) => {
         gt(verifications.expiresAt, now),
       ),
     )
+    .orderBy(desc(verifications.createdAt))
     .limit(1);
 
   if (!row) {

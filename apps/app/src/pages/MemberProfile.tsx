@@ -4,7 +4,7 @@ import { Loading } from "@/components/ui-atoms";
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);
 
-  if (isLoading) return <Loading />;
+  if (isLoading) return <Loading label="lagi membuka profil" />;
   if (!member) {
     return (
       <div className="screen" style={{ display: "flex", alignItems: "center" }}>
@@ -29,32 +29,12 @@ export default function MemberProfilePage({ id }: { id: string }) {
         <button
           type="button"
           onClick={() => window.history.back()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--ink2)",
-            fontSize: 13,
-            padding: 0,
-            marginBottom: 40,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
+          className="back-link"
         >
           ← balik
         </button>
 
-        <h1
-          style={{
-            fontSize: 28,
-            fontWeight: 300,
-            letterSpacing: "-0.025em",
-            marginBottom: 4,
-          }}
-        >
-          {member.name}
-        </h1>
+        <h1 className="profile-title">{member.name}</h1>
         <p className="sub" style={{ marginBottom: 40 }}>
           {member.year} · {member.major}
         </p>

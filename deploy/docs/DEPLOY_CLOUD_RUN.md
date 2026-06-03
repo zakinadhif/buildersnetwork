@@ -11,7 +11,7 @@ Manifest: [`deploy/cloudrun.service.yaml`](../cloudrun.service.yaml)
 ## Initial setup
 1. Create a Secret Manager secret per env var, grouped under one name the
    manifest references — `comfort-stack-secrets` with keys `APP_URL`,
-   `DATABASE_URL`, `BETTER_AUTH_SECRET`, `STORAGE_*`, etc.
+   `DATABASE_URL`, `BETTER_AUTH_SECRET`, `GEMINI_API_KEY`, `STORAGE_*`, etc.
 2. Edit `cloudrun.service.yaml`: replace `ghcr.io/OWNER/...` with your image.
 3. Create the migration **Job** (runs the same image with a command override):
    ```bash

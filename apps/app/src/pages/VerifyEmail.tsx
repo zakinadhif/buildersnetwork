@@ -1,6 +1,20 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
+import { BrandLockup } from "@/components/ui-atoms";
+
+const autoSendPromises = new Map<string, Promise<void>>();
+
+function requestOtp(email: string) {
+  const promise = sendOtp({ email })
+    .then(() => undefined)
+    .catch((err) => {
+      autoSendPromises.delete(email);
+      throw err;
+    });
+  autoSendPromises.set(email, promise);
+  return promise;
+}
 
 function extractApiError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -21,10 +35,27 @@ export default function VerifyEmail() {
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only send
   useEffect(() => {
-    if (email) handleSend();
-  }, []);
+    if (!email) return;
+    let cancelled = false;
+    setError(null);
+    const promise = autoSendPromises.get(email) ?? requestOtp(email);
+
+    promise
+      .then(() => {
+        if (cancelled) return;
+        setSent(true);
+        setCooldown(60);
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        setError(extractApiError(err, "Gagal mengirim kode."));
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [email]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -35,7 +66,7 @@ export default function VerifyEmail() {
   async function handleSend() {
     setError(null);
     try {
-      await sendOtp({ email });
+      await requestOtp(email);
       setSent(true);
       setCooldown(60);
     } catch (err: unknown) {
@@ -58,9 +89,10 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-      <div className="wrap" style={{ paddingTop: 0 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
+    <div className="screen brand-screen">
+      <div className="wrap auth-shell" style={{ paddingTop: 0 }}>
+        <BrandLockup meta="verifikasi anggota" />
+        <p className="eyebrow mt40 mb8">cek identitas</p>
         <h1 className="h1" style={{ marginBottom: 16 }}>
           Cek email kamu.
         </h1>
@@ -70,7 +102,11 @@ export default function VerifyEmail() {
             : `Mengirim kode ke ${email}…`}
         </p>
 
-        <form onSubmit={handleSubmit}>
+        <form
+          className="auth-panel"
+          onSubmit={handleSubmit}
+          style={{ marginTop: 0 }}
+        >
           <div style={{ marginBottom: 12 }}>
             <input
               type="text"
@@ -83,22 +119,15 @@ export default function VerifyEmail() {
               required
               // biome-ignore lint/a11y/noAutofocus: intentional focus on OTP input
               autoFocus
-              className="chat-textarea"
+              className="chat-textarea auth-input"
               style={{
-                width: "100%",
-                padding: "10px 14px",
-                resize: "none",
                 letterSpacing: "0.3em",
                 fontSize: 22,
               }}
             />
           </div>
 
-          {error && (
-            <p style={{ fontSize: 13, color: "var(--ink2)", marginBottom: 12 }}>
-              {error}
-            </p>
-          )}
+          {error && <p className="error-text">{error}</p>}
 
           <button
             type="submit"
@@ -110,21 +139,13 @@ export default function VerifyEmail() {
           </button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 20 }}>
+        <p className="auth-footnote">
           Tidak menerima kode?{" "}
           <button
             type="button"
             onClick={handleSend}
             disabled={cooldown > 0}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: cooldown > 0 ? "default" : "pointer",
-              fontSize: 13,
-              color: "var(--ink1)",
-              textDecoration: cooldown > 0 ? "none" : "underline",
-              padding: 0,
-            }}
+            className="text-link"
           >
             {cooldown > 0 ? `kirim ulang dalam ${cooldown}s` : "kirim ulang ↗"}
           </button>

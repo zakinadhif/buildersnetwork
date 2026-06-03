@@ -1,7 +1,7 @@
 import { useStream } from "@myapp/ai/react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Dots, Loading } from "@/components/ui-atoms";
+import { BrandLockup, Dots, Loading } from "@/components/ui-atoms";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
@@ -135,14 +135,10 @@ Percakapan:\n${transcript}`;
       className="screen"
       style={{ display: "flex", flexDirection: "column" }}
     >
-      <div
-        style={{
-          padding: "18px 28px",
-          borderBottom: "1px solid var(--line)",
-          flexShrink: 0,
-        }}
-      >
-        <p className="eyebrow">Al-Fath Berkarya · onboarding</p>
+      <div className="topbar">
+        <div className="topbar-inner">
+          <BrandLockup compact meta="onboarding" />
+        </div>
       </div>
 
       <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>

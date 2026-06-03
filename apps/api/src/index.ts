@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { createGeminiAI } from "@myapp/ai";
+import { createAnthropicAI, createDevAI, createGeminiAI } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { loadConfig } from "@myapp/config";
 import { createDb } from "@myapp/db";
@@ -15,6 +15,35 @@ import { createApp } from "./app";
 
 const config = loadConfig();
 
+function createConfiguredAI() {
+  if (config.AI_PROVIDER === "gemini") {
+    if (config.GEMINI_API_KEY) {
+      return createGeminiAI(config.GEMINI_API_KEY);
+    }
+    if (config.NODE_ENV === "production") {
+      throw new Error("GEMINI_API_KEY is required when AI_PROVIDER=gemini.");
+    }
+  } else if (config.AI_PROVIDER === "anthropic") {
+    if (config.ANTHROPIC_API_KEY) {
+      return createAnthropicAI(config.ANTHROPIC_API_KEY);
+    }
+    if (config.NODE_ENV === "production") {
+      throw new Error(
+        "ANTHROPIC_API_KEY is required when AI_PROVIDER=anthropic.",
+      );
+    }
+  } else {
+    throw new Error(
+      `AI_PROVIDER=${config.AI_PROVIDER} is not supported by the Node API runtime.`,
+    );
+  }
+
+  console.warn(
+    `[ai:dev] ${config.AI_PROVIDER} key is not set; using local development AI fallback.`,
+  );
+  return createDevAI();
+}
+
 const db = createDb(config.DATABASE_URL);
 const auth = createAuth({
   db,
@@ -23,7 +52,7 @@ const auth = createAuth({
   BETTER_AUTH_URL: config.BETTER_AUTH_URL ?? config.APP_URL,
   BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET,
 });
-const ai = createGeminiAI(config.GEMINI_API_KEY ?? "");
+const ai = createConfiguredAI();
 
 const email = config.RESEND_API_KEY
   ? createResendEmail({ apiKey: config.RESEND_API_KEY })

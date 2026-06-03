@@ -7,7 +7,12 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
-import { EditField, Loading, SkillsEditor } from "@/components/ui-atoms";
+import {
+  BrandLockup,
+  EditField,
+  Loading,
+  SkillsEditor,
+} from "@/components/ui-atoms";
 import {
   callClaude,
   cleanJSON,
@@ -100,7 +105,8 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
   return (
     <div className="screen" style={{ overflowY: "auto" }}>
       <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
+        <BrandLockup compact meta="profil builder" />
+        <p className="eyebrow mt40 mb8">review profil</p>
         <h1 className="h1">Ini yang aku tangkap.</h1>
         <p className="sub mt8 mb32">Kalau ada yang meleset, ketuk langsung.</p>
         <hr className="hr" style={{ margin: "0 0 32px" }} />

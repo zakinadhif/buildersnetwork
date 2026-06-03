@@ -59,8 +59,8 @@ const schema = z.object({
   CF_EMAIL_ACCOUNT_ID: z.string().optional(),
   CF_EMAIL_API_TOKEN: z.string().optional(),
 
-  /** Which AI backend to use. Defaults to "anthropic". */
-  AI_PROVIDER: z.enum(["anthropic", "workers-ai"]).default("anthropic"),
+  /** Which AI backend to use. Defaults to "gemini" in the Node runtime. */
+  AI_PROVIDER: z.enum(["gemini", "anthropic", "workers-ai"]).default("gemini"),
 
   /** Workers AI model override (only used when AI_PROVIDER=workers-ai). */
   AI_WORKERS_MODEL: z.string().optional(),
