@@ -12,10 +12,10 @@ Community platform for builder students at Telkom University. Students discover 
 | **API** | Hono v4 |
 | **Database ORM** | Drizzle ORM (PostgreSQL) |
 | **Auth** | Better Auth (drizzle adapter, DB-backed sessions) |
-| **AI** | Pluggable — Anthropic API or Cloudflare Workers AI |
+| **AI** | Pluggable — Gemini API (Node/Docker), Anthropic API, or Cloudflare Workers AI |
 | **Storage** | Pluggable — AWS S3, Cloudflare R2, GCS, MinIO |
 | **Frontend** | React 19 + Vite + TailwindCSS v4 |
-| **Routing** | Wouter |
+| **Routing** | Wouter (URL-based) |
 | **Data Fetching** | TanStack Query v5 |
 | **Monorepo** | pnpm workspaces |
 | **Language** | TypeScript ~5.9 |
@@ -29,14 +29,15 @@ buildersnetwork/
 ├── apps/
 │   ├── api/       # Hono API server
 │   │   ├── src/app.ts        # Pure Hono app factory (runtime-agnostic)
-│   │   ├── src/index.ts      # Node.js / Docker entry
-│   │   ├── src/worker.ts     # Cloudflare Workers entry
+│   │   ├── src/index.ts      # Node.js / Docker entry (Gemini AI)
+│   │   ├── src/worker.ts     # Cloudflare Workers entry (Workers AI)
 │   │   └── src/routes/
-│   │       └── ai.ts         # POST /api/ai/complete
+│   │       └── ai.ts         # POST /api/ai/complete  POST /api/ai/stream
 │   ├── app/       # React SPA (served at /app/*)
 │   └── landing/   # Astro landing (served at /)
 ├── libs/
-│   ├── ai/        # AI provider interface — Anthropic + Workers AI adapters
+│   ├── ai/        # AI provider interface — Anthropic, Gemini, Workers AI adapters
+│   │   └── src/react.ts      # useStream hook for frontend streaming
 │   ├── auth/      # Better Auth config
 │   ├── config/    # Zod-validated env loader
 │   ├── db/        # Drizzle schema + postgres-js / Neon HTTP clients
@@ -53,20 +54,25 @@ buildersnetwork/
 ### App flow
 
 ```
-Welcome → Onboarding (AI chat, 8–10 turns) → Review (editable profile) → Matches (3 AI-picked members) → CommunityHome → MemberProfile
+Welcome → Login → VerifyEmail → Onboarding (AI chat, 8–10 turns) → Review (editable profile) → Matches (3 AI-picked members) → CommunityHome → MemberProfile
 ```
 
-All screens live under `/app/` with `useState`-based routing (no URL routing).
+All screens are URL-routed via Wouter (`/welcome`, `/onboarding`, `/review`, `/matches`, `/home`, `/member/:id`).
 
-### AI endpoint
+### AI endpoints
 
-`POST /api/ai/complete` — body `{ messages: [{role, content}] }`, response `{ text: string }`.
+The `@myapp/ai` lib exposes a common `AIProvider` interface (`complete`, `stream`, `agentComplete`) implemented by three adapters. Two HTTP endpoints hang off `/api/ai`:
 
-The `@myapp/ai` lib abstracts the provider:
-- **`anthropic`** — `@anthropic-ai/sdk`, requires `ANTHROPIC_API_KEY`
-- **`workers-ai`** — CF Workers `env.AI` binding, free daily quota, no API key needed
+| Endpoint | Protocol | Use case | Frontend |
+|---|---|---|---|
+| `POST /api/ai/complete` | JSON request → `{ text: string }` | One-shot completions, agent runs | Generated hook `aiComplete` / `useAiComplete` |
+| `POST /api/ai/stream` | JSON request → `text/plain` chunked body | Live typing effect in onboarding chat | `useStream` hook from `@myapp/ai/react` |
 
-Switch via `AI_PROVIDER` env var.
+**The stream endpoint is not a regular JSON API.** It returns a plain-text chunked response consumed by reading `Response.body` directly. The orval-generated client cannot handle it — always use `useStream` for streaming.
+
+The AI provider is selected per runtime entrypoint, not via env var:
+- **Node.js / Docker** (`src/index.ts`) — `createGeminiAI`, requires `GEMINI_API_KEY`
+- **Cloudflare Workers** (`src/worker.ts`) — `createWorkersAI`, uses CF `AI` binding, no API key
 
 ---
 
@@ -99,9 +105,11 @@ pnpm dev:app   # React SPA on :5173
 
 ---
 
-## OpenAPI-first workflow
+## OpenAPI-first workflow (CRUD / JSON endpoints)
 
-`libs/api-spec/openapi.yaml` is the single source of truth for the API contract. Every new endpoint follows this cycle:
+`libs/api-spec/openapi.yaml` is the single source of truth for standard JSON endpoints. This workflow applies to CRUD-style routes that take a JSON body and return a JSON response.
+
+**This workflow does not apply to the AI stream endpoint** (`POST /api/ai/stream`). That endpoint returns chunked plain text and is consumed with `useStream` — see [Streaming AI](#streaming-ai-frontend) below.
 
 ### 1. Update the spec
 
@@ -114,18 +122,18 @@ pnpm codegen
 ```
 
 This generates two outputs:
-- **`libs/api-client-react/src/generated/`** — typed TanStack Query hooks (e.g. `useAiComplete`, `aiComplete`) backed by `customFetch`
-- **`libs/api-zod/src/generated/`** — Zod validators for every request/response schema (e.g. `AiCompleteBody`)
+- **`libs/api-client-react/src/generated/`** — typed TanStack Query hooks (e.g. `useListMembers`, `listMembers`) backed by `customFetch`
+- **`libs/api-zod/src/generated/`** — Zod validators for every request/response schema (e.g. `ProfileInput`)
 
 ### 3. Implement the Hono route
 
 Use the generated Zod validator for request parsing:
 
 ```ts
-import { AiCompleteBody } from "@myapp/api-zod";
+import { ProfileInput } from "@myapp/api-zod";
 
-app.post("/complete", async (c) => {
-  const parsed = AiCompleteBody.safeParse(await c.req.json());
+app.post("/profile", async (c) => {
+  const parsed = ProfileInput.safeParse(await c.req.json());
   if (!parsed.success) return c.json({ error: "invalid request" }, 400);
   // ...
 });
@@ -139,13 +147,35 @@ Use the generated imperative function or hook:
 
 ```ts
 // Imperative (in async handlers)
-import { aiComplete } from "@myapp/api-client-react";
-const { text } = await aiComplete({ messages });
+import { saveProfile } from "@myapp/api-client-react";
+await saveProfile(profileData);
 
 // Hook (in React components)
-import { useAiComplete } from "@myapp/api-client-react";
-const { mutateAsync } = useAiComplete();
+import { useSaveProfile } from "@myapp/api-client-react";
+const { mutateAsync } = useSaveProfile();
 ```
+
+---
+
+## Streaming AI (frontend)
+
+The onboarding chat and any other live-text features use `useStream` from `@myapp/ai/react`, which reads `POST /api/ai/stream` as a chunked plain-text body.
+
+```ts
+import { useStream } from "@myapp/ai/react";
+
+function OnboardingChat() {
+  const { streamingText, stream } = useStream();
+  // streamingText is null when idle, "" at start, accumulates chunks while streaming
+
+  async function sendMessage(messages: Message[]) {
+    const fullText = await stream(messages);
+    // fullText is the complete response once done
+  }
+}
+```
+
+Do not use the orval-generated `aiStream` function for this — it does not consume the chunked body incrementally.
 
 ---
 
@@ -184,9 +214,12 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID (optional) |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (optional) |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowlist (defaults to `APP_URL`) |
-| `AI_PROVIDER` | `anthropic` (default) or `workers-ai` |
-| `ANTHROPIC_API_KEY` | Required when `AI_PROVIDER=anthropic` |
+| `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
+| `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
 | `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-3.1-8b-instruct`) |
+| `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker) |
+| `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
+| `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
 | `STORAGE_*` | S3-compatible object storage — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md) |
 | `SERVE_STATIC` | `false` to disable Hono's static file serving (3-tier EC2 mode) |
 
@@ -199,13 +232,13 @@ Two deployment targets are supported. The same codebase, switched by env vars:
 | Target | AI | DB driver | Static files | Guide |
 |---|---|---|---|---|
 | **Cloudflare Workers** | Workers AI (free) | Neon HTTP | Workers Assets | [DEPLOY_CLOUDFLARE.md](deploy/docs/DEPLOY_CLOUDFLARE.md) |
-| **AWS EC2 3-tier (Ansible)** | Anthropic API | postgres-js | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
-| Fly.io | Anthropic API | postgres-js | Hono static | [DEPLOY_FLY.md](deploy/docs/DEPLOY_FLY.md) |
-| Railway | Anthropic API | postgres-js | Hono static | [DEPLOY_RAILWAY.md](deploy/docs/DEPLOY_RAILWAY.md) |
-| Render | Anthropic API | postgres-js | Hono static | [DEPLOY_RENDER.md](deploy/docs/DEPLOY_RENDER.md) |
-| Cloud Run | Anthropic API | postgres-js | Hono static | [DEPLOY_CLOUD_RUN.md](deploy/docs/DEPLOY_CLOUD_RUN.md) |
-| Coolify / Dokploy | Anthropic API | postgres-js | Hono static | [DEPLOY_COOLIFY.md](deploy/docs/DEPLOY_COOLIFY.md) |
-| Bare VPS (Compose) | Anthropic API | postgres-js | Hono static | [DEPLOY_COMPOSE.md](deploy/docs/DEPLOY_COMPOSE.md) |
+| **AWS EC2 3-tier (Ansible)** | Gemini API | postgres-js | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
+| Fly.io | Gemini API | postgres-js | Hono static | [DEPLOY_FLY.md](deploy/docs/DEPLOY_FLY.md) |
+| Railway | Gemini API | postgres-js | Hono static | [DEPLOY_RAILWAY.md](deploy/docs/DEPLOY_RAILWAY.md) |
+| Render | Gemini API | postgres-js | Hono static | [DEPLOY_RENDER.md](deploy/docs/DEPLOY_RENDER.md) |
+| Cloud Run | Gemini API | postgres-js | Hono static | [DEPLOY_CLOUD_RUN.md](deploy/docs/DEPLOY_CLOUD_RUN.md) |
+| Coolify / Dokploy | Gemini API | postgres-js | Hono static | [DEPLOY_COOLIFY.md](deploy/docs/DEPLOY_COOLIFY.md) |
+| Bare VPS (Compose) | Gemini API | postgres-js | Hono static | [DEPLOY_COMPOSE.md](deploy/docs/DEPLOY_COMPOSE.md) |
 
 ### Local single-container
 
