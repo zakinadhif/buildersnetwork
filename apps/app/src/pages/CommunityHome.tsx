@@ -10,8 +10,8 @@ export default function CommunityHome({ user }: { user: Member }) {
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
   const msgId = useRef(0);
-  const [msgs, setMsgs] = useState([
-    { id: msgId.current, role: "ai" as const, text: greeting },
+  const [msgs, setMsgs] = useState<{ id: number; role: "ai" | "user"; text: string }[]>([
+    { id: msgId.current, role: "ai", text: greeting },
   ]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);

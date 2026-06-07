@@ -10,7 +10,7 @@ export function Dots() {
   );
 }
 
-export function Loading({ label }: { label: string }) {
+export function Loading({ label = "loading" }: { label?: string }) {
   return (
     <div
       className="screen"
