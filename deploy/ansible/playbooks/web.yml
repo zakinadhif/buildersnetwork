@@ -1,6 +1,4 @@
 ---
-# Prerequisite: run `pnpm build:frontend` locally before this playbook,
-# so apps/landing/dist and apps/app/dist exist on the controller.
 - name: Provision frontend nginx VM
   hosts: web
   become: true

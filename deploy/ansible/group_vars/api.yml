@@ -1,4 +1,5 @@
-ai_provider: anthropic
+api_image: "ooflamp/buildersnetwork-api:latest"
+ai_provider: gemini
 # anthropic_api_key and better_auth_secret are secrets — store in ansible-vault:
 #   ansible-vault encrypt_string 'sk-ant-...' --name anthropic_api_key
 # anthropic_api_key: !vault |

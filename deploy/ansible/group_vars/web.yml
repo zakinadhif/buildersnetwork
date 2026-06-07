@@ -1,4 +1,2 @@
 api_url: "http://{{ hostvars[groups['api'][0]].ansible_host }}:{{ api_port }}"
-# Path on the controller where `pnpm build:frontend` output lives.
-# The role will rsync this to the web VM.
-frontend_dist_local: "{{ playbook_dir }}/../../apps"
+web_image: "ooflamp/buildersnetwork-web:latest"
