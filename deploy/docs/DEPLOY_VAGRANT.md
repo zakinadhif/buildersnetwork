@@ -20,16 +20,249 @@ All three VMs share a VirtualBox host-only network. The frontend IP is reachable
 - Docker Desktop on Windows (for building/pushing images)
 - Existing vault at `deploy/ansible/group_vars/all/vault.yml` (reuse from EC2 setup)
 
-## 1. Vagrantfile
+---
 
-Already at the **repo root**. Content for reference:
+## First-time setup
+
+### 1. Start the VMs
+
+```powershell
+vagrant up
+```
+
+Downloads the Ubuntu 22.04 box on first run (~600 MB) and boots all three VMs. Takes 3–5 minutes.
+
+### 2. Copy Vagrant SSH keys to WSL
+
+Ansible rejects keys from `/mnt/z/` because Windows mounts appear world-writable, which SSH treats as insecure. Copy each machine's key to WSL's native filesystem:
+
+```bash
+mkdir -p ~/.ssh/vagrant-bn
+cp /mnt/z/buildersnetwork/.vagrant/machines/bn-frontend/virtualbox/private_key ~/.ssh/vagrant-bn/frontend.key
+cp /mnt/z/buildersnetwork/.vagrant/machines/bn-api/virtualbox/private_key     ~/.ssh/vagrant-bn/api.key
+cp /mnt/z/buildersnetwork/.vagrant/machines/bn-db/virtualbox/private_key      ~/.ssh/vagrant-bn/db.key
+chmod 600 ~/.ssh/vagrant-bn/*.key
+```
+
+> Redo this step after `vagrant destroy && vagrant up` — Vagrant regenerates keys on each fresh provision.
+
+### 3. Populate the Ansible vault
+
+The vault lives at `deploy/ansible/group_vars/all/vault.yml`. Edit it with:
+
+```bash
+ansible-vault edit deploy/ansible/group_vars/all/vault.yml
+```
+
+Required keys:
+
+```yaml
+postgres_password: "your-strong-db-password"
+better_auth_secret: "at-least-32-character-random-string"
+gemini_api_key: "AIza..."
+resend_api_key: "re_..."
+```
+
+To create the vault from scratch if it doesn't exist:
+
+```bash
+ansible-vault create deploy/ansible/group_vars/all/vault.yml
+```
+
+### 4. Build and push Docker images
+
+From the repo root in PowerShell:
+
+```powershell
+# API image
+docker build -f deploy/Dockerfile.api -t ooflamp/buildersnetwork-api:latest .
+docker push ooflamp/buildersnetwork-api:latest
+
+# Web image
+docker build -f deploy/Dockerfile.web -t ooflamp/buildersnetwork-web:latest .
+docker push ooflamp/buildersnetwork-web:latest
+```
+
+The web image is environment-agnostic — `API_URL` is injected at container startup via Docker env var (nginx envsubst), so the same image works for both EC2 and Vagrant.
+
+### 5. Run Ansible
+
+From WSL. The `-e` flags override `app_domain` and `app_url` so that `BETTER_AUTH_URL` in the API env points to the frontend IP (where your browser reaches the app):
+
+```bash
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/site.yml \
+  -i deploy/ansible/inventory.vagrant.ini \
+  --ask-vault-pass \
+  -e "app_domain=192.168.56.10" \
+  -e "app_url=http://192.168.56.10"
+```
+
+Or provision each tier separately (useful when iterating):
+
+```bash
+# Database first
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/db.yml \
+  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass
+
+# API second (needs DB up)
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/api.yml \
+  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
+  -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
+
+# Frontend last
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/web.yml \
+  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
+  -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
+```
+
+### 6. Verify
+
+```bash
+curl http://192.168.56.10/           # landing page HTML
+curl http://192.168.56.11:8080/api/healthz  # {"status":"ok"}
+```
+
+Open `http://192.168.56.10/app/` in your Windows browser.
+
+---
+
+## Day-to-day operations
+
+### Changing an environment variable
+
+Environment variables for the API container come from the Ansible vault and `env.j2` template. To add or change one:
+
+1. Edit the vault:
+   ```bash
+   ansible-vault edit deploy/ansible/group_vars/all/vault.yml
+   ```
+2. If the variable isn't in `env.j2` yet, add it to `deploy/ansible/roles/backend-api/templates/env.j2`.
+3. Redeploy the API role:
+   ```bash
+   ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+   ansible-playbook deploy/ansible/playbooks/api.yml \
+     -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
+     -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
+   ```
+
+Ansible re-templates the `.env` file and recreates the container automatically.
+
+To confirm the variable reached the container:
+
+```bash
+vagrant ssh bn-api -c "docker inspect buildersnetwork-api --format '{{range .Config.Env}}{{println .}}{{end}}'"
+```
+
+### Rebuilding and redeploying the API
+
+After changing API code:
+
+```powershell
+# Rebuild and push
+docker build -f deploy/Dockerfile.api -t ooflamp/buildersnetwork-api:latest .
+docker push ooflamp/buildersnetwork-api:latest
+```
+
+```bash
+# Pull and restart
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/api.yml \
+  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
+  -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
+```
+
+The API role always pulls the latest image (`force_source: true`).
+
+### Rebuilding and redeploying the frontend
+
+After changing frontend code:
+
+```powershell
+docker build -f deploy/Dockerfile.web -t ooflamp/buildersnetwork-web:latest .
+docker push ooflamp/buildersnetwork-web:latest
+```
+
+```bash
+ANSIBLE_ROLES_PATH=deploy/ansible/roles \
+ansible-playbook deploy/ansible/playbooks/web.yml \
+  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
+  -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
+```
+
+### Viewing container logs
+
+```bash
+# API logs (tail + follow)
+vagrant ssh bn-api -c "docker logs buildersnetwork-api --tail 50 -f"
+
+# Web/nginx logs
+vagrant ssh bn-frontend -c "docker logs buildersnetwork-web --tail 50 -f"
+
+# Database logs
+vagrant ssh bn-db -c "docker logs buildersnetwork-db --tail 50 -f"
+```
+
+### Checking container status
+
+```bash
+vagrant ssh bn-api -c "docker ps"
+vagrant ssh bn-frontend -c "docker ps"
+vagrant ssh bn-db -c "docker ps"
+```
+
+A container with status `Restarting` means it's crash-looping. Check logs immediately.
+
+### Verifying a container's environment
+
+```bash
+vagrant ssh bn-api -c "docker inspect buildersnetwork-api --format '{{range .Config.Env}}{{println .}}{{end}}'"
+```
+
+Compare the output against `apps/api/.env` to ensure all required variables are present.
+
+### Running database migrations manually
+
+```bash
+vagrant ssh bn-api -c "docker run --rm \
+  --env-file /opt/buildersnetwork/.env \
+  ooflamp/buildersnetwork-api:latest \
+  node dist/scripts/migrate.js"
+```
+
+### SSHing into a VM
+
+```powershell
+vagrant ssh bn-api
+vagrant ssh bn-frontend
+vagrant ssh bn-db
+```
+
+---
+
+## Teardown
+
+```powershell
+# Stop VMs (state preserved, fast restart with `vagrant up`)
+vagrant halt
+
+# Destroy VMs completely (frees disk space)
+vagrant destroy -f
+```
+
+After `vagrant destroy`, repeat step 2 (copy SSH keys) before the next Ansible run — Vagrant regenerates keys on each fresh boot.
+
+---
+
+## Reference: Vagrantfile
 
 ```ruby
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"
   config.vm.box_check_update = false
-
-  # Disable default rsync — problematic on Windows
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   {
@@ -50,31 +283,7 @@ Vagrant.configure("2") do |config|
 end
 ```
 
-## 2. Start the VMs
-
-```powershell
-vagrant up
-```
-
-Downloads the Ubuntu 22.04 box on first run (~600 MB) and boots all three VMs. Takes 3–5 minutes.
-
-## 3. Copy Vagrant SSH keys to WSL
-
-Ansible rejects keys from `/mnt/z/` because Windows mounts appear world-writable, which SSH treats as insecure. Copy each machine's key to WSL's native filesystem:
-
-```bash
-mkdir -p ~/.ssh/vagrant-bn
-cp /mnt/z/buildersnetwork/.vagrant/machines/bn-frontend/virtualbox/private_key ~/.ssh/vagrant-bn/frontend.key
-cp /mnt/z/buildersnetwork/.vagrant/machines/bn-api/virtualbox/private_key     ~/.ssh/vagrant-bn/api.key
-cp /mnt/z/buildersnetwork/.vagrant/machines/bn-db/virtualbox/private_key      ~/.ssh/vagrant-bn/db.key
-chmod 600 ~/.ssh/vagrant-bn/*.key
-```
-
-> Redo this step after `vagrant destroy && vagrant up` — Vagrant regenerates keys on each fresh provision.
-
-## 4. Vagrant inventory
-
-Already at `deploy/ansible/inventory.vagrant.ini`. Content for reference:
+## Reference: inventory.vagrant.ini
 
 ```ini
 [web]
@@ -90,60 +299,3 @@ database ansible_host=192.168.56.12 ansible_user=vagrant ansible_ssh_private_key
 ansible_python_interpreter=/usr/bin/python3
 ansible_ssh_common_args='-o StrictHostKeyChecking=no'
 ```
-
-## 5. Web image (no rebuild needed)
-
-`API_URL` is injected at container startup via a Docker env var — the image is environment-agnostic. The same `ooflamp/buildersnetwork-web:latest` image works for both EC2 and Vagrant. Ansible passes the correct URL automatically from `api_url` in `group_vars/web.yml`, which already resolves to the Vagrant API IP.
-
-## 6. Run Ansible
-
-From WSL. The `-e` flags override `app_domain` and `app_url` so that `BETTER_AUTH_URL` in the API env points to the frontend IP (where your browser reaches the app):
-
-```bash
-cd /mnt/z/buildersnetwork/deploy/ansible
-
-ANSIBLE_ROLES_PATH=/mnt/z/buildersnetwork/deploy/ansible/roles \
-ansible-playbook -i inventory.vagrant.ini playbooks/site.yml \
-  --ask-vault-pass \
-  -e "app_domain=192.168.56.10" \
-  -e "app_url=http://192.168.56.10"
-```
-
-Or provision each tier separately:
-
-```bash
-# Database first
-ANSIBLE_ROLES_PATH=/mnt/z/buildersnetwork/deploy/ansible/roles \
-ansible-playbook -i inventory.vagrant.ini playbooks/db.yml --ask-vault-pass
-
-# API second (needs DB up)
-ANSIBLE_ROLES_PATH=/mnt/z/buildersnetwork/deploy/ansible/roles \
-ansible-playbook -i inventory.vagrant.ini playbooks/api.yml --ask-vault-pass \
-  -e "app_domain=192.168.56.10" -e "app_url=http://192.168.56.10"
-
-# Frontend last
-ANSIBLE_ROLES_PATH=/mnt/z/buildersnetwork/deploy/ansible/roles \
-ansible-playbook -i inventory.vagrant.ini playbooks/web.yml --ask-vault-pass
-```
-
-## 7. Verify
-
-```bash
-# From WSL or PowerShell
-curl http://192.168.56.10/          # should return landing page HTML
-curl http://192.168.56.11:8080/api/healthz   # should return {"status":"ok"}
-```
-
-Open `http://192.168.56.10/app/` in your Windows browser — the private network IP is directly reachable from the host.
-
-## Teardown
-
-```powershell
-# Stop VMs (state preserved, fast restart with `vagrant up`)
-vagrant halt
-
-# Destroy VMs completely (frees disk space)
-vagrant destroy -f
-```
-
-After `vagrant destroy`, run step 3 again before the next Ansible run — Vagrant regenerates SSH keys on each fresh boot.
