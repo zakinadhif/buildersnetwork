@@ -92,7 +92,7 @@ function AppRoutes() {
 export default function App() {
   return (
     <OnboardingProvider>
-      <Router>
+      <Router base={import.meta.env.PROD ? "/app" : ""}>
         <AppRoutes />
       </Router>
     </OnboardingProvider>

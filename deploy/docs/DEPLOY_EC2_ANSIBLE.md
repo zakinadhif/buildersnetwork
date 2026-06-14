@@ -3,46 +3,54 @@
 Three separate EC2 instances: **database**, **backend API**, **frontend nginx**.
 
 ```
-Frontend VM (nginx)  ──▶  Backend VM (Hono API)  ──▶  Database VM (Postgres)
+Browser → Frontend VM (nginx :80) → Backend VM (Hono :8080) → Database VM (Postgres :5432)
 ```
 
 ## Prerequisites
 
-- Three EC2 instances (e.g. `t3.micro` each — free tier eligible)
-- Ubuntu 22.04 LTS AMI on all three
-- SSH key pair (`~/.ssh/buildersnetwork.pem`)
-- Ansible installed locally: `pip install ansible`
+- Three EC2 instances (`t3.micro`, Ubuntu 22.04 LTS) — free tier eligible
+- SSH key pair saved at `~/.ssh/buildersnetwork.pem`
+- Ansible installed: `pip install ansible`
 - Docker community collection: `ansible-galaxy collection install community.docker`
+- Docker Hub account (for pushing images)
+- **Windows users:** run all Ansible commands from WSL
 
-## 1. Set up EC2 security groups
+## 1. Security groups
 
-| VM | Inbound |
+| VM | Inbound rules |
 |---|---|
-| Frontend | 80 (HTTP), 443 (HTTPS), 22 (SSH from your IP) |
-| Backend API | 8080 from Frontend VM's security group, 22 from your IP |
-| Database | 5432 from Backend VM's security group, 22 from your IP |
+| `bn-frontend` | 80 (HTTP), 22 (SSH from your IP) |
+| `bn-api` | 8080 from `bn-frontend` security group, 22 from your IP |
+| `bn-db` | 5432 from `bn-api` security group, 22 from your IP |
+
+Port 8080 on the backend is intentionally not public — the frontend nginx proxies `/api/` to it internally.
 
 ## 2. Configure inventory
 
-Edit `deploy/ansible/inventory.ini` — replace the placeholder IPs:
+Edit `deploy/ansible/inventory.ini` with your EC2 public IPs:
 
 ```ini
 [web]
-frontend ansible_host=1.2.3.4 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
+frontend ansible_host=<FRONTEND_IP> ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
 
 [api]
-backend  ansible_host=5.6.7.8 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
+backend  ansible_host=<BACKEND_IP>  ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
 
 [db]
-database ansible_host=9.10.11.12 ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
+database ansible_host=<DB_IP>       ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/buildersnetwork.pem
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
 ```
 
 ## 3. Vault secrets
 
-Create a vault file for secrets:
+Secrets live in `deploy/ansible/group_vars/all/vault.yml`, encrypted with Ansible Vault.
+
+Create it:
 
 ```bash
-ansible-vault create deploy/ansible/group_vars/vault.yml
+ansible-vault create deploy/ansible/group_vars/all/vault.yml
 ```
 
 Add:
@@ -50,80 +58,109 @@ Add:
 ```yaml
 postgres_password: "strong_random_password"
 better_auth_secret: "min_32_chars_random_secret"
-anthropic_api_key: "sk-ant-..."
+gemini_api_key: "your_gemini_api_key"
 ```
 
-## 4. Build the API image
+To edit later: `ansible-vault edit deploy/ansible/group_vars/all/vault.yml`
+
+> If using Anthropic instead of Gemini, add `anthropic_api_key` here and set `ai_provider: anthropic` in `group_vars/api.yml`.
+
+## 4. Build and push Docker images
+
+Build context is the **repo root** for both images.
+
+**API image:**
+
+```powershell
+docker build -f deploy/Dockerfile.api -t ooflamp/buildersnetwork-api:latest .
+docker push ooflamp/buildersnetwork-api:latest
+```
+
+**Web image** (`API_URL` is injected at container runtime — no build arg needed):
+
+```powershell
+docker build -f deploy/Dockerfile.web -t ooflamp/buildersnetwork-web:latest .
+docker push ooflamp/buildersnetwork-web:latest
+```
+
+Update `deploy/ansible/group_vars/api.yml` and `group_vars/web.yml` to reference your Docker Hub username if different from `ooflamp`.
+
+## 5. Deploy
+
+From WSL (Windows) or your terminal:
 
 ```bash
-docker build -f deploy/Dockerfile.api -t buildersnetwork-api:latest .
+cd /mnt/z/buildersnetwork/deploy/ansible   # adjust path for your machine
+
+ANSIBLE_ROLES_PATH=/mnt/z/buildersnetwork/deploy/ansible/roles \
+ansible-playbook -i inventory.ini playbooks/site.yml \
+  --ask-vault-pass \
+  -e "app_domain=<FRONTEND_IP>" \
+  -e "app_url=http://<FRONTEND_IP>"
 ```
 
-Then push to a registry the EC2 instances can pull from (ECR, Docker Hub, or transfer the image manually):
+The `-e` flags set `BETTER_AUTH_URL` and `ALLOWED_ORIGINS` to the frontend's public IP — the address users type into their browser.
+
+Or deploy each tier individually (database must come first):
 
 ```bash
-# Example: save and transfer (for class demo without a registry)
-docker save buildersnetwork-api:latest | gzip > buildersnetwork-api.tar.gz
-scp -i ~/.ssh/buildersnetwork.pem buildersnetwork-api.tar.gz ubuntu@<BACKEND_EC2_IP>:~/
-# On the backend VM: docker load < buildersnetwork-api.tar.gz
+# 1. Database
+ANSIBLE_ROLES_PATH=... ansible-playbook -i inventory.ini playbooks/db.yml --ask-vault-pass
+
+# 2. API
+ANSIBLE_ROLES_PATH=... ansible-playbook -i inventory.ini playbooks/api.yml --ask-vault-pass \
+  -e "app_domain=<FRONTEND_IP>" -e "app_url=http://<FRONTEND_IP>"
+
+# 3. Frontend
+ANSIBLE_ROLES_PATH=... ansible-playbook -i inventory.ini playbooks/web.yml --ask-vault-pass
 ```
 
-## 5. Build the frontend
+## 6. Verify
 
 ```bash
-# Set the backend API URL for the SPA
-VITE_API_URL=http://<BACKEND_EC2_IP>:8080 pnpm build:frontend
+curl http://<FRONTEND_IP>/           # landing page HTML
+curl http://<FRONTEND_IP>/api/healthz  # {"status":"ok"} — goes through nginx proxy
 ```
 
-> **Note:** If the frontend and backend are behind a shared domain/load balancer, set `VITE_API_URL` to that URL instead.
+The backend port 8080 will time out from the public internet — that's expected. Requests reach it only through the frontend proxy.
 
-## 6. Deploy
-
-```bash
-cd deploy/ansible
-ansible-playbook -i inventory.ini playbooks/site.yml --ask-vault-pass
-```
-
-Or deploy each tier individually:
-
-```bash
-ansible-playbook -i inventory.ini playbooks/db.yml --ask-vault-pass   # Postgres first
-ansible-playbook -i inventory.ini playbooks/api.yml --ask-vault-pass  # then API
-ansible-playbook -i inventory.ini playbooks/web.yml --ask-vault-pass  # then nginx
-```
-
-## 7. Verify
-
-```bash
-curl http://<FRONTEND_EC2_IP>/          # landing page HTML
-curl http://<BACKEND_EC2_IP>:8080/healthz  # {"ok":true,...}
-```
+Open `http://<FRONTEND_IP>/app/` in a browser to test the full app flow.
 
 ## Environment variables reference
 
-Set in `deploy/ansible/group_vars/api.yml` (non-secret) and `vault.yml` (secret):
+Non-secret vars live in `group_vars/api.yml` and `group_vars/all/vars.yml`. Secrets in `group_vars/all/vault.yml`.
 
-| Variable | Where | Description |
+| Variable | Source | Description |
 |---|---|---|
-| `APP_URL` | api.yml | Public URL of the app (from frontend VM) |
-| `DATABASE_URL` | auto-built from vault | Constructed from db host + vault password |
-| `BETTER_AUTH_SECRET` | vault | Min 32 chars |
-| `ANTHROPIC_API_KEY` | vault | Required when `AI_PROVIDER=anthropic` |
-| `SERVE_STATIC` | api.yml | Must be `false` for 3-tier |
-| `AI_PROVIDER` | api.yml | `anthropic` for EC2 deployment |
+| `DATABASE_URL` | auto-built | Constructed from db host IP + `postgres_password` from vault |
+| `BETTER_AUTH_SECRET` | vault | Min 32 chars random string |
+| `BETTER_AUTH_URL` | `-e app_url=...` | Frontend public URL — used in auth email links |
+| `AI_PROVIDER` | `api.yml` | `gemini` or `anthropic` |
+| `GEMINI_API_KEY` | vault | Required when `ai_provider: gemini` |
+| `ANTHROPIC_API_KEY` | vault | Required when `ai_provider: anthropic` |
+| `SERVE_STATIC` | `api.yml` | Must be `false` in 3-tier (nginx handles static files) |
 
-## Redeploying after code changes
+## Redeploying after changes
 
-```bash
-# Rebuild and transfer image
-docker build -f deploy/Dockerfile.api -t buildersnetwork-api:latest .
-# ... push/transfer to backend VM
-ansible-playbook -i inventory.ini playbooks/api.yml --ask-vault-pass
+**API code changes:**
+
+```powershell
+docker build -f deploy/Dockerfile.api -t ooflamp/buildersnetwork-api:latest .
+docker push ooflamp/buildersnetwork-api:latest
 ```
 
-## Redeploying after frontend changes
+```bash
+ANSIBLE_ROLES_PATH=... ansible-playbook -i inventory.ini playbooks/api.yml --ask-vault-pass \
+  -e "app_domain=<FRONTEND_IP>" -e "app_url=http://<FRONTEND_IP>"
+```
+
+**Frontend changes:**
+
+```powershell
+docker build -f deploy/Dockerfile.web -t ooflamp/buildersnetwork-web:latest .
+docker push ooflamp/buildersnetwork-web:latest
+```
 
 ```bash
-VITE_API_URL=http://<BACKEND_EC2_IP>:8080 pnpm build:frontend
-ansible-playbook -i inventory.ini playbooks/web.yml --ask-vault-pass
+ANSIBLE_ROLES_PATH=... ansible-playbook -i inventory.ini playbooks/web.yml --ask-vault-pass
 ```

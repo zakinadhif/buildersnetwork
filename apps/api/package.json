@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.14.4",
+    "@anthropic-ai/sdk": "^0.53.0",
+    "@google/genai": "^1.0.0",
     "@myapp/ai": "workspace:^",
     "@myapp/auth": "workspace:^",
     "@myapp/email": "workspace:^",

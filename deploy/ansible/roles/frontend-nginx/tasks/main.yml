@@ -13,3 +13,5 @@
     restart_policy: unless-stopped
     ports:
       - "80:80"
+    env:
+      API_URL: "{{ api_url }}"

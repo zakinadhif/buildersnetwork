@@ -15,7 +15,7 @@
   community.docker.docker_image:
     name: "{{ api_image | default(app_name + '-api:latest') }}"
     source: pull
-    force_source: "{{ force_pull | default(false) }}"
+    force_source: true
   when: api_image is defined
 
 - name: Run API container
