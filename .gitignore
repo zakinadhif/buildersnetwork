@@ -31,3 +31,4 @@ libs/api-zod/src/generated/
 
 # Ansible secret vault
 deploy/ansible/group_vars/all/vault.yml
+.vagrant
