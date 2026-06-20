@@ -1,15 +1,10 @@
-# Product Requirements Document — Al-Fath Berkarya (v2)
+# Product Requirements Document — Al-Fath Berkarya
 
 | | |
 |---|---|
 | **Product** | Al-Fath Berkarya |
 | **Engine codename** | BuildersNetwork |
-| **Document status** | Draft **v2** (synced to the Product Vision) |
-| **Supersedes** | `al-fath-berkarya-prd.md` (v1 — kept as the first draft) |
-| **Last updated** | (fill in) |
 | **Owner** | (fill in) |
-
-> **Changelog — what changed from v1 → v2.** Synced to the Product Vision doc. Added: per-project AI assistant; project posts elaborated to progress/challenges/achievements; karya "open to contributors / incubation" status; microblogging (general beneficial short-form, not only karya updates); community blog; magazine; AI-guided build journey; embeddable Al-Fath Berkarya badge; AI **quota** system and **subscription** tier. Changed: the AI cost stance moved from "AI only at creation" to **"AI woven throughout, made sustainable via quota (free) + subscription (premium)"**; monetization moved from a hard non-goal to an intended freemium direction. Everything from v1 is otherwise preserved.
 
 ---
 
@@ -23,7 +18,7 @@ Inspired by Buildspace's "Sage" but deliberately different: **karya-centric** (n
 
 ## 2. Background & Problem
 
-**Context.** Al-Fath is a bounded community (students/members, e.g. the team behind the student-run Handai Coffee business incubated at Telkom University's Bandung Techno Park; "FTE friends" who code or are learning to). The community already builds real things but has no shared home for that activity.
+**Context.** Al-Fath is a bounded community — a campus-wide university organization spanning members across all faculties, not a single faculty or program. Its members already build real things across a wide range of fields, but have no shared home for that activity.
 
 **Problems to solve:**
 1. **Direction** — many members haven't found their interests, skills, or "thing."
@@ -42,6 +37,7 @@ Inspired by Buildspace's "Sage" but deliberately different: **karya-centric** (n
 - Make the community's karya and people visible, alive (via posts), and easy to contribute to.
 - Enable the three forms of matchmaking (event team, project team, talent/gig).
 - Raise collective knowledge (microblog, blog, eventually a magazine).
+- Give builders a built-in validation loop — early users and constructive feedback from the community, right on the project page.
 - Provide an inspiring, *productive* feed — no brainrot.
 - Keep AI sustainable from day one via quota + a subscription path.
 
@@ -61,6 +57,7 @@ Inspired by Buildspace's "Sage" but deliberately different: **karya-centric** (n
 | % who create or join a karya | Core activation. |
 | **% who post a *second* update** | Leading indicator the flywheel is turning. |
 | Karya with ≥2 contributors | Collaboration working. |
+| Feedback left per karya (and early users gained) | Validation loop working. |
 | Successful teammate matches (badge → DM → joined) | People-discovery working. |
 | Weekly active / returning members | Retention without an external program. |
 | Messages sent | Real intent and connection. |
@@ -73,7 +70,7 @@ Targets set after a baseline week.
 ## 5. Target Users (Personas)
 
 - **The Seeker** — hasn't found their direction. Needs low-pressure discovery and inspiration. The agent's most important user.
-- **The Builder** — already shipping (e.g. a Handai founder). Needs a living page, visibility, contributors, a place to share progress and knowledge.
+- **The Builder** — already shipping something real. Needs a living page, visibility, contributors, a place to share progress and knowledge.
 - **The Contributor** — wants to help on others' projects but needs to understand them fast and find an easy way in. (Served by per-project AI + "open to contributors.")
 - **The Recruiter/Teammate-seeker** — needs a hackathon team, project partner, or a specific talent.
 - **The Organizer** — plans community events; needs to see skills/interests (served by search in v1).
@@ -85,7 +82,7 @@ Targets set after a baseline week.
 **People → Karya → Anchors.**
 
 - **People** — lightweight profile: name, bio, **skills**, **interests** (AI-synthesized, editable), and the karya they belong to. One person, many karya.
-- **Karya** — the spine. Any kind of work. Has description, status, a **contributor roster** (faces), a stream of **posts** (progress/challenges/achievements), and (P1) a **per-project AI**.
+- **Karya** — the spine. Any kind of work. Has description, status, a **contributor roster** (faces), a stream of **posts** (progress/challenges/achievements), a **feedback/validation channel** where the wider community (not just members) leaves constructive input, and (P1) a **per-project AI**.
 - **Anchors** (optional, many-to-many): **interests/themes**; **problems** (optional bank); **events** (hackathons).
 
 **Why karya, not problem, at the center:** forcing every work to declare a "problem" would exclude creative/expressive work and kill "any idea goes." Problems remain one anchor.
@@ -98,7 +95,7 @@ Targets set after a baseline week.
 
 1. **Onboard & find direction** — agent learns skills/interests or helps a Seeker explore → editable profile draft → suggests a karya/people/interests.
 2. **Create a karya** — via agent: articulate, tag interests, optionally attach problem/event → editable karya page.
-3. **Discover & contribute** — find a karya → read its posts / ask its per-project AI ("what's it built with? how do I contribute?") → request to join → contribute.
+3. **Discover & contribute** — find a karya → read its posts / ask its per-project AI ("what's it built with? how do I contribute?") → leave constructive feedback or request to join → contribute, or simply become an early user.
 4. **Post an update** — progress, a challenge, or an achievement → appears on the karya page and feed.
 5. **Find a teammate** — set a "looking for…" badge → others find you on the seeker board → DM → join.
 6. **Discover & get inspired** — browse the feed, microblog, and curated homepage picks; search by interest/skill.
@@ -125,12 +122,21 @@ Priority: **P0** = first build · **P1** = fast-follow · **P2** = later.
 - **FR-9 (P1)** Lightweight "update my profile via chat."
 
 ### 8.4 Karya
-- **FR-10 (P0)** Create a karya (via agent): title, description, status, interest tags.
+- **FR-10 (P0)** Create a karya (via agent): title, description, status, interest tags. A karya can be created at any maturity — including before anything is built.
+- **FR-10a (P0)** **Karya stage(s) (lifecycle).** A **multi-select** set of stage labels, so early-stage work is first-class and the feedback channel (FR-42) can meet a project wherever it is. A karya can occupy **more than one stage at once** (e.g. *Validating* + *Building* while it iterates):
+  - **Idea** — a concept being explored; not yet validated or built.
+  - **Validating** — researching problem–solution fit, target market, demand; actively seeking community feedback.
+  - **Building** — actively under construction.
+  - **Shipped** — live / released and usable.
+  - **Paused** — dormant or on hold (optional; keeps stale projects honest).
+
+  *Stages are owner-set and freely changeable; they're a signal, not a gate. A brand-new karya defaults to **Idea**.*
 - **FR-11 (P0)** Karya page: description, status, tags, anchors, **contributor roster shown as faces (profile pics)**, and the **post stream**.
 - **FR-12 (P0)** **Request to join**; owner approves/declines.
 - **FR-13 (P1)** Optionally link a karya to a problem and/or event.
 - **FR-34 (P1)** A karya can mark itself **"open to contributors" / incubation status**, surfacing how to contribute and inviting the community in (the community-effort concept).
 - **FR-33 (P1)** **Per-project AI assistant** — anyone can ask a project's AI questions to lower the barrier to collaborate, e.g. "What's this built with?", "How do I contribute?", "What's the nearest problem this project faces?" Grounded in the karya's data and posts; does not fabricate.
+- **FR-42 (P1)** **Project feedback / validation channel** — any community member (not only karya members) can leave constructive feedback, reactions, and questions on a karya's page, so builders gather early users and honest feedback *at every stage* — from research and conception (target-market analysis, problem–solution fit) through active building. This implies a karya is worth creating and sharing *before* it is built, not only after. This is the community-driven complement to the AI-guided validation in FR-38. *Mechanism builds on comments (FR-21) and likes (FR-20); given its centrality to the value prop, the underlying comment capability may warrant pulling earlier — see Open Questions.*
 
 ### 8.5 Anchors — Interests, Problems, Events
 - **FR-14 (P0)** Interest/theme tags, attachable to karya and people, browsable.
@@ -152,8 +158,13 @@ Priority: **P0** = first build · **P1** = fast-follow · **P2** = later.
 - **FR-24 (P0, admin)** Team can mark a karya as "featured."
 
 ### 8.8 Discovery & Search
-- **FR-25 (P0)** Browse/search karya by interest, people by skill/interest.
-- **FR-26 (P2)** Saved searches / filter refinement.
+
+*The **browse/discovery page** and the **search page** are distinct surfaces: discovery is for exploring what exists (curated + grouped listings you scroll), search is query-driven lookup.*
+
+- **FR-25 (P0)** **Project discovery page** — the home page for projects: a browsable listing organized into groupings (e.g. featured per FR-24, recent, by interest, and the validation-seeking grouping per FR-43). The surface for exploring what exists.
+- **FR-44 (P0)** **Search page** — query-driven search of karya by interest and people by skill/interest.
+- **FR-43 (P1)** **Surface validation-seeking karya on the discovery/listing page** — early-stage karya (*Idea* / *Validating*) that are seeking community feedback are surfaced as a visible grouping/section *within* the project discovery page (FR-25), with stage shown on each listing, so members who want to weigh in or become early users find them in the place they already browse. Not a separate destination; feeds the validation loop (FR-42).
+- **FR-26 (P2)** Saved searches / filter refinement (on the search page).
 
 ### 8.9 Matchmaking
 - **FR-27 (P0)** "Looking for…" badge: *event team*, *project team*, *talent/gig*, + a note.
@@ -166,7 +177,7 @@ Priority: **P0** = first build · **P1** = fast-follow · **P2** = later.
 - **FR-32 (P0)** "Request to join" and "message" are the connect actions.
 
 ### 8.11 Build Support & Identity (vision features)
-- **FR-38 (P2)** **AI-guided build journey** — when starting a karya, optional staged guidance through product validation, problem–solution fit, UI/UX prototyping, and other support, with AI at each step.
+- **FR-38 (P2)** **AI-guided build journey** — when starting a karya, optional staged guidance through product validation, target market analysis, problem–solution fit, UI/UX prototyping, and other support, with AI at each step.
 - **FR-39 (P1)** **Embeddable Al-Fath Berkarya badge** — a "Built at / Incubated by Al-Fath Berkarya" badge member/incubated projects can place in their footers.
 
 ### 8.12 Monetization & Quota
@@ -177,11 +188,11 @@ Priority: **P0** = first build · **P1** = fast-follow · **P2** = later.
 
 ## 9. Non-Functional Requirements
 
-- **NFR-1 — Mobile-first.** The community is mobile-dominant; design mobile-first.
+- **NFR-1 — Desktop-first.** The core experience is creator's work — running a karya, the onboarding agent, long-form posts and blogs, and the build journey (research, validation, prototyping) — and that happens at a desk. Design desktop-first. The app stays responsive and usable on mobile for consumption (feed, discovery, feedback, DMs), but mobile is not the primary design target. *(Revised from mobile-first: the "mobile-dominant community" assumption was not validated, and members do real building work on laptops.)*
 - **NFR-2 — Sustainable AI (revised).** AI is woven throughout (creation, per-project assistant, guided journey). Sustainability comes from **quota/rationing for free members + a subscription tier**, not from minimizing AI. Non-AI surfaces (feed, search, browsing) stay plain DB queries to keep baseline cost low.
 - **NFR-3 — Language/voice.** Authentic Indonesian (code-switched) register, not translated English.
 - **NFR-4 — Privacy.** DMs private; profiles community-only; handle data responsibly; some members may be minors — keep surfaces appropriate.
-- **NFR-5 — Performance.** Fast on mobile networks.
+- **NFR-5 — Performance.** Fast across devices and typical campus/mobile networks.
 - **NFR-6 — Scale.** Community scale (hundreds–low thousands); don't over-engineer.
 - **NFR-7 — Reliability.** No data loss on edits; editable drafts persist.
 
@@ -192,7 +203,7 @@ Priority: **P0** = first build · **P1** = fast-follow · **P2** = later.
 | Entity | Key fields |
 |---|---|
 | **User** | id, name, handle, bio, skills[], interests[], seeking_type, seeking_event, seeking_role, seeking_note, plan (free/paid), ai_quota |
-| **Karya** | id, title, description, status, open_to_contributors (bool), created_by, created_at |
+| **Karya** | id, title, description, stages[] (multi-select: `idea` / `validating` / `building` / `shipped` / `paused`; default `[idea]`), open_to_contributors (bool), created_by, created_at |
 | **Interest** | id, name · **KaryaInterest** · **UserInterest** |
 | **Problem** | id, title, description, created_by · **KaryaProblem** *(P1)* |
 | **Event** | id, name, starts_at, ends_at *(P1)* |
@@ -220,9 +231,9 @@ Relationships: User ↔ Karya many-to-many (KaryaMember). Karya ↔ Interest/Pro
 
 ## 12. Release Plan
 
-- **Phase 0 — Founding seed.** Recruit ~20–50 already-building members (Handai and peers) to create karya and post real progress before launch; team acts as relentless first commenter. Goal: content density on day one.
+- **Phase 0 — Founding seed.** Recruit ~20–50 already-building members from across the community to create karya and post real progress before launch; team acts as relentless first commenter. Goal: content density on day one.
 - **Phase 1 — MVP (P0).** Karya core loop: accounts, profiles + agent, karya create/join/roster, posts (progress/challenge/achievement), reverse-chron feed + curated homepage, basic search, basic matchmaking + seeker board, basic messaging. All four use cases represented minimally.
-- **Phase 2 — Fast-follow (P1).** Per-project AI; "open to contributors"/incubation; microblogging; blog; problem bank; events; event-scoped matchmaking; the embeddable badge; AI quota; likes; profile-update-via-chat.
+- **Phase 2 — Fast-follow (P1).** Per-project AI; project feedback/validation channel; validation-seeking karya on the discovery page; "open to contributors"/incubation; microblogging; blog; problem bank; events; event-scoped matchmaking; the embeddable badge; AI quota; likes; profile-update-via-chat.
 - **Horizon (P2).** AI-guided build journey; magazine; subscription tier and premium AI; comments; badge auto-expiry; richer search.
 
 ---
@@ -231,7 +242,7 @@ Relationships: User ↔ Karya many-to-many (KaryaMember). Karya ↔ Interest/Pro
 
 **In (v1):** all P0 items + P0 NFRs.
 
-**Deferred (P1/P2 or beyond):** per-project AI, incubation status, microblog, blog, magazine, guided build journey, badge, problem bank, events, event-scoped matchmaking, quota + subscription — sequenced per §12. **Still fully out of scope:** problem-bank tiers/governance, dedup/merge tooling, feed ranking/algorithmic picks, near-peer surfacing, organizer analytics dashboard, multi-tenant/multi-community, LLM micro-optimization beyond quota.
+**Deferred (P1/P2 or beyond):** per-project AI, project feedback/validation channel, validation-seeking surfacing on the discovery page, incubation status, microblog, blog, magazine, guided build journey, badge, problem bank, events, event-scoped matchmaking, quota + subscription — sequenced per §12. **Still fully out of scope:** problem-bank tiers/governance, dedup/merge tooling, feed ranking/algorithmic picks, near-peer surfacing, organizer analytics dashboard, multi-tenant/multi-community, LLM micro-optimization beyond quota.
 
 ---
 
@@ -265,6 +276,7 @@ Relationships: User ↔ Karya many-to-many (KaryaMember). Karya ↔ Interest/Pro
 ## 16. Open Questions
 
 - **Quota sizing & free/paid boundary:** how much AI is free; which features are premium?
+- **Feedback channel priority:** the project page is meant to be a validation/early-user channel (FR-42) — is that core enough to pull into P0, and should comments (FR-21) move up to power it?
 - **Microblog vs. karya feed:** one unified feed or two surfaces?
 - **Interest vocabulary:** how curated vs. free-text?
 - **Matchmaking priority:** is the hackathon/event-scoped flow a launch wedge (pull into P0)?

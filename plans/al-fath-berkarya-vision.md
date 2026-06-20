@@ -20,8 +20,9 @@ A project (karya) isn't a static listing — it's a living hub designed to pull 
   - *"Ini dibuat pakai apa?"* — "What's this built with?"
   - *"Gimana caranya kalau aku mau kontribusi?"* — "How do I contribute?"
   - *"Apa masalah paling dekat yang project ini hadapi?"* — "What's the most pressing problem this project is facing right now?"
+- **A feedback & validation channel** — community members can share constructive thoughts, reactions, and questions about the project right on its page. They aren't just spectators: a project page is where builders meet their *early users* and collect honest feedback *at every stage* — from the earliest research and conception (target-market analysis, problem–solution fit) all the way through active building. Validation comes from the community, not only from an AI.
 
-**The intent:** drop the barrier to collaboration to near-zero. A curious member — FTE friends especially — can understand a project and find their way in without interrupting anyone or reading a wall of docs. Projects become open doors, not closed shops.
+**The intent:** drop the barrier to collaboration to near-zero. A curious member can understand a project and find their way in without interrupting anyone or reading a wall of docs. Projects become open doors, not closed shops.
 
 ---
 
@@ -52,6 +53,7 @@ Raising the community's shared knowledge is a first-class goal, delivered in thr
 The platform shouldn't just *host* projects — it should actively **help them get better.** When a member starts a project, the platform guides them on a tour through the stages of building, with AI support at each step:
 
 - product validation,
+- target market analysis,
 - problem–solution fit,
 - UI/UX prototyping,
 - and other support along the way.
@@ -85,7 +87,7 @@ Whatever gets built holds to:
 - **Karya-centric.** The work is the unit; *any idea goes.*
 - **Community-scoped & authentic.** Built for Al-Fath, in the community's real voice — not a translated Silicon Valley costume.
 - **Edit-first AI.** Anything the AI generates is an editable draft, never a locked black box.
-- **Mobile-first.**
+- **Desktop-first.** The build work happens at a desk; mobile stays supported for consumption, but desktop is the design target.
 
 ---
 
