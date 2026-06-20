@@ -1,4 +1,8 @@
-import { useGetMatches, useGetMe, getGetMatchesQueryKey } from "@myapp/api-client-react";
+import {
+  getGetMatchesQueryKey,
+  useGetMatches,
+  useGetMe,
+} from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
@@ -11,7 +15,10 @@ export default function Matches() {
   const { data: me } = useGetMe();
 
   const { data: savedMatches = [], isLoading } = useGetMatches({
-    query: { queryKey: getGetMatchesQueryKey(), enabled: contextMatches.length === 0 },
+    query: {
+      queryKey: getGetMatchesQueryKey(),
+      enabled: contextMatches.length === 0,
+    },
   });
 
   const matches: MemberMatch[] =

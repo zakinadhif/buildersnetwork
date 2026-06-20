@@ -14,12 +14,12 @@ app.get("/", async (c) => {
     allProfiles.map((p) => ({
       id: p.userId,
       name: p.name,
+      handle: p.handle,
+      bio: p.bio,
+      interests: p.interests as string[],
       year: p.year,
       major: p.major,
       skills: p.skills as string[],
-      building: p.building,
-      wants: p.wants,
-      vibe: p.vibe,
     })),
   );
 });
@@ -39,12 +39,12 @@ app.get("/:id", async (c) => {
   return c.json({
     id: profile.userId,
     name: profile.name,
+    handle: profile.handle,
+    bio: profile.bio,
+    interests: profile.interests as string[],
     year: profile.year,
     major: profile.major,
     skills: profile.skills as string[],
-    building: profile.building,
-    wants: profile.wants,
-    vibe: profile.vibe,
   });
 });
 

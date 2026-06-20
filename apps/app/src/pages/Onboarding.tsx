@@ -8,9 +8,13 @@ import { useOnboarding } from "@/lib/onboarding-ctx";
 const INTRO =
   "hei — selamat datang di al-fath berkarya. aku mau kenalan dulu — abis itu kita nyusun profil kamu bareng.\n\nsiapa nama kamu?";
 
-const SYS_ONBOARD = `Kamu adalah AI onboarding untuk Al-Fath Berkarya — komunitas builder eksklusif mahasiswa teknik informatika di Telkom University, Indonesia.
+const SYS_ONBOARD = `Kamu adalah AI onboarding untuk Al-Fath Berkarya — komunitas builder buat mahasiswa Telkom University dari semua jurusan dan fakultas. Siapa pun yang suka bikin sesuatu — ngoding, desain, nulis, riset, bikin produk, atau ngegerakin komunitas — punya tempat di sini.
 
-Lakukan intake percakapan yang santai dan hangat untuk membangun profil anggota baru. Cakup: nama, tingkat/jurusan, skill teknis (probe lebih dalam — tanya apa yang pernah mereka bikin, bukan cuma yang mereka tahu), hal yang pernah dibangun, apa yang mau mereka bangun/pelajari, project sekarang, gaya kolaborasi.
+Lakukan intake percakapan yang santai dan hangat untuk membangun profil anggota baru. Cakup:
+- nama dan tingkat/jurusan,
+- skill — probe lebih dalam, tanya apa yang pernah mereka bikin atau kerjain, bukan cuma yang mereka tahu (skill ga harus teknis — desain, nulis, riset, ngatur acara semua kehitung),
+- cerita singkat soal diri mereka & apa yang lagi atau pengen mereka garap (buat "bio"),
+- hal-hal yang mereka minati atau pengen dalami (buat "interests").
 
 Aturan:
 - SATU pertanyaan per pesan. Jangan tumpuk pertanyaan.
@@ -59,10 +63,12 @@ export default function Onboarding() {
       .map((m) => `${m.role === "user" ? "member" : "ai"}: ${m.content}`)
       .join("\n");
     const prompt = `Dari percakapan onboarding ini, ekstrak profil anggota sebagai JSON dengan field persis ini:
-{"name":"","year":"Tingkat X","major":"","skills":[],"building":"","wants":"","vibe":""}
-- skills: array of string
-- building/wants/vibe: 1-2 kalimat singkat dalam bahasa Indonesia kasual (pakai "lagi bikin", "pengen", dll)
-- Jujur, jangan ngarang.
+{"name":"","handle":"","bio":"","year":"Tingkat X","major":"","skills":[],"interests":[]}
+- handle: username pendek huruf kecil tanpa spasi (boleh diturunkan dari nama depan). Kalau ga jelas, kosongkan ("").
+- bio: 1-2 kalimat singkat orang pertama dalam bahasa Indonesia kasual — siapa mereka & apa yang lagi atau pengen mereka garap.
+- skills: array of string (ga harus teknis).
+- interests: array of string — topik/bidang yang mereka minati atau pengen dalami.
+- Jujur, jangan ngarang. Kalau suatu info ga disebut di percakapan, isi string kosong "" atau array kosong [] — jangan dikira-kira.
 
 Percakapan:\n${transcript}`;
     try {
@@ -72,6 +78,7 @@ Percakapan:\n${transcript}`;
         ...parsed,
         id: "user",
         skills: parsed.skills ?? [],
+        interests: parsed.interests ?? [],
       };
       setDraft(profile);
       navigate("/review");

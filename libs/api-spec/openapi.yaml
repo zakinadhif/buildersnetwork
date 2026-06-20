@@ -326,6 +326,14 @@ components:
           type: string
         name:
           type: string
+        handle:
+          type: [string, "null"]
+        bio:
+          type: [string, "null"]
+        interests:
+          type: array
+          items:
+            type: string
         year:
           type: string
         major:
@@ -334,13 +342,7 @@ components:
           type: array
           items:
             type: string
-        building:
-          type: string
-        wants:
-          type: string
-        vibe:
-          type: string
-      required: [id, name, year, major, skills, building, wants, vibe]
+      required: [id, name, handle, bio, interests, year, major, skills]
 
     MemberMatch:
       allOf:
@@ -356,6 +358,14 @@ components:
       properties:
         name:
           type: string
+        handle:
+          type: string
+        bio:
+          type: string
+        interests:
+          type: array
+          items:
+            type: string
         year:
           type: string
         major:
@@ -364,13 +374,7 @@ components:
           type: array
           items:
             type: string
-        building:
-          type: string
-        wants:
-          type: string
-        vibe:
-          type: string
-      required: [name, year, major, skills, building, wants, vibe]
+      required: [name, year, major, skills]
 
     MatchEntry:
       type: object

@@ -194,7 +194,9 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm db:seed` | Run seeders against `DATABASE_URL` |
 | `pnpm format` | Format with Biome |
 | `pnpm lint` | Lint with Biome |
-| `pnpm test:api` | Run Vitest unit tests |
+| `pnpm test:api` | Run API Vitest unit tests |
+| `pnpm test:app` | Run SPA Vitest unit tests |
+| `pnpm test:e2e` | Run Playwright e2e tests |
 | `pnpm build:frontend` | Build SPA + landing (runs codegen first) |
 | `pnpm cf:deploy` | Build everything and deploy to Cloudflare Workers |
 

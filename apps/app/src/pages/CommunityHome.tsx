@@ -10,9 +10,9 @@ export default function CommunityHome({ user }: { user: Member }) {
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
   const msgId = useRef(0);
-  const [msgs, setMsgs] = useState<{ id: number; role: "ai" | "user"; text: string }[]>([
-    { id: msgId.current, role: "ai", text: greeting },
-  ]);
+  const [msgs, setMsgs] = useState<
+    { id: number; role: "ai" | "user"; text: string }[]
+  >([{ id: msgId.current, role: "ai", text: greeting }]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -35,7 +35,7 @@ export default function CommunityHome({ user }: { user: Member }) {
     const dir = members
       .map(
         (m) =>
-          `${m.name} (${m.year}, ${m.major})\nSkills: ${m.skills.join(", ")}\nLagi bikin: ${m.building}\nPengen: ${m.wants}\nVibe: ${m.vibe}`,
+          `${m.name} (${m.year}, ${m.major})\nSkills: ${m.skills.join(", ")}\nMinat: ${m.interests.join(", ")}\nBio: ${m.bio ?? "-"}`,
       )
       .join("\n\n");
 

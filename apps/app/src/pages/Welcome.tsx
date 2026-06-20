@@ -64,7 +64,7 @@ export default function Welcome() {
       <div className="wrap" style={{ paddingTop: 0 }}>
         <p className="eyebrow mb8">Al-Fath Berkarya</p>
         <h1 className="h1" style={{ marginBottom: 16 }}>
-          {isSignup ? "Kamu masuk." : "Selamat datang kembali."}
+          {isSignup ? "Gabung ke komunitas." : "Selamat datang kembali."}
         </h1>
         {isSignup && (
           <p className="sub" style={{ marginBottom: 40, maxWidth: 360 }}>

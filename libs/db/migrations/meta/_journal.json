@@ -15,6 +15,20 @@
       "when": 1779809733629,
       "tag": "0001_panoramic_cable",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781971379816,
+      "tag": "0002_regular_adam_warlock",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1781972293646,
+      "tag": "0003_faithful_hannibal_king",
+      "breakpoints": true
     }
   ]
 }

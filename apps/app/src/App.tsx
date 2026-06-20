@@ -1,4 +1,4 @@
-import { useGetMe, getGetMeQueryKey } from "@myapp/api-client-react";
+import { getGetMeQueryKey, useGetMe } from "@myapp/api-client-react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";

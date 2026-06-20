@@ -61,6 +61,12 @@ export default function MemberProfilePage({ id }: { id: string }) {
 
         <hr className="hr" style={{ margin: "0 0 28px" }} />
 
+        {member.bio && (
+          <div className="pf">
+            <p className="label">Bio</p>
+            <p style={{ fontSize: 15, lineHeight: 1.65 }}>{member.bio}</p>
+          </div>
+        )}
         <div className="pf">
           <p className="label">Skills</p>
           <div className="skills-wrap">
@@ -72,25 +78,14 @@ export default function MemberProfilePage({ id }: { id: string }) {
           </div>
         </div>
         <div className="pf">
-          <p className="label">Lagi bikin</p>
-          <p style={{ fontSize: 15, lineHeight: 1.65 }}>{member.building}</p>
-        </div>
-        <div className="pf">
-          <p className="label">Pengen</p>
-          <p style={{ fontSize: 15, lineHeight: 1.65 }}>{member.wants}</p>
-        </div>
-        <div className="pf">
-          <p className="label">Vibe</p>
-          <p
-            style={{
-              fontFamily: "var(--mono)",
-              fontSize: 13,
-              lineHeight: 1.75,
-              color: "var(--ink2)",
-            }}
-          >
-            {member.vibe}
-          </p>
+          <p className="label">Minat</p>
+          <div className="skills-wrap">
+            {(member.interests ?? []).map((s) => (
+              <span key={s} className="chip" style={{ cursor: "default" }}>
+                {s}
+              </span>
+            ))}
+          </div>
         </div>
       </div>
     </div>

@@ -8,12 +8,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import { EditField, Loading, SkillsEditor } from "@/components/ui-atoms";
-import {
-  callClaude,
-  cleanJSON,
-  type Member,
-  type MemberMatch,
-} from "@/lib/members";
+import { groundMatches } from "@/lib/matching";
+import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
 
 export default function Review() {
@@ -24,14 +20,15 @@ export default function Review() {
     ...(initialDraft ?? {
       id: "user",
       name: "",
+      handle: null,
+      bio: null,
+      interests: [],
       year: "",
       major: "",
       skills: [],
-      building: "",
-      wants: "",
-      vibe: "",
     }),
     skills: initialDraft?.skills ?? [],
+    interests: initialDraft?.interests ?? [],
   }));
   const [busy, setBusy] = useState(false);
   const set = <K extends keyof Member>(k: K, v: Member[K]) =>
@@ -44,15 +41,14 @@ export default function Review() {
     const membersCtx = members
       .map(
         (m) =>
-          `[${m.id}] ${m.name} (${m.year}, ${m.major}): ${m.skills.join(", ")}. Lagi bikin: ${m.building} Pengen: ${m.wants} Vibe: ${m.vibe}`,
+          `[${m.id}] ${m.name} (${m.year}, ${m.major}). Skills: ${m.skills.join(", ")}. Minat: ${m.interests.join(", ")}. Bio: ${m.bio ?? "-"}`,
       )
       .join("\n");
     const prompt = `Anggota baru:
 Nama: ${p.name} | ${p.year} ${p.major}
 Skills: ${p.skills.join(", ")}
-Lagi bikin: ${p.building}
-Pengen: ${p.wants}
-Vibe: ${p.vibe}
+Minat: ${p.interests.join(", ")}
+Bio: ${p.bio ?? "-"}
 
 Anggota komunitas:
 ${membersCtx}
@@ -62,25 +58,21 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
     try {
       const raw = await callClaude([{ role: "user", content: prompt }]);
       const parsed = cleanJSON(raw) as { memberId: string; reason: string }[];
-      const memberMap = new Map(members.map((m) => [m.id, m]));
-      const matched = parsed
-        .map((x) => ({ ...memberMap.get(x.memberId), reason: x.reason }))
-        .filter((x) => x.id != null) as MemberMatch[];
+      const matched = groundMatches(parsed, members);
 
       await saveProfile({
         name: p.name,
+        handle: p.handle ?? undefined,
+        bio: p.bio ?? undefined,
+        interests: p.interests,
         year: p.year,
         major: p.major,
         skills: p.skills,
-        building: p.building,
-        wants: p.wants,
-        vibe: p.vibe,
       });
       await saveMatches({
-        matches: parsed.map((x) => ({
-          memberId: x.memberId,
-          reason: x.reason,
-        })),
+        // Persist only grounded matches — hallucinated IDs are dropped so the
+        // insert can't trip the matched_user_id foreign key.
+        matches: matched.map((m) => ({ memberId: m.id, reason: m.reason })),
       });
       await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
 
@@ -110,10 +102,26 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
           <EditField value={p.name} onChange={(v) => set("name", v)} />
         </div>
         <div className="pf">
-          <p className="label">Angkatan · Jurusan</p>
+          <p className="label">Handle</p>
           <EditField
-            value={`${p.year} · ${p.major}`}
-            onChange={(v) => set("year", v)}
+            value={p.handle ?? ""}
+            onChange={(v) => set("handle", v)}
+          />
+        </div>
+        <div className="pf">
+          <p className="label">Angkatan</p>
+          <EditField value={p.year} onChange={(v) => set("year", v)} />
+        </div>
+        <div className="pf">
+          <p className="label">Jurusan</p>
+          <EditField value={p.major} onChange={(v) => set("major", v)} />
+        </div>
+        <div className="pf">
+          <p className="label">Bio</p>
+          <EditField
+            value={p.bio ?? ""}
+            onChange={(v) => set("bio", v)}
+            multiline
           />
         </div>
         <div className="pf">
@@ -121,27 +129,10 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
           <SkillsEditor skills={p.skills} onChange={(v) => set("skills", v)} />
         </div>
         <div className="pf">
-          <p className="label">Lagi bikin</p>
-          <EditField
-            value={p.building}
-            onChange={(v) => set("building", v)}
-            multiline
-          />
-        </div>
-        <div className="pf">
-          <p className="label">Pengen belajar / bikin</p>
-          <EditField
-            value={p.wants}
-            onChange={(v) => set("wants", v)}
-            multiline
-          />
-        </div>
-        <div className="pf">
-          <p className="label">Gaya kerja</p>
-          <EditField
-            value={p.vibe}
-            onChange={(v) => set("vibe", v)}
-            multiline
+          <p className="label">Minat</p>
+          <SkillsEditor
+            skills={p.interests}
+            onChange={(v) => set("interests", v)}
           />
         </div>
 

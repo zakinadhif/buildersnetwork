@@ -7,12 +7,14 @@ export const profiles = pgTable("profiles", {
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  // PRD profile model. `handle` is unique but nullable — backfilled by the 0a
+  // migration; a NOT NULL tightening is deferred to a later sprint.
+  handle: text("handle").unique(),
+  bio: text("bio"),
+  interests: jsonb("interests").$type<string[]>().notNull().default([]),
   year: text("year").notNull(),
   major: text("major").notNull(),
   skills: jsonb("skills").$type<string[]>().notNull().default([]),
-  building: text("building").notNull(),
-  wants: text("wants").notNull(),
-  vibe: text("vibe").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
