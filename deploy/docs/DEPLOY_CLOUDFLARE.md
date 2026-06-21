@@ -61,10 +61,13 @@ Workers can't run migrations themselves (no long-lived scripts), so they run
   ```bash
   # run from a local machine against the Neon DB directly
   DATABASE_URL=postgres://... pnpm db:migrate   # apply migration files
-  # DATABASE_URL=postgres://... pnpm db:push    # or push schema for first setup
-
-  # or use the Neon dashboard / psql
   ```
+
+> **Use `db:migrate`, never `db:push`, on any DB the release workflow targets.**
+> `db:push` creates tables directly and records nothing in the
+> `drizzle.__drizzle_migrations` ledger, so a later `db:migrate` thinks nothing
+> is applied, tries to run `0000` from scratch, and fails on the already-existing
+> tables. `db:push` is for throwaway local iteration only.
 
 ## Redeploy after code changes
 
