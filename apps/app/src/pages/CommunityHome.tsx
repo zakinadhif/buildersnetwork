@@ -1,12 +1,13 @@
-import { useListMembers } from "@myapp/api-client-react";
+import { useListKarya, useListMembers } from "@myapp/api-client-react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Dots } from "@/components/ui-atoms";
+import { Avatar, Dots, STAGE_LABELS } from "@/components/ui-atoms";
 import { callClaude, firstName, type Member } from "@/lib/members";
 
 export default function CommunityHome({ user }: { user: Member }) {
   const [, navigate] = useLocation();
   const { data: members = [] } = useListMembers();
+  const { data: karya = [] } = useListKarya();
 
   const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
   const msgId = useRef(0);
@@ -115,7 +116,79 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
             <div ref={endRef} />
           </div>
 
-          <p className="sec-head">Anggota ({members.length})</p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "baseline",
+              borderBottom: "1px solid var(--line)",
+              paddingBottom: 10,
+            }}
+          >
+            <span
+              style={{
+                fontSize: 11,
+                fontWeight: 500,
+                letterSpacing: "0.08em",
+                textTransform: "uppercase",
+                color: "var(--ink3)",
+              }}
+            >
+              Karya ({karya.length})
+            </span>
+            <button
+              type="button"
+              onClick={() => navigate("/karya/new")}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "var(--accent)",
+                fontSize: 13,
+                padding: 0,
+              }}
+            >
+              + buat karya
+            </button>
+          </div>
+          {karya.map((k) => (
+            // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
+            <div
+              key={k.id}
+              className="karya-card"
+              role="button"
+              tabIndex={0}
+              onClick={() => navigate(`/karya/${k.id}`)}
+              onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${k.id}`)}
+            >
+              <span className="karya-card-title">{k.title}</span>
+              <p className="karya-card-desc">{k.description}</p>
+              <div className="karya-card-foot">
+                <div className="skills-wrap">
+                  {k.stages.map((s) => (
+                    <span key={s} className="stage-chip">
+                      {STAGE_LABELS[s]}
+                    </span>
+                  ))}
+                </div>
+                <div className="roster">
+                  {k.roster.map((m) => (
+                    <Avatar
+                      key={m.id}
+                      name={m.name}
+                      handle={m.handle}
+                      image={m.image}
+                      size={26}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+          ))}
+
+          <p className="sec-head" style={{ marginTop: 40 }}>
+            Anggota ({members.length})
+          </p>
           {members.map((m) => (
             // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
             <div

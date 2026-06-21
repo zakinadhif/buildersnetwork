@@ -57,7 +57,9 @@ buildersnetwork/
 Welcome → Login → VerifyEmail → Onboarding (AI chat, 8–10 turns) → Review (editable profile) → Matches (3 AI-picked members) → CommunityHome → MemberProfile
 ```
 
-All screens are URL-routed via Wouter (`/welcome`, `/onboarding`, `/review`, `/matches`, `/home`, `/member/:id`).
+All screens are URL-routed via Wouter (`/welcome`, `/onboarding`, `/review`, `/matches`, `/home`, `/member/:id`, `/karya/new`, `/karya/new/ai`, `/karya/:id`).
+
+Beyond the linear onboarding flow, **karya** (projects) are a recurring surface reached from `/home`: a member creates one at `/karya/new` — either filling the draft directly or letting the AI pre-fill it at `/karya/new/ai` — then publishes to a live karya page (`/karya/:id`) with stage chips, interest tags, and a contributor roster shown as avatar faces. Others can request to join; the owner approves or declines. Backed by the `karya` / `karya_members` / `karya_interests` tables and the `/api/karya` routes (list, create, detail, join, approve/decline).
 
 ### AI endpoints
 
@@ -194,6 +196,7 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm db:seed` | Run seeders against `DATABASE_URL` |
 | `pnpm format` | Format with Biome |
 | `pnpm lint` | Lint with Biome |
+| `pnpm test:db` | Run `@myapp/db` Vitest unit tests (pure helpers, no DB) |
 | `pnpm test:api` | Run API Vitest unit tests |
 | `pnpm test:app` | Run SPA Vitest unit tests |
 | `pnpm test:e2e` | Run Playwright e2e tests |

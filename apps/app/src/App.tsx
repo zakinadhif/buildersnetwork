@@ -2,8 +2,12 @@ import { getGetMeQueryKey, useGetMe } from "@myapp/api-client-react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
+import { KaryaDraftProvider } from "@/lib/karya-draft-ctx";
 import { OnboardingProvider } from "@/lib/onboarding-ctx";
 import CommunityHome from "@/pages/CommunityHome";
+import Karya from "@/pages/Karya";
+import KaryaAgent from "@/pages/KaryaAgent";
+import KaryaNew from "@/pages/KaryaNew";
 import Login from "@/pages/Login";
 import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
@@ -73,6 +77,35 @@ function AppRoutes() {
           )
         }
       </Route>
+      <Route path="/karya/new/ai">
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : !hasProfile ? (
+          <Redirect to="/onboarding" />
+        ) : (
+          <KaryaAgent />
+        )}
+      </Route>
+      <Route path="/karya/new">
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : !hasProfile ? (
+          <Redirect to="/onboarding" />
+        ) : (
+          <KaryaNew />
+        )}
+      </Route>
+      <Route path="/karya/:id">
+        {(params) =>
+          !loggedIn ? (
+            <Redirect to="/welcome" />
+          ) : !hasProfile ? (
+            <Redirect to="/onboarding" />
+          ) : (
+            <Karya id={params.id ?? ""} />
+          )
+        }
+      </Route>
       <Route path="/">
         {!loggedIn ? (
           <Redirect to="/welcome" />
@@ -92,9 +125,11 @@ function AppRoutes() {
 export default function App() {
   return (
     <OnboardingProvider>
-      <Router base={import.meta.env.PROD ? "/app" : ""}>
-        <AppRoutes />
-      </Router>
+      <KaryaDraftProvider>
+        <Router base={import.meta.env.PROD ? "/app" : ""}>
+          <AppRoutes />
+        </Router>
+      </KaryaDraftProvider>
     </OnboardingProvider>
   );
 }

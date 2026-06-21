@@ -7,7 +7,12 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
-import { EditField, Loading, SkillsEditor } from "@/components/ui-atoms";
+import {
+  EditField,
+  InterestsEditor,
+  Loading,
+  SkillsEditor,
+} from "@/components/ui-atoms";
 import { groundMatches } from "@/lib/matching";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
@@ -130,8 +135,8 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         </div>
         <div className="pf">
           <p className="label">Minat</p>
-          <SkillsEditor
-            skills={p.interests}
+          <InterestsEditor
+            interests={p.interests}
             onChange={(v) => set("interests", v)}
           />
         </div>

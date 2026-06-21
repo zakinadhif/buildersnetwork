@@ -86,8 +86,10 @@ authed(
     await expect(page.getByText("Handle")).toBeVisible();
     await expect(page.getByText("Bio")).toBeVisible();
     await expect(page.getByText("Minat")).toBeVisible();
-    await expect(page.getByText("Lagi bikin")).toHaveCount(0);
-    await expect(page.getByText("Gaya kerja")).toHaveCount(0);
+    // Exact match: the legacy field *labels* are gone. (Substring matching
+    // would collide with the draft bio "lagi bikin app…".)
+    await expect(page.getByText("Lagi bikin", { exact: true })).toHaveCount(0);
+    await expect(page.getByText("Gaya kerja", { exact: true })).toHaveCount(0);
 
     // Draft content rendered from sessionStorage.
     await expect(

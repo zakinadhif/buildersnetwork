@@ -3,6 +3,11 @@ import { eq, inArray } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
+import {
+  interestsByUserIds,
+  interestsForUser,
+  reconcileUserInterests,
+} from "../lib/interests";
 
 const app = new Hono<AppEnv>();
 
@@ -28,7 +33,7 @@ app.get("/me", async (c) => {
     name: profile.name,
     handle: profile.handle,
     bio: profile.bio,
-    interests: profile.interests as string[],
+    interests: await interestsForUser(db, profile.userId),
     year: profile.year,
     major: profile.major,
     skills: profile.skills as string[],
@@ -50,13 +55,21 @@ app.post("/profile", async (c) => {
     skills: string[];
   }>();
 
-  await db
-    .insert(profiles)
-    .values({ userId: session.user.id, ...body })
-    .onConflictDoUpdate({
-      target: profiles.userId,
-      set: { ...body, updatedAt: new Date() },
-    });
+  // Interests are normalized into their own tables — strip from the profile row
+  // and reconcile separately (DECISION-B). Full replace of the link set, since
+  // the Review screen always sends the complete interest list.
+  const { interests: interestNames = [], ...profileValues } = body;
+
+  await db.transaction(async (tx) => {
+    await tx
+      .insert(profiles)
+      .values({ userId: session.user.id, ...profileValues })
+      .onConflictDoUpdate({
+        target: profiles.userId,
+        set: { ...profileValues, updatedAt: new Date() },
+      });
+    await reconcileUserInterests(tx, session.user.id, interestNames);
+  });
 
   return c.json({ ok: true });
 });
@@ -109,6 +122,10 @@ app.get("/matches", async (c) => {
     );
 
   const profileMap = new Map(matchedProfiles.map((p) => [p.userId, p]));
+  const interestsByUser = await interestsByUserIds(
+    db,
+    matchedProfiles.map((p) => p.userId),
+  );
 
   return c.json(
     userMatches
@@ -120,7 +137,7 @@ app.get("/matches", async (c) => {
           name: p.name,
           handle: p.handle,
           bio: p.bio,
-          interests: p.interests as string[],
+          interests: interestsByUser.get(p.userId) ?? [],
           year: p.year,
           major: p.major,
           skills: p.skills as string[],

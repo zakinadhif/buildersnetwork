@@ -29,6 +29,20 @@
       "when": 1781972293646,
       "tag": "0003_faithful_hannibal_king",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1781977409577,
+      "tag": "0004_cheerful_zaladane",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1782021486819,
+      "tag": "0005_jittery_jane_foster",
+      "breakpoints": true
     }
   ]
 }

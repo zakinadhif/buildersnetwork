@@ -39,5 +39,7 @@ export async function runMigrations(url: string, migrationsFolder: string) {
   }
 }
 
+export { dedupeBySlug, slugifyInterest } from "./interests";
+export { KARYA_STAGES, type KaryaStage, normalizeStages } from "./karya";
 export type { SeedContext, SeedDb, Seeder } from "./seed";
 export { runSeedCli, seeders } from "./seed";

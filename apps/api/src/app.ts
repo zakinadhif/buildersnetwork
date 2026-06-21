@@ -6,6 +6,8 @@ import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 
 import aiRouter from "./routes/ai";
+import interestsRouter from "./routes/interests";
+import karyaRouter from "./routes/karya";
 import membersRouter from "./routes/members";
 import otpRouter from "./routes/otp";
 import profileRouter from "./routes/profile";
@@ -106,6 +108,8 @@ export function createApp(services: AppServices) {
   app.route("/api/ai", aiRouter);
   app.route("/api", profileRouter);
   app.route("/api/members", membersRouter);
+  app.route("/api/interests", interestsRouter);
+  app.route("/api/karya", karyaRouter);
 
   return app;
 }

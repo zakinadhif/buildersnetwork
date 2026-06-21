@@ -12,6 +12,7 @@
     "db:generate": "pnpm run --filter @myapp/db db:generate",
     "db:seed": "pnpm --filter api run db:seed",
     "codegen": "pnpm --filter @myapp/api-spec run codegen",
+    "test:db": "pnpm --filter @myapp/db run test",
     "test:api": "pnpm --filter api run test",
     "test:api:watch": "pnpm --filter api run test:watch",
     "test:app": "pnpm --filter app run test",
