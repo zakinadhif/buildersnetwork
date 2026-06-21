@@ -12,6 +12,14 @@ main = "apps/api/src/worker.ts"
 compatibility_date = "2024-09-23"
 compatibility_flags = ["nodejs_compat"]
 
+# Custom domain — binds the Worker to the apex of the buildersnetwork.web.id
+# zone (which must be active in this Cloudflare account). On deploy, wrangler
+# provisions the DNS record + edge certificate. The workers.dev subdomain stays
+# enabled alongside this, so `versions upload` preview URLs keep working.
+routes = [
+  { pattern = "buildersnetwork.web.id", custom_domain = true },
+]
+
 # Workers Assets — serves the built SPA and landing from apps/api/public/.
 # Requests matching a static file are served directly; everything else falls
 # through to the Worker's fetch handler.
@@ -31,7 +39,9 @@ name = "EMAIL"
 # Non-secret vars. Secrets go via `wrangler secret put`.
 [vars]
 AI_WORKERS_MODEL = "@cf/meta/llama-3.1-8b-instruct"
-APP_URL = "https://buildersnetwork.muh-zakinadhif.workers.dev"
+# Canonical production URL — drives auth redirects and email links. Points at
+# the custom domain now that the Worker is bound to it.
+APP_URL = "https://buildersnetwork.web.id"
 
 # --- Per-environment overrides ---
 
