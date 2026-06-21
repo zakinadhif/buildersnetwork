@@ -65,3 +65,118 @@ export const createAuthMock = (user: MockUser | null = null): MockAuth => ({
       user ? { user, session: { id: "test-session-id" } } : null,
   },
 });
+
+// ---------------------------------------------------------------------------
+// Full chainable db mock
+// ---------------------------------------------------------------------------
+//
+// `makeQueryResult` above only models `.limit()`. Real routes chain longer
+// (`.from().innerJoin().where().orderBy().limit()`), so `createDbMock` returns
+// a builder where *every* chain method returns the same thenable. Reads are
+// drained from a queue in call order — one entry per awaited `select(...)`
+// chain (default `[]` once drained). Writes (`insert/update/delete`) resolve to
+// `undefined` and are recorded in `writes` so a test can assert what was saved.
+
+/** A recorded write — `values` from inserts, `set` from updates. */
+export interface WriteCall {
+  op: "insert" | "update" | "delete";
+  values?: unknown;
+  set?: unknown;
+}
+
+interface ReadBuilder {
+  from: (...a: unknown[]) => ReadBuilder;
+  innerJoin: (...a: unknown[]) => ReadBuilder;
+  leftJoin: (...a: unknown[]) => ReadBuilder;
+  where: (...a: unknown[]) => ReadBuilder;
+  orderBy: (...a: unknown[]) => ReadBuilder;
+  limit: (...a: unknown[]) => ReadBuilder;
+  then: <R>(
+    resolve: (v: unknown[]) => R,
+    reject?: (e: unknown) => R,
+  ) => Promise<R>;
+}
+
+interface WriteBuilder {
+  values: (v: unknown) => WriteBuilder;
+  set: (v: unknown) => WriteBuilder;
+  where: (...a: unknown[]) => WriteBuilder;
+  onConflictDoNothing: (...a: unknown[]) => WriteBuilder;
+  onConflictDoUpdate: (...a: unknown[]) => WriteBuilder;
+  then: <R>(
+    resolve: (v: unknown) => R,
+    reject?: (e: unknown) => R,
+  ) => Promise<R>;
+}
+
+interface DbLike {
+  select: (...a: unknown[]) => ReadBuilder;
+  insert: (...a: unknown[]) => WriteBuilder;
+  update: (...a: unknown[]) => WriteBuilder;
+  delete: (...a: unknown[]) => WriteBuilder;
+  transaction: (cb: (tx: DbLike) => unknown) => Promise<unknown>;
+}
+
+export interface DbMock {
+  /** Cast to the Drizzle `Db` type when injecting into the request context. */
+  db: DbLike;
+  /** Writes recorded in order, for assertions. */
+  writes: WriteCall[];
+}
+
+export const createDbMock = (reads: unknown[][] = []): DbMock => {
+  const queue = [...reads];
+  const writes: WriteCall[] = [];
+  const nextRead = (): unknown[] => queue.shift() ?? [];
+
+  const readBuilder = (): ReadBuilder => {
+    const b: ReadBuilder = {
+      from: () => b,
+      innerJoin: () => b,
+      leftJoin: () => b,
+      where: () => b,
+      orderBy: () => b,
+      limit: () => b,
+      // biome-ignore lint/suspicious/noThenProperty: intentional thenable — mocks Drizzle's awaitable query builder
+      then: (resolve, reject) =>
+        Promise.resolve(nextRead()).then(resolve, reject),
+    };
+    return b;
+  };
+
+  const writeBuilder = (call: WriteCall): WriteBuilder => {
+    const b: WriteBuilder = {
+      values: (v) => {
+        call.values = v;
+        return b;
+      },
+      set: (v) => {
+        call.set = v;
+        return b;
+      },
+      where: () => b,
+      onConflictDoNothing: () => b,
+      onConflictDoUpdate: () => b,
+      // biome-ignore lint/suspicious/noThenProperty: intentional thenable — mocks Drizzle's awaitable query builder
+      then: (resolve, reject) =>
+        Promise.resolve(undefined).then(resolve, reject),
+    };
+    return b;
+  };
+
+  const record = (op: WriteCall["op"]): WriteBuilder => {
+    const call: WriteCall = { op };
+    writes.push(call);
+    return writeBuilder(call);
+  };
+
+  const db: DbLike = {
+    select: () => readBuilder(),
+    insert: () => record("insert"),
+    update: () => record("update"),
+    delete: () => record("delete"),
+    transaction: (cb) => Promise.resolve(cb(db)),
+  };
+
+  return { db, writes };
+};
