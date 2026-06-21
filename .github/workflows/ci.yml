@@ -11,6 +11,22 @@ jobs:
     name: Lint · Type-check · E2E
     runs-on: ubuntu-latest
 
+    services:
+      # Clean, empty Postgres for the from-scratch migration check below.
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: comfort
+          POSTGRES_PASSWORD: comfort
+          POSTGRES_DB: comfort
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U comfort -d comfort"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -33,6 +49,32 @@ jobs:
 
       - name: Lint (Biome)
         run: pnpm lint
+
+      # Static guard: every .sql file is registered in the journal (catches the
+      # orphan-migration drift the runner would otherwise ignore). No DB needed.
+      - name: Check migration journal integrity
+        run: pnpm db:check
+
+      # Static guard: the schema TS must not be ahead of the committed migrations.
+      # `db:generate` diffs schema against the snapshots (no DB); if it emits a new
+      # migration the tree goes dirty — meaning someone edited the schema without
+      # running `pnpm db:generate`. No DB needed.
+      - name: Check schema matches migrations
+        run: |
+          pnpm db:generate
+          if [ -n "$(git status --porcelain libs/db)" ]; then
+            echo "::error::Schema changed without a migration. Run 'pnpm db:generate' and commit the result:"
+            git status --porcelain libs/db
+            git --no-pager diff -- libs/db
+            exit 1
+          fi
+
+      # Prove the generated migrations apply cleanly from an empty database —
+      # validates SQL/ordering/FKs that db:push never exercises locally.
+      - name: Verify migrations apply on a clean database
+        run: pnpm db:migrate
+        env:
+          DATABASE_URL: postgres://comfort:comfort@localhost:5432/comfort
 
       - name: Unit tests — api
         run: pnpm test:api

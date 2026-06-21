@@ -165,15 +165,22 @@ Closed:
   shell / `/api/items` / a 404 page this app never had. Rewritten to cover
   the real app (welcome / login / feed-first home). Lesson: knowingly-red
   tests desensitize you to red — fix-on-touch or delete, don't defer.
+- Migration verification (was "Remaining" below). Two CI guards added to
+  the `ci` job (.github/workflows/ci.yml): a static journal-integrity check
+  (`pnpm db:check` → libs/db/scripts/check-migrations.mjs) that fails if any
+  .sql file isn't registered in meta/_journal.json, and a from-scratch apply
+  (`pnpm db:migrate`) against a clean Postgres service container that proves
+  the generated SQL runs (ordering / FKs). Found while wiring this: an orphan
+  `0001_add_profiles_and_matches.sql` sat unjournaled beside the real
+  `0001_panoramic_cable` — the runner had been ignoring it. Verified it was a
+  superseded duplicate (same tables; the journaled one additionally drops the
+  template `items` table) and deleted it. Lesson: db:push keeps the *db*
+  correct while letting the migration *files* drift unnoticed.
 
 Remaining (flagged, not done):
 - The authz suite mocks the db, so it proves guard ordering + control
   flow, NOT that the Drizzle queries are valid SQL. A real-Postgres
   integration harness (testcontainers / the docker-compose dev DB) would
   add query validity + FK/cascade coverage. Deferred per NFR-6 — revisit
-  if a query bug slips to production.
-- Migrations are generated (`db:generate`) but applied locally via
-  `db:push`, never through the migration runner — generated SQL is
-  unverified until the production deploy step (`node dist/scripts/migrate.js`).
-  Periodically apply the 000x migrations to a throwaway DB to prove they
-  run clean (ordering / FKs).
+  if a query bug slips to production. (The CI from-scratch apply above now
+  proves migrations run, but not that the app's runtime queries match.)

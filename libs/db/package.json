@@ -12,6 +12,7 @@
     "db:studio": "drizzle-kit studio --config drizzle.config.ts",
     "db:generate": "drizzle-kit generate --config drizzle.config.ts",
     "db:migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "db:check": "node scripts/check-migrations.mjs",
     "test": "vitest run",
     "test:watch": "vitest"
   },

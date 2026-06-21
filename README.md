@@ -194,6 +194,8 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm better-auth:generate` | Regenerate `libs/db/src/schema/auth.ts` from auth config |
 | `pnpm db:push` | Push Drizzle schema to Postgres |
 | `pnpm db:generate` | Write SQL migration files from schema changes |
+| `pnpm db:migrate` | Apply migration files to `DATABASE_URL` (the deploy-step runner) |
+| `pnpm db:check` | Verify every migration `.sql` is registered in the journal (no DB needed) |
 | `pnpm db:studio` | Open Drizzle Studio |
 | `pnpm db:seed` | Run seeders against `DATABASE_URL` |
 | `pnpm format` | Format with Biome |
