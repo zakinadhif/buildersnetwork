@@ -74,7 +74,10 @@ jobs:
       - name: Verify migrations apply on a clean database
         run: pnpm db:migrate
         env:
-          DATABASE_URL: postgres://comfort:comfort@localhost:5432/comfort
+          # 127.0.0.1, not localhost: on the runner `localhost` can resolve to
+          # IPv6 (::1) first, but the Postgres service only publishes on IPv4 —
+          # postgres-js then hits ECONNREFUSED. Forcing IPv4 avoids that.
+          DATABASE_URL: postgres://comfort:comfort@127.0.0.1:5432/comfort
 
       - name: Unit tests — api
         run: pnpm test:api
