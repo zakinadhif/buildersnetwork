@@ -1,186 +1,141 @@
-RETRO — Risks / notes collected across sprints
-Source: plans/sprint/sprint-{0,1,2,3}.md  ·  Compiled 2026-06-21
+RETRO — decisions, principles & open threads
+Source: plans/sprint/sprint-{0,1,2,3}.md · Compiled 2026-06-21 · revised 2026-06-22
 Non-authoritative working knowledge — trust the code when they diverge.
 
-================================================================
-SPRINT 0 — Foundation (0a + 0b)
-================================================================
-
-(No "Risks / notes" section — sprint-0.md is a mechanical 0a/0b split
-with no dedicated risks block.)
-
 
 ================================================================
-SPRINT 1 — Interests + profile
+PRINCIPLES (hold across sprints)
 ================================================================
 
-- Tag fragmentation (PRD §15). Slug dedupe (DECISION-D) is the primary
-  guard; curated-first suggestions in the editor (S1.9) are the secondary
-  nudge. No admin merge/moderation UI this sprint — user-created rows
-  accumulate as `curated:false` and can be promoted/merged later.
-- `GET /members` join cost. Batch + group in memory (S1.7); fine at
-  community scale (NFR-6). Revisit only if the directory grows large.
-- Shared vocabulary forward-looks to Sprint 2. `karya_interests` will
-  reuse this `interests` table and `slugifyInterest`. Keep the helper and
-  catalog table karya-agnostic.
-- `handle` still unique-but-nullable (carried over from Sprint 0a S0a.6);
-  a NOT NULL tightening remains out of scope here.
-
-
-================================================================
-SPRINT 2 — Karya core
-================================================================
-
-- Reused interest vocabulary (Sprint 1 forward-look). `karya_interests`
-  and `reconcileKaryaInterests` reuse the `interests` catalog +
-  `slugifyInterest` (DECISION-C). Keep the extracted find-or-create core
-  karya-agnostic so a third tagger (problems, FR-16) can reuse it later.
-- No real profile pics (DECISION-E). Faces are monograms; the wire carries
-  a nullable `image` so a later upload feature is drop-in. Don't build
-  photo upload here.
-- Posts are Sprint 3 (DECISION-F). The post-stream section is an
-  empty-state placeholder only — no `posts` table, no compose. Resist
-  scope-creeping posts in.
-- Owner-only authorization. Approve/decline (S2.10) and the
-  `pendingRequests` field (S2.8) must verify ownership server-side, not
-  trust the client. The single-owner model (one `role:"owner"` row) is the
-  only authority this sprint; co-owners/transfers are out of scope.
-- `GET /api/karya` roster cost. Batch + group in memory like `GET /members`
-  (Sprint 1); fine at community scale (NFR-6). Revisit only if listings
-  grow large.
-- Stage as array vs. enum. Stored as `jsonb` string array, validated by
-  `normalizeStages`, not a DB-level pg enum — matches `skills`/repo style
-  and keeps adding/reordering stages a code change, not a migration.
-  Accepted trade-off for small scale.
+- Batch-in-memory reads, never N+1 (NFR-6): `GET /members` (S1),
+  `GET /api/karya` roster (S2), feed/featured (S3). Fine at community
+  scale; revisit only if a listing grows large.
+- Server-side authorization, never trust the client: owner-only
+  approve/decline (S2.10, incl. the `pendingRequests` field S2.8),
+  member-only posting (S3.7), admin-only featuring (S3.10a). The Playwright
+  e2e mocks the API, so it covers the UI gate (e.g. no compose box for
+  non-members), NOT this boundary — the karya-authz suite exercises the real
+  router for the 401/403/404 paths.
+- Closed vocabularies as validated `text`, not pg enums, so the list stays a
+  code change not a migration: stages (S2), post `kind` / `role` / `status`
+  (S3). Matches repo `skills` style.
+- Shared cores kept entity-agnostic for reuse: interest catalog +
+  `slugifyInterest` (S1 → S2 `karya_interests` / `reconcileKaryaInterests`;
+  keep find-or-create reusable for FR-16 problems next); `toKaryaListItem` /
+  roster + interest batching (S2 → S3 feed).
+- No RBAC / admin app / moderation build-out — the PRD describes none: env
+  `ADMIN_EMAILS` allowlist, not `users.role` (S3); no tag merge UI (S1). The
+  toggle is UI convenience; the server email check is the real authority.
 
 
 ================================================================
-SPRINT 3 — Posts, feed & homepage
+SPRINT DECISIONS (the specifics behind the principles)
 ================================================================
 
-- Admin is an env allowlist, not RBAC (DECISION-A). Curation is a
-  karya-page toggle gated by `ADMIN_EMAILS` (parsed in `worker.ts`, checked
-  server-side on `…/feature`). There is no `users.role`, no admin role, no
-  separate admin app — the PRD describes none. Resist growing this into
-  RBAC. The toggle is UI convenience; the server email check is the real
-  authority. Editing the allowlist requires a redeploy/secret update —
-  acceptable for a small founding team. The seeder pre-marks featured karya
-  only so a fresh seed isn't empty.
-- Homepage regression is intentional (DECISION-F). Removing the
-  AI-discovery chat + members list from `/home` is a deliberate scope shift
-  to Sprint 4 (discovery + search), not an accident. Member-browsing
-  survives the gap only via faces/titles linking out — confirm those links
-  exist before closing. Don't leave the discovery `callClaude` code as dead
-  weight; Sprint 4 rebuilds it.
-- Feed cost + shape (DECISION-E). Merge in memory, batch enrichment (reuse
-  `rostersByKaryaIds`/`interestsByKaryaIds`/`toKaryaListItem`) — fine at
-  community scale (NFR-6). No ranking, no cursor: a fixed `limit` is the
-  whole pagination story this sprint. Revisit only if the feed grows large.
-  The `oneOf`/discriminated `FeedItem` must stay simple enough for
-  orval/zod codegen — a flat `type` discriminant, not deep polymorphism.
-- Authorization is server-side (DECISION-C). "Any karya member can post"
-  means `status:"member"` verified on the server for `POST …/posts` —
-  never trust a client flag. Pending requesters and non-members get 403.
-- Post `kind` as enum vs. pg enum (DECISION-B). Stored as validated `text`,
-  not a DB-level enum — matches `stages`/`role`/`status` and keeps the
-  vocabulary a code change. `normalizePostKind` returns `null` (no default)
-  because a post must declare its kind; the API maps `null` → 400.
-- Likes/comments are out (FR-20 P1 / FR-21 P2). Posts this sprint are
-  author-only content — no reactions, no threads. The feedback/validation
-  channel (FR-42) and per-project AI (FR-33) are P1; don't scope-creep them
-  onto the post stream.
+S1 — Interests + profile
+- Tag fragmentation (PRD §15, DECISION-D): slug dedupe is the primary guard,
+  curated-first suggestions in the editor (S1.9) the secondary nudge.
+  User-created rows accumulate `curated:false` for later promote/merge.
+- `handle` stays unique-but-nullable (carried from S0a.6); a NOT NULL
+  tightening is out of scope.
 
+S2 — Karya core
+- No real profile pics (DECISION-E): faces are monograms; the wire carries a
+  nullable `image` so an upload feature is drop-in later. Don't build it here.
+- Single-owner model (one `role:"owner"` row) is the only authority;
+  co-owners/transfers out of scope.
+- Stages stored as a `jsonb` string array validated by `normalizeStages`
+  (see Principles — adding/reordering stays a code change).
+- Posts deferred to S3 (DECISION-F): placeholder empty-state only, no
+  `posts` table, no compose. Resisted scope-creeping posts in.
 
-================================================================
-RECURRING THREADS (across sprints)
-================================================================
-
-- Batch-in-memory reads, never N+1 — community scale (NFR-6): S1
-  (`GET /members`), S2 (`GET /api/karya` roster), S3 (feed/featured).
-- Server-side authorization, never trust the client: S2 (owner-only
-  approve/decline), S3 (member-only posting, admin-only featuring).
-- Closed vocab as validated `text`, not pg enum, so changes stay code not
-  migrations: S2 (`stages`), S3 (`kind`).
-- Shared, reusable cores kept entity-agnostic: S1→S2 interest catalog +
-  `slugifyInterest`; S2→S3 `toKaryaListItem` / roster + interest batching.
-- No moderation/admin/RBAC build-out — the PRD describes none: S1 (no tag
-  merge UI), S3 (env allowlist, not roles).
-- Deferred-but-flagged forward-looks: S1 `handle` NOT NULL; S2 photo
-  upload, co-owners/transfers; S3 likes/comments, feedback channel,
-  per-project AI.
-- Test the real boundary, not a stub: an e2e that mocks the API cannot
-  cover server-side authz (it stubs the server it claims to test). The S3
-  follow-up API suite executes the actual router for the 401/403/404 paths.
+S3 — Posts, feed & homepage
+- Admin = env allowlist (DECISION-A): `ADMIN_EMAILS` parsed in `worker.ts`,
+  checked server-side on `…/feature`. Editing it needs a redeploy/secret
+  update — acceptable for a small founding team. The seeder pre-marks
+  featured karya so a fresh seed isn't empty.
+- Homepage regression is intentional (DECISION-F): the AI-discovery chat +
+  members list were pulled from `/home`, shifted to S4 (discovery + search).
+  Member-browsing survives the gap only via faces/titles linking out —
+  confirm those links exist. S4 rebuilds the discovery `callClaude` code;
+  don't leave it as dead weight.
+- Feed shape (DECISION-E): merge in memory, batch enrichment (see
+  Principles). No ranking, no cursor — a fixed `limit` is the whole
+  pagination story. The `oneOf`/discriminated `FeedItem` stays simple for
+  orval/zod codegen: a flat `type` discriminant, not deep polymorphism.
+- Post `kind` (DECISION-B): validated `text`; `normalizePostKind` returns
+  `null` (no default) because a post must declare its kind → API maps
+  `null` to 400.
+- Likes/comments are out (FR-20 P1 / FR-21 P2) — posts are author-only
+  content. The feedback/validation channel (FR-42) and per-project AI
+  (FR-33) are P1; don't scope-creep them onto the post stream.
 
 
 ================================================================
-SURFACED NEED — admin UI
+HARDENED (work done post-Sprint 3)
 ================================================================
 
-The "no RBAC, no admin app" stance (S1, S3) has held through P0 by
-leaning on env config + SQL, but the seams are now visible and an admin
-UI is the natural next investment once the team/community grows:
-
-- Featured curation is a per-karya toggle (S3) — fine for marking, but
-  there's no surface to *see/reorder the whole featured set* or its
-  `rank`s; reordering still means direct SQL on `featured`.
-- The admin allowlist itself (`ADMIN_EMAILS`, S3) can only change via a
-  redeploy / `wrangler secret put`. Granting or revoking an admin is a
-  deploy, not an action — the point where a real `users.role` (or an
-  `admins` table) + an admin screen starts to earn its keep.
-- Tag/interest moderation (S1) was explicitly deferred: no merge/promote
-  UI, so `curated:false` rows accumulate unmanaged. An admin UI is where
-  merge/promote/dedupe would live.
-- No moderation surface for posts/karya (hide, remove, flag) exists at
-  all — acceptable at founding-team trust levels, but a gap as the
-  community opens up.
-
-Not P0. Flag for a post-P0 "admin/moderation" track once curation,
-allowlist churn, or tag cleanup becomes a recurring manual chore.
+- API authz suite (apps/api/tests/karya-authz.test.ts, 16 tests). Mounts the
+  REAL karya router with an injected chainable db + configurable auth, driven
+  via `app.request` — asserts the real 401/403/404/400/200 flow and that a
+  post is inserted with the session user as author (not client-supplied).
+  `pnpm test:api` now runs a real suite (was: no test files, exit 1).
+  Reusable seam: tests/helpers/harness.ts `createDbMock`.
+- Stale template specs (auth.spec / routes.spec) carried RED for 3+ sprints
+  (asserted a "My App" shell / `/api/items` / a 404 page this app never had)
+  rewritten to the real app (welcome / login / feed-first home). Lesson:
+  knowingly-red tests desensitize you to red — fix-on-touch or delete.
+- Migration drift guards — three CI checks (.github/workflows/ci.yml), one
+  per axis along which schema, files and DB can diverge:
+    1. `pnpm db:check` (no DB) — every migration .sql is registered in
+       meta/_journal.json. The runner applies files by the journal, not the
+       directory, so a stray file is silently ignored.
+    2. `pnpm db:generate` + dirty-tree check (no DB) — the schema TS isn't
+       ahead of the migrations. generate diffs schema against the snapshots
+       (it never connects to a DB); a new emitted migration dirties the tree.
+    3. `pnpm db:migrate` on a clean Postgres service container — the
+       generated SQL actually applies (ordering / FKs); db:push never
+       exercises this locally.
+  Removed orphan `0001_add_profiles_and_matches.sql` (superseded duplicate of
+  the journaled `0001_panoramic_cable`, which also drops the template `items`
+  table). Lesson: db:push keeps the *db* correct while letting the migration
+  *files* drift unnoticed; tsc already guards schema-typo bugs, so the
+  residual gap is runtime queries vs. the real DB (see Open / Deferred).
 
 
 ================================================================
-TESTING — gaps closed & remaining (post-Sprint 3)
+OPEN / DEFERRED (flagged, not P0)
 ================================================================
 
-Found while closing Sprint 3: the "authorization covered by the e2e"
-assumption (S3.16/S3.17) was false. The Playwright e2e mocks the API, so
-the server-side guards it claimed to cover — member-only posting (S3.7),
-admin-only featuring (S3.10a), owner-only approve/decline (S2.10) — never
-executed in any test. The e2e stubs the very server it was meant to
-exercise; it covers the UI gate (e.g. no compose box for non-members),
-not the security boundary behind it.
+In-sprint forward-looks already flagged: `handle` NOT NULL (S1); photo
+upload, co-owners/transfers (S2); likes/comments, feedback channel,
+per-project AI (S3).
 
-Closed:
-- API authz suite (apps/api/tests/karya-authz.test.ts, 16 tests). Mounts
-  the REAL karya router with an injected chainable db mock + configurable
-  auth, driven via `app.request` — asserts the real 401/403/404/400/200
-  control flow and that a post is inserted with the session user as author
-  (not a client-supplied one). `pnpm test:api` now runs a real suite
-  (was: no test files, exit 1). Reusable seam: tests/helpers/harness.ts
-  `createDbMock` (a fully chainable Drizzle builder mock; the prior
-  `makeQueryResult` only modelled `.limit()`).
-- Stale template specs (auth.spec / routes.spec) had been carried RED for
-  3+ sprints under "leave for the cleanup pass," asserting a "My App"
-  shell / `/api/items` / a 404 page this app never had. Rewritten to cover
-  the real app (welcome / login / feed-first home). Lesson: knowingly-red
-  tests desensitize you to red — fix-on-touch or delete, don't defer.
-- Migration verification (was "Remaining" below). Two CI guards added to
-  the `ci` job (.github/workflows/ci.yml): a static journal-integrity check
-  (`pnpm db:check` → libs/db/scripts/check-migrations.mjs) that fails if any
-  .sql file isn't registered in meta/_journal.json, and a from-scratch apply
-  (`pnpm db:migrate`) against a clean Postgres service container that proves
-  the generated SQL runs (ordering / FKs). Found while wiring this: an orphan
-  `0001_add_profiles_and_matches.sql` sat unjournaled beside the real
-  `0001_panoramic_cable` — the runner had been ignoring it. Verified it was a
-  superseded duplicate (same tables; the journaled one additionally drops the
-  template `items` table) and deleted it. Lesson: db:push keeps the *db*
-  correct while letting the migration *files* drift unnoticed.
+- Real-Postgres query coverage. The authz suite mocks the db, so it proves
+  guard ordering + control flow, NOT that the Drizzle queries are valid SQL.
+  A testcontainers / docker-compose-DB integration harness would add query
+  validity + FK/cascade coverage. The CI from-scratch apply proves migrations
+  run, not that runtime queries match the schema. Deferred per NFR-6 —
+  revisit if a query bug reaches production.
 
-Remaining (flagged, not done):
-- The authz suite mocks the db, so it proves guard ordering + control
-  flow, NOT that the Drizzle queries are valid SQL. A real-Postgres
-  integration harness (testcontainers / the docker-compose dev DB) would
-  add query validity + FK/cascade coverage. Deferred per NFR-6 — revisit
-  if a query bug slips to production. (The CI from-scratch apply above now
-  proves migrations run, but not that the app's runtime queries match.)
+- Admin / moderation UI. The env-config-plus-SQL stance has held through P0,
+  but the seams show: the featured set has no see/reorder surface (rank edits
+  mean raw SQL on `featured`); granting/revoking an admin is a redeploy, not
+  an action (`ADMIN_EMAILS`) — the point a real `users.role` / `admins` table
+  earns its keep; tag/interest merge/promote/dedupe has no home, so
+  `curated:false` rows accumulate unmanaged; no hide/remove/flag surface for
+  posts/karya exists. Pick up once curation, allowlist churn, or tag cleanup
+  becomes a recurring manual chore.
+
+- Preview deployments / branch workflow. Commit-straight-to-main is the local
+  optimum because no per-branch preview exists — branching adds ceremony with
+  no clickable payoff; tolerable only because traffic is ~0. The stack has
+  both primitives already: `wrangler versions upload` (preview *.workers.dev
+  URL without promoting production) and Neon DB branching (copy-on-write
+  per-PR DB so a preview migrates against a throwaway, not prod — already on
+  `@neondatabase/serverless`, unused). Tiers: (0, today) main + eyeball prod;
+  (1, cheap) versions-upload on PRs, bot comments the URL — ~20 lines CI,
+  frontend/logic only, no DB isolation; (2, full) Neon branch per PR. The new
+  migration guards already de-risk schema branches statically, before any
+  deploy. Pick up Tier 1 when commit-to-main friction bites; Tier 2 when a
+  schema-changing PR makes sharing the prod DB feel risky.
