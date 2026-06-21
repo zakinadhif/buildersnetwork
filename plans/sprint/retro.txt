@@ -108,6 +108,9 @@ RECURRING THREADS (across sprints)
 - Deferred-but-flagged forward-looks: S1 `handle` NOT NULL; S2 photo
   upload, co-owners/transfers; S3 likes/comments, feedback channel,
   per-project AI.
+- Test the real boundary, not a stub: an e2e that mocks the API cannot
+  cover server-side authz (it stubs the server it claims to test). The S3
+  follow-up API suite executes the actual router for the 401/403/404 paths.
 
 
 ================================================================
@@ -134,3 +137,43 @@ UI is the natural next investment once the team/community grows:
 
 Not P0. Flag for a post-P0 "admin/moderation" track once curation,
 allowlist churn, or tag cleanup becomes a recurring manual chore.
+
+
+================================================================
+TESTING — gaps closed & remaining (post-Sprint 3)
+================================================================
+
+Found while closing Sprint 3: the "authorization covered by the e2e"
+assumption (S3.16/S3.17) was false. The Playwright e2e mocks the API, so
+the server-side guards it claimed to cover — member-only posting (S3.7),
+admin-only featuring (S3.10a), owner-only approve/decline (S2.10) — never
+executed in any test. The e2e stubs the very server it was meant to
+exercise; it covers the UI gate (e.g. no compose box for non-members),
+not the security boundary behind it.
+
+Closed:
+- API authz suite (apps/api/tests/karya-authz.test.ts, 16 tests). Mounts
+  the REAL karya router with an injected chainable db mock + configurable
+  auth, driven via `app.request` — asserts the real 401/403/404/400/200
+  control flow and that a post is inserted with the session user as author
+  (not a client-supplied one). `pnpm test:api` now runs a real suite
+  (was: no test files, exit 1). Reusable seam: tests/helpers/harness.ts
+  `createDbMock` (a fully chainable Drizzle builder mock; the prior
+  `makeQueryResult` only modelled `.limit()`).
+- Stale template specs (auth.spec / routes.spec) had been carried RED for
+  3+ sprints under "leave for the cleanup pass," asserting a "My App"
+  shell / `/api/items` / a 404 page this app never had. Rewritten to cover
+  the real app (welcome / login / feed-first home). Lesson: knowingly-red
+  tests desensitize you to red — fix-on-touch or delete, don't defer.
+
+Remaining (flagged, not done):
+- The authz suite mocks the db, so it proves guard ordering + control
+  flow, NOT that the Drizzle queries are valid SQL. A real-Postgres
+  integration harness (testcontainers / the docker-compose dev DB) would
+  add query validity + FK/cascade coverage. Deferred per NFR-6 — revisit
+  if a query bug slips to production.
+- Migrations are generated (`db:generate`) but applied locally via
+  `db:push`, never through the migration runner — generated SQL is
+  unverified until the production deploy step (`node dist/scripts/migrate.js`).
+  Periodically apply the 000x migrations to a throwaway DB to prove they
+  run clean (ordering / FKs).
