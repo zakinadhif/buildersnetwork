@@ -102,6 +102,16 @@ HARDENED (work done post-Sprint 3)
   *files* drift unnoticed; tsc already guards schema-typo bugs, so the
   residual gap is runtime queries vs. the real DB (see Open / Deferred).
 
+- Tier 1 preview deploys (.github/workflows/preview.yml). On every PR,
+  `wrangler versions upload` builds a Worker version (no production traffic
+  shift) and a sticky bot comment posts its *.workers.dev URL — turning
+  commit-straight-to-main into branch-and-eyeball. Gated on
+  CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID, no-op until set (same
+  secret-guard idiom as release.yml). Caveat: the preview runs against the
+  *prod* bindings incl. DATABASE_URL — frontend/logic PRs only, not schema
+  changes (that's Tier 2, see Open / Deferred). Secrets documented in
+  deploy/docs/DEPLOY_CLOUDFLARE.md.
+
 
 ================================================================
 OPEN / DEFERRED (flagged, not P0)
@@ -127,15 +137,11 @@ per-project AI (S3).
   posts/karya exists. Pick up once curation, allowlist churn, or tag cleanup
   becomes a recurring manual chore.
 
-- Preview deployments / branch workflow. Commit-straight-to-main is the local
-  optimum because no per-branch preview exists — branching adds ceremony with
-  no clickable payoff; tolerable only because traffic is ~0. The stack has
-  both primitives already: `wrangler versions upload` (preview *.workers.dev
-  URL without promoting production) and Neon DB branching (copy-on-write
-  per-PR DB so a preview migrates against a throwaway, not prod — already on
-  `@neondatabase/serverless`, unused). Tiers: (0, today) main + eyeball prod;
-  (1, cheap) versions-upload on PRs, bot comments the URL — ~20 lines CI,
-  frontend/logic only, no DB isolation; (2, full) Neon branch per PR. The new
+- Preview deployments — Tier 2 (per-branch DB isolation). Tier 1 shipped (see
+  HARDENED), but its preview versions run against the *prod* DATABASE_URL, so
+  it's only safe for frontend/logic PRs. Tier 2 = a Neon DB branch per PR
+  (copy-on-write, so a preview migrates against a throwaway, not prod — the
+  stack is already on `@neondatabase/serverless`, that capability unused). The
   migration guards already de-risk schema branches statically, before any
-  deploy. Pick up Tier 1 when commit-to-main friction bites; Tier 2 when a
-  schema-changing PR makes sharing the prod DB feel risky.
+  deploy. Pick up Tier 2 when a schema-changing PR makes sharing the prod DB
+  feel risky.

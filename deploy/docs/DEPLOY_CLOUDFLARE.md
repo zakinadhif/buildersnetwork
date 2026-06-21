@@ -50,20 +50,46 @@ This runs:
 
 ## Run database migrations
 
-Migrations must be run separately (Workers can't run long-lived scripts):
+Workers can't run migrations themselves (no long-lived scripts), so they run
+*before* the Worker is published.
 
-```bash
-# Option A: run from local machine against Neon DB directly
-DATABASE_URL=postgres://... pnpm db:push   # for initial schema
+- **In CI (normal path):** `.github/workflows/release.yml` runs `pnpm db:migrate`
+  against the prod `DATABASE_URL` secret on every push to `main`, then deploys.
+  No manual step needed.
+- **Manually (initial schema / out-of-band):**
 
-# Option B: use Neon dashboard or psql
-```
+  ```bash
+  # run from a local machine against the Neon DB directly
+  DATABASE_URL=postgres://... pnpm db:migrate   # apply migration files
+  # DATABASE_URL=postgres://... pnpm db:push    # or push schema for first setup
+
+  # or use the Neon dashboard / psql
+  ```
 
 ## Redeploy after code changes
 
 ```bash
 pnpm cf:deploy
 ```
+
+## PR preview deploys (CI)
+
+`.github/workflows/preview.yml` uploads a Worker *version* on every PR and
+comments its `*.workers.dev` preview URL. `wrangler versions upload` does **not**
+shift production traffic — it's a clickable build for eyeballing changes.
+
+It runs only when both repo secrets are set (otherwise the job no-ops, like the
+guarded deploys in `release.yml`):
+
+```
+CLOUDFLARE_API_TOKEN    # token with "Edit Workers" permission
+CLOUDFLARE_ACCOUNT_ID   # Cloudflare account ID
+```
+
+The preview version uses the **production** bindings/secrets, including the prod
+`DATABASE_URL`. So it's safe for frontend/logic PRs but not schema-changing ones
+— those need per-branch DB isolation (Neon branching), tracked as Tier 2 in
+`plans/sprint/retro.txt`.
 
 ## Redeploy after frontend-only changes
 

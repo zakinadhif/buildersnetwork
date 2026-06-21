@@ -1,0 +1,118 @@
+name: Preview
+
+# Tier 1 preview deploy: on every PR, upload a new Worker *version* (without
+# promoting it to production) and comment its *.workers.dev preview URL.
+# `wrangler versions upload` does NOT shift production traffic — it just makes a
+# clickable build. The version runs against the production bindings/secrets,
+# including the prod DATABASE_URL, so this is for eyeballing frontend/logic
+# changes, NOT for schema-changing PRs (those need per-branch DB isolation —
+# see "Preview deployments — Tier 2" in plans/sprint/retro.txt).
+
+on:
+  pull_request:
+    branches: [main]
+
+# One preview per PR; a new push supersedes the in-flight upload.
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    name: Upload preview version
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Gate the whole job on the Cloudflare creds existing, mirroring the
+      # secret-guarded deploys in release.yml. Until both are set (and on PRs
+      # from forks, which can't see secrets) the steps below no-op.
+      - name: Guard on Cloudflare credentials
+        id: guard
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
+            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup pnpm
+        if: steps.guard.outputs.enabled == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.guard.outputs.enabled == 'true'
+        run: pnpm install
+
+      # Same build the production deploy uses: codegen → frontend → api → copy
+      # assets into apps/api/public so the Worker serves the SPA + landing.
+      - name: Build for Cloudflare
+        if: steps.guard.outputs.enabled == 'true'
+        run: pnpm build:cf
+
+      # Upload a new version (no traffic shift). Capture stdout to pull the
+      # "Version Preview URL:" line wrangler prints.
+      - name: Upload preview version
+        id: upload
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          pnpm exec wrangler versions upload 2>&1 | tee upload.log
+          url="$(grep -oE 'https://[a-z0-9-]+\.[a-z0-9-]+\.workers\.dev' upload.log | head -n1)"
+          if [ -z "$url" ]; then
+            echo "::warning::Could not parse a preview URL from wrangler output."
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # Sticky comment: upsert a single bot comment instead of stacking one per
+      # push. Keyed by the hidden marker below.
+      - name: Comment preview URL
+        if: steps.guard.outputs.enabled == 'true' && steps.upload.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = "${{ steps.upload.outputs.url }}";
+            const marker = "<!-- preview-deploy -->";
+            const body = [
+              marker,
+              "### ⚡ Preview deploy",
+              "",
+              `Latest version of this PR: ${url}`,
+              "",
+              "_Uploaded as a Worker version — production traffic is untouched._",
+              "> ⚠️ Runs against the **production** database. Don't exercise",
+              "> schema-changing or destructive flows here.",
+              "",
+              `<sub>Commit ${context.sha.slice(0, 7)} · updated ${new Date().toISOString()}</sub>`,
+            ].join("\n");
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.issue.number;
+
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number },
+            );
+            const existing = comments.find((c) => (c.body || "").includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number, body,
+              });
+            }
