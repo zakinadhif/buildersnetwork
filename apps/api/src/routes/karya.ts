@@ -1,15 +1,18 @@
-import { CreateKaryaBody } from "@myapp/api-zod";
-import { normalizeStages } from "@myapp/db";
-import { karya, karyaMembers, profiles, users } from "@myapp/db/schema";
-import { and, desc, eq, inArray } from "drizzle-orm";
+import { CreateKaryaBody, CreatePostBody } from "@myapp/api-zod";
+import { normalizePostKind, normalizeStages } from "@myapp/db";
+import { featured, karya, karyaMembers, posts } from "@myapp/db/schema";
+import { and, desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
+import { interestsForKarya, reconcileKaryaInterests } from "../lib/interests";
 import {
-  interestsByKaryaIds,
-  interestsForKarya,
-  reconcileKaryaInterests,
-} from "../lib/interests";
+  karyaListItems,
+  rostersByKaryaIds,
+  sortRoster,
+  toRosterMember,
+} from "../lib/karya";
+import { getPostById, postsForKarya, toPost } from "../lib/posts";
 
 const app = new Hono<AppEnv>();
 
@@ -17,68 +20,13 @@ async function getSession(c: Context<AppEnv>) {
   return c.get("auth").api.getSession({ headers: c.req.raw.headers });
 }
 
-type Db = AppEnv["Variables"]["db"];
+type Session = Awaited<ReturnType<typeof getSession>>;
 
-// One roster row per karya membership, joined to the member's profile + user
-// (for the face). Carries `role`/`status` so callers can filter approved
-// members vs pending requests and sort the owner first.
-interface RosterRow {
-  karyaId: string;
-  userId: string;
-  role: string;
-  status: string;
-  createdAt: Date;
-  name: string;
-  handle: string | null;
-  image: string | null;
-}
-
-/**
- * Fetch every roster row for the given karya in one grouped query — don't N+1
- * the listing (mirrors `interestsByKaryaIds`). Members without a profile are
- * dropped (no name to render a face from).
- */
-async function rostersByKaryaIds(
-  db: Db,
-  karyaIds: string[],
-): Promise<Map<string, RosterRow[]>> {
-  const grouped = new Map<string, RosterRow[]>();
-  if (karyaIds.length === 0) return grouped;
-
-  const rows = await db
-    .select({
-      karyaId: karyaMembers.karyaId,
-      userId: karyaMembers.userId,
-      role: karyaMembers.role,
-      status: karyaMembers.status,
-      createdAt: karyaMembers.createdAt,
-      name: profiles.name,
-      handle: profiles.handle,
-      image: users.image,
-    })
-    .from(karyaMembers)
-    .innerJoin(profiles, eq(karyaMembers.userId, profiles.userId))
-    .innerJoin(users, eq(karyaMembers.userId, users.id))
-    .where(inArray(karyaMembers.karyaId, karyaIds));
-
-  for (const r of rows) {
-    const list = grouped.get(r.karyaId);
-    if (list) list.push(r);
-    else grouped.set(r.karyaId, [r]);
-  }
-  return grouped;
-}
-
-/** Owner first, then by join time — stable roster order for the faces. */
-function sortRoster(rows: RosterRow[]): RosterRow[] {
-  return [...rows].sort((a, b) => {
-    if (a.role !== b.role) return a.role === "owner" ? -1 : 1;
-    return a.createdAt.getTime() - b.createdAt.getTime();
-  });
-}
-
-function toRosterMember(r: RosterRow) {
-  return { id: r.userId, name: r.name, handle: r.handle, image: r.image };
+/** Email allowlist check (DECISION-A) — the entire feature authority model. */
+function isAdmin(c: Context<AppEnv>, session: Session): boolean {
+  const email = session?.user.email;
+  if (!email) return false;
+  return c.get("adminEmails").includes(email);
 }
 
 // Create a karya (FR-10). Authenticated; the creator becomes owner + member in
@@ -124,32 +72,12 @@ app.get("/", async (c) => {
   const db = c.get("db");
 
   const rows = await db.select().from(karya).orderBy(desc(karya.createdAt));
-  if (rows.length === 0) return c.json([]);
-
-  const ids = rows.map((k) => k.id);
-  const interestsByKarya = await interestsByKaryaIds(db, ids);
-  const rosters = await rostersByKaryaIds(db, ids);
-
-  return c.json(
-    rows.map((k) => {
-      const members = sortRoster(
-        (rosters.get(k.id) ?? []).filter((r) => r.status === "member"),
-      );
-      return {
-        id: k.id,
-        title: k.title,
-        description: k.description,
-        stages: k.stages,
-        interests: interestsByKarya.get(k.id) ?? [],
-        roster: members.map(toRosterMember),
-        memberCount: members.length,
-      };
-    }),
-  );
+  return c.json(await karyaListItems(db, rows));
 });
 
 // Karya detail (FR-11/FR-12). `pendingRequests` is owner-only — never leak the
-// pending list to non-owners. `viewerMembership` drives the client CTA.
+// pending list to non-owners. `viewerMembership` drives the client CTA;
+// `featured`/`viewerIsAdmin` drive the admin feature toggle (S3.10a).
 app.get("/:id", async (c) => {
   const db = c.get("db");
   const id = c.req.param("id");
@@ -167,6 +95,12 @@ app.get("/:id", async (c) => {
     ? all.find((r) => r.userId === viewerId)
     : undefined;
 
+  const [feat] = await db
+    .select({ karyaId: featured.karyaId })
+    .from(featured)
+    .where(eq(featured.karyaId, id))
+    .limit(1);
+
   return c.json({
     id: k.id,
     title: k.title,
@@ -181,6 +115,8 @@ app.get("/:id", async (c) => {
     pendingRequests: isOwner
       ? all.filter((r) => r.status === "pending").map(toRosterMember)
       : [],
+    featured: !!feat,
+    viewerIsAdmin: isAdmin(c, session),
   });
 });
 
@@ -212,6 +148,78 @@ app.post("/:id/join", async (c) => {
     .values({ karyaId: id, userId, role: "member", status: "pending" })
     .onConflictDoNothing();
   return c.json({ role: "member", status: "pending" });
+});
+
+// Karya update stream (FR-18/19, DECISION-D). Reverse-chron posts for the karya,
+// each with its author face. Separate from `GET /:id` so the page can refetch
+// the stream after posting without re-pulling roster/pending. 404 if missing.
+app.get("/:id/posts", async (c) => {
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const [k] = await db
+    .select({ id: karya.id })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+  if (!k) return c.json({ error: "not found" }, 404);
+
+  const rows = await postsForKarya(db, id);
+  return c.json(rows.map(toPost));
+});
+
+// Post an update (FR-18). Authenticated; only an approved member of the karya
+// may post (DECISION-C) — verified server-side, never trusted from the client.
+app.post("/:id/posts", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const [k] = await db
+    .select({ id: karya.id })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+  if (!k) return c.json({ error: "not found" }, 404);
+
+  const [membership] = await db
+    .select({ status: karyaMembers.status })
+    .from(karyaMembers)
+    .where(
+      and(
+        eq(karyaMembers.karyaId, id),
+        eq(karyaMembers.userId, session.user.id),
+      ),
+    )
+    .limit(1);
+  if (!membership || membership.status !== "member") {
+    return c.json({ error: "forbidden" }, 403);
+  }
+
+  const parsed = CreatePostBody.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return c.json(
+      { error: parsed.error.issues[0]?.message ?? "invalid request" },
+      400,
+    );
+  }
+  const kind = normalizePostKind(parsed.data.kind);
+  const body = parsed.data.body.trim();
+  if (!kind || !body) return c.json({ error: "invalid post" }, 400);
+
+  const postId = crypto.randomUUID();
+  await db.insert(posts).values({
+    id: postId,
+    karyaId: id,
+    authorId: session.user.id,
+    kind,
+    body,
+  });
+
+  const created = await getPostById(db, postId);
+  if (!created) return c.json({ error: "not found" }, 404);
+  return c.json(toPost(created));
 });
 
 /** Resolve the karya and verify the session user owns it (403 otherwise). */
@@ -275,6 +283,57 @@ app.post("/:id/members/:userId/decline", async (c) => {
         eq(karyaMembers.status, "pending"),
       ),
     );
+  return c.json({ ok: true });
+});
+
+/** Resolve the karya and verify the session user is an admin (DECISION-A). */
+async function requireAdmin(
+  c: Context<AppEnv>,
+): Promise<{ ok: true } | { ok: false; res: Response }> {
+  const session = await getSession(c);
+  if (!session)
+    return { ok: false, res: c.json({ error: "unauthorized" }, 401) };
+  const db = c.get("db");
+  const id = c.req.param("id") ?? "";
+
+  const [k] = await db
+    .select({ id: karya.id })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+  if (!k) return { ok: false, res: c.json({ error: "not found" }, 404) };
+  if (!isAdmin(c, session)) {
+    return { ok: false, res: c.json({ error: "forbidden" }, 403) };
+  }
+  return { ok: true };
+}
+
+// Mark a karya featured (FR-24, admin-only). Upsert so re-featuring updates the
+// rank. `rank` defaults to 0; lower sorts first in the homepage "Top picked".
+app.post("/:id/feature", async (c) => {
+  const guard = await requireAdmin(c);
+  if (!guard.ok) return guard.res;
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const body = (await c.req.json().catch(() => ({}))) as { rank?: unknown };
+  const rank = typeof body.rank === "number" ? body.rank : 0;
+
+  await db
+    .insert(featured)
+    .values({ karyaId: id, rank })
+    .onConflictDoUpdate({ target: featured.karyaId, set: { rank } });
+  return c.json({ ok: true });
+});
+
+// Remove a karya from featured (admin-only).
+app.delete("/:id/feature", async (c) => {
+  const guard = await requireAdmin(c);
+  if (!guard.ok) return guard.res;
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  await db.delete(featured).where(eq(featured.karyaId, id));
   return c.json({ ok: true });
 });
 

@@ -61,6 +61,8 @@ All screens are URL-routed via Wouter (`/welcome`, `/onboarding`, `/review`, `/m
 
 Beyond the linear onboarding flow, **karya** (projects) are a recurring surface reached from `/home`: a member creates one at `/karya/new` — either filling the draft directly or letting the AI pre-fill it at `/karya/new/ai` — then publishes to a live karya page (`/karya/:id`) with stage chips, interest tags, and a contributor roster shown as avatar faces. Others can request to join; the owner approves or declines. Backed by the `karya` / `karya_members` / `karya_interests` tables and the `/api/karya` routes (list, create, detail, join, approve/decline).
 
+On a karya page, approved members post short **updates** (`progress` / `challenge` / `achievement`) into a reverse-chron stream; non-members see the stream read-only. Each update also surfaces in the **global feed** — a reverse-chronological, *unranked* interleave of recent posts and newly created karya. `/home` is **feed-first**: a hand-curated "Top picked inspiring projects" section (the `featured` table) sits atop that feed. Team members on the `ADMIN_EMAILS` allowlist see a ✦ feature toggle on each karya page to mark/unmark it featured (an env allowlist, not a role system — server-enforced). Backed by the `posts` / `featured` tables and the `/api/karya/:id/posts`, `/api/karya/:id/feature`, `/api/feed`, and `/api/featured` routes. *(The Sprint-2 AI-discovery chat + members list were removed from `/home`; they return on the Sprint-4 search/discovery page.)*
+
 ### AI endpoints
 
 The `@myapp/ai` lib exposes a common `AIProvider` interface (`complete`, `stream`, `agentComplete`) implemented by three adapters. Two HTTP endpoints hang off `/api/ai`:
@@ -219,6 +221,7 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID (optional) |
 | `GOOGLE_CLIENT_SECRET` | Google OAuth client secret (optional) |
 | `ALLOWED_ORIGINS` | Comma-separated CORS allowlist (defaults to `APP_URL`) |
+| `ADMIN_EMAILS` | Comma-separated allowlist of team emails who can feature karya (optional; no RBAC) |
 | `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
 | `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
 | `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-3.1-8b-instruct`) |

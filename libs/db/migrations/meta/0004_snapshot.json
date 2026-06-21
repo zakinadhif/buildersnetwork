@@ -48,9 +48,7 @@
         "interests_slug_unique": {
           "name": "interests_slug_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "slug"
-          ]
+          "columns": ["slug"]
         }
       },
       "policies": {},
@@ -115,12 +113,8 @@
           "name": "matches_user_id_users_id_fk",
           "tableFrom": "matches",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -128,12 +122,8 @@
           "name": "matches_matched_user_id_users_id_fk",
           "tableFrom": "matches",
           "tableTo": "users",
-          "columnsFrom": [
-            "matched_user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["matched_user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -212,12 +202,8 @@
           "name": "profiles_user_id_users_id_fk",
           "tableFrom": "profiles",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -227,9 +213,7 @@
         "profiles_handle_unique": {
           "name": "profiles_handle_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "handle"
-          ]
+          "columns": ["handle"]
         }
       },
       "policies": {},
@@ -275,12 +259,8 @@
           "name": "user_interests_user_id_users_id_fk",
           "tableFrom": "user_interests",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
@@ -288,12 +268,8 @@
           "name": "user_interests_interest_id_interests_id_fk",
           "tableFrom": "user_interests",
           "tableTo": "interests",
-          "columnsFrom": [
-            "interest_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["interest_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -301,10 +277,7 @@
       "compositePrimaryKeys": {
         "user_interests_user_id_interest_id_pk": {
           "name": "user_interests_user_id_interest_id_pk",
-          "columns": [
-            "user_id",
-            "interest_id"
-          ]
+          "columns": ["user_id", "interest_id"]
         }
       },
       "uniqueConstraints": {},
@@ -418,12 +391,8 @@
           "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -510,12 +479,8 @@
           "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
         }
@@ -525,9 +490,7 @@
         "sessions_token_unique": {
           "name": "sessions_token_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "token"
-          ]
+          "columns": ["token"]
         }
       },
       "policies": {},
@@ -591,9 +554,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},

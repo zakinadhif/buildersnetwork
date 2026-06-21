@@ -40,12 +40,18 @@ const allowedOrigins = config.ALLOWED_ORIGINS
       .filter(Boolean)
   : [config.APP_URL];
 
+const adminEmails = (config.ADMIN_EMAILS ?? "")
+  .split(",")
+  .map((e) => e.trim())
+  .filter(Boolean);
+
 const app = createApp({
   db,
   auth,
   ai,
   email,
   allowedOrigins,
+  adminEmails,
   gitSha: process.env.GIT_SHA,
 });
 

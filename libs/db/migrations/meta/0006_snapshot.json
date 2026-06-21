@@ -1,9 +1,68 @@
 {
-  "id": "c0c5ed02-6c8a-40fe-b1e4-efe5e240dcff",
-  "prevId": "a9e4c7ec-b7de-487b-b69d-4a2364ce1dfa",
+  "id": "6ed15dfc-eb8a-4c15-8ade-bc3b303e668e",
+  "prevId": "c0c5ed02-6c8a-40fe-b1e4-efe5e240dcff",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
+    "public.featured": {
+      "name": "featured",
+      "schema": "",
+      "columns": {
+        "karya_id": {
+          "name": "karya_id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "rank": {
+          "name": "rank",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "featured_rank_idx": {
+          "name": "featured_rank_idx",
+          "columns": [
+            {
+              "expression": "rank",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "featured_karya_id_karya_id_fk": {
+          "name": "featured_karya_id_karya_id_fk",
+          "tableFrom": "featured",
+          "tableTo": "karya",
+          "columnsFrom": ["karya_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.interests": {
       "name": "interests",
       "schema": "",
@@ -373,6 +432,106 @@
           "tableFrom": "matches",
           "tableTo": "users",
           "columnsFrom": ["matched_user_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.posts": {
+      "name": "posts",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "karya_id": {
+          "name": "karya_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "author_id": {
+          "name": "author_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "kind": {
+          "name": "kind",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "body": {
+          "name": "body",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "posts_karyaId_idx": {
+          "name": "posts_karyaId_idx",
+          "columns": [
+            {
+              "expression": "karya_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "posts_createdAt_idx": {
+          "name": "posts_createdAt_idx",
+          "columns": [
+            {
+              "expression": "created_at",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "posts_karya_id_karya_id_fk": {
+          "name": "posts_karya_id_karya_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "karya",
+          "columnsFrom": ["karya_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "posts_author_id_users_id_fk": {
+          "name": "posts_author_id_users_id_fk",
+          "tableFrom": "posts",
+          "tableTo": "users",
+          "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"

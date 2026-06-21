@@ -1,9 +1,45 @@
-import { expect } from "@playwright/test";
-import { authed, unauthed } from "./fixtures";
+import type { Page } from "@playwright/test";
+import { authed, expect, unauthed } from "./fixtures";
 
-unauthed("unauthenticated: / redirects to /login", async ({ page }) => {
+// Auth / entry-routing acceptance against the real app: unauthenticated users
+// land on /welcome, the /login form renders, and an authenticated member with a
+// profile lands on the feed-first home (not the old template "My App" shell).
+
+const PROFILE = {
+  id: "test-user-id",
+  name: "Test User",
+  handle: "test",
+  bio: null,
+  interests: [],
+  year: "Tingkat 2",
+  major: "Informatika",
+  skills: [],
+};
+
+// The feed-first home (`CommunityHome`) fetches the viewer's profile + the
+// curated featured list + the global feed. Empty bodies are enough to render.
+async function mockHome(page: Page) {
+  await page.route("**/api/me", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(PROFILE),
+    }),
+  );
+  for (const path of ["**/api/featured", "**/api/feed"]) {
+    await page.route(path, (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "[]",
+      }),
+    );
+  }
+}
+
+unauthed("unauthenticated: / redirects to /welcome", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveURL(/\/login/);
+  await expect(page).toHaveURL(/\/welcome/);
 });
 
 unauthed("login page renders sign-in form", async ({ page }) => {
@@ -14,21 +50,28 @@ unauthed("login page renders sign-in form", async ({ page }) => {
   await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
 });
 
-authed("authenticated: / renders home without redirect", async ({ page }) => {
-  await page.route("**/api/items", (route) =>
-    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
-  );
-  await page.goto("/");
-  await expect(page).not.toHaveURL(/\/login/);
-  await expect(page.getByRole("heading", { name: "My App" })).toBeVisible();
-});
+authed(
+  "authenticated with a profile: / lands on the feed-first home",
+  async ({ page }) => {
+    await mockHome(page);
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/home/);
+    await expect(page).not.toHaveURL(/\/welcome/);
+    await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
+  },
+);
 
-authed("authenticated: /login redirects to /", async ({ page }) => {
-  await page.route("**/api/items", (route) =>
-    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
-  );
-  // When already authenticated, visiting /login should still show the form
-  // (redirect logic can be added to Login.tsx if desired)
-  await page.goto("/login");
-  await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
-});
+authed(
+  "authenticated without a profile: / redirects to onboarding",
+  async ({ page }) => {
+    await page.route("**/api/me", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "null",
+      }),
+    );
+    await page.goto("/");
+    await expect(page).toHaveURL(/\/onboarding/);
+  },
+);

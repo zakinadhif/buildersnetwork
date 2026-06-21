@@ -1,80 +1,24 @@
-import { useListKarya, useListMembers } from "@myapp/api-client-react";
-import { useEffect, useRef, useState } from "react";
+import {
+  type KaryaListItem,
+  useGetFeatured,
+  useGetFeed,
+} from "@myapp/api-client-react";
 import { useLocation } from "wouter";
-import { Avatar, Dots, STAGE_LABELS } from "@/components/ui-atoms";
-import { callClaude, firstName, type Member } from "@/lib/members";
+import Feed from "@/components/Feed";
+import { Avatar, STAGE_LABELS } from "@/components/ui-atoms";
+import { firstName, type Member } from "@/lib/members";
 
+/**
+ * Feed-first community home (Sprint 3, DECISION-F): a hand-curated "Top picked
+ * inspiring projects" section atop a reverse-chron feed of recent posts + new
+ * karya. The Sprint-2 AI-discovery chat and members list were removed — they're
+ * a Sprint-4 search/discovery concern. People-browsing survives the gap via
+ * faces/titles in the feed/featured linking out.
+ */
 export default function CommunityHome({ user }: { user: Member }) {
   const [, navigate] = useLocation();
-  const { data: members = [] } = useListMembers();
-  const { data: karya = [] } = useListKarya();
-
-  const greeting = `hei ${firstName(user.name)} — lagi nyari siapa? tanya aja soal komunitas ini.`;
-  const msgId = useRef(0);
-  const [msgs, setMsgs] = useState<
-    { id: number; role: "ai" | "user"; text: string }[]
-  >([{ id: msgId.current, role: "ai", text: greeting }]);
-  const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
-  const endRef = useRef<HTMLDivElement>(null);
-
-  // biome-ignore lint/correctness/useExhaustiveDependencies: msgs/busy are intentional scroll triggers
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs, busy]);
-
-  async function query() {
-    const text = input.trim();
-    if (!text || busy) return;
-    setMsgs((p) => [
-      ...p,
-      { id: ++msgId.current, role: "user" as const, text },
-    ]);
-    setInput("");
-    setBusy(true);
-
-    const dir = members
-      .map(
-        (m) =>
-          `${m.name} (${m.year}, ${m.major})\nSkills: ${m.skills.join(", ")}\nMinat: ${m.interests.join(", ")}\nBio: ${m.bio ?? "-"}`,
-      )
-      .join("\n\n");
-
-    const prompt = `Kamu adalah AI discovery untuk komunitas builder Al-Fath Berkarya.
-
-Direktori anggota:
-${dir}
-
-Pertanyaan: "${text}"
-
-Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota yang relevan beserta nama dan 1-2 kalimat kenapa mereka cocok. Kalau ga ada yang cocok, bilang aja terus terang. Singkat padat.`;
-
-    try {
-      const reply = await callClaude([{ role: "user", content: prompt }]);
-      setBusy(false);
-      setMsgs((p) => [
-        ...p,
-        { id: ++msgId.current, role: "ai" as const, text: reply },
-      ]);
-    } catch {
-      setBusy(false);
-      setMsgs((p) => [
-        ...p,
-        {
-          id: ++msgId.current,
-          role: "ai" as const,
-          text: "ada yang error — coba lagi?",
-        },
-      ]);
-    }
-  }
-
-  const onKey = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      query();
-    }
-  };
+  const { data: featured = [] } = useGetFeatured();
+  const { data: feed = [] } = useGetFeed();
 
   return (
     <div
@@ -100,41 +44,18 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>
+      <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 80px" }}>
         <div className="wrap" style={{ padding: 0 }}>
-          <div className="chat" style={{ marginBottom: 48 }}>
-            {msgs.map((m) => (
-              <div key={m.id} className={`msg-${m.role}`}>
-                {m.text}
-              </div>
-            ))}
-            {busy && (
-              <div className="msg-ai">
-                <Dots />
-              </div>
-            )}
-            <div ref={endRef} />
-          </div>
-
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "baseline",
-              borderBottom: "1px solid var(--line)",
-              paddingBottom: 10,
+              marginBottom: 36,
             }}
           >
-            <span
-              style={{
-                fontSize: 11,
-                fontWeight: 500,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                color: "var(--ink3)",
-              }}
-            >
-              Karya ({karya.length})
+            <span style={{ fontSize: 15, color: "var(--ink2)" }}>
+              hei {firstName(user.name)} 👋
             </span>
             <button
               type="button"
@@ -151,86 +72,73 @@ Jawab dengan bahasa Indonesia kasual dan langsung. Sebutkan maksimal 3 anggota y
               + buat karya
             </button>
           </div>
-          {karya.map((k) => (
-            // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
-            <div
-              key={k.id}
-              className="karya-card"
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate(`/karya/${k.id}`)}
-              onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${k.id}`)}
-            >
-              <span className="karya-card-title">{k.title}</span>
-              <p className="karya-card-desc">{k.description}</p>
-              <div className="karya-card-foot">
-                <div className="skills-wrap">
-                  {k.stages.map((s) => (
-                    <span key={s} className="stage-chip">
-                      {STAGE_LABELS[s]}
-                    </span>
-                  ))}
-                </div>
-                <div className="roster">
-                  {k.roster.map((m) => (
-                    <Avatar
-                      key={m.id}
-                      name={m.name}
-                      handle={m.handle}
-                      image={m.image}
-                      size={26}
-                    />
-                  ))}
-                </div>
-              </div>
+
+          <p className="sec-head">Pilihan inspiratif</p>
+          {featured.length === 0 ? (
+            <p className="empty-state">belum ada pilihan.</p>
+          ) : (
+            <div className="featured">
+              {featured.map((k) => (
+                <KaryaCard
+                  key={k.id}
+                  karya={k}
+                  onOpen={() => navigate(`/karya/${k.id}`)}
+                />
+              ))}
             </div>
-          ))}
+          )}
 
           <p className="sec-head" style={{ marginTop: 40 }}>
-            Anggota ({members.length})
+            Aktivitas terbaru
           </p>
-          {members.map((m) => (
-            // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
-            <div
-              key={m.id}
-              className="member-row"
-              role="button"
-              tabIndex={0}
-              onClick={() => navigate(`/member/${m.id}`)}
-              onKeyDown={(e) =>
-                e.key === "Enter" && navigate(`/member/${m.id}`)
-              }
-            >
-              <div className="member-top">
-                <span className="member-name">{m.name}</span>
-                <span className="member-year">{m.year}</span>
-              </div>
-              <p className="member-skills">
-                {m.skills.slice(0, 3).join(" · ")}
-              </p>
-            </div>
-          ))}
+          {feed.length === 0 ? (
+            <p className="empty-state">belum ada aktivitas.</p>
+          ) : (
+            <Feed items={feed} />
+          )}
         </div>
       </div>
+    </div>
+  );
+}
 
-      <div className="input-bar">
-        <div className="input-inner">
-          <textarea
-            className="chat-textarea"
-            rows={1}
-            placeholder="siapa yang lagi kerja di ML? ada yang jago backend?"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKey}
-          />
-          <button
-            type="button"
-            className="send-btn"
-            onClick={query}
-            disabled={!input.trim() || busy}
-          >
-            ↑
-          </button>
+/** A featured karya card — reuses the karya-card visual language. */
+function KaryaCard({
+  karya,
+  onOpen,
+}: {
+  karya: KaryaListItem;
+  onOpen: () => void;
+}) {
+  return (
+    // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
+    <div
+      className="karya-card"
+      role="button"
+      tabIndex={0}
+      onClick={onOpen}
+      onKeyDown={(e) => e.key === "Enter" && onOpen()}
+    >
+      <span className="karya-card-title">{karya.title}</span>
+      <p className="karya-card-desc">{karya.description}</p>
+      <div className="karya-card-foot">
+        <div className="skills-wrap">
+          {karya.stages.map((s) => (
+            <span key={s} className="stage-chip">
+              {STAGE_LABELS[s]}
+            </span>
+          ))}
+        </div>
+        <div className="roster">
+          {karya.roster.map((m) => (
+            <Avatar
+              key={m.id}
+              name={m.name}
+              handle={m.handle}
+              image={m.image}
+              size={26}
+            />
+          ))}
         </div>
       </div>
     </div>

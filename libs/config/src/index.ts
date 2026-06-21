@@ -45,6 +45,13 @@ const schema = z.object({
   /** Comma-separated CORS allowlist. Defaults to APP_URL when unset. */
   ALLOWED_ORIGINS: z.string().optional(),
 
+  /**
+   * Comma-separated allowlist of team emails who may feature karya (DECISION-A,
+   * Sprint 3). The entire authority model for curation — no RBAC, no role
+   * column. Editing it requires a redeploy/secret update.
+   */
+  ADMIN_EMAILS: z.string().optional(),
+
   /** Anthropic API key — required when AI_PROVIDER=anthropic. */
   ANTHROPIC_API_KEY: z.string().optional(),
 
@@ -60,7 +67,9 @@ const schema = z.object({
   CF_EMAIL_API_TOKEN: z.string().optional(),
 
   /** Which AI backend to use. Defaults to "anthropic". */
-  AI_PROVIDER: z.enum(["anthropic", "gemini", "workers-ai"]).default("anthropic"),
+  AI_PROVIDER: z
+    .enum(["anthropic", "gemini", "workers-ai"])
+    .default("anthropic"),
 
   /** Workers AI model override (only used when AI_PROVIDER=workers-ai). */
   AI_WORKERS_MODEL: z.string().optional(),

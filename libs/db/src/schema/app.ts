@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -9,6 +10,7 @@ import {
   timestamp,
 } from "drizzle-orm/pg-core";
 import type { KaryaStage } from "../karya";
+import type { PostKind } from "../posts";
 import { users } from "./auth";
 
 export const profiles = pgTable("profiles", {
@@ -129,6 +131,50 @@ export const karyaInterests = pgTable(
   ],
 );
 
+// Karya updates — short author-only posts a member writes on a karya (FR-18).
+// `kind` is a closed 3-value vocabulary stored as plain text (DECISION-B),
+// validated by `normalizePostKind`. Read two ways (DECISION-D): the karya stream
+// (by karya_id) and the global feed (reverse-chron by created_at).
+export const posts = pgTable(
+  "posts",
+  {
+    id: text("id").primaryKey(),
+    karyaId: text("karya_id")
+      .notNull()
+      .references(() => karya.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    kind: text("kind").$type<PostKind>().notNull(), // PostKind (DECISION-B)
+    body: text("body").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    // Karya stream (DECISION-D).
+    index("posts_karyaId_idx").on(table.karyaId),
+    // Reverse-chron global feed (FR-22).
+    index("posts_createdAt_idx").on(table.createdAt),
+  ],
+);
+
+// Hand-curated "Top picked" karya for the homepage (FR-24). One row per featured
+// karya; `rank` gives the team explicit ordering (lower sorts first). Edited
+// in-app via the `ADMIN_EMAILS` allowlist toggle (DECISION-A) — not RBAC.
+export const featured = pgTable(
+  "featured",
+  {
+    karyaId: text("karya_id")
+      .primaryKey()
+      .references(() => karya.id, { onDelete: "cascade" }),
+    rank: integer("rank").notNull().default(0),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    // Ordered "Top picked" read.
+    index("featured_rank_idx").on(table.rank),
+  ],
+);
+
 export const matches = pgTable(
   "matches",
   {
@@ -172,6 +218,26 @@ export const karyaRelations = relations(karya, ({ one, many }) => ({
   }),
   members: many(karyaMembers),
   interests: many(karyaInterests),
+  posts: many(posts),
+  featured: one(featured),
+}));
+
+export const postsRelations = relations(posts, ({ one }) => ({
+  karya: one(karya, {
+    fields: [posts.karyaId],
+    references: [karya.id],
+  }),
+  author: one(users, {
+    fields: [posts.authorId],
+    references: [users.id],
+  }),
+}));
+
+export const featuredRelations = relations(featured, ({ one }) => ({
+  karya: one(karya, {
+    fields: [featured.karyaId],
+    references: [karya.id],
+  }),
 }));
 
 export const karyaMembersRelations = relations(karyaMembers, ({ one }) => ({

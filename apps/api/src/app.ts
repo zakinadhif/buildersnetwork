@@ -6,6 +6,7 @@ import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 
 import aiRouter from "./routes/ai";
+import { featuredRouter, feedRouter } from "./routes/feed";
 import interestsRouter from "./routes/interests";
 import karyaRouter from "./routes/karya";
 import membersRouter from "./routes/members";
@@ -17,6 +18,8 @@ export type AppVariables = {
   db: ReturnType<typeof createDb>;
   ai: AIProvider;
   email: EmailProvider;
+  // Team emails allowed to feature karya (DECISION-A) — env allowlist, not RBAC.
+  adminEmails: string[];
 };
 
 export type AppEnv = { Variables: AppVariables };
@@ -27,11 +30,12 @@ export interface AppServices {
   ai: AIProvider;
   email: EmailProvider;
   allowedOrigins: string[];
+  adminEmails: string[];
   gitSha?: string;
 }
 
 export function createApp(services: AppServices) {
-  const { db, auth, ai, email, allowedOrigins, gitSha } = services;
+  const { db, auth, ai, email, allowedOrigins, adminEmails, gitSha } = services;
 
   const app = new Hono<AppEnv>();
 
@@ -59,6 +63,7 @@ export function createApp(services: AppServices) {
     c.set("auth", auth);
     c.set("ai", ai);
     c.set("email", email);
+    c.set("adminEmails", adminEmails);
     await next();
   });
 
@@ -110,6 +115,8 @@ export function createApp(services: AppServices) {
   app.route("/api/members", membersRouter);
   app.route("/api/interests", interestsRouter);
   app.route("/api/karya", karyaRouter);
+  app.route("/api/feed", feedRouter);
+  app.route("/api/featured", featuredRouter);
 
   return app;
 }

@@ -1,15 +1,30 @@
 import {
   approveKaryaMember,
+  createPost,
   declineKaryaMember,
+  featureKarya,
   joinKarya,
+  type PostKind,
+  unfeatureKarya,
   useGetKarya,
+  useGetKaryaPosts,
 } from "@myapp/api-client-react";
 import { useState } from "react";
-import { Avatar, Loading, STAGE_LABELS } from "@/components/ui-atoms";
+import {
+  Avatar,
+  Loading,
+  POST_KIND_LABELS,
+  POST_KIND_ORDER,
+  STAGE_LABELS,
+  timeAgo,
+} from "@/components/ui-atoms";
 
 export default function Karya({ id }: { id: string }) {
   const { data: karya, isLoading, refetch } = useGetKarya(id);
+  const { data: posts = [], refetch: refetchPosts } = useGetKaryaPosts(id);
   const [busy, setBusy] = useState(false);
+  const [postKind, setPostKind] = useState<PostKind>("progress");
+  const [postBody, setPostBody] = useState("");
 
   if (isLoading) return <Loading />;
   if (!karya) {
@@ -32,12 +47,28 @@ export default function Karya({ id }: { id: string }) {
 
   const membership = karya.viewerMembership;
   const isOwner = membership?.role === "owner";
+  const isMember = membership?.status === "member";
 
   async function act(fn: () => Promise<unknown>) {
     setBusy(true);
     try {
       await fn();
       await refetch();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function submitPost() {
+    const body = postBody.trim();
+    if (!body || busy) return;
+    setBusy(true);
+    try {
+      await createPost(id, { kind: postKind, body });
+      setPostBody("");
+      await refetchPosts();
     } catch (e) {
       console.error(e);
     } finally {
@@ -106,6 +137,23 @@ export default function Karya({ id }: { id: string }) {
             style={{ opacity: 0.6, cursor: "default" }}
           >
             Menunggu persetujuan
+          </button>
+        )}
+
+        {/* Admin-only feature toggle (S3.12a, DECISION-A). Server is the real
+            authority; this is only shown to allowlisted viewers. */}
+        {karya.viewerIsAdmin && (
+          <button
+            type="button"
+            className={`btn feature-toggle${karya.featured ? " on" : ""}`}
+            disabled={busy}
+            onClick={() =>
+              act(() =>
+                karya.featured ? unfeatureKarya(id) : featureKarya(id),
+              )
+            }
+          >
+            {karya.featured ? "✦ Hapus dari unggulan" : "✦ Tandai unggulan"}
           </button>
         )}
 
@@ -178,10 +226,73 @@ export default function Karya({ id }: { id: string }) {
 
         <hr className="hr" />
 
-        {/* Post stream — Sprint 3 (DECISION-F). Empty-state placeholder only. */}
+        {/* Post stream — Sprint 3 (FR-18/19). Members compose; everyone reads. */}
         <div className="pf">
           <p className="label">Update</p>
-          <p className="empty-state">belum ada update.</p>
+
+          {isMember && (
+            <div className="composer">
+              <div className="kind-select">
+                {POST_KIND_ORDER.map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className={`kind-chip kind-${k} kind-pick${
+                      postKind === k ? " on" : ""
+                    }`}
+                    aria-pressed={postKind === k}
+                    onClick={() => setPostKind(k)}
+                  >
+                    {POST_KIND_LABELS[k]}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                className="composer-input"
+                rows={3}
+                placeholder="bagikan progres, tantangan, atau capaian…"
+                value={postBody}
+                onChange={(e) => setPostBody(e.target.value)}
+              />
+              <button
+                type="button"
+                className="btn btn-dark"
+                disabled={busy || !postBody.trim()}
+                onClick={submitPost}
+              >
+                Posting
+              </button>
+            </div>
+          )}
+
+          {posts.length === 0 ? (
+            <p className="empty-state">belum ada update.</p>
+          ) : (
+            <div className="stream">
+              {posts.map((p) => (
+                <article key={p.id} className="post-card">
+                  <div className="post-card-head">
+                    <div className="post-author">
+                      <Avatar
+                        name={p.author.name}
+                        handle={p.author.handle}
+                        image={p.author.image}
+                        size={28}
+                      />
+                      <span className="post-author-name">{p.author.name}</span>
+                    </div>
+                    <span className={`kind-chip kind-${p.kind}`}>
+                      {POST_KIND_LABELS[p.kind]}
+                    </span>
+                  </div>
+                  <p className="post-body">{p.body}</p>
+                  <div className="post-card-foot">
+                    <span className="post-time">{timeAgo(p.createdAt)}</span>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

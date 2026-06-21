@@ -43,6 +43,13 @@
       "when": 1782021486819,
       "tag": "0005_jittery_jane_foster",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1782056668132,
+      "tag": "0006_wakeful_madrox",
+      "breakpoints": true
     }
   ]
 }

@@ -22,6 +22,7 @@ interface Env {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   ALLOWED_ORIGINS?: string;
+  ADMIN_EMAILS?: string;
   AI_WORKERS_MODEL?: string;
 }
 
@@ -48,7 +49,12 @@ function getServices(env: Env): AppServices {
         .filter(Boolean)
     : [env.APP_URL];
 
-  services = { db, auth, ai, email, allowedOrigins };
+  const adminEmails = (env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((e) => e.trim())
+    .filter(Boolean);
+
+  services = { db, auth, ai, email, allowedOrigins, adminEmails };
   return services;
 }
 

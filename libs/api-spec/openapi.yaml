@@ -21,6 +21,8 @@ tags:
     description: Shared interest vocabulary
   - name: karya
     description: Karya — the unit of work people build and collaborate around
+  - name: feed
+    description: Global activity feed and curated homepage picks
   - name: otp
     description: Email OTP verification
 
@@ -414,6 +416,188 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /karya/{id}/posts:
+    get:
+      operationId: getKaryaPosts
+      tags: [karya]
+      summary: List a karya's update stream, reverse-chronological
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Array of posts with author faces
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Post"
+        "404":
+          description: Karya not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createPost
+      tags: [karya]
+      summary: Post an update to a karya (members only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PostInput"
+      responses:
+        "200":
+          description: The created post with its author face
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "400":
+          description: Invalid kind or empty body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not an approved member of this karya
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Karya not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /karya/{id}/feature:
+    post:
+      operationId: featureKarya
+      tags: [karya]
+      summary: Mark a karya as featured (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FeatureInput"
+      responses:
+        "200":
+          description: Karya featured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Karya not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: unfeatureKarya
+      tags: [karya]
+      summary: Remove a karya from featured (admin only)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Karya unfeatured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not an admin
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Karya not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /feed:
+    get:
+      operationId: getFeed
+      tags: [feed]
+      summary: Reverse-chronological feed of recent posts and new karya
+      responses:
+        "200":
+          description: Merged feed items, newest first (no ranking)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FeedItem"
+
+  /featured:
+    get:
+      operationId: getFeatured
+      tags: [feed]
+      summary: Hand-curated "Top picked" karya for the homepage
+      responses:
+        "200":
+          description: Featured karya, ordered by rank
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/KaryaListItem"
+
   /otp/send:
     post:
       operationId: sendOtp
@@ -687,7 +871,101 @@ components:
               type: array
               items:
                 $ref: "#/components/schemas/RosterMember"
-          required: [createdBy, roster, viewerMembership, pendingRequests]
+            featured:
+              type: boolean
+            viewerIsAdmin:
+              type: boolean
+          required:
+            [
+              createdBy,
+              roster,
+              viewerMembership,
+              pendingRequests,
+              featured,
+              viewerIsAdmin,
+            ]
+
+    PostKind:
+      type: string
+      enum: [progress, challenge, achievement]
+
+    PostInput:
+      type: object
+      properties:
+        kind:
+          $ref: "#/components/schemas/PostKind"
+        body:
+          type: string
+          minLength: 1
+      required: [kind, body]
+
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+        karyaId:
+          type: string
+        kind:
+          $ref: "#/components/schemas/PostKind"
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        author:
+          $ref: "#/components/schemas/RosterMember"
+      required: [id, karyaId, kind, body, createdAt, author]
+
+    KaryaRef:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+      required: [id, title]
+
+    FeedPostItem:
+      allOf:
+        - $ref: "#/components/schemas/Post"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [post]
+            karya:
+              $ref: "#/components/schemas/KaryaRef"
+          required: [type, karya]
+
+    FeedKaryaItem:
+      allOf:
+        - $ref: "#/components/schemas/KaryaListItem"
+        - type: object
+          properties:
+            type:
+              type: string
+              enum: [karya]
+            createdAt:
+              type: string
+              format: date-time
+          required: [type, createdAt]
+
+    FeedItem:
+      oneOf:
+        - $ref: "#/components/schemas/FeedPostItem"
+        - $ref: "#/components/schemas/FeedKaryaItem"
+      discriminator:
+        propertyName: type
+        mapping:
+          post: "#/components/schemas/FeedPostItem"
+          karya: "#/components/schemas/FeedKaryaItem"
+
+    FeatureInput:
+      type: object
+      properties:
+        rank:
+          type: integer
 
     MatchEntry:
       type: object

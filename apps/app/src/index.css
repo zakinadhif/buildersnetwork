@@ -494,6 +494,176 @@ body {
   padding: 20px 0;
 }
 
+/* --- Sprint 3: posts, feed & homepage --- */
+
+/* Post kind chip — a colored variant per update type (progress/challenge/
+   achievement). Reuses the stage-chip footprint with a kind-tinted accent. */
+.kind-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  border: 1px solid var(--line);
+  color: var(--ink2);
+  background: transparent;
+  cursor: default;
+}
+.kind-progress {
+  border-color: oklch(50% 0.07 230 / 0.5);
+  color: oklch(45% 0.08 230);
+}
+.kind-challenge {
+  border-color: oklch(55% 0.09 60 / 0.5);
+  color: oklch(48% 0.1 55);
+}
+.kind-achievement {
+  border-color: oklch(50% 0.08 145 / 0.5);
+  color: oklch(44% 0.09 150);
+}
+/* Composer kind picker — same chips, but tappable + a selected state. */
+.kind-pick {
+  cursor: pointer;
+  opacity: 0.55;
+  transition: opacity 0.12s;
+}
+.kind-pick.on {
+  opacity: 1;
+  font-weight: 500;
+}
+
+/* Post compose box (members only) */
+.composer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px 0 24px;
+}
+.kind-select {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.composer-input {
+  width: 100%;
+  resize: vertical;
+  background: transparent;
+  border: 1px solid var(--line);
+  padding: 10px 12px;
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.composer-input:focus {
+  border-color: var(--accent);
+}
+.composer-input::placeholder {
+  color: var(--ink3);
+}
+.composer .btn {
+  align-self: flex-start;
+}
+
+/* Post cards — the karya stream + the feed post item */
+.stream,
+.feed {
+  display: flex;
+  flex-direction: column;
+}
+.post-card {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.post-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.post-author {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  min-width: 0;
+  text-align: left;
+}
+.post-author-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+}
+button.post-author:hover .post-author-name {
+  color: var(--accent);
+}
+.post-body {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+  margin-top: 10px;
+  white-space: pre-wrap;
+}
+.post-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+}
+.post-karya-link {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 12.5px;
+  color: var(--ink2);
+  transition: color 0.12s;
+}
+.post-karya-link:hover {
+  color: var(--accent);
+}
+.post-time {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--ink3);
+  flex-shrink: 0;
+}
+
+/* Feed: a "karya baru" tag distinguishes a new-karya item from a post card */
+.feed-new-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin-bottom: 6px;
+}
+
+/* Featured ("Top picked") section reuses the karya-card cards directly. */
+.featured {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Admin feature toggle on the karya page */
+.feature-toggle {
+  margin-left: 10px;
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--ink2);
+}
+.feature-toggle.on {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 /* Nav */
 .nav {
   position: sticky;

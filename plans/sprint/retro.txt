@@ -1,0 +1,136 @@
+RETRO — Risks / notes collected across sprints
+Source: plans/sprint/sprint-{0,1,2,3}.md  ·  Compiled 2026-06-21
+Non-authoritative working knowledge — trust the code when they diverge.
+
+================================================================
+SPRINT 0 — Foundation (0a + 0b)
+================================================================
+
+(No "Risks / notes" section — sprint-0.md is a mechanical 0a/0b split
+with no dedicated risks block.)
+
+
+================================================================
+SPRINT 1 — Interests + profile
+================================================================
+
+- Tag fragmentation (PRD §15). Slug dedupe (DECISION-D) is the primary
+  guard; curated-first suggestions in the editor (S1.9) are the secondary
+  nudge. No admin merge/moderation UI this sprint — user-created rows
+  accumulate as `curated:false` and can be promoted/merged later.
+- `GET /members` join cost. Batch + group in memory (S1.7); fine at
+  community scale (NFR-6). Revisit only if the directory grows large.
+- Shared vocabulary forward-looks to Sprint 2. `karya_interests` will
+  reuse this `interests` table and `slugifyInterest`. Keep the helper and
+  catalog table karya-agnostic.
+- `handle` still unique-but-nullable (carried over from Sprint 0a S0a.6);
+  a NOT NULL tightening remains out of scope here.
+
+
+================================================================
+SPRINT 2 — Karya core
+================================================================
+
+- Reused interest vocabulary (Sprint 1 forward-look). `karya_interests`
+  and `reconcileKaryaInterests` reuse the `interests` catalog +
+  `slugifyInterest` (DECISION-C). Keep the extracted find-or-create core
+  karya-agnostic so a third tagger (problems, FR-16) can reuse it later.
+- No real profile pics (DECISION-E). Faces are monograms; the wire carries
+  a nullable `image` so a later upload feature is drop-in. Don't build
+  photo upload here.
+- Posts are Sprint 3 (DECISION-F). The post-stream section is an
+  empty-state placeholder only — no `posts` table, no compose. Resist
+  scope-creeping posts in.
+- Owner-only authorization. Approve/decline (S2.10) and the
+  `pendingRequests` field (S2.8) must verify ownership server-side, not
+  trust the client. The single-owner model (one `role:"owner"` row) is the
+  only authority this sprint; co-owners/transfers are out of scope.
+- `GET /api/karya` roster cost. Batch + group in memory like `GET /members`
+  (Sprint 1); fine at community scale (NFR-6). Revisit only if listings
+  grow large.
+- Stage as array vs. enum. Stored as `jsonb` string array, validated by
+  `normalizeStages`, not a DB-level pg enum — matches `skills`/repo style
+  and keeps adding/reordering stages a code change, not a migration.
+  Accepted trade-off for small scale.
+
+
+================================================================
+SPRINT 3 — Posts, feed & homepage
+================================================================
+
+- Admin is an env allowlist, not RBAC (DECISION-A). Curation is a
+  karya-page toggle gated by `ADMIN_EMAILS` (parsed in `worker.ts`, checked
+  server-side on `…/feature`). There is no `users.role`, no admin role, no
+  separate admin app — the PRD describes none. Resist growing this into
+  RBAC. The toggle is UI convenience; the server email check is the real
+  authority. Editing the allowlist requires a redeploy/secret update —
+  acceptable for a small founding team. The seeder pre-marks featured karya
+  only so a fresh seed isn't empty.
+- Homepage regression is intentional (DECISION-F). Removing the
+  AI-discovery chat + members list from `/home` is a deliberate scope shift
+  to Sprint 4 (discovery + search), not an accident. Member-browsing
+  survives the gap only via faces/titles linking out — confirm those links
+  exist before closing. Don't leave the discovery `callClaude` code as dead
+  weight; Sprint 4 rebuilds it.
+- Feed cost + shape (DECISION-E). Merge in memory, batch enrichment (reuse
+  `rostersByKaryaIds`/`interestsByKaryaIds`/`toKaryaListItem`) — fine at
+  community scale (NFR-6). No ranking, no cursor: a fixed `limit` is the
+  whole pagination story this sprint. Revisit only if the feed grows large.
+  The `oneOf`/discriminated `FeedItem` must stay simple enough for
+  orval/zod codegen — a flat `type` discriminant, not deep polymorphism.
+- Authorization is server-side (DECISION-C). "Any karya member can post"
+  means `status:"member"` verified on the server for `POST …/posts` —
+  never trust a client flag. Pending requesters and non-members get 403.
+- Post `kind` as enum vs. pg enum (DECISION-B). Stored as validated `text`,
+  not a DB-level enum — matches `stages`/`role`/`status` and keeps the
+  vocabulary a code change. `normalizePostKind` returns `null` (no default)
+  because a post must declare its kind; the API maps `null` → 400.
+- Likes/comments are out (FR-20 P1 / FR-21 P2). Posts this sprint are
+  author-only content — no reactions, no threads. The feedback/validation
+  channel (FR-42) and per-project AI (FR-33) are P1; don't scope-creep them
+  onto the post stream.
+
+
+================================================================
+RECURRING THREADS (across sprints)
+================================================================
+
+- Batch-in-memory reads, never N+1 — community scale (NFR-6): S1
+  (`GET /members`), S2 (`GET /api/karya` roster), S3 (feed/featured).
+- Server-side authorization, never trust the client: S2 (owner-only
+  approve/decline), S3 (member-only posting, admin-only featuring).
+- Closed vocab as validated `text`, not pg enum, so changes stay code not
+  migrations: S2 (`stages`), S3 (`kind`).
+- Shared, reusable cores kept entity-agnostic: S1→S2 interest catalog +
+  `slugifyInterest`; S2→S3 `toKaryaListItem` / roster + interest batching.
+- No moderation/admin/RBAC build-out — the PRD describes none: S1 (no tag
+  merge UI), S3 (env allowlist, not roles).
+- Deferred-but-flagged forward-looks: S1 `handle` NOT NULL; S2 photo
+  upload, co-owners/transfers; S3 likes/comments, feedback channel,
+  per-project AI.
+
+
+================================================================
+SURFACED NEED — admin UI
+================================================================
+
+The "no RBAC, no admin app" stance (S1, S3) has held through P0 by
+leaning on env config + SQL, but the seams are now visible and an admin
+UI is the natural next investment once the team/community grows:
+
+- Featured curation is a per-karya toggle (S3) — fine for marking, but
+  there's no surface to *see/reorder the whole featured set* or its
+  `rank`s; reordering still means direct SQL on `featured`.
+- The admin allowlist itself (`ADMIN_EMAILS`, S3) can only change via a
+  redeploy / `wrangler secret put`. Granting or revoking an admin is a
+  deploy, not an action — the point where a real `users.role` (or an
+  `admins` table) + an admin screen starts to earn its keep.
+- Tag/interest moderation (S1) was explicitly deferred: no merge/promote
+  UI, so `curated:false` rows accumulate unmanaged. An admin UI is where
+  merge/promote/dedupe would live.
+- No moderation surface for posts/karya (hide, remove, flag) exists at
+  all — acceptable at founding-team trust levels, but a gap as the
+  community opens up.
+
+Not P0. Flag for a post-P0 "admin/moderation" track once curation,
+allowlist churn, or tag cleanup becomes a recurring manual chore.
