@@ -1,3 +1,4 @@
+import { atomicWrite } from "@myapp/db";
 import { matches as matchesTable, profiles } from "@myapp/db/schema";
 import { eq, inArray } from "drizzle-orm";
 import type { Context } from "hono";
@@ -6,7 +7,8 @@ import type { AppEnv } from "../app";
 import {
   interestsByUserIds,
   interestsForUser,
-  reconcileUserInterests,
+  resolveInterestIds,
+  userInterestWrites,
 } from "../lib/interests";
 
 const app = new Hono<AppEnv>();
@@ -60,16 +62,20 @@ app.post("/profile", async (c) => {
   // the Review screen always sends the complete interest list.
   const { interests: interestNames = [], ...profileValues } = body;
 
-  await db.transaction(async (tx) => {
-    await tx
+  // Find-or-create the shared interest catalog first (interactive reads — the
+  // neon-http driver has no interactive transactions), then commit the profile
+  // upsert and interest-link replacement as one atomic block.
+  const { deduped, idBySlug } = await resolveInterestIds(db, interestNames);
+  await atomicWrite(db, (e) => [
+    e
       .insert(profiles)
       .values({ userId: session.user.id, ...profileValues })
       .onConflictDoUpdate({
         target: profiles.userId,
         set: { ...profileValues, updatedAt: new Date() },
-      });
-    await reconcileUserInterests(tx, session.user.id, interestNames);
-  });
+      }),
+    ...userInterestWrites(e, session.user.id, deduped, idBySlug),
+  ]);
 
   return c.json({ ok: true });
 });

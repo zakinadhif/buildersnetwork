@@ -1,11 +1,15 @@
 import { CreateKaryaBody, CreatePostBody } from "@myapp/api-zod";
-import { normalizePostKind, normalizeStages } from "@myapp/db";
+import { atomicWrite, normalizePostKind, normalizeStages } from "@myapp/db";
 import { featured, karya, karyaMembers, posts } from "@myapp/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
-import { interestsForKarya, reconcileKaryaInterests } from "../lib/interests";
+import {
+  interestsForKarya,
+  karyaInterestWrites,
+  resolveInterestIds,
+} from "../lib/interests";
 import {
   karyaListItems,
   rostersByKaryaIds,
@@ -46,22 +50,26 @@ app.post("/", async (c) => {
   const { title, description, stages, interests = [] } = parsed.data;
 
   const id = crypto.randomUUID();
-  await db.transaction(async (tx) => {
-    await tx.insert(karya).values({
+  // Resolve the shared interest catalog first (interactive reads — the neon-http
+  // driver has no interactive transactions), then commit the karya, the owner
+  // membership, and the interest tags as one atomic block.
+  const { deduped, idBySlug } = await resolveInterestIds(db, interests);
+  await atomicWrite(db, (e) => [
+    e.insert(karya).values({
       id,
       title,
       description,
       stages: normalizeStages(stages),
       createdBy: session.user.id,
-    });
-    await tx.insert(karyaMembers).values({
+    }),
+    e.insert(karyaMembers).values({
       karyaId: id,
       userId: session.user.id,
       role: "owner",
       status: "member",
-    });
-    await reconcileKaryaInterests(tx, id, interests);
-  });
+    }),
+    ...karyaInterestWrites(e, id, deduped, idBySlug),
+  ]);
 
   return c.json({ id });
 });

@@ -38,8 +38,16 @@ export interface AppServices {
 }
 
 export function createApp(services: AppServices) {
-  const { db, auth, ai, email, emailFrom, allowedOrigins, adminEmails, gitSha } =
-    services;
+  const {
+    db,
+    auth,
+    ai,
+    email,
+    emailFrom,
+    allowedOrigins,
+    adminEmails,
+    gitSha,
+  } = services;
 
   const app = new Hono<AppEnv>();
 

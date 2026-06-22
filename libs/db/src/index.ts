@@ -39,6 +39,7 @@ export async function runMigrations(url: string, migrationsFolder: string) {
   }
 }
 
+export { type AtomicExec, atomicWrite } from "./atomic";
 export { dedupeBySlug, slugifyInterest } from "./interests";
 export { KARYA_STAGES, type KaryaStage, normalizeStages } from "./karya";
 export { normalizePostKind, POST_KINDS, type PostKind } from "./posts";
