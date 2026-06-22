@@ -14,7 +14,9 @@
       "!libs/api-client-react/src/generated",
       "!libs/api-zod/src/generated",
       "!.wrangler",
-      "!apps/api/public"
+      "!apps/api/public",
+      "!apps/app/src/mockups",
+      "!apps/app/mockups.html"
     ]
   },
   "formatter": {
