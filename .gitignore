@@ -25,6 +25,10 @@ dist/
 # Claude Code chat dumps and handoff documents
 /.claude-chat/
 
+# Claude Code local settings and agent worktrees (per-machine / transient)
+.claude/settings.local.json
+.claude/worktrees/
+
 # Generated API client and Zod schemas
 libs/api-client-react/src/generated/
 libs/api-zod/src/generated/
