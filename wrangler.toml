@@ -41,7 +41,7 @@ name = "EMAIL"
 
 # Non-secret vars. Secrets go via `wrangler secret put`.
 [vars]
-AI_WORKERS_MODEL = "@cf/meta/llama-3.1-8b-instruct"
+AI_WORKERS_MODEL = "@cf/meta/llama-4-scout-17b-16e-instruct"
 # Canonical production URL — drives auth redirects and email links. Points at
 # the custom domain now that the Worker is bound to it.
 APP_URL = "https://buildersnetwork.web.id"

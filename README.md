@@ -226,7 +226,7 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `ADMIN_EMAILS` | Comma-separated allowlist of team emails who can feature karya (optional; no RBAC) |
 | `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
 | `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
-| `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-3.1-8b-instruct`) |
+| `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-4-scout-17b-16e-instruct`) |
 | `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker; on Cloudflare, overrides the `[[send_email]]` binding when set) |
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
