@@ -56,6 +56,20 @@ This runs:
 5. Copies `apps/landing/dist` and `apps/app/dist` into `apps/api/public/`
 6. `wrangler deploy` — uploads the Worker + static assets
 
+## Viewing logs / API errors
+
+Stream the deployed Worker's runtime logs (console output + uncaught
+exceptions) live — no config needed:
+
+```bash
+wrangler tail                       # stream all requests
+wrangler tail --status error        # only failed invocations
+```
+
+This only shows logs while it's running. For a persisted, searchable history in
+the dashboard, enable Workers Logs by adding an `[observability]` block to
+`wrangler.toml` (`enabled = true`) and redeploying.
+
 ## How it works
 
 - Workers Assets binding serves `/` (landing) and `/app/*` (SPA) directly from Cloudflare's CDN.
