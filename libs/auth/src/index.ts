@@ -47,6 +47,13 @@ function createAuth(config?: AuthConfig) {
       window: 60,
       max: 100,
     },
+    advanced: {
+      // Cloudflare forwards the real client IP in CF-Connecting-IP. Without
+      // this, Better Auth can't determine the client IP and skips rate limiting.
+      ipAddress: {
+        ipAddressHeaders: ["cf-connecting-ip"],
+      },
+    },
   });
 }
 
