@@ -29,7 +29,7 @@ app.post("/send", async (c) => {
 
   await c.get("email").send({
     to: email,
-    from: "Al-Fath Berkarya <noreply@buildersnetwork.web.id>",
+    from: c.get("emailFrom"),
     subject: "Kode verifikasi kamu",
     text: `Kode OTP kamu: ${code}\n\nBerlaku 10 menit. Jangan bagikan kode ini ke siapa pun.`,
     html: `<p>Kode OTP kamu: <strong>${code}</strong></p><p>Berlaku 10 menit. Jangan bagikan kode ini ke siapa pun.</p>`,

@@ -62,6 +62,12 @@ const schema = z.object({
   // In the Workers runtime the [[send_email]] binding is used; these are not needed there.
   /** Resend API key — preferred for Node.js / Docker deployments. */
   RESEND_API_KEY: z.string().optional(),
+  /**
+   * Sender address for outgoing email, e.g.
+   * `Al-Fath Berkarya <noreply@yourdomain.com>`. Its domain must be verified
+   * with the active email provider. Defaults to DEFAULT_EMAIL_FROM when unset.
+   */
+  EMAIL_FROM: z.string().optional(),
   /** Cloudflare Email REST API fallback (alternative to Resend). */
   CF_EMAIL_ACCOUNT_ID: z.string().optional(),
   CF_EMAIL_API_TOKEN: z.string().optional(),

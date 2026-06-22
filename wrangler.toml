@@ -6,6 +6,8 @@
 #   wrangler secret put DATABASE_URL
 #   wrangler secret put BETTER_AUTH_SECRET
 #   wrangler secret put ANTHROPIC_API_KEY   # not needed when AI_PROVIDER=workers-ai
+#   wrangler secret put RESEND_API_KEY      # optional — sends email via Resend
+#                                           # instead of the [[send_email]] binding
 
 name = "buildersnetwork"
 main = "apps/api/src/worker.ts"
@@ -31,8 +33,9 @@ binding = "ASSETS"
 [ai]
 binding = "AI"
 
-# Cloudflare Email Service (beta) — transactional email sending.
+# Cloudflare Email Service (beta) — default transactional email sender.
 # Requires Workers Paid plan. Set sender domain via Cloudflare Email Routing.
+# Overridden at runtime by Resend when the RESEND_API_KEY secret is set.
 [[send_email]]
 name = "EMAIL"
 
@@ -42,6 +45,9 @@ AI_WORKERS_MODEL = "@cf/meta/llama-3.1-8b-instruct"
 # Canonical production URL — drives auth redirects and email links. Points at
 # the custom domain now that the Worker is bound to it.
 APP_URL = "https://buildersnetwork.web.id"
+# Sender address for outgoing email. Its domain must be verified with the active
+# email provider (Cloudflare Email Routing, or Resend when RESEND_API_KEY is set).
+EMAIL_FROM = "Al-Fath Berkarya <noreply@buildersnetwork.web.id>"
 
 # --- Per-environment overrides ---
 

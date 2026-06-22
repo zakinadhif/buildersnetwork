@@ -28,6 +28,10 @@ export interface EmailProvider {
   send(options: SendEmailOptions): Promise<void>;
 }
 
+/** Default sender used when EMAIL_FROM is not configured. */
+export const DEFAULT_EMAIL_FROM =
+  "Al-Fath Berkarya <noreply@buildersnetwork.web.id>";
+
 /** No-op provider — logs to console. Use in local dev when email is not configured. */
 export function createNoopEmail(): EmailProvider {
   return {

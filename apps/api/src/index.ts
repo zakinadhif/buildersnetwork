@@ -9,6 +9,7 @@ import {
   createNoopEmail,
   createResendEmail,
   createRestEmail,
+  DEFAULT_EMAIL_FROM,
 } from "@myapp/email";
 
 import { createApp } from "./app";
@@ -50,6 +51,7 @@ const app = createApp({
   auth,
   ai,
   email,
+  emailFrom: config.EMAIL_FROM ?? DEFAULT_EMAIL_FROM,
   allowedOrigins,
   adminEmails,
   gitSha: process.env.GIT_SHA,

@@ -1,7 +1,12 @@
 import { createWorkersAI, type WorkersAIBinding } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { createDb, type Db } from "@myapp/db";
-import { createWorkersEmail, type WorkersEmailBinding } from "@myapp/email";
+import {
+  createResendEmail,
+  createWorkersEmail,
+  DEFAULT_EMAIL_FROM,
+  type WorkersEmailBinding,
+} from "@myapp/email";
 
 import { type AppServices, createApp } from "./app";
 
@@ -12,12 +17,17 @@ interface Env {
   ASSETS: Fetcher;
   // Workers AI binding (configured in wrangler.toml)
   AI: WorkersAIBinding;
-  // Cloudflare Email Service binding (configured in wrangler.toml)
+  // Cloudflare Email Service binding (configured in wrangler.toml) — default sender.
   EMAIL: WorkersEmailBinding;
   // Vars / secrets
   APP_URL: string;
   DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
+  // Optional: set via `wrangler secret put RESEND_API_KEY` to send via Resend
+  // instead of the Cloudflare Email Service binding.
+  RESEND_API_KEY?: string;
+  // Optional sender override (var in wrangler.toml); defaults to DEFAULT_EMAIL_FROM.
+  EMAIL_FROM?: string;
   BETTER_AUTH_URL?: string;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
@@ -41,7 +51,11 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
-  const email = createWorkersEmail(env.EMAIL);
+  // Default to the Cloudflare Email Service binding; switch to Resend when a
+  // RESEND_API_KEY secret is present.
+  const email = env.RESEND_API_KEY
+    ? createResendEmail({ apiKey: env.RESEND_API_KEY })
+    : createWorkersEmail(env.EMAIL);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
     ? env.ALLOWED_ORIGINS.split(",")
@@ -54,7 +68,9 @@ function getServices(env: Env): AppServices {
     .map((e) => e.trim())
     .filter(Boolean);
 
-  services = { db, auth, ai, email, allowedOrigins, adminEmails };
+  const emailFrom = env.EMAIL_FROM ?? DEFAULT_EMAIL_FROM;
+
+  services = { db, auth, ai, email, emailFrom, allowedOrigins, adminEmails };
   return services;
 }
 

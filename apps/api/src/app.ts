@@ -18,6 +18,8 @@ export type AppVariables = {
   db: ReturnType<typeof createDb>;
   ai: AIProvider;
   email: EmailProvider;
+  // Sender address for outgoing email (EMAIL_FROM, with a default).
+  emailFrom: string;
   // Team emails allowed to feature karya (DECISION-A) — env allowlist, not RBAC.
   adminEmails: string[];
 };
@@ -29,13 +31,15 @@ export interface AppServices {
   auth: ReturnType<typeof createAuth>;
   ai: AIProvider;
   email: EmailProvider;
+  emailFrom: string;
   allowedOrigins: string[];
   adminEmails: string[];
   gitSha?: string;
 }
 
 export function createApp(services: AppServices) {
-  const { db, auth, ai, email, allowedOrigins, adminEmails, gitSha } = services;
+  const { db, auth, ai, email, emailFrom, allowedOrigins, adminEmails, gitSha } =
+    services;
 
   const app = new Hono<AppEnv>();
 
@@ -63,6 +67,7 @@ export function createApp(services: AppServices) {
     c.set("auth", auth);
     c.set("ai", ai);
     c.set("email", email);
+    c.set("emailFrom", emailFrom);
     c.set("adminEmails", adminEmails);
     await next();
   });

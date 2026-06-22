@@ -227,9 +227,10 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
 | `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
 | `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-3.1-8b-instruct`) |
-| `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker) |
+| `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker; on Cloudflare, overrides the `[[send_email]]` binding when set) |
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
+| `EMAIL_FROM` | Sender address for outgoing email (default: `Al-Fath Berkarya <noreply@buildersnetwork.web.id>`); domain must be verified with the active provider |
 | `STORAGE_*` | S3-compatible object storage — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md) |
 | `SERVE_STATIC` | `false` to disable Hono's static file serving (3-tier EC2 mode) |
 
@@ -264,6 +265,7 @@ wrangler login
 wrangler secret put DATABASE_URL
 wrangler secret put BETTER_AUTH_SECRET
 wrangler secret put APP_URL
+wrangler secret put RESEND_API_KEY   # optional — send via Resend instead of the [[send_email]] binding
 pnpm cf:deploy
 ```
 
