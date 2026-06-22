@@ -4,7 +4,7 @@
  * Design direction: Calm, Wide Editorial
  */
 
-import React, { useState } from "react";
+import { useState } from "react";
 
 // ─── Design tokens (inline style objects) ────────────────────────────────────
 const T = {

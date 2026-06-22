@@ -7,7 +7,7 @@
  * No router, no real APIs, no external component libraries.
  */
 
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 
 // ─── Design Tokens ────────────────────────────────────────────────────────────
 const tokens = `

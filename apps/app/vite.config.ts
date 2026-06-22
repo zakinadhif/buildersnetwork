@@ -19,6 +19,17 @@ export default defineConfig(({ mode, command }) => {
         "@": path.resolve(__dirname, "./src"),
       },
     },
+    build: {
+      rollupOptions: {
+        input: {
+          // Main SPA entry.
+          main: path.resolve(__dirname, "index.html"),
+          // Standalone UI mockup gallery, shipped at /app/mockups.html so it
+          // can be shared for review alongside the deployed app.
+          mockups: path.resolve(__dirname, "mockups.html"),
+        },
+      },
+    },
     server: {
       proxy: {
         "/api": {

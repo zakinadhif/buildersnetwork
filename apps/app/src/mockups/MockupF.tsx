@@ -4,7 +4,7 @@
  * Fonts loaded via inline <style> injection on mount.
  */
 
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 // ─── Design tokens ──────────────────────────────────────────────────────────
 const T = {
@@ -1237,7 +1237,9 @@ export default function AlFathBerkarya() {
     const style = document.createElement("style");
     style.textContent = GLOBAL_CSS;
     document.head.appendChild(style);
-    return () => document.head.removeChild(style);
+    return () => {
+      document.head.removeChild(style);
+    };
   }, []);
 
   const handleVote = useCallback((id: string) => {
