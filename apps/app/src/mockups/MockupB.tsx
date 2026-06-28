@@ -49,6 +49,8 @@ const T = {
   weight: { light: 300, regular: 400, medium: 500, semibold: 600 },
   track: { wide: "0.08em", tag: "0.02em", tight: "-0.01em" }, // letter-spacing roles
   lh: { tight: 1.15, snug: 1.3, body: 1.55 },                 // line-height roles
+  radius: "8px",
+  radiusLg: "16px",
 };
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
