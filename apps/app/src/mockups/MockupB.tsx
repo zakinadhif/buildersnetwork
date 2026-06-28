@@ -10,20 +10,22 @@
  */
 
 import { useState } from "react";
+import { coverFor, screenshots } from "./images";
 
 // ─── Design Tokens ───────────────────────────────────────────────────────────
 const T = {
-  bg: "#f1efe9",
-  ink: "#0f0e0b",
-  ink2: "#8a8781",
-  ink3: "#bbb8b2",
-  accent: "oklch(39% 0.085 62)",     // terracotta
+  bg: "oklch(98% 0 0)",              // gallery white (neutral)
+  ink: "oklch(18% 0 0)",             // soft neutral near-black
+  ink2: "oklch(46% 0 0)",            // muted body — ~4.7:1 on white (AA)
+  ink3: "oklch(64% 0 0)",            // light meta / decorative grey
+  accent: "oklch(39% 0.085 62)",     // terracotta (kept)
   accentMid: "oklch(55% 0.085 62)",  // terracotta mid for hover
-  accentFg: "#f9f6f0",               // text on accent
-  line: "#dedad2",
-  lineDark: "#c8c4bc",
-  surface: "#faf9f5",                // slightly lifted card
-  surfaceHover: "#f5f2eb",
+  accentFg: "oklch(99% 0 0)",        // text on accent
+  line: "oklch(91% 0 0)",            // neutral hairline
+  lineDark: "oklch(85% 0 0)",
+  surface: "oklch(100% 0 0)",        // pure white lifted card
+  surfaceHover: "oklch(96.5% 0 0)",
+  fontDisplay: "'Instrument Serif', serif", // brand / display copy
   fontBody: "'Plus Jakarta Sans', sans-serif",
   fontMono: "'IBM Plex Mono', monospace",
   radius: "6px",
@@ -131,6 +133,9 @@ const MEMBERS: Member[] = [
   { id: 5, name: "Eko Saputra", handle: "@eko_s", bio: "Backend developer, hobi otomasi hal-hal yang bikin frustrasi.", interests: ["Mobile", "Web"], skills: ["Go", "Docker", "PostgreSQL"], year: 3, major: "S1 Teknik Informatika", karya: 2 },
 ];
 
+const ALL_INTERESTS = Array.from(new Set(KARYA.flatMap((k) => k.interests)));
+const ALL_SKILLS = Array.from(new Set(MEMBERS.flatMap((m) => m.skills)));
+
 // ─── Utilities ────────────────────────────────────────────────────────────────
 function rankBadge(rank: number): string {
   if (rank === 1) return "🥇";
@@ -226,17 +231,24 @@ function UpvoteButton({ count, active, onClick }: { count: number; active: boole
 }
 
 // ─── Left Nav Rail ─────────────────────────────────────────────────────────────
-const NAV_ITEMS = [
-  { label: "Launchpad", icon: "◈", active: true },
-  { label: "Jelajahi Karya", icon: "◉", active: false },
-  { label: "Cari Kolaborator", icon: "◎", active: false },
-  { label: "Minat Saya", icon: "◇", active: false },
-  { label: "Karya Saya", icon: "◆", active: false },
+type View = "launchpad" | "jelajahi";
+
+const NAV_ITEMS: { label: string; icon: string; view?: View }[] = [
+  { label: "Launchpad", icon: "◈", view: "launchpad" },
+  { label: "Jelajahi Karya", icon: "◉", view: "jelajahi" },
+  { label: "Cari Kolaborator", icon: "◎" },
+  { label: "Minat Saya", icon: "◇" },
+  { label: "Karya Saya", icon: "◆" },
 ];
 
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"];
 
-function LeftNav({ activeFilter, onFilter }: { activeFilter: string; onFilter: (f: string) => void }) {
+function LeftNav({ view, onNav, activeFilter, onFilter }: {
+  view: View;
+  onNav: (v: View) => void;
+  activeFilter: string;
+  onFilter: (f: string) => void;
+}) {
   return (
     <aside style={{
       width: 200,
@@ -249,35 +261,42 @@ function LeftNav({ activeFilter, onFilter }: { activeFilter: string; onFilter: (
       {/* Logo */}
       <div style={{ padding: "0 12px 20px", borderBottom: `1px solid ${T.line}`, marginBottom: 16 }}>
         <div style={{ fontFamily: T.fontMono, fontSize: 11, color: T.ink3, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 4 }}>Al-Fath</div>
-        <div style={{ fontFamily: T.fontBody, fontSize: 18, fontWeight: 300, color: T.ink, lineHeight: 1.1 }}>Berkarya</div>
+        <div style={{ fontFamily: T.fontDisplay, fontSize: 23, fontWeight: 400, color: T.ink, lineHeight: 1 }}>Berkarya</div>
       </div>
 
       {/* Nav items */}
       <nav style={{ marginBottom: 24 }}>
-        {NAV_ITEMS.map((item) => (
-          <div key={item.label} style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            padding: "7px 12px",
-            borderRadius: T.radius,
-            backgroundColor: item.active ? T.accentFg : "transparent",
-            color: item.active ? T.accent : T.ink2,
-            fontFamily: T.fontBody,
-            fontSize: 13,
-            fontWeight: item.active ? 500 : 400,
-            cursor: "pointer",
-            marginBottom: 1,
-            borderLeft: item.active ? `2px solid ${T.accent}` : "2px solid transparent",
-          }}>
-            <span style={{ fontFamily: T.fontMono, fontSize: 12 }}>{item.icon}</span>
-            {item.label}
-          </div>
-        ))}
+        {NAV_ITEMS.map((item) => {
+          const itemActive = item.view !== undefined && item.view === view;
+          return (
+            <div
+              key={item.label}
+              onClick={item.view ? () => onNav(item.view as View) : undefined}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "7px 12px",
+                borderRadius: T.radius,
+                backgroundColor: itemActive ? T.accentFg : "transparent",
+                color: itemActive ? T.accent : T.ink2,
+                fontFamily: T.fontBody,
+                fontSize: 13,
+                fontWeight: itemActive ? 500 : 400,
+                cursor: "pointer",
+                marginBottom: 1,
+                borderLeft: itemActive ? `2px solid ${T.accent}` : "2px solid transparent",
+              }}
+            >
+              <span style={{ fontFamily: T.fontMono, fontSize: 12 }}>{item.icon}</span>
+              {item.label}
+            </div>
+          );
+        })}
       </nav>
 
-      {/* Interest filters */}
-      <div style={{ padding: "0 12px" }}>
+      {/* Interest filters (Launchpad feed only) */}
+      <div style={{ padding: "0 12px", display: view === "launchpad" ? "block" : "none" }}>
         <div style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>Filter Minat</div>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
           {INTEREST_FILTERS.map((f) => (
@@ -377,16 +396,34 @@ function KaryaCard({ karya, voted, onVote }: { karya: Karya; voted: boolean; onV
         <UpvoteButton count={karya.upvotes + (voted ? 1 : 0)} active={voted} onClick={() => onVote(karya.id)} />
       </div>
 
+      {/* Cover thumbnail */}
+      <div style={{
+        width: 88,
+        alignSelf: "stretch",
+        minHeight: 76,
+        flexShrink: 0,
+        borderRadius: T.radius,
+        overflow: "hidden",
+        border: `1px solid ${T.line}`,
+        background: T.bg,
+      }}>
+        <img
+          src={coverFor(karya.interests)}
+          alt={karya.title}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      </div>
+
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 4, flexWrap: "wrap" as const }}>
           <h3 style={{
             margin: 0,
-            fontFamily: T.fontBody,
-            fontSize: 14,
-            fontWeight: 600,
+            fontFamily: T.fontDisplay,
+            fontSize: 18,
+            fontWeight: 400,
             color: T.ink,
-            lineHeight: 1.3,
+            lineHeight: 1.2,
           }}>{karya.title}</h3>
           {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
         </div>
@@ -424,6 +461,172 @@ function KaryaCard({ karya, voted, onVote }: { karya: Karya; voted: boolean; onV
   );
 }
 
+// ─── Spotlight (Play-Store-style featured listing) ─────────────────────────────
+function SpotlightMetric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
+  return (
+    <div style={{ flex: 1, textAlign: "center" as const, padding: "0 4px" }}>
+      <div style={{
+        fontFamily: T.fontMono,
+        fontSize: 15,
+        fontWeight: 500,
+        color: accent ? T.accent : T.ink,
+        lineHeight: 1.1,
+        marginBottom: 3,
+      }}>{value}</div>
+      <div style={{
+        fontFamily: T.fontMono,
+        fontSize: 9,
+        letterSpacing: "0.06em",
+        textTransform: "uppercase" as const,
+        color: T.ink3,
+      }}>{label}</div>
+    </div>
+  );
+}
+
+function Spotlight({ karya }: { karya: Karya }) {
+  const delta = deltaLabel(karya.weeklyDelta);
+  const builders = karya.roster.map((r) => r.name).join(" · ");
+  const latestStage = karya.stages[karya.stages.length - 1];
+
+  return (
+    <section style={{
+      marginBottom: 18,
+      background: T.surface,
+      border: `1px solid ${T.accent}`,
+      borderRadius: T.radiusLg,
+      overflow: "hidden",
+      boxShadow: `0 0 0 1px ${T.accent}22, 0 4px 16px #0f0e0b10`,
+    }}>
+      {/* Accent header band */}
+      <div style={{
+        fontFamily: T.fontMono,
+        fontSize: 9,
+        letterSpacing: "0.12em",
+        textTransform: "uppercase" as const,
+        color: T.accentFg,
+        backgroundColor: T.accent,
+        padding: "4px 18px",
+      }}>
+        ◈ Pilihan Minggu Ini
+      </div>
+
+      {/* App header */}
+      <div style={{ display: "flex", gap: 14, alignItems: "center", padding: "16px 18px 14px" }}>
+        {/* App icon */}
+        <div style={{
+          width: 60,
+          height: 60,
+          borderRadius: 15,
+          flexShrink: 0,
+          background: `linear-gradient(145deg, ${T.accentMid}, ${T.accent})`,
+          color: T.accentFg,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontFamily: T.fontMono,
+          fontSize: 26,
+          fontWeight: 500,
+          boxShadow: `0 2px 8px ${T.accent}33`,
+        }}>
+          {karya.title.charAt(0)}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: 23, fontWeight: 400, lineHeight: 1.1, color: T.ink }}>{karya.title}</h2>
+          <div style={{ fontFamily: T.fontBody, fontSize: 12, color: T.accentMid, fontWeight: 500, marginBottom: 5 }}>
+            oleh {builders}
+          </div>
+          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+            {karya.interests.map((i) => <Tag key={i} label={i} />)}
+          </div>
+        </div>
+        <button style={{
+          backgroundColor: T.accent,
+          color: T.accentFg,
+          border: "none",
+          borderRadius: T.radius,
+          padding: "9px 20px",
+          fontFamily: T.fontBody,
+          fontSize: 12,
+          fontWeight: 600,
+          cursor: "pointer",
+          whiteSpace: "nowrap" as const,
+          alignSelf: "flex-start",
+        }}>
+          Lihat Karya
+        </button>
+      </div>
+
+      {/* Play-Store-style metrics strip */}
+      <div style={{
+        display: "flex",
+        alignItems: "stretch",
+        borderTop: `1px solid ${T.line}`,
+        borderBottom: `1px solid ${T.line}`,
+        padding: "11px 12px",
+        margin: "0 18px",
+      }}>
+        <SpotlightMetric value={`▲ ${karya.upvotes}`} label="Upvote" accent />
+        <div style={{ width: 1, backgroundColor: T.line }} />
+        <SpotlightMetric value={`#${karya.rank} ${delta.text}`} label="Peringkat" />
+        <div style={{ width: 1, backgroundColor: T.line }} />
+        <SpotlightMetric value={`${karya.roster.length}`} label="Builder" />
+        <div style={{ width: 1, backgroundColor: T.line }} />
+        <SpotlightMetric value={latestStage} label="Tahap" />
+      </div>
+
+      {/* Tagline */}
+      <p style={{
+        margin: 0,
+        padding: "14px 18px 12px",
+        fontFamily: T.fontBody,
+        fontSize: 13,
+        color: T.ink2,
+        lineHeight: 1.55,
+      }}>{karya.description}</p>
+
+      {/* Screenshot gallery */}
+      <div style={{
+        display: "flex",
+        alignItems: "baseline",
+        justifyContent: "space-between",
+        padding: "0 18px 8px",
+      }}>
+        <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
+          Tangkapan Layar
+        </span>
+        <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3 }}>← geser →</span>
+      </div>
+      <div className="spotlight-carousel" style={{
+        display: "flex",
+        gap: 12,
+        overflowX: "auto" as const,
+        padding: "0 18px 18px",
+        scrollSnapType: "x mandatory",
+        scrollPaddingLeft: 18,
+      }}>
+        {screenshots.map((src, i) => (
+          <img
+            key={src}
+            src={src}
+            alt={`${karya.title} — tangkapan layar ${i + 1}`}
+            style={{
+              height: 360,
+              width: "auto",
+              flexShrink: 0,
+              borderRadius: 18,
+              border: `2px solid ${T.lineDark}`,
+              scrollSnapAlign: "start",
+              background: T.bg,
+              boxShadow: "0 2px 10px #0f0e0b14",
+            }}
+          />
+        ))}
+      </div>
+    </section>
+  );
+}
+
 // ─── Center Feed ──────────────────────────────────────────────────────────────
 const WEEKS = ["Minggu ini", "Minggu lalu", "2 minggu lalu"];
 
@@ -433,13 +636,15 @@ function CenterFeed({ filter, votes, onVote }: { filter: string; votes: Set<numb
   const filtered = KARYA.filter((k) =>
     filter === "Semua" ? true : k.interests.some((i) => i === filter)
   );
+  const spotlight = filtered.find((k) => k.featured);
+  const cards = filtered.filter((k) => k.id !== spotlight?.id);
 
   return (
     <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 0 }}>
       {/* Header */}
       <div style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 6 }}>
-          <h1 style={{ margin: 0, fontFamily: T.fontBody, fontSize: 22, fontWeight: 300, color: T.ink }}>Launchpad</h1>
+          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 30, fontWeight: 400, letterSpacing: "-0.01em", color: T.ink }}>Launchpad</h1>
           <span style={{ fontFamily: T.fontMono, fontSize: 11, color: T.ink3 }}>Karya terbaik minggu ini</span>
         </div>
 
@@ -468,6 +673,9 @@ function CenterFeed({ filter, votes, onVote }: { filter: string; votes: Set<numb
         </div>
       </div>
 
+      {/* Spotlight featured app */}
+      {spotlight && <Spotlight karya={spotlight} />}
+
       {/* Cards */}
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 10 }}>
         {filtered.length === 0 && (
@@ -475,7 +683,7 @@ function CenterFeed({ filter, votes, onVote }: { filter: string; votes: Set<numb
             Belum ada karya untuk minat ini.
           </div>
         )}
-        {filtered.map((k) => (
+        {cards.map((k) => (
           <KaryaCard key={k.id} karya={k} voted={votes.has(k.id)} onVote={onVote} />
         ))}
       </div>
@@ -655,9 +863,317 @@ function RightRail({ votes }: { votes: Set<number> }) {
   );
 }
 
+// ─── Jelajahi Karya — search list row (karya) ──────────────────────────────────
+function KaryaRow({ karya }: { karya: Karya }) {
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "104px 1fr auto",
+      gap: "12px 20px",
+      padding: "18px 0",
+      borderBottom: `1px solid ${T.line}`,
+      alignItems: "start",
+    }}>
+      <div style={{
+        width: 104,
+        aspectRatio: "16 / 10",
+        borderRadius: T.radius,
+        overflow: "hidden",
+        border: `1px solid ${T.line}`,
+        background: T.bg,
+      }}>
+        <img
+          src={coverFor(karya.interests)}
+          alt={karya.title}
+          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        />
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 6, minWidth: 0 }}>
+        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 18, fontWeight: 400, lineHeight: 1.2, color: T.ink }}>
+          {karya.title}
+        </h3>
+        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: 12, color: T.ink2, lineHeight: 1.55 }}>
+          {karya.description}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginTop: 2 }}>
+          {karya.interests.map((t) => <Tag key={t} label={t} />)}
+        </div>
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, paddingTop: 2 }}>
+        <span style={{ fontFamily: T.fontMono, fontSize: 11, color: T.accentMid }}>▲ {karya.upvotes}</span>
+        <span style={{
+          fontFamily: T.fontMono,
+          fontSize: 9,
+          color: T.ink3,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase" as const,
+        }}>
+          {karya.stages[karya.stages.length - 1]}
+        </span>
+        <div style={{ display: "flex" }}>
+          {karya.roster.slice(0, 3).map((r, i) => (
+            <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: karya.roster.length - i }}>
+              <Avatar name={r.name} size={22} />
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Jelajahi Karya — search list row (member) ─────────────────────────────────
+function MemberRow({ member }: { member: Member }) {
+  return (
+    <div style={{
+      display: "grid",
+      gridTemplateColumns: "auto 1fr",
+      gap: "0 16px",
+      padding: "18px 0",
+      borderBottom: `1px solid ${T.line}`,
+      alignItems: "start",
+    }}>
+      <Avatar name={member.name} size={40} />
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 5, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" as const }}>
+          <span style={{ fontFamily: T.fontDisplay, fontSize: 17, fontWeight: 400, color: T.ink }}>{member.name}</span>
+          <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3 }}>{member.handle}</span>
+          <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3, marginLeft: "auto" }}>
+            Tkt {member.year} · {member.major}
+          </span>
+        </div>
+        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: 12, color: T.ink2, lineHeight: 1.55 }}>
+          {member.bio}
+        </p>
+        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginTop: 2 }}>
+          {member.skills.map((s) => <Tag key={s} label={s} accent />)}
+          {member.interests.map((i) => <Tag key={i} label={i} />)}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Filter sidebar (right rail in Jelajahi view) ──────────────────────────────
+function FilterColumn({ label, items, active, onToggle, mono }: {
+  label: string;
+  items: string[];
+  active: string[];
+  onToggle: (v: string) => void;
+  mono?: boolean;
+}) {
+  return (
+    <div>
+      <div style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>
+        {label}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
+        {items.map((item) => {
+          const on = active.includes(item);
+          return (
+            <button
+              key={item}
+              onClick={() => onToggle(item)}
+              style={{
+                textAlign: "left" as const,
+                background: on ? "oklch(95% 0.015 62)" : "transparent",
+                border: "none",
+                borderLeft: on ? `2px solid ${T.accent}` : "2px solid transparent",
+                cursor: "pointer",
+                fontFamily: mono ? T.fontMono : T.fontBody,
+                fontSize: mono ? 11 : 12,
+                color: on ? T.accent : T.ink2,
+                fontWeight: on ? 500 : 400,
+                padding: "4px 8px",
+                borderRadius: "0 4px 4px 0",
+              }}
+            >
+              {item}
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ─── Jelajahi Karya (ported from Calm Wide "Cari" surface) ─────────────────────
+function Jelajahi() {
+  const [query, setQuery] = useState("");
+  const [tab, setTab] = useState<"karya" | "orang">("karya");
+  const [activeInterests, setActiveInterests] = useState<string[]>([]);
+  const [activeSkills, setActiveSkills] = useState<string[]>([]);
+
+  function toggle(arr: string[], val: string, set: (v: string[]) => void) {
+    set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
+  }
+
+  const filteredKarya = KARYA.filter((k) => {
+    const q = query.toLowerCase();
+    const matchQ =
+      !q ||
+      k.title.toLowerCase().includes(q) ||
+      k.description.toLowerCase().includes(q) ||
+      k.interests.some((i) => i.toLowerCase().includes(q));
+    const matchInterests =
+      activeInterests.length === 0 || k.interests.some((i) => activeInterests.includes(i));
+    return matchQ && matchInterests;
+  });
+
+  const filteredMembers = MEMBERS.filter((m) => {
+    const q = query.toLowerCase();
+    const matchQ =
+      !q ||
+      m.name.toLowerCase().includes(q) ||
+      m.bio.toLowerCase().includes(q) ||
+      m.skills.some((s) => s.toLowerCase().includes(q)) ||
+      m.interests.some((i) => i.toLowerCase().includes(q));
+    const matchSkills =
+      activeSkills.length === 0 || m.skills.some((s) => activeSkills.includes(s));
+    const matchInterests =
+      activeInterests.length === 0 || m.interests.some((i) => activeInterests.includes(i));
+    return matchQ && matchSkills && matchInterests;
+  });
+
+  const hasFilters = activeInterests.length > 0 || activeSkills.length > 0;
+
+  return (
+    <>
+      {/* Results column */}
+      <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
+        {/* Heading */}
+        <div>
+          <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
+            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 30, fontWeight: 400, letterSpacing: "-0.01em", color: T.ink }}>Jelajahi Karya</h1>
+            <span style={{ fontFamily: T.fontMono, fontSize: 11, color: T.ink3 }}>Cari karya & kolaborator</span>
+          </div>
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cari karya, orang, skill…"
+            style={{
+              width: "100%",
+              boxSizing: "border-box" as const,
+              background: "transparent",
+              border: "none",
+              borderBottom: `2px solid ${T.ink}`,
+              outline: "none",
+              fontFamily: T.fontBody,
+              fontWeight: 300,
+              fontSize: 22,
+              color: T.ink,
+              padding: "6px 0",
+              letterSpacing: "-0.02em",
+            }}
+          />
+        </div>
+
+        {/* Tabs */}
+        <div style={{ display: "flex", borderBottom: `1px solid ${T.line}` }}>
+          {([
+            { id: "karya", label: "Karya", count: filteredKarya.length },
+            { id: "orang", label: "Orang", count: filteredMembers.length },
+          ] as const).map(({ id, label, count }) => (
+            <button
+              key={id}
+              onClick={() => setTab(id)}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                fontFamily: T.fontBody,
+                fontSize: 13,
+                fontWeight: tab === id ? 500 : 400,
+                padding: "8px 16px 8px 0",
+                color: tab === id ? T.accent : T.ink2,
+                borderBottom: tab === id ? `2px solid ${T.accent}` : "2px solid transparent",
+                marginBottom: -1,
+              }}
+            >
+              {label}{" "}
+              <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3 }}>{count}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Results */}
+        {tab === "karya" ? (
+          <div>
+            {filteredKarya.length === 0 ? (
+              <p style={{ fontFamily: T.fontBody, fontSize: 13, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+                Tidak ada karya yang cocok.
+              </p>
+            ) : (
+              filteredKarya.map((k) => <KaryaRow key={k.id} karya={k} />)
+            )}
+          </div>
+        ) : (
+          <div>
+            {filteredMembers.length === 0 ? (
+              <p style={{ fontFamily: T.fontBody, fontSize: 13, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+                Tidak ada builder yang cocok.
+              </p>
+            ) : (
+              filteredMembers.map((m) => <MemberRow key={m.id} member={m} />)
+            )}
+          </div>
+        )}
+      </main>
+
+      {/* Filter rail */}
+      <aside style={{
+        width: 232,
+        flexShrink: 0,
+        display: "flex",
+        flexDirection: "column" as const,
+        gap: 24,
+        position: "sticky" as const,
+        top: 68,
+      }}>
+        <FilterColumn
+          label="Minat"
+          items={ALL_INTERESTS}
+          active={activeInterests}
+          onToggle={(v) => toggle(activeInterests, v, setActiveInterests)}
+        />
+        {tab === "orang" && (
+          <FilterColumn
+            label="Keahlian"
+            items={ALL_SKILLS}
+            active={activeSkills}
+            onToggle={(v) => toggle(activeSkills, v, setActiveSkills)}
+            mono
+          />
+        )}
+        {hasFilters && (
+          <button
+            onClick={() => { setActiveInterests([]); setActiveSkills([]); }}
+            style={{
+              background: "none",
+              border: `1px solid ${T.line}`,
+              cursor: "pointer",
+              fontFamily: T.fontMono,
+              fontSize: 10,
+              color: T.ink2,
+              padding: "6px 10px",
+              borderRadius: T.radius,
+              letterSpacing: "0.04em",
+              alignSelf: "flex-start",
+            }}
+          >
+            Hapus filter
+          </button>
+        )}
+      </aside>
+    </>
+  );
+}
+
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function LaunchpadMockup() {
   const [filter, setFilter] = useState("Semua");
+  const [view, setView] = useState<"launchpad" | "jelajahi">("launchpad");
   const [votes, setVotes] = useState<Set<number>>(new Set());
 
   function handleVote(id: number) {
@@ -675,51 +1191,14 @@ export default function LaunchpadMockup() {
       fontFamily: T.fontBody,
       color: T.ink,
     }}>
-      {/* Top bar */}
-      <header style={{
-        borderBottom: `1px solid ${T.line}`,
-        backgroundColor: T.bg,
-        position: "sticky" as const,
-        top: 0,
-        zIndex: 10,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 24px",
-        height: 44,
-      }}>
-        <div style={{ fontFamily: T.fontMono, fontSize: 11, color: T.ink3, letterSpacing: "0.06em" }}>
-          ◈ Al-Fath Berkarya · Launchpad
-        </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-          <div style={{
-            backgroundColor: T.surface,
-            border: `1px solid ${T.line}`,
-            borderRadius: T.radius,
-            padding: "4px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}>
-            <span style={{ fontFamily: T.fontMono, fontSize: 10, color: T.ink3 }}>⌕</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: 12, color: T.ink3 }}>Cari karya, orang, skill…</span>
-          </div>
-          <button style={{
-            backgroundColor: T.accent,
-            color: T.accentFg,
-            border: "none",
-            borderRadius: T.radius,
-            padding: "5px 12px",
-            fontFamily: T.fontBody,
-            fontSize: 11,
-            fontWeight: 500,
-            cursor: "pointer",
-          }}>
-            + Karya Baru
-          </button>
-        </div>
-      </header>
-
+      <style>{`
+        .spotlight-carousel::-webkit-scrollbar { height: 8px; }
+        .spotlight-carousel::-webkit-scrollbar-thumb {
+          background: ${T.lineDark};
+          border-radius: 99px;
+        }
+        .spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
+      `}</style>
       {/* Three-column layout */}
       <div style={{
         maxWidth: 1100,
@@ -729,9 +1208,15 @@ export default function LaunchpadMockup() {
         gap: 24,
         alignItems: "flex-start",
       }}>
-        <LeftNav activeFilter={filter} onFilter={setFilter} />
-        <CenterFeed filter={filter} votes={votes} onVote={handleVote} />
-        <RightRail votes={votes} />
+        <LeftNav view={view} onNav={setView} activeFilter={filter} onFilter={setFilter} />
+        {view === "launchpad" ? (
+          <>
+            <CenterFeed filter={filter} votes={votes} onVote={handleVote} />
+            <RightRail votes={votes} />
+          </>
+        ) : (
+          <Jelajahi />
+        )}
       </div>
     </div>
   );
