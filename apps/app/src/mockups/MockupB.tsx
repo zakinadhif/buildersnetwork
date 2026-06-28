@@ -21,14 +21,15 @@ const T = {
   bg: "oklch(98% 0 0)",              // gallery white (neutral)
   ink: "oklch(18% 0 0)",             // soft neutral near-black
   ink2: "oklch(46% 0 0)",            // muted body — ~4.7:1 on white (AA)
-  ink3: "oklch(64% 0 0)",            // light meta / decorative grey
+  ink3: "oklch(53% 0 0)",            // meta text — ~5:1 on bg (AA)
   accent: "oklch(39% 0.085 62)",     // terracotta (kept)
-  accentMid: "oklch(55% 0.085 62)",  // terracotta mid for hover
+  accentMid: "oklch(55% 0.085 62)",  // terracotta mid — ~4.7:1 on bg (AA)
   accentFg: "oklch(99% 0 0)",        // text on accent
+  accentTint: "oklch(95% 0.015 62)", // light terracotta wash — chips, active rows, seeker
+  accentLine: "oklch(88% 0.03 62)",  // terracotta-tinted hairline (seeker block)
   line: "oklch(91% 0 0)",            // neutral hairline
   lineDark: "oklch(85% 0 0)",
   surface: "oklch(100% 0 0)",        // pure white lifted card
-  surfaceHover: "oklch(96.5% 0 0)",
   fontDisplay: "'Instrument Serif', serif", // brand / display copy (weight 400 only)
   fontBody: "'Plus Jakarta Sans', sans-serif", // everything else: body, labels, meta
 
@@ -202,7 +203,7 @@ function Tag({ label, accent }: { label: string; accent?: boolean }) {
       borderRadius: "3px",
       border: `1px solid ${accent ? T.accent : T.line}`,
       color: accent ? T.accent : T.ink2,
-      backgroundColor: accent ? "oklch(95% 0.015 62)" : "transparent",
+      backgroundColor: accent ? T.accentTint : "transparent",
       whiteSpace: "nowrap" as const,
     }}>{label}</span>
   );
@@ -210,7 +211,7 @@ function Tag({ label, accent }: { label: string; accent?: boolean }) {
 
 function Avatar({ name, size = 28 }: { name: string; size?: number }) {
   return (
-    <span style={{
+    <span aria-hidden="true" style={{
       display: "inline-flex",
       alignItems: "center",
       justifyContent: "center",
@@ -245,7 +246,7 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
         padding: "5px 11px",
         border: `1px solid ${active ? T.accent : T.line}`,
         borderRadius: 99,
-        backgroundColor: active ? "oklch(95% 0.015 62)" : "transparent",
+        backgroundColor: active ? T.accentTint : "transparent",
         color: active ? T.accent : T.ink2,
         cursor: "pointer",
         fontFamily: T.fontBody,
@@ -281,7 +282,7 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
   onFilter: (f: string) => void;
 }) {
   return (
-    <aside style={{
+    <aside className="bn-nav" style={{
       width: 200,
       flexShrink: 0,
       display: "flex",
@@ -290,50 +291,56 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
       paddingTop: 8,
     }}>
       {/* Logo */}
-      <div style={{ padding: "0 12px 20px", borderBottom: `1px solid ${T.line}`, marginBottom: 16 }}>
+      <div className="bn-nav-logo" style={{ padding: "0 12px 20px", borderBottom: `1px solid ${T.line}`, marginBottom: 16 }}>
         <div style={{ ...eyebrow, marginBottom: 4 }}>Al-Fath</div>
         <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, color: T.ink, lineHeight: 1 }}>Berkarya</div>
       </div>
 
       {/* Nav items */}
-      <nav style={{ marginBottom: 24 }}>
+      <nav className="bn-nav-items" style={{ marginBottom: 24 }}>
         {NAV_ITEMS.map((item) => {
           const itemActive = item.view !== undefined && item.view === view;
           return (
-            <div
+            <button
               key={item.label}
+              type="button"
               onClick={item.view ? () => onNav(item.view as View) : undefined}
+              aria-current={itemActive ? "page" : undefined}
               style={{
                 display: "flex",
                 alignItems: "center",
                 gap: 10,
+                width: "100%",
+                textAlign: "left" as const,
+                border: "none",
                 padding: "7px 12px",
                 borderRadius: T.radius,
-                backgroundColor: itemActive ? T.accentFg : "transparent",
+                backgroundColor: itemActive ? T.accentTint : "transparent",
                 color: itemActive ? T.accent : T.ink2,
                 fontFamily: T.fontBody,
                 fontSize: T.size.body,
                 fontWeight: itemActive ? T.weight.medium : T.weight.regular,
                 cursor: "pointer",
                 marginBottom: 1,
-                borderLeft: itemActive ? `2px solid ${T.accent}` : "2px solid transparent",
               }}
             >
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui }}>{item.icon}</span>
+              <span aria-hidden="true" style={{ fontFamily: T.fontBody, fontSize: T.size.ui }}>{item.icon}</span>
               {item.label}
-            </div>
+            </button>
           );
         })}
       </nav>
 
       {/* Interest filters (Launchpad feed only) */}
-      <div style={{ padding: "0 12px", display: view === "launchpad" ? "block" : "none" }}>
+      <div className="bn-nav-filters" style={{ padding: "0 12px", display: view === "launchpad" ? "block" : "none" }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Filter Minat</div>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
           {INTEREST_FILTERS.map((f) => (
             <button
               key={f}
+              type="button"
               onClick={() => onFilter(f)}
+              aria-pressed={activeFilter === f}
               style={{
                 textAlign: "left" as const,
                 background: "none",
@@ -343,7 +350,7 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
                 fontFamily: T.fontBody,
                 fontSize: T.size.ui,
                 color: activeFilter === f ? T.accent : T.ink2,
-                backgroundColor: activeFilter === f ? "oklch(95% 0.015 62)" : "transparent",
+                backgroundColor: activeFilter === f ? T.accentTint : "transparent",
                 cursor: "pointer",
                 fontWeight: activeFilter === f ? T.weight.medium : T.weight.regular,
               }}
@@ -355,7 +362,7 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
       </div>
 
       {/* User stub at bottom */}
-      <div style={{
+      <div className="bn-nav-user" style={{
         marginTop: "auto",
         paddingTop: 16,
         borderTop: `1px solid ${T.line}`,
@@ -501,13 +508,13 @@ function Spotlight({ karya }: { karya: Karya }) {
         backgroundColor: T.accent,
         padding: "4px 18px",
       }}>
-        ◈ Pilihan Minggu Ini
+        <span aria-hidden="true">◈</span> Pilihan Minggu Ini
       </div>
 
       {/* App header */}
       <div style={{ display: "flex", gap: 14, alignItems: "center", padding: "16px 18px 14px" }}>
         {/* App icon */}
-        <div style={{
+        <div aria-hidden="true" style={{
           width: 60,
           height: 60,
           borderRadius: 15,
@@ -625,11 +632,11 @@ function SeekerRamp() {
       gap: 14,
       padding: "14px 18px",
       marginBottom: 18,
-      background: "oklch(96.5% 0.012 62)",
-      border: "1px solid oklch(88% 0.03 62)",
+      background: T.accentTint,
+      border: `1px solid ${T.accentLine}`,
       borderRadius: T.radiusLg,
     }}>
-      <div style={{ fontFamily: T.fontDisplay, fontSize: 28, color: T.accent, lineHeight: 1, flexShrink: 0 }}>✦</div>
+      <div aria-hidden="true" style={{ fontFamily: T.fontDisplay, fontSize: 28, color: T.accent, lineHeight: 1, flexShrink: 0 }}>✦</div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.tight, marginBottom: 2 }}>
           Belum tahu mau bikin apa?
@@ -668,7 +675,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: string; app
     .sort((a, b) => a.lastActivity.hoursAgo - b.lastActivity.hoursAgo); // newest first
 
   return (
-    <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 0 }}>
+    <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 0 }}>
       {/* Header */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
@@ -746,7 +753,7 @@ function RightRail() {
   );
 
   return (
-    <aside style={{
+    <aside className="bn-rail" style={{
       width: 232,
       flexShrink: 0,
       display: "flex",
@@ -780,13 +787,14 @@ function RightRail() {
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <div style={eyebrow}>Kenalan dengan builder</div>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</span>
+          <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
         </div>
 
         {/* Search by skill */}
         <input
           type="text"
           placeholder="Cari skill / minat…"
+          aria-label="Cari builder berdasarkan skill atau minat"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           style={{
@@ -799,7 +807,6 @@ function RightRail() {
             border: `1px solid ${T.line}`,
             borderRadius: T.radius,
             padding: "6px 10px",
-            outline: "none",
             marginBottom: 10,
           }}
         />
@@ -974,19 +981,20 @@ function FilterColumn({ label, items, active, onToggle }: {
           return (
             <button
               key={item}
+              type="button"
               onClick={() => onToggle(item)}
+              aria-pressed={on}
               style={{
                 textAlign: "left" as const,
-                background: on ? "oklch(95% 0.015 62)" : "transparent",
+                background: on ? T.accentTint : "transparent",
                 border: "none",
-                borderLeft: on ? `2px solid ${T.accent}` : "2px solid transparent",
                 cursor: "pointer",
                 fontFamily: T.fontBody,
                 fontSize: T.size.ui,
                 color: on ? T.accent : T.ink2,
                 fontWeight: on ? T.weight.medium : T.weight.regular,
                 padding: "4px 8px",
-                borderRadius: "0 4px 4px 0",
+                borderRadius: "4px",
               }}
             >
               {item}
@@ -1041,7 +1049,7 @@ function Jelajahi() {
   return (
     <>
       {/* Results column */}
-      <main style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
+      <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
         {/* Heading */}
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
@@ -1053,13 +1061,13 @@ function Jelajahi() {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Cari karya, orang, skill…"
+            aria-label="Cari karya, orang, atau skill"
             style={{
               width: "100%",
               boxSizing: "border-box" as const,
               background: "transparent",
               border: "none",
               borderBottom: `2px solid ${T.ink}`,
-              outline: "none",
               fontFamily: T.fontBody,
               fontWeight: T.weight.light,
               fontSize: 22,
@@ -1123,7 +1131,7 @@ function Jelajahi() {
       </main>
 
       {/* Filter rail */}
-      <aside style={{
+      <aside className="bn-rail" style={{
         width: 232,
         flexShrink: 0,
         display: "flex",
@@ -1192,18 +1200,59 @@ export default function LaunchpadMockup() {
       color: T.ink,
     }}>
       <style>{`
-        /* Even line breaks on display type; fewer orphans in prose. */
-        h1, h2, h3 { text-wrap: balance; }
-        p { text-wrap: pretty; }
+        /* Even line breaks on display type; fewer orphans in prose.
+           overflow-wrap guards against long unbroken strings (URLs, IDs). */
+        h1, h2, h3 { text-wrap: balance; overflow-wrap: break-word; }
+        p { text-wrap: pretty; overflow-wrap: break-word; }
+        /* Visible keyboard focus on every interactive control. */
+        button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
+          outline: 2px solid ${T.accent};
+          outline-offset: 2px;
+          border-radius: ${T.radius};
+        }
+        /* Placeholder held to the body-text contrast bar, not the UA grey. */
+        input::placeholder { color: ${T.ink3}; opacity: 1; }
         .spotlight-carousel::-webkit-scrollbar { height: 8px; }
         .spotlight-carousel::-webkit-scrollbar-thumb {
           background: ${T.lineDark};
           border-radius: 99px;
         }
         .spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
+        /* Honour reduced-motion: collapse the 0.15s state transitions. */
+        @media (prefers-reduced-motion: reduce) {
+          * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+        /* ── Responsive ──────────────────────────────────────────────────────
+           Below ~900px the three columns can't hold their measure. Stack to a
+           single column led by the feed (mobile = the consumption view), and
+           fold the left rail into a compact top nav bar. */
+        @media (max-width: 900px) {
+          .bn-shell { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
+          .bn-nav, .bn-main, .bn-rail { width: 100% !important; }
+          .bn-rail { position: static !important; top: auto !important; }
+          .bn-nav {
+            flex-direction: row !important;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px 16px;
+            padding-top: 0 !important;
+            padding-bottom: 14px;
+            border-bottom: 1px solid ${T.line};
+          }
+          .bn-nav-logo { margin: 0 auto 0 0 !important; padding: 0 !important; border-bottom: none !important; }
+          .bn-nav-items { display: flex !important; flex-flow: row wrap; gap: 2px 4px; margin: 0 !important; }
+          .bn-nav-items button { width: auto !important; }
+          /* Interest filters + profile stub are desktop-only chrome; the feed
+             and Jelajahi search carry discovery on mobile. */
+          .bn-nav-filters, .bn-nav-user { display: none !important; }
+        }
+        /* Comfortable touch targets where the pointer is coarse. */
+        @media (pointer: coarse) {
+          .bn-nav-items button { min-height: 44px; }
+        }
       `}</style>
-      {/* Three-column layout */}
-      <div style={{
+      {/* Three-column layout (collapses to one column below ~900px) */}
+      <div className="bn-shell" style={{
         maxWidth: 1100,
         margin: "0 auto",
         padding: "24px 24px 48px",
