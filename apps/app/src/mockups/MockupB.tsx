@@ -4,10 +4,13 @@
  *   (no ranking, no leaderboard — the karya leads, nothing is "winning")
  * Self-contained: no imports beyond React, all data hardcoded, tokens inline.
  *
+ * Type: one serif display face (Instrument Serif) + one sans (Plus Jakarta Sans).
+ * Hierarchy rides a committed scale (T.size/weight/track/lh), not ad-hoc px.
+ *
  * To preview: drop into any React sandbox (e.g. StackBlitz, CodeSandbox)
  * with the Google Fonts link in the HTML head:
  *
- *   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+ *   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
  */
 
 import { useState } from "react";
@@ -26,10 +29,25 @@ const T = {
   lineDark: "oklch(85% 0 0)",
   surface: "oklch(100% 0 0)",        // pure white lifted card
   surfaceHover: "oklch(96.5% 0 0)",
-  fontDisplay: "'Instrument Serif', serif", // brand / display copy
+  fontDisplay: "'Instrument Serif', serif", // brand / display copy (weight 400 only)
   fontBody: "'Plus Jakarta Sans', sans-serif", // everything else: body, labels, meta
-  radius: "6px",
-  radiusLg: "10px",
+
+  // Type scale — fixed px (desktop product UI; port to rem for the shipping app).
+  // Distinct roles, not arbitrary steps. The bottom four are 1px apart by design:
+  // dense meta separated further by case + weight + colour.
+  size: {
+    micro: 10,    // eyebrow labels, tags, chips, dense inline meta
+    caption: 11,  // subtitles, standalone secondary text, small counts
+    ui: 12,       // nav, filters, controls, buttons, secondary body
+    body: 13,     // primary body: descriptions, bios
+    stat: 15,     // featured metric values
+    title: 18,    // serif list-item titles + callout heading
+    feature: 23,  // serif wordmark + featured title
+    display: 30,  // serif page heading
+  },
+  weight: { light: 300, regular: 400, medium: 500, semibold: 600 },
+  track: { wide: "0.08em", tag: "0.02em", tight: "-0.01em" }, // letter-spacing roles
+  lh: { tight: 1.15, snug: 1.3, body: 1.55 },                 // line-height roles
 };
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
@@ -162,14 +180,24 @@ function avatarColor(name: string): string {
   return `oklch(78% 0.08 ${hues[h % hues.length]})`;
 }
 
+// Shared style for short uppercase eyebrow/section labels.
+const eyebrow = {
+  fontFamily: T.fontBody,
+  fontSize: T.size.micro,
+  fontWeight: T.weight.medium,
+  letterSpacing: T.track.wide,
+  textTransform: "uppercase" as const,
+  color: T.ink3,
+};
+
 // ─── Micro Components ─────────────────────────────────────────────────────────
 function Tag({ label, accent }: { label: string; accent?: boolean }) {
   return (
     <span style={{
       display: "inline-block",
       fontFamily: T.fontBody,
-      fontSize: "10px",
-      letterSpacing: "0.03em",
+      fontSize: T.size.micro,
+      letterSpacing: T.track.tag,
       padding: "1px 7px",
       borderRadius: "3px",
       border: `1px solid ${accent ? T.accent : T.line}`,
@@ -193,7 +221,7 @@ function Avatar({ name, size = 28 }: { name: string; size?: number }) {
       color: T.ink,
       fontFamily: T.fontBody,
       fontSize: size * 0.36,
-      fontWeight: 500,
+      fontWeight: T.weight.medium,
       flexShrink: 0,
       border: `1.5px solid ${T.line}`,
       userSelect: "none" as const,
@@ -221,12 +249,13 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
         color: active ? T.accent : T.ink2,
         cursor: "pointer",
         fontFamily: T.fontBody,
-        fontSize: "11px",
-        fontWeight: 500,
+        fontSize: T.size.caption,
+        fontWeight: T.weight.medium,
+        fontVariantNumeric: "tabular-nums",
         transition: "all 0.15s",
       }}
     >
-      <span style={{ fontSize: "12px", lineHeight: 1 }}>{active ? "♥" : "♡"}</span>
+      <span style={{ fontSize: T.size.ui, lineHeight: 1 }}>{active ? "♥" : "♡"}</span>
       <span>{count}</span>
     </button>
   );
@@ -262,8 +291,8 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
     }}>
       {/* Logo */}
       <div style={{ padding: "0 12px 20px", borderBottom: `1px solid ${T.line}`, marginBottom: 16 }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: 11, color: T.ink3, letterSpacing: "0.1em", textTransform: "uppercase" as const, marginBottom: 4 }}>Al-Fath</div>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: 23, fontWeight: 400, color: T.ink, lineHeight: 1 }}>Berkarya</div>
+        <div style={{ ...eyebrow, marginBottom: 4 }}>Al-Fath</div>
+        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, color: T.ink, lineHeight: 1 }}>Berkarya</div>
       </div>
 
       {/* Nav items */}
@@ -283,14 +312,14 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
                 backgroundColor: itemActive ? T.accentFg : "transparent",
                 color: itemActive ? T.accent : T.ink2,
                 fontFamily: T.fontBody,
-                fontSize: 13,
-                fontWeight: itemActive ? 500 : 400,
+                fontSize: T.size.body,
+                fontWeight: itemActive ? T.weight.medium : T.weight.regular,
                 cursor: "pointer",
                 marginBottom: 1,
                 borderLeft: itemActive ? `2px solid ${T.accent}` : "2px solid transparent",
               }}
             >
-              <span style={{ fontFamily: T.fontBody, fontSize: 12 }}>{item.icon}</span>
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui }}>{item.icon}</span>
               {item.label}
             </div>
           );
@@ -299,7 +328,7 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
 
       {/* Interest filters (Launchpad feed only) */}
       <div style={{ padding: "0 12px", display: view === "launchpad" ? "block" : "none" }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>Filter Minat</div>
+        <div style={{ ...eyebrow, marginBottom: 10 }}>Filter Minat</div>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
           {INTEREST_FILTERS.map((f) => (
             <button
@@ -312,11 +341,11 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
                 padding: "4px 8px",
                 borderRadius: "4px",
                 fontFamily: T.fontBody,
-                fontSize: 12,
+                fontSize: T.size.ui,
                 color: activeFilter === f ? T.accent : T.ink2,
                 backgroundColor: activeFilter === f ? "oklch(95% 0.015 62)" : "transparent",
                 cursor: "pointer",
-                fontWeight: activeFilter === f ? 500 : 400,
+                fontWeight: activeFilter === f ? T.weight.medium : T.weight.regular,
               }}
             >
               {f}
@@ -337,8 +366,8 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
       }}>
         <Avatar name="Zaki Nadhif" size={28} />
         <div>
-          <div style={{ fontFamily: T.fontBody, fontSize: 12, fontWeight: 500, color: T.ink }}>Zaki Nadhif</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3 }}>@zaki_n</div>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>Zaki Nadhif</div>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>@zaki_n</div>
         </div>
       </div>
     </aside>
@@ -374,8 +403,8 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
       {/* Content */}
       <div style={{ flex: 1, minWidth: 0 }}>
         {/* Activity line — what's new, and when */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontFamily: T.fontBody, fontSize: 10, letterSpacing: "0.02em" }}>
-          <span style={{ color: T.accentMid }}>{karya.lastActivity.text}</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontFamily: T.fontBody, fontSize: T.size.micro, letterSpacing: T.track.tag }}>
+          <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{karya.lastActivity.text}</span>
           <span style={{ color: T.ink3 }}>·</span>
           <span style={{ color: T.ink3 }}>{relativeTime(karya.lastActivity.hoursAgo)}</span>
         </div>
@@ -384,10 +413,10 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
           <h3 style={{
             margin: 0,
             fontFamily: T.fontDisplay,
-            fontSize: 19,
-            fontWeight: 400,
+            fontSize: T.size.title,
+            fontWeight: T.weight.regular,
             color: T.ink,
-            lineHeight: 1.15,
+            lineHeight: T.lh.tight,
           }}>{karya.title}</h3>
           {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
         </div>
@@ -395,9 +424,9 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
         <p style={{
           margin: "0 0 10px",
           fontFamily: T.fontBody,
-          fontSize: 12.5,
+          fontSize: T.size.body,
           color: T.ink2,
-          lineHeight: 1.55,
+          lineHeight: T.lh.body,
         }}>{karya.description}</p>
 
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10 }}>
@@ -415,7 +444,7 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
                 </span>
               ))}
               {karya.roster.length > 4 && (
-                <span style={{ marginLeft: -8, zIndex: 0, width: 22, height: 22, borderRadius: "50%", backgroundColor: T.line, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: T.fontBody, fontSize: 9, color: T.ink2 }}>
+                <span style={{ marginLeft: -8, zIndex: 0, width: 22, height: 22, borderRadius: "50%", backgroundColor: T.line, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink2 }}>
                   +{karya.roster.length - 4}
                 </span>
               )}
@@ -440,19 +469,14 @@ function SpotlightMetric({ value, label, accent }: { value: string; label: strin
     <div style={{ flex: 1, textAlign: "center" as const, padding: "0 4px" }}>
       <div style={{
         fontFamily: T.fontBody,
-        fontSize: 15,
-        fontWeight: 500,
+        fontSize: T.size.stat,
+        fontWeight: T.weight.medium,
+        fontVariantNumeric: "tabular-nums",
         color: accent ? T.accent : T.ink,
-        lineHeight: 1.1,
+        lineHeight: T.lh.tight,
         marginBottom: 3,
       }}>{value}</div>
-      <div style={{
-        fontFamily: T.fontBody,
-        fontSize: 9,
-        letterSpacing: "0.06em",
-        textTransform: "uppercase" as const,
-        color: T.ink3,
-      }}>{label}</div>
+      <div style={eyebrow}>{label}</div>
     </div>
   );
 }
@@ -472,10 +496,7 @@ function Spotlight({ karya }: { karya: Karya }) {
     }}>
       {/* Accent header band */}
       <div style={{
-        fontFamily: T.fontBody,
-        fontSize: 9,
-        letterSpacing: "0.12em",
-        textTransform: "uppercase" as const,
+        ...eyebrow,
         color: T.accentFg,
         backgroundColor: T.accent,
         padding: "4px 18px",
@@ -498,14 +519,14 @@ function Spotlight({ karya }: { karya: Karya }) {
           justifyContent: "center",
           fontFamily: T.fontBody,
           fontSize: 26,
-          fontWeight: 500,
+          fontWeight: T.weight.medium,
           boxShadow: `0 2px 8px ${T.accent}33`,
         }}>
           {karya.title.charAt(0)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: 23, fontWeight: 400, lineHeight: 1.1, color: T.ink }}>{karya.title}</h2>
-          <div style={{ fontFamily: T.fontBody, fontSize: 12, color: T.accentMid, fontWeight: 500, marginBottom: 5 }}>
+          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, lineHeight: T.lh.tight, color: T.ink }}>{karya.title}</h2>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accentMid, fontWeight: T.weight.medium, marginBottom: 5 }}>
             oleh {builders}
           </div>
           <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
@@ -519,8 +540,8 @@ function Spotlight({ karya }: { karya: Karya }) {
           borderRadius: T.radius,
           padding: "9px 20px",
           fontFamily: T.fontBody,
-          fontSize: 12,
-          fontWeight: 600,
+          fontSize: T.size.ui,
+          fontWeight: T.weight.semibold,
           cursor: "pointer",
           whiteSpace: "nowrap" as const,
           alignSelf: "flex-start",
@@ -550,9 +571,9 @@ function Spotlight({ karya }: { karya: Karya }) {
         margin: 0,
         padding: "14px 18px 12px",
         fontFamily: T.fontBody,
-        fontSize: 13,
+        fontSize: T.size.body,
         color: T.ink2,
-        lineHeight: 1.55,
+        lineHeight: T.lh.body,
       }}>{karya.description}</p>
 
       {/* Screenshot gallery */}
@@ -562,10 +583,8 @@ function Spotlight({ karya }: { karya: Karya }) {
         justifyContent: "space-between",
         padding: "0 18px 8px",
       }}>
-        <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>
-          Tangkapan Layar
-        </span>
-        <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3 }}>← geser →</span>
+        <span style={eyebrow}>Tangkapan Layar</span>
+        <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>← geser →</span>
       </div>
       <div className="spotlight-carousel" style={{
         display: "flex",
@@ -612,10 +631,10 @@ function SeekerRamp() {
     }}>
       <div style={{ fontFamily: T.fontDisplay, fontSize: 28, color: T.accent, lineHeight: 1, flexShrink: 0 }}>✦</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: 19, fontWeight: 400, color: T.ink, lineHeight: 1.15, marginBottom: 2 }}>
+        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.tight, marginBottom: 2 }}>
           Belum tahu mau bikin apa?
         </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: 12.5, color: T.ink2, lineHeight: 1.5 }}>
+        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
           Ngobrol sebentar sama asisten — kita cari arah yang pas buat kamu.
         </div>
       </div>
@@ -627,8 +646,8 @@ function SeekerRamp() {
         borderRadius: T.radius,
         padding: "8px 16px",
         fontFamily: T.fontBody,
-        fontSize: 12,
-        fontWeight: 600,
+        fontSize: T.size.ui,
+        fontWeight: T.weight.semibold,
         cursor: "pointer",
         whiteSpace: "nowrap" as const,
       }}>
@@ -653,8 +672,8 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: string; app
       {/* Header */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 30, fontWeight: 400, letterSpacing: "-0.01em", color: T.ink }}>Launchpad</h1>
-          <span style={{ fontFamily: T.fontBody, fontSize: 11, color: T.ink3 }}>Apa yang lagi dikerjakan komunitas</span>
+          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.tight, color: T.ink }}>Launchpad</h1>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Apa yang lagi dikerjakan komunitas</span>
         </div>
       </div>
 
@@ -667,14 +686,12 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: string; app
       {/* Reverse-chronological feed */}
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
         {filtered.length === 0 ? (
-          <div style={{ fontFamily: T.fontBody, fontSize: 13, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
             Belum ada karya untuk minat ini — coba minat lain, atau jadilah yang pertama.
           </div>
         ) : (
           <>
-            <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, margin: "4px 0 2px" }}>
-              Kabar terbaru
-            </div>
+            <div style={{ ...eyebrow, margin: "4px 0 2px" }}>Kabar terbaru</div>
             {feed.map((k) => (
               <KaryaFeedRow key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
             ))}
@@ -694,8 +711,8 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: string; app
         gap: 12,
       }}>
         <div>
-          <div style={{ fontFamily: T.fontBody, fontSize: 13, fontWeight: 500, color: T.ink, marginBottom: 2 }}>Punya karya baru?</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: 12, color: T.ink2 }}>Bagikan kapan saja — komunitas senang lihat progresmu, sekecil apa pun.</div>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink, marginBottom: 2 }}>Punya karya baru?</div>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>Bagikan kapan saja — komunitas senang lihat progresmu, sekecil apa pun.</div>
         </div>
         <button style={{
           backgroundColor: T.accent,
@@ -704,8 +721,8 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: string; app
           borderRadius: T.radius,
           padding: "8px 16px",
           fontFamily: T.fontBody,
-          fontSize: 12,
-          fontWeight: 500,
+          fontSize: T.size.ui,
+          fontWeight: T.weight.semibold,
           cursor: "pointer",
           whiteSpace: "nowrap" as const,
         }}>
@@ -737,14 +754,14 @@ function RightRail() {
       gap: 20,
       paddingTop: 0,
     }}>
-      {/* Social proof strip */}
+      {/* Community pulse strip */}
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
         borderRadius: T.radiusLg,
         padding: "12px 14px",
       }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>Denyut minggu ini</div>
+        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut minggu ini</div>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
           {[
             { label: "Karya aktif", value: KARYA.length },
@@ -752,18 +769,18 @@ function RightRail() {
             { label: "Cari kolaborator", value: seekingCollab },
           ].map((stat) => (
             <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontFamily: T.fontBody, fontSize: 12, color: T.ink2 }}>{stat.label}</span>
-              <span style={{ fontFamily: T.fontBody, fontSize: 13, fontWeight: 500, color: T.ink }}>{stat.value}</span>
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{stat.label}</span>
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums", color: T.ink }}>{stat.value}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Top Builders */}
+      {/* Builders to meet */}
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const }}>Kenalan dengan builder</div>
-          <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.accentMid, cursor: "pointer" }}>Lihat semua</span>
+          <div style={eyebrow}>Kenalan dengan builder</div>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</span>
         </div>
 
         {/* Search by skill */}
@@ -776,7 +793,7 @@ function RightRail() {
             width: "100%",
             boxSizing: "border-box" as const,
             fontFamily: T.fontBody,
-            fontSize: 12,
+            fontSize: T.size.ui,
             color: T.ink,
             backgroundColor: T.surface,
             border: `1px solid ${T.line}`,
@@ -802,15 +819,15 @@ function RightRail() {
               <Avatar name={m.name} size={32} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontFamily: T.fontBody, fontSize: 12, fontWeight: 500, color: T.ink }}>{m.name}</span>
-                  <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3 }}>{m.karya} karya</span>
+                  <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
+                  <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
                 </div>
-                <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
+                <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
                 <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
                   {m.skills.slice(0, 3).map((s) => (
                     <span key={s} style={{
                       fontFamily: T.fontBody,
-                      fontSize: 9,
+                      fontSize: T.size.micro,
                       color: T.ink2,
                       backgroundColor: T.bg,
                       border: `1px solid ${T.line}`,
@@ -823,7 +840,7 @@ function RightRail() {
             </div>
           ))}
           {filteredMembers.length === 0 && (
-            <div style={{ fontFamily: T.fontBody, fontSize: 12, color: T.ink3, padding: "16px 0", textAlign: "center" as const }}>
+            <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3, padding: "16px 0", textAlign: "center" as const }}>
               Tidak ada builder yang cocok.
             </div>
           )}
@@ -836,7 +853,7 @@ function RightRail() {
         borderRadius: T.radiusLg,
         padding: "14px 16px",
       }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: 13, fontWeight: 300, color: T.accentFg, lineHeight: 1.4, marginBottom: 10 }}>
+        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.light, color: T.accentFg, lineHeight: T.lh.snug, marginBottom: 10 }}>
           Bergabung sebagai builder Telkom University.
         </div>
         <button style={{
@@ -846,8 +863,8 @@ function RightRail() {
           borderRadius: T.radius,
           padding: "6px 14px",
           fontFamily: T.fontBody,
-          fontSize: 12,
-          fontWeight: 600,
+          fontSize: T.size.ui,
+          fontWeight: T.weight.semibold,
           cursor: "pointer",
           width: "100%",
         }}>
@@ -884,10 +901,10 @@ function KaryaRow({ karya }: { karya: Karya }) {
         />
       </div>
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 6, minWidth: 0 }}>
-        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 18, fontWeight: 400, lineHeight: 1.2, color: T.ink }}>
+        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, lineHeight: T.lh.tight, color: T.ink }}>
           {karya.title}
         </h3>
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: 12, color: T.ink2, lineHeight: 1.55 }}>
+        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
           {karya.description}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginTop: 2 }}>
@@ -895,16 +912,8 @@ function KaryaRow({ karya }: { karya: Karya }) {
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, paddingTop: 2 }}>
-        <span style={{ fontFamily: T.fontBody, fontSize: 11, color: T.accentMid }}>♥ {karya.appreciations}</span>
-        <span style={{
-          fontFamily: T.fontBody,
-          fontSize: 9,
-          color: T.ink3,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase" as const,
-        }}>
-          {karya.stages[karya.stages.length - 1]}
-        </span>
+        <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, fontVariantNumeric: "tabular-nums", color: T.accentMid }}>♥ {karya.appreciations}</span>
+        <span style={eyebrow}>{karya.stages[karya.stages.length - 1]}</span>
         <div style={{ display: "flex" }}>
           {karya.roster.slice(0, 3).map((r, i) => (
             <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: karya.roster.length - i }}>
@@ -931,13 +940,13 @@ function MemberRow({ member }: { member: Member }) {
       <Avatar name={member.name} size={40} />
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 5, minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10, flexWrap: "wrap" as const }}>
-          <span style={{ fontFamily: T.fontDisplay, fontSize: 17, fontWeight: 400, color: T.ink }}>{member.name}</span>
-          <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3 }}>{member.handle}</span>
-          <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, marginLeft: "auto" }}>
+          <span style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink }}>{member.name}</span>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{member.handle}</span>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginLeft: "auto" }}>
             Tkt {member.year} · {member.major}
           </span>
         </div>
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: 12, color: T.ink2, lineHeight: 1.55 }}>
+        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
           {member.bio}
         </p>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginTop: 2 }}>
@@ -950,18 +959,15 @@ function MemberRow({ member }: { member: Member }) {
 }
 
 // ─── Filter sidebar (right rail in Jelajahi view) ──────────────────────────────
-function FilterColumn({ label, items, active, onToggle, mono }: {
+function FilterColumn({ label, items, active, onToggle }: {
   label: string;
   items: string[];
   active: string[];
   onToggle: (v: string) => void;
-  mono?: boolean;
 }) {
   return (
     <div>
-      <div style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3, letterSpacing: "0.08em", textTransform: "uppercase" as const, marginBottom: 10 }}>
-        {label}
-      </div>
+      <div style={{ ...eyebrow, marginBottom: 10 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
         {items.map((item) => {
           const on = active.includes(item);
@@ -975,10 +981,10 @@ function FilterColumn({ label, items, active, onToggle, mono }: {
                 border: "none",
                 borderLeft: on ? `2px solid ${T.accent}` : "2px solid transparent",
                 cursor: "pointer",
-                fontFamily: mono ? T.fontBody : T.fontBody,
-                fontSize: mono ? 11 : 12,
+                fontFamily: T.fontBody,
+                fontSize: T.size.ui,
                 color: on ? T.accent : T.ink2,
-                fontWeight: on ? 500 : 400,
+                fontWeight: on ? T.weight.medium : T.weight.regular,
                 padding: "4px 8px",
                 borderRadius: "0 4px 4px 0",
               }}
@@ -1039,8 +1045,8 @@ function Jelajahi() {
         {/* Heading */}
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
-            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: 30, fontWeight: 400, letterSpacing: "-0.01em", color: T.ink }}>Jelajahi Karya</h1>
-            <span style={{ fontFamily: T.fontBody, fontSize: 11, color: T.ink3 }}>Cari karya & kolaborator</span>
+            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.tight, color: T.ink }}>Jelajahi Karya</h1>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Cari karya & kolaborator</span>
           </div>
           <input
             type="text"
@@ -1055,7 +1061,7 @@ function Jelajahi() {
               borderBottom: `2px solid ${T.ink}`,
               outline: "none",
               fontFamily: T.fontBody,
-              fontWeight: 300,
+              fontWeight: T.weight.light,
               fontSize: 22,
               color: T.ink,
               padding: "6px 0",
@@ -1078,8 +1084,8 @@ function Jelajahi() {
                 border: "none",
                 cursor: "pointer",
                 fontFamily: T.fontBody,
-                fontSize: 13,
-                fontWeight: tab === id ? 500 : 400,
+                fontSize: T.size.body,
+                fontWeight: tab === id ? T.weight.medium : T.weight.regular,
                 padding: "8px 16px 8px 0",
                 color: tab === id ? T.accent : T.ink2,
                 borderBottom: tab === id ? `2px solid ${T.accent}` : "2px solid transparent",
@@ -1087,7 +1093,7 @@ function Jelajahi() {
               }}
             >
               {label}{" "}
-              <span style={{ fontFamily: T.fontBody, fontSize: 10, color: T.ink3 }}>{count}</span>
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, fontVariantNumeric: "tabular-nums", color: T.ink3 }}>{count}</span>
             </button>
           ))}
         </div>
@@ -1096,7 +1102,7 @@ function Jelajahi() {
         {tab === "karya" ? (
           <div>
             {filteredKarya.length === 0 ? (
-              <p style={{ fontFamily: T.fontBody, fontSize: 13, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+              <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
                 Tidak ada karya yang cocok.
               </p>
             ) : (
@@ -1106,7 +1112,7 @@ function Jelajahi() {
         ) : (
           <div>
             {filteredMembers.length === 0 ? (
-              <p style={{ fontFamily: T.fontBody, fontSize: 13, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+              <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
                 Tidak ada builder yang cocok.
               </p>
             ) : (
@@ -1138,7 +1144,6 @@ function Jelajahi() {
             items={ALL_SKILLS}
             active={activeSkills}
             onToggle={(v) => toggle(activeSkills, v, setActiveSkills)}
-            mono
           />
         )}
         {hasFilters && (
@@ -1149,11 +1154,11 @@ function Jelajahi() {
               border: `1px solid ${T.line}`,
               cursor: "pointer",
               fontFamily: T.fontBody,
-              fontSize: 10,
+              fontSize: T.size.micro,
               color: T.ink2,
               padding: "6px 10px",
               borderRadius: T.radius,
-              letterSpacing: "0.04em",
+              letterSpacing: T.track.tag,
               alignSelf: "flex-start",
             }}
           >
@@ -1187,6 +1192,9 @@ export default function LaunchpadMockup() {
       color: T.ink,
     }}>
       <style>{`
+        /* Even line breaks on display type; fewer orphans in prose. */
+        h1, h2, h3 { text-wrap: balance; }
+        p { text-wrap: pretty; }
         .spotlight-carousel::-webkit-scrollbar { height: 8px; }
         .spotlight-carousel::-webkit-scrollbar-thumb {
           background: ${T.lineDark};
