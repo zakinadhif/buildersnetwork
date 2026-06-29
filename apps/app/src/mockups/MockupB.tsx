@@ -4,7 +4,7 @@
  *   (no ranking, no leaderboard — the karya leads, nothing is "winning")
  * Self-contained: no imports beyond React, all data hardcoded, tokens inline.
  *
- * Type: Lora (display serif) + body switcher: Plus Jakarta Sans / DM Sans / Manrope / Outfit.
+ * Type: display switcher (Lora / Instrument Serif) + body switcher (Plus Jakarta / Figtree / DM Sans / Manrope / Outfit).
  * Hierarchy rides a committed scale (T.size/weight/track/lh), not ad-hoc px.
  *
  * To preview: drop into any React sandbox (e.g. StackBlitz, CodeSandbox)
@@ -53,11 +53,17 @@ const T = {
   radiusLg: "16px",
 };
 
-const FONT_PAIRS = [
-  { display: "'Lora', serif", body: "'Plus Jakarta Sans', sans-serif", label: "Plus Jakarta" },
-  { display: "'Lora', serif", body: "'DM Sans', sans-serif",           label: "DM Sans" },
-  { display: "'Lora', serif", body: "'Manrope', sans-serif",           label: "Manrope" },
-  { display: "'Lora', serif", body: "'Outfit', sans-serif",            label: "Outfit" },
+const DISPLAY_FONTS = [
+  { font: "'Lora', serif",             label: "Lora" },
+  { font: "'Instrument Serif', serif", label: "Instrument Serif" },
+] as const;
+
+const BODY_FONTS = [
+  { font: "'Plus Jakarta Sans', sans-serif", label: "Plus Jakarta" },
+  { font: "'Figtree', sans-serif",           label: "Figtree" },
+  { font: "'DM Sans', sans-serif",           label: "DM Sans" },
+  { font: "'Manrope', sans-serif",           label: "Manrope" },
+  { font: "'Outfit', sans-serif",            label: "Outfit" },
 ] as const;
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
@@ -1239,16 +1245,15 @@ function Jelajahi() {
 }
 
 // ─── Font Tweak Switcher ──────────────────────────────────────────────────────
-function FontSwitcher({ pairIdx, onChange }: { pairIdx: number; onChange: (i: number) => void }) {
+function FontSwitcher({ options, activeIdx, onChange }: {
+  options: readonly { font: string; label: string }[];
+  activeIdx: number;
+  onChange: (i: number) => void;
+}) {
   return (
     <div
       role="group"
-      aria-label="Pilih tipografi"
       style={{
-        position: "fixed",
-        bottom: 20,
-        right: 20,
-        zIndex: 100,
         background: T.surface,
         border: `1px solid ${T.lineDark}`,
         borderRadius: 99,
@@ -1258,8 +1263,8 @@ function FontSwitcher({ pairIdx, onChange }: { pairIdx: number; onChange: (i: nu
         gap: 2,
       }}
     >
-      {FONT_PAIRS.map((pair, i) => {
-        const active = i === pairIdx;
+      {options.map((opt, i) => {
+        const active = i === activeIdx;
         return (
           <button
             key={i}
@@ -1274,7 +1279,7 @@ function FontSwitcher({ pairIdx, onChange }: { pairIdx: number; onChange: (i: nu
               border: "none",
               background: active ? T.ink : "transparent",
               color: active ? T.bg : T.ink3,
-              fontFamily: pair.body,
+              fontFamily: T.fontBody,
               fontSize: T.size.micro,
               fontWeight: active ? T.weight.medium : T.weight.regular,
               cursor: "pointer",
@@ -1283,8 +1288,8 @@ function FontSwitcher({ pairIdx, onChange }: { pairIdx: number; onChange: (i: nu
               transition: "background 0.12s, color 0.12s",
             }}
           >
-            <span style={{ fontFamily: pair.display, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
-            {pair.label}
+            <span style={{ fontFamily: opt.font, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
+            {opt.label}
           </button>
         );
       })}
@@ -1297,11 +1302,12 @@ export default function LaunchpadMockup() {
   const [filter, setFilter] = useState("Semua");
   const [view, setView] = useState<"launchpad" | "jelajahi">("launchpad");
   const [appreciated, setAppreciated] = useState<Set<number>>(new Set());
-  const [pairIdx, setPairIdx] = useState(0);
+  const [displayIdx, setDisplayIdx] = useState(0);
+  const [bodyIdx, setBodyIdx] = useState(0);
 
-  // Apply chosen font pair before render — all child refs to T.fontDisplay / T.fontBody pick this up.
-  T.fontDisplay = FONT_PAIRS[pairIdx].display;
-  T.fontBody = FONT_PAIRS[pairIdx].body;
+  // Apply chosen fonts before render — all child refs to T.fontDisplay / T.fontBody pick this up.
+  T.fontDisplay = DISPLAY_FONTS[displayIdx].font;
+  T.fontBody = BODY_FONTS[bodyIdx].font;
 
   function toggleAppreciate(id: number) {
     setAppreciated((prev) => {
@@ -1391,7 +1397,10 @@ export default function LaunchpadMockup() {
           <Jelajahi />
         )}
       </div>
-      <FontSwitcher pairIdx={pairIdx} onChange={setPairIdx} />
+      <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
+        <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={setDisplayIdx} />
+        <FontSwitcher options={BODY_FONTS} activeIdx={bodyIdx} onChange={setBodyIdx} />
+      </div>
     </div>
   );
 }
