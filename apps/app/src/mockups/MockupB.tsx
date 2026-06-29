@@ -4,17 +4,17 @@
  *   (no ranking, no leaderboard — the karya leads, nothing is "winning")
  * Self-contained: no imports beyond React, all data hardcoded, tokens inline.
  *
- * Type: one serif display face (Instrument Serif) + one sans (Plus Jakarta Sans).
+ * Type: Lora (display serif) + body switcher: Plus Jakarta Sans / DM Sans / Manrope / Outfit.
  * Hierarchy rides a committed scale (T.size/weight/track/lh), not ad-hoc px.
  *
  * To preview: drop into any React sandbox (e.g. StackBlitz, CodeSandbox)
  * with the Google Fonts link in the HTML head:
  *
- *   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+ *   <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Figtree:wght@300;400;500;600&display=swap" rel="stylesheet">
  */
 
 import { useState } from "react";
-import { coverFor, screenshots } from "./images";
+import { coverFor, covers, screenshots } from "./images";
 
 // ─── Design Tokens ───────────────────────────────────────────────────────────
 const T = {
@@ -30,8 +30,8 @@ const T = {
   line: "oklch(91% 0 0)",            // neutral hairline
   lineDark: "oklch(85% 0 0)",
   surface: "oklch(100% 0 0)",        // pure white lifted card
-  fontDisplay: "'Instrument Serif', serif", // brand / display copy (weight 400 only)
-  fontBody: "'Plus Jakarta Sans', sans-serif", // everything else: body, labels, meta
+  fontDisplay: "'Lora', serif" as string,                 // brand / display copy (weight 400 only)
+  fontBody: "'Plus Jakarta Sans', sans-serif" as string,  // everything else: body, labels, meta
 
   // Type scale — fixed px (desktop product UI; port to rem for the shipping app).
   // Distinct roles, not arbitrary steps. The bottom four are 1px apart by design:
@@ -53,6 +53,13 @@ const T = {
   radiusLg: "16px",
 };
 
+const FONT_PAIRS = [
+  { display: "'Lora', serif", body: "'Plus Jakarta Sans', sans-serif", label: "Plus Jakarta" },
+  { display: "'Lora', serif", body: "'DM Sans', sans-serif",           label: "DM Sans" },
+  { display: "'Lora', serif", body: "'Manrope', sans-serif",           label: "Manrope" },
+  { display: "'Lora', serif", body: "'Outfit', sans-serif",            label: "Outfit" },
+] as const;
+
 // ─── Sample Data ─────────────────────────────────────────────────────────────
 interface Roster { name: string; handle: string }
 interface Karya {
@@ -65,6 +72,7 @@ interface Karya {
   appreciations: number;
   lastActivity: { text: string; hoursAgo: number }; // drives the chronological feed
   featured?: boolean;
+  landscapeScreenshots?: string[];
 }
 interface Member {
   id: number;
@@ -119,6 +127,7 @@ const KARYA: Karya[] = [
     roster: [{ name: "Nadia Kusuma", handle: "@nadiaku" }, { name: "Budi Santoso", handle: "@budisnt" }],
     appreciations: 134,
     lastActivity: { text: "Tambah 12 kartu materi", hoursAgo: 20 },
+    landscapeScreenshots: [covers.education, covers.writing, covers.productivity, covers.community],
   },
   {
     id: 5,
@@ -129,6 +138,7 @@ const KARYA: Karya[] = [
     roster: [{ name: "Farhan Ardiansyah", handle: "@farhan_a" }],
     appreciations: 112,
     lastActivity: { text: "Buka lowongan kolaborator", hoursAgo: 26 },
+    landscapeScreenshots: [covers.maps, covers.community, covers.environment, covers.devtools],
   },
   {
     id: 6,
@@ -139,6 +149,7 @@ const KARYA: Karya[] = [
     roster: [{ name: "Mega Wulandari", handle: "@megaw" }, { name: "Taufik Hidayat", handle: "@taufikhi" }],
     appreciations: 98,
     lastActivity: { text: "Pasang update progres", hoursAgo: 38 },
+    landscapeScreenshots: [covers.productivity, covers.ai, covers.data],
   },
   {
     id: 7,
@@ -254,7 +265,6 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
         fontFamily: T.fontBody,
         fontSize: T.size.caption,
         fontWeight: T.weight.medium,
-        fontVariantNumeric: "tabular-nums",
         transition: "all 0.15s",
       }}
     >
@@ -383,88 +393,136 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
   );
 }
 
+// ─── Landscape Screenshot Carousel (Play Store-style) ────────────────────────
+function LandscapeCarousel({ images, title }: { images: string[]; title: string }) {
+  return (
+    <div
+      className="landscape-carousel"
+      role="region"
+      aria-label={`Tangkapan layar ${title}`}
+      style={{
+        display: "flex",
+        gap: 10,
+        overflowX: "auto" as const,
+        scrollSnapType: "x mandatory",
+        scrollPaddingLeft: 0,
+        borderRadius: T.radius,
+      }}
+    >
+      {images.map((src, i) => (
+        <img
+          key={src}
+          src={src}
+          alt={`${title} — layar ${i + 1}`}
+          loading="lazy"
+          style={{
+            width: 240,
+            height: 135,
+            flexShrink: 0,
+            objectFit: "cover",
+            borderRadius: T.radius,
+            border: `1.5px solid ${T.line}`,
+            scrollSnapAlign: "start",
+            display: "block",
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 // ─── Karya Feed Row (reverse-chronological activity) ───────────────────────────
 function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appreciated: boolean; onAppreciate: (id: number) => void }) {
   return (
     <article style={{
       display: "flex",
-      gap: 14,
+      flexDirection: "column" as const,
       padding: "16px 2px",
       borderBottom: `1px solid ${T.line}`,
+      gap: 12,
     }}>
-      {/* Cover thumbnail */}
-      <div style={{
-        width: 96,
-        aspectRatio: "16 / 11",
-        flexShrink: 0,
-        borderRadius: T.radius,
-        overflow: "hidden",
-        border: `1px solid ${T.line}`,
-        background: T.bg,
-      }}>
-        <img
-          src={coverFor(karya.interests)}
-          alt={karya.title}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-      </div>
+      {/* Landscape screenshot carousel — Play Store style, full-width above metadata */}
+      {karya.landscapeScreenshots && (
+        <LandscapeCarousel images={karya.landscapeScreenshots} title={karya.title} />
+      )}
 
-      {/* Content */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Activity line — what's new, and when */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontFamily: T.fontBody, fontSize: T.size.micro, letterSpacing: T.track.tag }}>
-          <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{karya.lastActivity.text}</span>
-          <span style={{ color: T.ink3 }}>·</span>
-          <span style={{ color: T.ink3 }}>{relativeTime(karya.lastActivity.hoursAgo)}</span>
+      {/* Thumbnail + content row */}
+      <div style={{ display: "flex", gap: 14 }}>
+        {/* App icon */}
+        <div style={{
+          width: 56,
+          height: 56,
+          flexShrink: 0,
+          borderRadius: 14,
+          overflow: "hidden",
+          border: `1px solid ${T.line}`,
+          background: T.bg,
+        }}>
+          <img
+            src={coverFor(karya.interests)}
+            alt={karya.title}
+            loading="lazy"
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+          />
         </div>
 
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap" as const }}>
-          <h3 style={{
-            margin: 0,
-            fontFamily: T.fontDisplay,
-            fontSize: T.size.title,
-            fontWeight: T.weight.regular,
-            color: T.ink,
-            lineHeight: T.lh.tight,
-          }}>{karya.title}</h3>
-          {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
-        </div>
-
-        <p style={{
-          margin: "0 0 10px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink2,
-          lineHeight: T.lh.body,
-        }}>{karya.description}</p>
-
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10 }}>
-          {/* Interests */}
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
-            {karya.interests.map((i) => <Tag key={i} label={i} />)}
+        {/* Content */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {/* Activity line — what's new, and when */}
+          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontFamily: T.fontBody, fontSize: T.size.micro, letterSpacing: T.track.tag }}>
+            <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{karya.lastActivity.text}</span>
+            <span style={{ color: T.ink3 }}>·</span>
+            <span style={{ color: T.ink3 }}>{relativeTime(karya.lastActivity.hoursAgo)}</span>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-            {/* Roster avatars */}
-            <div style={{ display: "flex", alignItems: "center" }}>
-              {karya.roster.slice(0, 4).map((r, idx) => (
-                <span key={r.handle} style={{ marginLeft: idx === 0 ? 0 : -8, zIndex: karya.roster.length - idx }}>
-                  <Avatar name={r.name} size={22} />
-                </span>
-              ))}
-              {karya.roster.length > 4 && (
-                <span style={{ marginLeft: -8, zIndex: 0, width: 22, height: 22, borderRadius: "50%", backgroundColor: T.line, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink2 }}>
-                  +{karya.roster.length - 4}
-                </span>
-              )}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap" as const }}>
+            <h3 style={{
+              margin: 0,
+              fontFamily: T.fontDisplay,
+              fontSize: T.size.title,
+              fontWeight: T.weight.regular,
+              color: T.ink,
+              lineHeight: T.lh.tight,
+            }}>{karya.title}</h3>
+            {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
+          </div>
+
+          <p style={{
+            margin: "0 0 10px",
+            fontFamily: T.fontBody,
+            fontSize: T.size.body,
+            color: T.ink2,
+            lineHeight: T.lh.body,
+          }}>{karya.description}</p>
+
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10 }}>
+            {/* Interests */}
+            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+              {karya.interests.map((i) => <Tag key={i} label={i} />)}
             </div>
 
-            {/* Quiet appreciation */}
-            <AppreciateButton
-              count={karya.appreciations + (appreciated ? 1 : 0)}
-              active={appreciated}
-              onClick={() => onAppreciate(karya.id)}
-            />
+            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+              {/* Roster avatars */}
+              <div style={{ display: "flex", alignItems: "center" }}>
+                {karya.roster.slice(0, 4).map((r, idx) => (
+                  <span key={r.handle} style={{ marginLeft: idx === 0 ? 0 : -8, zIndex: karya.roster.length - idx }}>
+                    <Avatar name={r.name} size={22} />
+                  </span>
+                ))}
+                {karya.roster.length > 4 && (
+                  <span style={{ marginLeft: -8, zIndex: 0, width: 22, height: 22, borderRadius: "50%", backgroundColor: T.line, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink2 }}>
+                    +{karya.roster.length - 4}
+                  </span>
+                )}
+              </div>
+
+              {/* Quiet appreciation */}
+              <AppreciateButton
+                count={karya.appreciations + (appreciated ? 1 : 0)}
+                active={appreciated}
+                onClick={() => onAppreciate(karya.id)}
+              />
+            </div>
           </div>
         </div>
       </div>
@@ -480,7 +538,6 @@ function SpotlightMetric({ value, label, accent }: { value: string; label: strin
         fontFamily: T.fontBody,
         fontSize: T.size.stat,
         fontWeight: T.weight.medium,
-        fontVariantNumeric: "tabular-nums",
         color: accent ? T.accent : T.ink,
         lineHeight: T.lh.tight,
         marginBottom: 3,
@@ -889,16 +946,17 @@ function KaryaRow({ karya }: { karya: Karya }) {
   return (
     <div style={{
       display: "grid",
-      gridTemplateColumns: "104px 1fr auto",
+      gridTemplateColumns: "56px 1fr auto",
       gap: "12px 20px",
       padding: "18px 0",
       borderBottom: `1px solid ${T.line}`,
       alignItems: "start",
     }}>
       <div style={{
-        width: 104,
-        aspectRatio: "16 / 10",
-        borderRadius: T.radius,
+        width: 56,
+        height: 56,
+        flexShrink: 0,
+        borderRadius: 14,
         overflow: "hidden",
         border: `1px solid ${T.line}`,
         background: T.bg,
@@ -921,7 +979,7 @@ function KaryaRow({ karya }: { karya: Karya }) {
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, paddingTop: 2 }}>
-        <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, fontVariantNumeric: "tabular-nums", color: T.accentMid }}>♥ {karya.appreciations}</span>
+        <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.accentMid }}>♥ {karya.appreciations}</span>
         <span style={eyebrow}>{karya.stages[karya.stages.length - 1]}</span>
         <div style={{ display: "flex" }}>
           {karya.roster.slice(0, 3).map((r, i) => (
@@ -1103,7 +1161,7 @@ function Jelajahi() {
               }}
             >
               {label}{" "}
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, fontVariantNumeric: "tabular-nums", color: T.ink3 }}>{count}</span>
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{count}</span>
             </button>
           ))}
         </div>
@@ -1180,11 +1238,70 @@ function Jelajahi() {
   );
 }
 
+// ─── Font Tweak Switcher ──────────────────────────────────────────────────────
+function FontSwitcher({ pairIdx, onChange }: { pairIdx: number; onChange: (i: number) => void }) {
+  return (
+    <div
+      role="group"
+      aria-label="Pilih tipografi"
+      style={{
+        position: "fixed",
+        bottom: 20,
+        right: 20,
+        zIndex: 100,
+        background: T.surface,
+        border: `1px solid ${T.lineDark}`,
+        borderRadius: 99,
+        boxShadow: "0 4px 16px oklch(0% 0 0 / 10%)",
+        display: "flex",
+        padding: 3,
+        gap: 2,
+      }}
+    >
+      {FONT_PAIRS.map((pair, i) => {
+        const active = i === pairIdx;
+        return (
+          <button
+            key={i}
+            onClick={() => onChange(i)}
+            aria-pressed={active}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "5px 13px",
+              borderRadius: 99,
+              border: "none",
+              background: active ? T.ink : "transparent",
+              color: active ? T.bg : T.ink3,
+              fontFamily: pair.body,
+              fontSize: T.size.micro,
+              fontWeight: active ? T.weight.medium : T.weight.regular,
+              cursor: "pointer",
+              letterSpacing: T.track.tag,
+              whiteSpace: "nowrap" as const,
+              transition: "background 0.12s, color 0.12s",
+            }}
+          >
+            <span style={{ fontFamily: pair.display, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
+            {pair.label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function LaunchpadMockup() {
   const [filter, setFilter] = useState("Semua");
   const [view, setView] = useState<"launchpad" | "jelajahi">("launchpad");
   const [appreciated, setAppreciated] = useState<Set<number>>(new Set());
+  const [pairIdx, setPairIdx] = useState(0);
+
+  // Apply chosen font pair before render — all child refs to T.fontDisplay / T.fontBody pick this up.
+  T.fontDisplay = FONT_PAIRS[pairIdx].display;
+  T.fontBody = FONT_PAIRS[pairIdx].body;
 
   function toggleAppreciate(id: number) {
     setAppreciated((prev) => {
@@ -1220,6 +1337,8 @@ export default function LaunchpadMockup() {
           border-radius: 99px;
         }
         .spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
+        .landscape-carousel { scrollbar-width: none; }
+        .landscape-carousel::-webkit-scrollbar { display: none; }
         /* Honour reduced-motion: collapse the 0.15s state transitions. */
         @media (prefers-reduced-motion: reduce) {
           * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
@@ -1272,6 +1391,7 @@ export default function LaunchpadMockup() {
           <Jelajahi />
         )}
       </div>
+      <FontSwitcher pairIdx={pairIdx} onChange={setPairIdx} />
     </div>
   );
 }

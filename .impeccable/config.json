@@ -1,0 +1,7 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": ["apps/app/mockups.html"],
+    "ignoreValues": []
+  }
+}
