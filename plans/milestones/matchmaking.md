@@ -12,7 +12,8 @@ People-discovery via **explicit intent** (FR-5, FR-27, FR-28). A member declares
 
 - Intent lives as `seeking_*` fields on the member's profile (alter `profiles`), not a new table — one active intent per member.
 - `seekingType` is a closed vocabulary validated in code, not a pg enum (repo convention; see [retro](retro.txt)).
-- **Open — [#6](https://github.com/zakinadhif/buildersnetwork/issues/6):** the existing AI-`matches` feature is a different model (AI-suggested vs. explicit intent). Replace, keep both, or defer — undecided; the seeker board ships regardless and `matches` stays untouched meanwhile.
+- **Open — [#7](https://github.com/zakinadhif/buildersnetwork/issues/7):** which Cari Kolaborator direction ships — the mockup explorations in `apps/app/src/mockups/` (A two-lane · B intent-typed · C reciprocal match · E wall of asks) are all two-sided (people ↔ karya) and lean on P1-deferred FR-34/FR-29, so the pick reshapes this milestone's task set. Direction E would also rework the schema task (intent as timestamped asks, not profile fields).
+- **Open — [#6](https://github.com/zakinadhif/buildersnetwork/issues/6):** the existing AI-`matches` feature is a different model (AI-suggested vs. explicit intent). Replace, keep both, or defer — undecided; `matches` stays untouched meanwhile. Direction C in #7 would effectively answer this, so decide them together.
 
 ## Exit
 
