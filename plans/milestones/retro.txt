@@ -1,5 +1,5 @@
 RETRO — decisions, principles & open threads
-Source: plans/sprint/sprint-{0,1,2,3}.md · Compiled 2026-06-21 · revised 2026-06-22
+Source: plans/archive/sprint-{0,1,2,3}.md · Compiled 2026-06-21 · revised 2026-06-22
 Non-authoritative working knowledge — trust the code when they diverge.
 
 

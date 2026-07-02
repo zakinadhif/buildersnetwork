@@ -10,16 +10,16 @@
 
 | Milestone | Doc | Theme | Core FRs | Status |
 |---|---|---|---|---|
-| Profile model | [milestones/sprint-0.md](milestones/sprint-0.md) | Profile expand + agent contract | FR-3, FR-4, FR-8 | Done |
-| Interests | [milestones/sprint-1.md](milestones/sprint-1.md) | Interests + profile | FR-14, FR-15 | Done |
-| Karya core | [milestones/sprint-2.md](milestones/sprint-2.md) | Projects, lifecycle, roster | FR-10–12 | Done |
-| Posts + feed | [milestones/sprint-3.md](milestones/sprint-3.md) | Progress posts, featured | FR-18/19/22–24 | Done |
-| Discovery | [milestones/sprint-4.md](milestones/sprint-4.md) | Search + filters | FR-25, FR-44 | Done |
+| Profile model | [archive/sprint-0.md](archive/sprint-0.md) | Profile expand + agent contract | FR-3, FR-4, FR-8 | Done |
+| Interests | [archive/sprint-1.md](archive/sprint-1.md) | Interests + profile | FR-14, FR-15 | Done |
+| Karya core | [archive/sprint-2.md](archive/sprint-2.md) | Projects, lifecycle, roster | FR-10–12 | Done |
+| Posts + feed | [archive/sprint-3.md](archive/sprint-3.md) | Progress posts, featured | FR-18/19/22–24 | Done |
+| Discovery | [archive/sprint-4.md](archive/sprint-4.md) | Search + filters | FR-25, FR-44 | Done |
 | **Matchmaking** | [milestones/matchmaking.md](milestones/matchmaking.md) | Intent badge + seeker board | FR-5, FR-27, FR-28 | **Active** — [GitHub milestone](https://github.com/zakinadhif/buildersnetwork/milestone/1) |
 | Messaging | [milestones/messaging.md](milestones/messaging.md) | 1:1 DMs, connect actions | FR-31, FR-32 | Next |
 | Seed + hardening | [milestones/seed-hardening.md](milestones/seed-hardening.md) | Phase 0 content + NFR pass | NFR-1/3/4/5/7 | Next |
 
-Docs from the completed era keep their original `sprint-N.md` names as history; decisions distilled from them live in [milestones/retro.txt](milestones/retro.txt).
+Completed-era docs are archived under [archive/](archive/) under their original `sprint-N.md` names (full data models + decision rationale, kept for reference, not maintained); the decisions distilled from them live in [milestones/retro.txt](milestones/retro.txt). The parallel-UI-exploration method those sprints used is generalized in [how-to/parallel-ui-exploration.md](how-to/parallel-ui-exploration.md).
 
 ---
 
