@@ -300,6 +300,12 @@ Hyper-minimalist. Warm off-white background (`#f1efe9`), Plus Jakarta Sans for U
 
 ---
 
+## Contributing
+
+Team workflow (milestones → task issues → project board) is defined in [plans/how-to/build-workflow.md](plans/how-to/build-workflow.md); roadmap in [plans/roadmap.md](plans/roadmap.md). One-time setup beyond Quick start: `gh auth login`, then `gh auth refresh -s project,read:project`. Claude Code users get the loop as repo skills: `/board` (see the queue), `/pick-task` (claim + load context), `/ship-task` (PR + board update).
+
+---
+
 ## License
 
 MIT

@@ -1,6 +1,6 @@
 # Sprint 3 — Posts, feed & homepage
 
-*Part of the [P0 Sprint Plan](sprint-plan.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
 Goal: the flywheel — karya feel alive (members post updates), and there's a place to see activity (a reverse-chron feed + a curated homepage).
 
