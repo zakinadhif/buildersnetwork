@@ -29,5 +29,5 @@ Chosen over B (*everything is a post; a page is a filtered feed* — kills the r
 
 ## Deliberately still open (not blocking A)
 
-- **Must a post always belong to a karya?** Today `posts.karyaId` is `NOT NULL`. Allowing **personal posts** (a builder musing, untethered) is the microblog seed (FR-35) and the one place A needs a small extension — make `karyaId` nullable, or add a separate personal-post path. Decided when microblog is groomed.
+- **Must a post always belong to a karya?** Today `posts.karyaId` is `NOT NULL`. Allowing **personal posts** (a builder musing, untethered) is the microblog seed (FR-35) and the one place A needs a small extension — make `karyaId` nullable, or add a separate personal-post path. Decided when microblog is groomed — live discussion in [#15](https://github.com/zakinadhif/buildersnetwork/issues/15).
 - **Article priority** (Phase 1 vs 2) and its data shape — deferred to its own milestone.
