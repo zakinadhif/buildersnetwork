@@ -12,6 +12,25 @@
 
 **One fact, one home.** Docs in git hold *intent* (why, decisions, exit). Issues hold the *contract* (what done means). The board holds *state* (who, what stage). Never write status into `plans/` files — that's how docs rot.
 
+## Scope treatments — how much a feature gets *right now*
+
+Priority (**P0 / P1**, set in the [PRD](../al-fath-berkarya-prd.md) and [roadmap](../roadmap.md)) says how much a feature *matters*. It does **not** say how finished it should be in the build we're shipping this week. That's a second, independent axis — the **treatment** — and naming it lets us shrink scope ruthlessly without lying about a feature's importance.
+
+| Treatment | Real-world name | What it means | Polish budget? |
+|---|---|---|---|
+| **Hero** | flagship / focus | Finished to the edges — empty states, loading, error copy, the *feel*. The surface a member touches first and keeps coming back to. | Yes — this is where it all goes. |
+| **Dark** | *dark launch* / *walking skeleton* | Shipped and integrated — data model, shell slot, route all present — but the surface is stubbed, flag-gated, or deliberately thin. The scaffold is load-bearing so nothing needs re-architecting later; the polish is skipped **on purpose**. | No. |
+| **Deferred** | P1 backlog | Not in the build at all. Named in the roadmap so it isn't forgotten; absent from the app. | No. |
+
+Two ideas worth knowing by name, because they *are* the point of **Dark**:
+
+- **Dark launch** (feature-flag / continuous-delivery practice) — code ships live to production but stays hidden from users behind a flag. You lay the plumbing early and light up the UI later, decoupling *"is it built"* from *"can users see it."*
+- **Walking skeleton** (Alistair Cockburn) — a thin end-to-end slice that actually runs and proves the architecture holds, *before* any of it is fleshed out. Real, but minimal.
+
+The failure mode of Dark: a half-lit surface that looks clickable but does nothing reads as **broken**, not *"coming soon."* Dark only works when it's honestly signposted — disabled, *"segera hadir,"* or simply absent from the nav — never present-but-hollow.
+
+A feature carries **both** tags, e.g. *"Launchpad — P0, hero"* or *"Messaging — P1, dark."*
+
 ## Board statuses
 
 ```

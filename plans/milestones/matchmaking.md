@@ -6,11 +6,11 @@
 
 ## Why
 
-People-discovery via **explicit intent** (FR-5, FR-27, FR-28). A member declares what they're looking for — `event team / project team / talent-gig` — plus a free-text note; everyone looking is browsable on a seeker board, filterable by type. This is the launch-critical "find teammates" loop, and the P0 half of matchmaking.
+People-discovery via **explicit intent** (FR-5, FR-27, FR-28). A member declares what they're looking for — `event team / project team / talent-gig` — plus a free-text note; everyone looking is browsable on a seeker board, filterable by type. This is the "find teammates" loop. **Priority: P1** — moved out of P0 by the [ruthless shrink](../roadmap.md) so we validate the Launchpad hero with real users first; it leads the matchmaking work when P1 opens.
 
 ## Scope
 
-**People lane only.** A member is the one seeking; the board lists people. The mirror image — *karya* seeking contributors ("open to contributors", FR-34) — is **out of scope here** and lives in the [Karya openings](karya-openings.md) P1 milestone. This split keeps a P1 feature off the P0 critical path; the two lanes reunite into one two-sided surface then.
+**People lane only.** A member is the one seeking; the board lists people. The mirror image — *karya* seeking contributors ("open to contributors", FR-34) — is **out of scope here** and lives in the [Karya openings](karya-openings.md) milestone. Both are P1 now, but the people lane leads; the two lanes reunite into one two-sided surface when the karya lane follows.
 
 ## Decisions
 

@@ -6,33 +6,38 @@
 
 **How work flows** (docs ↔ issues ↔ board) is defined in [how-to/build-workflow.md](how-to/build-workflow.md). Short version: each milestone has a half-page doc here (the why + exit criteria) and a GitHub Milestone holding its task issues; live status lives on the [project board](https://github.com/users/zakinadhif/projects/8), never in these files.
 
+**How content surfaces relate** (post ↔ feed ↔ karya page ↔ articles) is settled in [content-model.md](content-model.md) — the *feed carries events that point at pages* spine (ratified 2026-07-03). Launchpad, microblog, and articles all inherit it.
+
 ---
 
-## P0 — MVP (Phase 1)
+## P0 — the ruthless MVP (Phase 1)
+
+**The bet: one hero surface, finished.** P0 shrinks to the **Launchpad home**, polished to the edges, sitting on the foundation already built (profile, interests, karya, auth). Everything that pointed *forward* — matchmaking, messaging — moves to **P1**: not because it doesn't matter, but because building it before the hero is validated risks polishing concepts users haven't confirmed they want. Two already-built surfaces (posts + feed, discovery) stay in the app but are reclassified **dark / walking skeleton** — present and integrated, *not* invested in further until real users validate the concept. See [scope treatments](how-to/build-workflow.md#scope-treatments--how-much-a-feature-gets-right-now) for what **hero / dark / deferred** mean.
+
+| Milestone | Doc | Treatment | Core FRs | Status |
+|---|---|---|---|---|
+| Profile · Interests · Karya core | [archive/](archive/) | foundation | FR-3/4/8/10–15 | Done |
+| Posts + feed | [archive/sprint-3.md](archive/sprint-3.md) | **dark** — built, unvalidated. The *feed display* is absorbed into Launchpad and polished there; the *microblog posting* concept waits for validation (→ P1) | FR-18/19/22–24 | Done, frozen |
+| Discovery | [archive/sprint-4.md](archive/sprint-4.md) | **dark** — search/filters present but thin; fuller discovery is P1 | FR-25, FR-44 | Done, frozen |
+| **Launchpad** | [milestones/launchpad.md](milestones/launchpad.md) | **hero** — the one surface we finish | FR-22/23/25, FR-6 | **Active** |
+| Seed + hardening | [milestones/seed-hardening.md](milestones/seed-hardening.md) | supports the hero — seed content so the feed lands alive | NFR-1/3/4/5/7 | Later |
+
+## P1 — fast-follow (named, not scheduled)
+
+Pulled out of P0 by the ruthless shrink, plus the previously-named follow-ons. None is scheduled until the Launchpad hero is in front of real users and their behavior tells us what earns polish next.
 
 | Milestone | Doc | Theme | Core FRs | Status |
 |---|---|---|---|---|
-| Profile model | [archive/sprint-0.md](archive/sprint-0.md) | Profile expand + agent contract | FR-3, FR-4, FR-8 | Done |
-| Interests | [archive/sprint-1.md](archive/sprint-1.md) | Interests + profile | FR-14, FR-15 | Done |
-| Karya core | [archive/sprint-2.md](archive/sprint-2.md) | Projects, lifecycle, roster | FR-10–12 | Done |
-| Posts + feed | [archive/sprint-3.md](archive/sprint-3.md) | Progress posts, featured | FR-18/19/22–24 | Done |
-| Discovery | [archive/sprint-4.md](archive/sprint-4.md) | Search + filters | FR-25, FR-44 | Done |
-| **Launchpad** | [milestones/launchpad.md](milestones/launchpad.md) | App shell + left sidebar; calm curated home; onboarding made optional | FR-22/23/25, FR-6 | **Active** |
-| Matchmaking — people lane | [milestones/matchmaking.md](milestones/matchmaking.md) | "Looking for…" intent badge + seeker board | FR-5, FR-27, FR-28 | Next |
-| Messaging | [milestones/messaging.md](milestones/messaging.md) | 1:1 DMs, connect actions | FR-31, FR-32 | Later |
-| Seed + hardening | [milestones/seed-hardening.md](milestones/seed-hardening.md) | Phase 0 content + NFR pass | NFR-1/3/4/5/7 | Later |
-
-## P1 — fast-follow (named, not yet scheduled)
-
-| Milestone | Doc | Theme | Core FRs | Status |
-|---|---|---|---|---|
-| Karya openings | [milestones/karya-openings.md](milestones/karya-openings.md) | "Open to contributors" — the karya-seeking-contributors lane; completes two-sided matchmaking | FR-34 | Planned |
+| Matchmaking — people lane | [milestones/matchmaking.md](milestones/matchmaking.md) | "Looking for…" intent badge + seeker board | FR-5/27/28 | Planned |
+| Messaging | [milestones/messaging.md](milestones/messaging.md) | 1:1 DMs, connect actions | FR-31/32 | Planned |
+| Karya openings | [milestones/karya-openings.md](milestones/karya-openings.md) | "Open to contributors" — completes two-sided matchmaking | FR-34 | Planned |
+| Microblog | — | Twitter-like progress stream — the validated evolution of posts + feed; where `posts.karyaId` may go nullable (personal posts) per [content-model.md](content-model.md) | FR-35 | Planned |
 
 Remaining P1 scope stays in the deferred list below until it earns a milestone doc.
 
-> **Sequencing (current intent).** Build order is **Launchpad → Matchmaking → later**. Launchpad first because it establishes the left-sidebar shell every other surface lives inside, and it makes the AI onboarding chat *optional* (its own sidebar tab) rather than an obligatory gate. **Messaging** (FR-31/32) stays P0 but is deprioritized to "later" per current intent — flagged because the PRD lists it P0 and FR-32 makes "message" a core connect action. Microblog (FR-35) and blog/articles (FR-36) are P1, unchanged.
+> **Sequencing (current intent) — shrink P0 ruthlessly.** Ship **Launchpad as the single hero**, get it in front of real users, and let their behavior decide what earns polish next. Matchmaking and messaging are demoted from P0 to **P1** — deliberately, so we don't fine-tune concepts before the community confirms they hold. (This is a change from the earlier "Launchpad → Matchmaking → later" order and from the PRD, which lists messaging as P0; the PRD gets amended to match once this settles.) Posts + feed and discovery are already built, so rather than extend them we hold them as **walking skeletons** and revisit under P1 once tested. Blog/articles (FR-36) remain P1, unchanged.
 
-> **Why matchmaking is split.** The [Cari Kolaborator mockups](../apps/app/src/mockups/) explored a *two-sided* surface — people seeking teams **and** karya seeking contributors — in one board. But the two sides sit on different PRD priorities: the **people lane** ("looking for…" badge + seeker board, FR-5/27/28) is **P0**, while the **karya lane** ("open to contributors", FR-34) is **P1** (PRD §12 Phase 2). Fusing them would drag a P1 feature into the P0 critical path. So P0 ships the people lane alone; the karya lane becomes the first named P1 milestone that makes the surface two-sided. The mockups (A/B/C/E) remain the design input for that combined surface — see [karya-openings.md](milestones/karya-openings.md).
+> **Why matchmaking is still split.** The [Cari Kolaborator mockups](../apps/app/src/mockups/) explored a *two-sided* surface — people seeking teams **and** karya seeking contributors — in one board. Those two sides sit on different PRD priorities and stay separate milestones: the **people lane** ("looking for…" badge + seeker board, FR-5/27/28) comes first, and the **karya lane** ("open to contributors", FR-34, PRD §12 Phase 2) follows to make the surface two-sided. Both are now **P1** — the ruthless shrink moved the people lane out of P0 too — but the people lane leads. The mockups (A/B/C/E) remain the design input for the combined surface — see [karya-openings.md](milestones/karya-openings.md).
 
 ---
 
