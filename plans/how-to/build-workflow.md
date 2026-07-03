@@ -22,6 +22,8 @@ Every issue title opens with a bracket tag — the "what is this?" signal that s
 | **`[Fitur]`** | A shippable deliverable: one agent session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default for build work. | Yes. |
 | **`[UI]`** | A UI *approach* built to be reviewed before it's locked in — mockups, design directions, visual options (see [parallel-ui-exploration](parallel-ui-exploration.md)). | Yes — to explore; the winner then graduates to a `[Fitur]`. |
 
+**Title shape:** `[Tag] <Area>: <brief>`. `<Area>` is the feature or milestone (e.g. `Launchpad`), so the grouping shows up in `gh issue list` where the Milestone field doesn't. `[Fitur]` covers any shippable deliverable in service of a feature — **building new or reshaping existing**.
+
 We tag by **deliverable, not by module.** A real feature cuts through `libs/db` → `apps/api` → `apps/app` in one slice, so a `[DB]`/`[API]`/`[UI]`-per-layer split would only manufacture dependencies and half-landed entities. The one worthwhile break-out is **UI** — for a review reason (seeing options before committing), not a module reason. Titles stay in Bahasa Indonesia; `UI` keeps its English name.
 
 ## Scope treatments — how much a feature gets *right now*
