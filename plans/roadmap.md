@@ -2,6 +2,8 @@
 
 *Ordered milestones toward the P0 (MVP / Phase 1) scope in [the PRD](al-fath-berkarya-prd.md), plus the first named P1 fast-follows. Vision north star: [al-fath-berkarya-vision.md](al-fath-berkarya-vision.md). Like everything in `plans/`, this is non-authoritative working knowledge — trust the code when they diverge.*
 
+**Open discussion** about vision, ideas, and this sequencing lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — technical and non-technical alike. This file stays the source of truth; the issue is where changes to it get argued out first.
+
 **How work flows** (docs ↔ issues ↔ board) is defined in [how-to/build-workflow.md](how-to/build-workflow.md). Short version: each milestone has a half-page doc here (the why + exit criteria) and a GitHub Milestone holding its task issues; live status lives on the [project board](https://github.com/users/zakinadhif/projects/8), never in these files.
 
 ---
