@@ -51,7 +51,7 @@ Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth r
 
 ## Grooming (maintainer)
 
-Groom one milestone at a time, straight into issues — the doc never carries a task list:
+Groom one milestone at a time, straight into issues — the doc never carries a task list. **Issues (title + body) are written in Bahasa Indonesia** — the team's language; keep code identifiers, file paths, and FR/NFR codes as-is:
 
 1. Write the half-page milestone doc (why, decisions, exit) in `plans/milestones/`.
 2. Create the GitHub Milestone; decompose into 3–6 session-sized issues sliced along module boundaries, dependencies explicit (`Depends on #N`).
