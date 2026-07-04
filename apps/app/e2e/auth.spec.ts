@@ -16,8 +16,8 @@ const PROFILE = {
   skills: [],
 };
 
-// The feed-first home (`CommunityHome`) fetches the viewer's profile + the
-// curated featured list + the global feed. Empty bodies are enough to render.
+// The Launchpad home fetches the viewer's profile + the curated featured list +
+// the global feed. Empty bodies are enough to render.
 async function mockHome(page: Page) {
   await page.route("**/api/me", (route) =>
     route.fulfill({
@@ -62,7 +62,7 @@ authed(
 );
 
 authed(
-  "authenticated without a profile: / redirects to onboarding",
+  "authenticated without a profile: / redirects to the minimal start (not the AI chat)",
   async ({ page }) => {
     await page.route("**/api/me", (route) =>
       route.fulfill({
@@ -72,6 +72,9 @@ authed(
       }),
     );
     await page.goto("/");
-    await expect(page).toHaveURL(/\/onboarding/);
+    // Onboarding is no longer a gate (issue #8): a profile-less member lands on
+    // the quick one-field start, never forced through the AI chat.
+    await expect(page).toHaveURL(/\/mulai/);
+    await expect(page).not.toHaveURL(/\/onboarding/);
   },
 );

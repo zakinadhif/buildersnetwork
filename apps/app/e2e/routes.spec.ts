@@ -63,21 +63,21 @@ unauthed(
 // Authenticated members with a profile see the feed-first home
 // ---------------------------------------------------------------------------
 
-authed(
-  "/ lands on the feed-first home with both sections",
-  async ({ page }) => {
-    await mockHome(page);
-    await page.goto("/");
-    await expect(page).toHaveURL(/\/home/);
-    await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
-    await expect(page.getByText("Aktivitas terbaru")).toBeVisible();
-  },
-);
+authed("/ lands on the Launchpad home with both sections", async ({ page }) => {
+  await mockHome(page);
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/home/);
+  await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
+  await expect(page.getByText("Kabar terbaru")).toBeVisible();
+});
 
-authed("home shows the signed-in member in the header", async ({ page }) => {
+authed("shell rail shows the signed-in member", async ({ page }) => {
   await mockHome(page);
   await page.goto("/home");
-  await expect(page.getByText(/Test User · Tingkat 2/)).toBeVisible();
+  // Identity now lives in the persistent shell rail, not a top bar.
+  await expect(
+    page.locator(".bn-nav-user", { hasText: "Test User" }),
+  ).toBeVisible();
 });
 
 authed(

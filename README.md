@@ -54,10 +54,12 @@ buildersnetwork/
 ### App flow
 
 ```
-Welcome → Login → VerifyEmail → Onboarding (AI chat, 8–10 turns) → Review (editable profile) → Matches (3 AI-picked members) → CommunityHome → MemberProfile
+Welcome → Login → VerifyEmail → Mulai (one-field name) → Launchpad shell (/home)
 ```
 
-All screens are URL-routed via Wouter (`/welcome`, `/onboarding`, `/review`, `/matches`, `/home`, `/member/:id`, `/karya/new`, `/karya/new/ai`, `/karya/:id`).
+A newly-verified member enters straight into the **Launchpad shell** via a quick one-field start (`/mulai`) — onboarding is **no longer a gate**. The AI onboarding chat lives on as an always-available **assistant tab** (`/assistant`) that produces an editable profile draft; the older linear flow (`/onboarding` → `/review` → `/matches`) still works for those who opt into it.
+
+Logged-in surfaces render inside a **persistent left-sidebar shell** (`Shell` + rail): Launchpad home (`/home`), Minat Saya (`/minat`), the assistant (`/assistant`), plus "segera hadir" placeholders (`/jelajahi`, `/karya-saya`) and a disabled "Cari Kolaborator" that lights up in the Matchmaking milestone. All screens are URL-routed via Wouter (`/welcome`, `/mulai`, `/assistant`, `/onboarding`, `/review`, `/matches`, `/home`, `/minat`, `/member/:id`, `/karya/new`, `/karya/new/ai`, `/karya/:id`). Detail/creation pages (`/karya/*`, `/member/:id`) currently open as focused full-screen routes reachable from the shell.
 
 Beyond the linear onboarding flow, **karya** (projects) are a recurring surface reached from `/home`: a member creates one at `/karya/new` — either filling the draft directly or letting the AI pre-fill it at `/karya/new/ai` — then publishes to a live karya page (`/karya/:id`) with stage chips, interest tags, and a contributor roster shown as avatar faces. Others can request to join; the owner approves or declines. Backed by the `karya` / `karya_members` / `karya_interests` tables and the `/api/karya` routes (list, create, detail, join, approve/decline).
 
@@ -296,7 +298,7 @@ ansible-playbook -i inventory.ini playbooks/site.yml --ask-vault-pass
 
 ## Design system
 
-Hyper-minimalist. Warm off-white background (`#f1efe9`), Plus Jakarta Sans for UI, IBM Plex Mono for AI voice. No decoration, heavy whitespace. All UI copy is Bahasa Indonesia kasual.
+Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`MockupB`).
 
 ---
 
