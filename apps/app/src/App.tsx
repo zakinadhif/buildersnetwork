@@ -1,16 +1,23 @@
 import { getGetMeQueryKey, useGetMe } from "@myapp/api-client-react";
+import type { ReactNode } from "react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
+import Shell from "@/components/Shell";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
 import { KaryaDraftProvider } from "@/lib/karya-draft-ctx";
+import type { Member } from "@/lib/members";
 import { OnboardingProvider } from "@/lib/onboarding-ctx";
-import CommunityHome from "@/pages/CommunityHome";
+import Assistant from "@/pages/Assistant";
+import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaNew from "@/pages/KaryaNew";
+import Launchpad from "@/pages/Launchpad";
 import Login from "@/pages/Login";
 import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
+import MinatSaya from "@/pages/MinatSaya";
+import MinimalStart from "@/pages/MinimalStart";
 import Onboarding from "@/pages/Onboarding";
 import Review from "@/pages/Review";
 import VerifyEmail from "@/pages/VerifyEmail";
@@ -39,8 +46,17 @@ function AppRoutes() {
     return <Redirect to={`/verify-email?email=${email}`} />;
   }
 
+  // A logged-in route that lives *inside* the persistent shell. Gates on auth
+  // (→ welcome) and profile (→ the minimal one-field start, not the AI chat).
+  const shell = (page: (m: Member) => ReactNode) => {
+    if (!loggedIn) return <Redirect to="/welcome" />;
+    if (!me) return <Redirect to="/mulai" />;
+    return <Shell me={me}>{page(me)}</Shell>;
+  };
+
   return (
     <Switch>
+      {/* ── Outside the shell: auth, entry, and the opt-in onboarding flow ── */}
       <Route path="/verify-email">
         <VerifyEmail />
       </Route>
@@ -49,6 +65,15 @@ function AppRoutes() {
       </Route>
       <Route path="/login">
         <Login />
+      </Route>
+      <Route path="/mulai">
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : hasProfile ? (
+          <Redirect to="/home" />
+        ) : (
+          <MinimalStart defaultName={session?.user?.name ?? ""} />
+        )}
       </Route>
       <Route path="/onboarding">
         {!loggedIn ? <Redirect to="/welcome" /> : <Onboarding />}
@@ -59,15 +84,42 @@ function AppRoutes() {
       <Route path="/matches">
         {!loggedIn ? <Redirect to="/welcome" /> : <Matches />}
       </Route>
+
+      {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
-        {!loggedIn ? (
-          <Redirect to="/welcome" />
-        ) : !me ? (
-          <Redirect to="/onboarding" />
-        ) : (
-          <CommunityHome user={me} />
-        )}
+        {shell((m) => (
+          <Launchpad user={m} />
+        ))}
       </Route>
+      <Route path="/minat">
+        {shell((m) => (
+          <MinatSaya user={m} />
+        ))}
+      </Route>
+      <Route path="/assistant">
+        {shell((m) => (
+          <Assistant user={m} />
+        ))}
+      </Route>
+      <Route path="/jelajahi">
+        {shell(() => (
+          <ComingSoon
+            title="Jelajahi Karya"
+            sub="Pencarian & penjelajahan karya lengkap lagi disiapin — sementara, Launchpad nunjukin apa yang lagi jalan di komunitas."
+          />
+        ))}
+      </Route>
+      <Route path="/karya-saya">
+        {shell(() => (
+          <ComingSoon
+            title="Karya Saya"
+            sub="Ringkasan karya yang kamu garap lagi disiapin. Kamu tetap bisa bikin karya baru lewat tombol di halaman karya."
+          />
+        ))}
+      </Route>
+
+      {/* ── Detail / creation flows: focused full-screen, reachable from the
+           shell (their fixed-layout pages aren't shell-hosted yet) ── */}
       <Route path="/member/:id">
         {(params) =>
           !loggedIn ? (
@@ -81,7 +133,7 @@ function AppRoutes() {
         {!loggedIn ? (
           <Redirect to="/welcome" />
         ) : !hasProfile ? (
-          <Redirect to="/onboarding" />
+          <Redirect to="/mulai" />
         ) : (
           <KaryaAgent />
         )}
@@ -90,7 +142,7 @@ function AppRoutes() {
         {!loggedIn ? (
           <Redirect to="/welcome" />
         ) : !hasProfile ? (
-          <Redirect to="/onboarding" />
+          <Redirect to="/mulai" />
         ) : (
           <KaryaNew />
         )}
@@ -100,17 +152,18 @@ function AppRoutes() {
           !loggedIn ? (
             <Redirect to="/welcome" />
           ) : !hasProfile ? (
-            <Redirect to="/onboarding" />
+            <Redirect to="/mulai" />
           ) : (
             <Karya id={params.id ?? ""} />
           )
         }
       </Route>
+
       <Route path="/">
         {!loggedIn ? (
           <Redirect to="/welcome" />
         ) : !hasProfile ? (
-          <Redirect to="/onboarding" />
+          <Redirect to="/mulai" />
         ) : (
           <Redirect to="/home" />
         )}

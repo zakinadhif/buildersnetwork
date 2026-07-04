@@ -1,15 +1,28 @@
 @import "tailwindcss";
 
 :root {
-  --bg: #f1efe9;
-  --ink: #0f0e0b;
-  --ink2: #8a8781;
-  --ink3: #bbb8b2;
-  --accent: oklch(39% 0.085 62);
-  --line: #dedad2;
-  --font: "Figtree", sans-serif;
-  --mono: "IBM Plex Mono", monospace;
+  /* Design tokens ported from the Launchpad mockup (MockupB): a neutral gallery-
+     white palette with a Lora serif display face, adopted as the live system
+     (see plans/milestones/launchpad.md, issue #8 grooming decision 1). */
+  --bg: oklch(98% 0 0); /* gallery white */
+  --ink: oklch(18% 0 0); /* soft neutral near-black */
+  --ink2: oklch(46% 0 0); /* muted body — AA on white */
+  --ink3: oklch(53% 0 0); /* meta text — AA on bg */
+  --accent: oklch(39% 0.085 62); /* terracotta */
+  --accent-mid: oklch(55% 0.085 62); /* terracotta mid — AA on bg */
+  --accent-fg: oklch(99% 0 0); /* text on accent */
+  --accent-tint: oklch(95% 0.015 62); /* light terracotta wash */
+  --accent-line: oklch(88% 0.03 62); /* terracotta-tinted hairline */
+  --line: oklch(91% 0 0); /* neutral hairline */
+  --line-dark: oklch(85% 0 0);
+  --surface: oklch(100% 0 0); /* pure white lifted card */
+  --font: "Plus Jakarta Sans", sans-serif; /* body, labels, meta */
+  --font-display: "Lora", serif; /* brand / display copy */
+  --mono: "IBM Plex Mono", monospace; /* AI voice */
+  --radius: 8px;
+  --radius-lg: 16px;
   --max: 580px;
+  --shell-max: 1100px;
 }
 
 *,
@@ -737,4 +750,299 @@ button.post-author:hover .post-author-name {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
+}
+
+/* ── Launchpad app shell (issue #8) ────────────────────────────────────────
+   Persistent left-sidebar rail + center content, ported from MockupB's
+   three-column `bn-*` layout. Logged-in routes render inside `.bn-shell`;
+   auth/welcome/login stay outside it. Collapses to one column below 900px. */
+.bn-shell {
+  position: fixed;
+  inset: 0;
+  overflow-y: auto;
+  animation: up 0.28s ease;
+}
+.bn-shell-inner {
+  max-width: var(--shell-max);
+  margin: 0 auto;
+  padding: 24px 24px 48px;
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* Left rail */
+.bn-nav {
+  width: 200px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 8px;
+  position: sticky;
+  top: 24px;
+}
+.bn-nav-logo {
+  padding: 0 12px 20px;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 16px;
+}
+.bn-nav-logo .eyebrow {
+  margin-bottom: 4px;
+}
+.bn-nav-wordmark {
+  font-family: var(--font-display);
+  font-size: 23px;
+  font-weight: 400;
+  color: var(--ink);
+  line-height: 1;
+}
+.bn-nav-items {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 24px;
+}
+.bn-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 7px 12px;
+  border-radius: var(--radius);
+  color: var(--ink2);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  margin-bottom: 1px;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.bn-nav-item:hover:not(:disabled):not([aria-current="page"]) {
+  color: var(--ink);
+}
+.bn-nav-item[aria-current="page"] {
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-weight: 500;
+}
+.bn-nav-item:disabled {
+  color: var(--ink3);
+  cursor: default;
+}
+.bn-nav-item .bn-nav-icon {
+  font-size: 12px;
+}
+.bn-nav-item .bn-nav-soon {
+  margin-left: auto;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--ink3);
+}
+.bn-nav-filters {
+  padding: 0 12px;
+}
+.bn-nav-filter {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--font);
+  font-size: 12px;
+  color: var(--ink2);
+  cursor: pointer;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.bn-nav-filter[aria-pressed="true"] {
+  color: var(--accent);
+  background: var(--accent-tint);
+  font-weight: 500;
+}
+.bn-nav-user {
+  margin-top: auto;
+  padding: 16px 12px 0;
+  border-top: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bn-nav-user-name {
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+.bn-nav-user-handle {
+  font-family: var(--font);
+  font-size: 10px;
+  color: var(--ink3);
+}
+
+/* Center content column */
+.bn-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Display heading (Lora) for in-shell page headers */
+.bn-head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+.bn-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 30px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+}
+.bn-title-sub {
+  font-family: var(--font);
+  font-size: 11px;
+  color: var(--ink3);
+}
+
+/* Calm on-ramp card to the AI assistant (replaces MockupB SeekerRamp) */
+.bn-ramp {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  margin-bottom: 24px;
+  background: var(--accent-tint);
+  border: 1px solid var(--accent-line);
+  border-radius: var(--radius-lg);
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  transition: opacity 0.15s;
+}
+.bn-ramp:hover {
+  opacity: 0.85;
+}
+.bn-ramp-mark {
+  font-family: var(--font-display);
+  font-size: 28px;
+  color: var(--accent);
+  line-height: 1;
+  flex-shrink: 0;
+}
+.bn-ramp-title {
+  font-family: var(--font-display);
+  font-size: 18px;
+  color: var(--ink);
+  line-height: 1.15;
+  margin-bottom: 2px;
+}
+.bn-ramp-sub {
+  font-family: var(--font);
+  font-size: 13px;
+  color: var(--ink2);
+  line-height: 1.55;
+}
+.bn-ramp-cue {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Placeholder page for rail destinations that light up in a later milestone —
+   honestly signposted "segera hadir", never present-but-hollow. */
+.bn-soon {
+  padding: 48px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--ink3);
+  line-height: 1.8;
+}
+
+/* Minimal-profile one-field start form (new verified users) */
+.bn-start {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 72px 28px;
+}
+.bn-start-field {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--ink);
+  font-family: var(--font);
+  font-size: 22px;
+  font-weight: 300;
+  color: var(--ink);
+  outline: none;
+  padding: 6px 0;
+  letter-spacing: -0.02em;
+  margin: 20px 0 8px;
+}
+.bn-start-field::placeholder {
+  color: var(--ink3);
+}
+
+/* Section eyebrow above the reverse-chron feed */
+.bn-feed-eyebrow {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink3);
+  margin: 8px 0 4px;
+}
+
+@media (max-width: 900px) {
+  .bn-shell-inner {
+    flex-direction: column;
+    padding: 16px 16px 40px;
+    gap: 20px;
+  }
+  .bn-nav,
+  .bn-main {
+    width: 100%;
+  }
+  .bn-nav {
+    position: static;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    padding-top: 0;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .bn-nav-logo {
+    margin: 0 auto 0 0;
+    padding: 0;
+    border-bottom: none;
+  }
+  .bn-nav-items {
+    flex-flow: row wrap;
+    gap: 2px 4px;
+    margin: 0;
+  }
+  .bn-nav-item {
+    width: auto;
+  }
+  .bn-nav-filters,
+  .bn-nav-user {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .bn-nav-item {
+    min-height: 44px;
+  }
 }
