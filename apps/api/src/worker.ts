@@ -7,6 +7,7 @@ import {
   DEFAULT_EMAIL_FROM,
   type WorkersEmailBinding,
 } from "@myapp/email";
+import { createR2Storage } from "@myapp/storage";
 
 import { type AppServices, createApp } from "./app";
 
@@ -34,6 +35,9 @@ interface Env {
   ALLOWED_ORIGINS?: string;
   ADMIN_EMAILS?: string;
   AI_WORKERS_MODEL?: string;
+  // R2 bucket binding for uploads (karya covers). Configured in wrangler.toml as
+  // an [[r2_buckets]] entry. Optional — absent → the upload/serve routes 503.
+  UPLOADS?: R2Bucket;
 }
 
 // Lazy singleton — initialized once per isolate, reused across requests.
@@ -70,7 +74,20 @@ function getServices(env: Env): AppServices {
 
   const emailFrom = env.EMAIL_FROM ?? DEFAULT_EMAIL_FROM;
 
-  services = { db, auth, ai, email, emailFrom, allowedOrigins, adminEmails };
+  // Only build the storage adapter when the R2 binding is present; deploys
+  // without it run fine and the cover upload/serve routes 503 until it's set.
+  const storage = env.UPLOADS ? createR2Storage(env.UPLOADS) : undefined;
+
+  services = {
+    db,
+    auth,
+    ai,
+    email,
+    emailFrom,
+    allowedOrigins,
+    adminEmails,
+    storage,
+  };
   return services;
 }
 

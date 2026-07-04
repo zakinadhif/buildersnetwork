@@ -117,6 +117,8 @@ pnpm dev:app   # React SPA on :5173
 
 **This workflow does not apply to the AI stream endpoint** (`POST /api/ai/stream`). That endpoint returns chunked plain text and is consumed with `useStream` — see [Streaming AI](#streaming-ai-frontend) below.
 
+**Nor to binary upload/serve routes.** The karya cover routes (`POST`/`DELETE`/`GET /api/karya/:id/cover`) carry `multipart/form-data` or raw image bytes, not JSON, so they're hand-written in `routes/karya.ts` and called via `apps/app/src/lib/upload.ts` — outside the generated client. Only their read-side effect (a nullable `coverUrl` on `Karya`) lives in the spec.
+
 ### 1. Update the spec
 
 Add your path and schemas to `libs/api-spec/openapi.yaml`.
@@ -233,7 +235,7 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
 | `EMAIL_FROM` | Sender address for outgoing email (default: `Al-Fath Berkarya <noreply@buildersnetwork.web.id>`); domain must be verified with the active provider |
-| `STORAGE_*` | S3-compatible object storage — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md) |
+| `STORAGE_*` | S3-compatible object storage for the **Node/Docker** path (karya cover uploads) — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md). Point at R2's S3 API for local dev. On **Cloudflare Workers**, uploads use the native R2 binding `UPLOADS` (in `wrangler.toml`) instead — run `wrangler r2 bucket create buildersnetwork-uploads` once before deploying. Absent storage → the cover routes return 503. |
 | `SERVE_STATIC` | `false` to disable Hono's static file serving (3-tier EC2 mode) |
 
 ---

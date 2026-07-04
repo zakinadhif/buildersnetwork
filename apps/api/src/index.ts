@@ -11,6 +11,7 @@ import {
   createRestEmail,
   DEFAULT_EMAIL_FROM,
 } from "@myapp/email";
+import { createStorageFromEnv } from "@myapp/storage";
 
 import { createApp } from "./app";
 
@@ -46,6 +47,11 @@ const adminEmails = (config.ADMIN_EMAILS ?? "")
   .map((e) => e.trim())
   .filter(Boolean);
 
+// Object storage is optional: only build the adapter when STORAGE_* is
+// configured (createStorageFromEnv throws on missing vars). Deploys without it
+// run fine; the cover upload/serve routes 503 until it's set.
+const storage = config.STORAGE_BUCKET ? createStorageFromEnv() : undefined;
+
 const app = createApp({
   db,
   auth,
@@ -54,6 +60,7 @@ const app = createApp({
   emailFrom: config.EMAIL_FROM ?? DEFAULT_EMAIL_FROM,
   allowedOrigins,
   adminEmails,
+  storage,
   gitSha: process.env.GIT_SHA,
 });
 

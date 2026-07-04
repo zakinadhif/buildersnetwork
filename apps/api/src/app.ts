@@ -2,6 +2,7 @@ import type { AIProvider } from "@myapp/ai";
 import type { createAuth } from "@myapp/auth";
 import type { createDb } from "@myapp/db";
 import type { EmailProvider } from "@myapp/email";
+import type { StorageProvider } from "@myapp/storage";
 import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 
@@ -22,6 +23,9 @@ export type AppVariables = {
   emailFrom: string;
   // Team emails allowed to feature karya (DECISION-A) — env allowlist, not RBAC.
   adminEmails: string[];
+  // Object storage for uploads (karya covers). Optional — undefined when the
+  // deploy has no STORAGE_* configured; upload/serve routes 503 in that case.
+  storage: StorageProvider | undefined;
 };
 
 export type AppEnv = { Variables: AppVariables };
@@ -34,6 +38,7 @@ export interface AppServices {
   emailFrom: string;
   allowedOrigins: string[];
   adminEmails: string[];
+  storage?: StorageProvider;
   gitSha?: string;
 }
 
@@ -46,6 +51,7 @@ export function createApp(services: AppServices) {
     emailFrom,
     allowedOrigins,
     adminEmails,
+    storage,
     gitSha,
   } = services;
 
@@ -77,6 +83,7 @@ export function createApp(services: AppServices) {
     c.set("email", email);
     c.set("emailFrom", emailFrom);
     c.set("adminEmails", adminEmails);
+    c.set("storage", storage);
     await next();
   });
 

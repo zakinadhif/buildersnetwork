@@ -65,6 +65,7 @@ featuredRouter.get("/", async (c) => {
       title: karya.title,
       description: karya.description,
       stages: karya.stages,
+      coverKey: karya.coverKey,
     })
     .from(featured)
     .innerJoin(karya, eq(featured.karyaId, karya.id))

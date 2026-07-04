@@ -48,5 +48,7 @@ export { createStorageFromEnv } from "./from-env";
 export type { GcsConfig } from "./gcs";
 
 export { createGcsStorage } from "./gcs";
+export type { R2BucketLike } from "./r2";
+export { createR2Storage } from "./r2";
 export type { S3Config } from "./s3";
 export { createS3Storage } from "./s3";
