@@ -15,6 +15,19 @@ export default defineConfig(({ mode, command }) => {
   // build keeps mockups under /app/mockups.html alongside the app.
   const mockupsOnly = mode === "mockups";
 
+  // Rollup entry points. Typed as Record<string, string> so both branches share
+  // one declared type — otherwise TS widens the mockups-only arm to
+  // `{ mockups: string; main?: undefined }`, which is not a valid Rollup `input`
+  // (TS2769). The regular build ships the main SPA entry alongside the standalone
+  // mockup gallery (served at /app/mockups.html for review); the mockups-only
+  // build drops the SPA and serves the gallery at the deploy root.
+  const input: Record<string, string> = mockupsOnly
+    ? { mockups: path.resolve(__dirname, "mockups.html") }
+    : {
+        main: path.resolve(__dirname, "index.html"),
+        mockups: path.resolve(__dirname, "mockups.html"),
+      };
+
   return {
     // Production builds are served under /app/* by the Hono container, so
     // assets and the Wouter base (import.meta.env.BASE_URL) must be prefixed.
@@ -29,20 +42,7 @@ export default defineConfig(({ mode, command }) => {
     },
     build: {
       outDir: mockupsOnly ? "dist-mockups" : "dist",
-      rollupOptions: {
-        input: mockupsOnly
-          ? {
-              // Standalone gallery deploy — mockups.html only, at the root.
-              mockups: path.resolve(__dirname, "mockups.html"),
-            }
-          : {
-              // Main SPA entry.
-              main: path.resolve(__dirname, "index.html"),
-              // Standalone UI mockup gallery, shipped at /app/mockups.html so it
-              // can be shared for review alongside the deployed app.
-              mockups: path.resolve(__dirname, "mockups.html"),
-            },
-      },
+      rollupOptions: { input },
     },
     server: {
       proxy: {
