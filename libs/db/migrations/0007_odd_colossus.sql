@@ -1,0 +1,1 @@
+ALTER TABLE "karya" ADD COLUMN "cover_key" text;

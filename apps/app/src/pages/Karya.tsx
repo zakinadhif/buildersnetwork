@@ -12,6 +12,7 @@ import {
 import { useState } from "react";
 import {
   Avatar,
+  KaryaCover,
   Loading,
   POST_KIND_LABELS,
   POST_KIND_ORDER,
@@ -94,6 +95,8 @@ export default function Karya({ id }: { id: string }) {
         >
           ← balik
         </button>
+
+        <KaryaCover url={karya.coverUrl} size={72} className="karya-cover-lg" />
 
         <h1
           style={{

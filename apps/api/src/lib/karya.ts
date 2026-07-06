@@ -1,6 +1,7 @@
 import type { createDb, KaryaStage } from "@myapp/db";
 import { karyaMembers, profiles, users } from "@myapp/db/schema";
 import { eq, inArray } from "drizzle-orm";
+import { coverUrlFor } from "./cover";
 import { interestsByKaryaIds } from "./interests";
 
 type Db = ReturnType<typeof createDb>;
@@ -74,6 +75,7 @@ export interface KaryaListRow {
   title: string;
   description: string;
   stages: KaryaStage[];
+  coverKey: string | null;
 }
 
 /**
@@ -94,6 +96,7 @@ export function toKaryaListItem(
     description: k.description,
     stages: k.stages,
     interests,
+    coverUrl: coverUrlFor(k.id, k.coverKey),
     roster: members.map(toRosterMember),
     memberCount: members.length,
   };

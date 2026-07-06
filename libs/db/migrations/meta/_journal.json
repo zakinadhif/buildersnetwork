@@ -50,6 +50,13 @@
       "when": 1782056668132,
       "tag": "0006_wakeful_madrox",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1783157034393,
+      "tag": "0007_odd_colossus",
+      "breakpoints": true
     }
   ]
 }

@@ -73,6 +73,11 @@ export const karya = pgTable(
     title: text("title").notNull(),
     description: text("description").notNull(),
     stages: jsonb("stages").$type<KaryaStage[]>().notNull().default(["idea"]),
+    // Object-storage key of an owner-uploaded cover image (nullable). The
+    // content-type is encoded in the key's extension so the serve route
+    // (`GET /karya/:id/cover`) needs no companion column. Absent → the client
+    // falls back to an interest-derived illustration (issue #17).
+    coverKey: text("cover_key"),
     createdBy: text("created_by").references(() => users.id, {
       onDelete: "cascade",
     }),

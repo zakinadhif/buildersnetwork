@@ -2,6 +2,7 @@ import type { FeedItem } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import {
   Avatar,
+  KaryaCover,
   POST_KIND_LABELS,
   STAGE_LABELS,
   timeAgo,
@@ -62,27 +63,32 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             onClick={() => navigate(`/karya/${it.id}`)}
             onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${it.id}`)}
           >
-            <span className="feed-new-tag">karya baru</span>
-            <span className="karya-card-title">{it.title}</span>
-            <p className="karya-card-desc">{it.description}</p>
-            <div className="karya-card-foot">
-              <div className="skills-wrap">
-                {it.stages.map((s) => (
-                  <span key={s} className="stage-chip">
-                    {STAGE_LABELS[s]}
-                  </span>
-                ))}
-              </div>
-              <div className="roster">
-                {it.roster.map((m) => (
-                  <Avatar
-                    key={m.id}
-                    name={m.name}
-                    handle={m.handle}
-                    image={m.image}
-                    size={26}
-                  />
-                ))}
+            <div className="karya-card-row">
+              <KaryaCover url={it.coverUrl} size={48} />
+              <div className="karya-card-body">
+                <span className="feed-new-tag">karya baru</span>
+                <span className="karya-card-title">{it.title}</span>
+                <p className="karya-card-desc">{it.description}</p>
+                <div className="karya-card-foot">
+                  <div className="skills-wrap">
+                    {it.stages.map((s) => (
+                      <span key={s} className="stage-chip">
+                        {STAGE_LABELS[s]}
+                      </span>
+                    ))}
+                  </div>
+                  <div className="roster">
+                    {it.roster.map((m) => (
+                      <Avatar
+                        key={m.id}
+                        name={m.name}
+                        handle={m.handle}
+                        image={m.image}
+                        size={26}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

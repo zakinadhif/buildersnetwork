@@ -44,6 +44,35 @@ export function timeAgo(input: string | Date): string {
   return `${Math.floor(days / 365)}th lalu`;
 }
 
+/**
+ * A karya's cover image tile (issue #18). Renders nothing when there's no
+ * uploaded cover — never a broken/placeholder box. The interest-derived
+ * illustration fallback lands with issue #17; until then, no cover = no tile.
+ */
+export function KaryaCover({
+  url,
+  size = 44,
+  className = "karya-cover",
+}: {
+  url: string | null | undefined;
+  size?: number;
+  className?: string;
+}) {
+  if (!url) return null;
+  return (
+    <img
+      className={className}
+      src={url}
+      alt=""
+      aria-hidden="true"
+      loading="lazy"
+      width={size}
+      height={size}
+      style={{ width: size, height: size }}
+    />
+  );
+}
+
 export function Dots() {
   return (
     <span className="dots">

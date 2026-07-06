@@ -426,6 +426,36 @@ body {
   text-transform: uppercase;
 }
 
+/* Karya cover image tile (issue #18) — app-icon style, used on cards + detail */
+.karya-cover {
+  border-radius: 12px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--line);
+  flex-shrink: 0;
+  display: block;
+}
+.karya-cover-lg {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  background: var(--line);
+  display: block;
+  margin-bottom: 20px;
+}
+/* Icon-left row inside a karya card when a cover is present */
+.karya-card-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.karya-card-row > .karya-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
 /* Karya list cards */
 .karya-card {
   padding: 18px 0;

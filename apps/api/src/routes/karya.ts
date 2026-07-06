@@ -6,6 +6,13 @@ import type { Context } from "hono";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
 import {
+  contentTypeForKey,
+  coverKeyFor,
+  coverUrlFor,
+  extForContentType,
+  MAX_COVER_BYTES,
+} from "../lib/cover";
+import {
   interestsForKarya,
   karyaInterestWrites,
   resolveInterestIds,
@@ -115,6 +122,7 @@ app.get("/:id", async (c) => {
     description: k.description,
     stages: k.stages,
     interests: await interestsForKarya(db, id),
+    coverUrl: coverUrlFor(k.id, k.coverKey),
     createdBy: k.createdBy,
     roster: members.map(toRosterMember),
     viewerMembership: viewerRow
@@ -343,6 +351,94 @@ app.delete("/:id/feature", async (c) => {
 
   await db.delete(featured).where(eq(featured.karyaId, id));
   return c.json({ ok: true });
+});
+
+// ── Karya cover image (issue #18) ──────────────────────────────────────────
+// Hand-written (not OpenAPI-first): these carry binary bodies, not JSON, so
+// they sit outside the codegen contract (see README "OpenAPI-first workflow").
+// The uploaded cover overrides the client's interest-derived fallback (#17).
+
+// Upload / replace a karya's cover (owner-only). Multipart `file`; the accepted
+// content-type is encoded in the stored key's extension so the serve route can
+// set Content-Type without a companion column.
+app.post("/:id/cover", async (c) => {
+  const guard = await requireOwner(c);
+  if (!guard.ok) return guard.res;
+  const storage = c.get("storage");
+  if (!storage) return c.json({ error: "storage not configured" }, 503);
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const body = await c.req.parseBody();
+  const file = body.file;
+  if (!(file instanceof File)) return c.json({ error: "missing file" }, 400);
+  const ext = extForContentType(file.type);
+  if (!ext) return c.json({ error: "unsupported image type" }, 400);
+  if (file.size > MAX_COVER_BYTES) {
+    return c.json({ error: "image too large" }, 413);
+  }
+
+  const [existing] = await db
+    .select({ coverKey: karya.coverKey })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+
+  const key = coverKeyFor(id, ext);
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  await storage.put(key, bytes, { contentType: file.type });
+  // Drop a prior cover stored under a different extension (avoid orphans).
+  if (existing?.coverKey && existing.coverKey !== key) {
+    await storage.delete(existing.coverKey).catch(() => {});
+  }
+  await db.update(karya).set({ coverKey: key }).where(eq(karya.id, id));
+
+  return c.json({ coverUrl: coverUrlFor(id, key) });
+});
+
+// Remove a karya's cover (owner-only). Deletes the object best-effort, then
+// clears the column so reads fall back to the interest-derived cover.
+app.delete("/:id/cover", async (c) => {
+  const guard = await requireOwner(c);
+  if (!guard.ok) return guard.res;
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const [existing] = await db
+    .select({ coverKey: karya.coverKey })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+  const storage = c.get("storage");
+  if (existing?.coverKey && storage) {
+    await storage.delete(existing.coverKey).catch(() => {});
+  }
+  await db.update(karya).set({ coverKey: null }).where(eq(karya.id, id));
+  return c.json({ ok: true });
+});
+
+// Serve a karya's cover bytes (public — covers show on the logged-out-safe feed
+// too). Streams from storage with the content-type recovered from the key.
+app.get("/:id/cover", async (c) => {
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const [k] = await db
+    .select({ coverKey: karya.coverKey })
+    .from(karya)
+    .where(eq(karya.id, id))
+    .limit(1);
+  if (!k?.coverKey) return c.json({ error: "not found" }, 404);
+
+  const storage = c.get("storage");
+  if (!storage) return c.json({ error: "storage not configured" }, 503);
+  const bytes = await storage.get(k.coverKey);
+  if (!bytes) return c.json({ error: "not found" }, 404);
+
+  return c.body(new Uint8Array(bytes), 200, {
+    "Content-Type": contentTypeForKey(k.coverKey),
+    "Cache-Control": "public, max-age=300",
+  });
 });
 
 export default app;

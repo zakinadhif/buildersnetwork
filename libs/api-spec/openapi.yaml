@@ -828,7 +828,12 @@ components:
           type: array
           items:
             type: string
-      required: [id, title, description, stages, interests]
+        coverUrl:
+          type: [string, "null"]
+          description: >-
+            Relative URL of the owner-uploaded cover image
+            (`/api/karya/{id}/cover`), or null when none has been uploaded.
+      required: [id, title, description, stages, interests, coverUrl]
 
     KaryaMembership:
       type: object

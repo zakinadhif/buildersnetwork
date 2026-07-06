@@ -117,6 +117,8 @@ pnpm dev:app   # React SPA on :5173
 
 **This workflow does not apply to the AI stream endpoint** (`POST /api/ai/stream`). That endpoint returns chunked plain text and is consumed with `useStream` — see [Streaming AI](#streaming-ai-frontend) below.
 
+**Nor to binary upload/serve routes.** The karya cover routes (`POST`/`DELETE`/`GET /api/karya/:id/cover`) carry `multipart/form-data` or raw image bytes, not JSON, so they're hand-written in `routes/karya.ts` and called via `apps/app/src/lib/upload.ts` — outside the generated client. Only their read-side effect (a nullable `coverUrl` on `Karya`) lives in the spec.
+
 ### 1. Update the spec
 
 Add your path and schemas to `libs/api-spec/openapi.yaml`.
@@ -233,7 +235,7 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
 | `EMAIL_FROM` | Sender address for outgoing email (default: `Al-Fath Berkarya <noreply@buildersnetwork.web.id>`); domain must be verified with the active provider |
-| `STORAGE_*` | S3-compatible object storage — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md) |
+| `STORAGE_*` | S3-compatible object storage for the **Node/Docker** path (karya cover uploads) — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md). Point at R2's S3 API for local dev. On **Cloudflare Workers**, uploads use the native R2 binding `UPLOADS` (in `wrangler.toml`) instead — run `wrangler r2 bucket create buildersnetwork-uploads` once before deploying. Absent storage → the cover routes return 503. |
 | `SERVE_STATIC` | `false` to disable Hono's static file serving (3-tier EC2 mode) |
 
 ---
@@ -269,6 +271,38 @@ wrangler secret put BETTER_AUTH_SECRET
 wrangler secret put APP_URL
 wrangler secret put RESEND_API_KEY   # optional — send via Resend instead of the [[send_email]] binding
 pnpm cf:deploy
+```
+
+### PR previews
+
+Design branches named `mockup/*` or `design/*` get a live static preview URL
+posted on their pull request. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
+`CLOUDFLARE_ACCOUNT_ID` repo secrets.
+
+There is intentionally **no full app/API preview**. A `wrangler versions upload`
+preview runs on a `*.workers.dev` origin, where auth is unusable — cookies are
+host-only and `baseURL`/redirects derive from the production `APP_URL`
+(`buildersnetwork.web.id`), so you can't log in and the preview is dead weight.
+Previewing app/API changes needs per-PR environment isolation (own DB + origin);
+that's tracked separately as an ephemeral-preview proposal, not this shortcut.
+
+The mockup preview is **fork-safe** so community PRs get previews. It's split
+into two workflows on purpose:
+
+- `preview-mockups.yml` (`pull_request`, no secrets) runs the PR code to build
+  the standalone gallery (`pnpm --filter app run build:mockups`, static, no
+  API/DB) and uploads it as an artifact. No secret is in scope, so a fork PR has
+  nothing to steal.
+- `preview-mockups-deploy.yml` (`workflow_run`, trusted, has secrets) downloads
+  that artifact and runs `wrangler pages deploy` to a dedicated Cloudflare
+  **Pages** project. It never executes PR code, so the token stays safe.
+
+Setup: enable "Require approval for all outside collaborators" (or first-time
+contributors) in the repo's Actions settings, create the Pages project, and give
+the API token the "Cloudflare Pages — Edit" permission:
+
+```bash
+wrangler pages project create buildersnetwork-mockups --production-branch=main
 ```
 
 ### EC2 3-tier (Ansible)
