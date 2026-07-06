@@ -12,7 +12,7 @@ import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaNew from "@/pages/KaryaNew";
-import Launchpad from "@/pages/Launchpad";
+import Launchpad, { LaunchpadRail } from "@/pages/Launchpad";
 import Login from "@/pages/Login";
 import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
@@ -48,10 +48,18 @@ function AppRoutes() {
 
   // A logged-in route that lives *inside* the persistent shell. Gates on auth
   // (→ welcome) and profile (→ the minimal one-field start, not the AI chat).
-  const shell = (page: (m: Member) => ReactNode) => {
+  // `rail` optionally supplies the shell's right column (issue #20).
+  const shell = (
+    page: (m: Member) => ReactNode,
+    rail?: (m: Member) => ReactNode,
+  ) => {
     if (!loggedIn) return <Redirect to="/welcome" />;
     if (!me) return <Redirect to="/mulai" />;
-    return <Shell me={me}>{page(me)}</Shell>;
+    return (
+      <Shell me={me} rail={rail?.(me)}>
+        {page(me)}
+      </Shell>
+    );
   };
 
   return (
@@ -87,9 +95,14 @@ function AppRoutes() {
 
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
-        {shell((m) => (
-          <Launchpad user={m} />
-        ))}
+        {shell(
+          (m) => (
+            <Launchpad user={m} />
+          ),
+          (m) => (
+            <LaunchpadRail user={m} />
+          ),
+        )}
       </Route>
       <Route path="/minat">
         {shell((m) => (

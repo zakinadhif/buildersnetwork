@@ -598,6 +598,19 @@ paths:
                 items:
                   $ref: "#/components/schemas/KaryaListItem"
 
+  /stats:
+    get:
+      operationId: getStats
+      tags: [feed]
+      summary: Aggregate community pulse counts for the Launchpad rail
+      responses:
+        "200":
+          description: Community-wide counts (no per-entity data)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CommunityStats"
+
   /otp/send:
     post:
       operationId: sendOtp
@@ -699,6 +712,21 @@ components:
         ok:
           type: boolean
       required: [ok]
+
+    CommunityStats:
+      type: object
+      description: Community pulse counts for the Launchpad right rail.
+      properties:
+        karya:
+          type: integer
+          description: Total karya in the community
+        builders:
+          type: integer
+          description: Total members with a profile
+        updatesThisWeek:
+          type: integer
+          description: Karya updates (posts) created in the last 7 days
+      required: [karya, builders, updatesThisWeek]
 
     Member:
       type: object

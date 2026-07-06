@@ -13,6 +13,7 @@ import karyaRouter from "./routes/karya";
 import membersRouter from "./routes/members";
 import otpRouter from "./routes/otp";
 import profileRouter from "./routes/profile";
+import { statsRouter } from "./routes/stats";
 
 export type AppVariables = {
   auth: ReturnType<typeof createAuth>;
@@ -137,6 +138,7 @@ export function createApp(services: AppServices) {
   app.route("/api/karya", karyaRouter);
   app.route("/api/feed", feedRouter);
   app.route("/api/featured", featuredRouter);
+  app.route("/api/stats", statsRouter);
 
   return app;
 }

@@ -4,8 +4,9 @@ import type { Member } from "@/lib/members";
 
 /**
  * The persistent Launchpad app shell (issue #8): a left-sidebar rail + a content
- * slot. Every logged-in route renders *inside* this shell; auth/welcome/login
- * stay outside it (see App.tsx). Ported from MockupB's `bn-nav` rail.
+ * slot, and an optional right rail (issue #20) a page can fill. Every logged-in
+ * route renders *inside* this shell; auth/welcome/login stay outside it (see
+ * App.tsx). Ported from MockupB's three-column `bn-*` layout.
  *
  * The rail is route-aware — the active item follows `wouter`'s location and is
  * marked with `aria-current="page"`. "Cari Kolaborator" ships disabled until the
@@ -86,12 +87,18 @@ function LeftNav({ me }: { me: Member }) {
   );
 }
 
-/** Persistent shell wrapping the in-app (logged-in) routes. */
+/**
+ * Persistent shell wrapping the in-app (logged-in) routes. `rail` is an optional
+ * third column a page supplies (the Launchpad fills it, issue #20); when absent
+ * the main column simply widens — no empty rail on other pages.
+ */
 export default function Shell({
   me,
+  rail,
   children,
 }: {
   me: Member;
+  rail?: React.ReactNode;
   children: React.ReactNode;
 }) {
   return (
@@ -99,6 +106,7 @@ export default function Shell({
       <div className="bn-shell-inner">
         <LeftNav me={me} />
         <main className="bn-main">{children}</main>
+        {rail && <aside className="bn-rail">{rail}</aside>}
       </div>
     </div>
   );
