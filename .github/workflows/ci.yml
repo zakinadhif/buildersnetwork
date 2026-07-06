@@ -90,6 +90,10 @@ jobs:
         working-directory: apps/app
         run: pnpm exec tsc -b
 
+      - name: Type-check — mockups
+        working-directory: apps/mockups
+        run: pnpm exec tsc -b
+
       - name: Install Playwright browsers
         working-directory: apps/app
         run: pnpm exec playwright install --with-deps chromium

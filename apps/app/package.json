@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
-    "build:mockups": "vite build --mode mockups && node -e \"require('fs').copyFileSync('dist-mockups/mockups.html','dist-mockups/index.html')\"",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",

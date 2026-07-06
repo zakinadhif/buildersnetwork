@@ -6,7 +6,7 @@
 
 ## Why
 
-The mirror of the [people lane](matchmaking.md): a karya marks itself **"open to contributors" / incubation status** (FR-34), surfacing what help it needs and inviting the community in. Together with the people lane this makes matchmaking **two-sided** — browsing people *and* browsing karya-with-openings in one surface, which is what the [Cari Kolaborator mockups](../../apps/app/src/mockups/) (directions A/B/C/E) actually explored.
+The mirror of the [people lane](matchmaking.md): a karya marks itself **"open to contributors" / incubation status** (FR-34), surfacing what help it needs and inviting the community in. Together with the people lane this makes matchmaking **two-sided** — browsing people *and* browsing karya-with-openings in one surface, which is what the [Cari Kolaborator mockups](../../apps/mockups/src/) (directions A/B/C/E) actually explored.
 
 ## Open decisions (settle at grooming)
 

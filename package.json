@@ -6,6 +6,7 @@
     "dev:api": "pnpm --filter api run dev",
     "dev:app": "pnpm --filter app run dev",
     "dev:landing": "pnpm --filter landing run dev",
+    "dev:mockups": "pnpm --filter mockups run dev",
     "better-auth:generate": "pnpm --filter @myapp/auth run better-auth:generate",
     "db:push": "pnpm run --filter @myapp/db db:push",
     "db:studio": "pnpm run --filter @myapp/db db:studio",

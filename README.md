@@ -275,8 +275,8 @@ pnpm cf:deploy
 
 ### PR previews
 
-Design branches named `mockup/*` or `design/*` get a live static preview URL
-posted on their pull request. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
+Any pull request that modifies `apps/mockups/**` gets a live static preview URL
+posted on it. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
 `CLOUDFLARE_ACCOUNT_ID` repo secrets.
 
 There is intentionally **no full app/API preview**. A `wrangler versions upload`
@@ -290,9 +290,9 @@ The mockup preview is **fork-safe** so community PRs get previews. It's split
 into two workflows on purpose:
 
 - `preview-mockups.yml` (`pull_request`, no secrets) runs the PR code to build
-  the standalone gallery (`pnpm --filter app run build:mockups`, static, no
-  API/DB) and uploads it as an artifact. No secret is in scope, so a fork PR has
-  nothing to steal.
+  the standalone gallery (`pnpm --filter mockups build` — the `apps/mockups`
+  app, static, no API/DB) and uploads it as an artifact. No secret is in scope,
+  so a fork PR has nothing to steal.
 - `preview-mockups-deploy.yml` (`workflow_run`, trusted, has secrets) downloads
   that artifact and runs `wrangler pages deploy` to a dedicated Cloudflare
   **Pages** project. It never executes PR code, so the token stays safe.
@@ -304,6 +304,35 @@ the API token the "Cloudflare Pages — Edit" permission:
 ```bash
 wrangler pages project create buildersnetwork-mockups --production-branch=main
 ```
+
+The gallery is its own Pages project, configured in `apps/mockups/wrangler.toml`
+(`name`, `pages_build_output_dir`), served at **`mockups.buildersnetwork.web.id`**.
+`deploy-mockups.yml` publishes it to production on every push to `main` that
+touches `apps/mockups/**` (guarded on the same `CLOUDFLARE_*` secrets). To deploy
+by hand — off a different branch, or before the automation is wired up:
+
+```bash
+pnpm --filter mockups deploy   # builds, then `wrangler pages deploy` (run on main)
+```
+
+The custom domain serves the **production** deployment (the `main` branch); per-PR
+previews keep their own `*.buildersnetwork-mockups.pages.dev` URLs. Pages custom
+domains can't live in
+`wrangler.toml` — attach it once via the dashboard (Pages → project → Custom
+domains) or the API (the zone is already in this account, so the CNAME is
+auto-created):
+
+```bash
+curl -X POST \
+  "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/buildersnetwork-mockups/domains" \
+  -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"mockups.buildersnetwork.web.id"}'
+```
+
+The preview-deploy workflow deliberately does **not** read the config: it passes
+`--project-name`/`--branch` on the CLI so the trusted job never trusts config
+from a forked PR (keep the project name in the two places in sync).
 
 ### EC2 3-tier (Ansible)
 
