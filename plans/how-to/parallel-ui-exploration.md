@@ -13,7 +13,7 @@ Run several agents **in parallel, each in its own git worktree** so they never c
 - One `Agent` call per direction, `subagent_type: "claude"`, `isolation: "worktree"`, each using the **`frontend-design` skill**.
 - Launch them in a **single message** so they run concurrently.
 - Keep each mockup **self-contained**: import only `react` and `./images` (`coverFor`); hardcode all data inline; copy design tokens/shell verbatim from an existing mockup so every direction renders under identical font/palette rules.
-- Land the results in `apps/app/src/mockups/` and register each in `main.tsx`'s gallery picker so you can flip between them in one view. (See the existing `MockupB` + `MockupCari{A,B,C,E}` set for the pattern.)
+- Land the results in `apps/mockups/src/` and register each in `main.tsx`'s gallery picker so you can flip between them in one view. (See the existing `MockupB` + `MockupCari{A,B,C,E}` set for the pattern.)
 
 ## Shared context preamble (paste into every agent)
 
@@ -39,4 +39,4 @@ Write 5–6 candidate directions that genuinely diverge (calm/wide vs. dense das
 
 ## After the round
 
-Review the mockups side by side in the gallery, decide, and pull the winning ideas into the real app. The mockups are throwaway exploration — once a direction ships for real, the mockup can be deleted or kept as a reference in `apps/app/src/mockups/`. If the direction reshapes a milestone's scope, that's a **Proposed** issue (see [build-workflow.md](build-workflow.md)), not a silent pivot.
+Review the mockups side by side in the gallery, decide, and pull the winning ideas into the real app. The mockups are throwaway exploration — once a direction ships for real, the mockup can be deleted or kept as a reference in `apps/mockups/src/`. If the direction reshapes a milestone's scope, that's a **Proposed** issue (see [build-workflow.md](build-workflow.md)), not a silent pivot.

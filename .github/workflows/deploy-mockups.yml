@@ -1,0 +1,74 @@
+name: Deploy mockups
+
+# Production deploy of the standalone mockup gallery to its Cloudflare Pages
+# project (buildersnetwork-mockups), served at mockups.buildersnetwork.web.id.
+#
+# Unlike the per-PR preview (preview-mockups.yml + preview-mockups-deploy.yml,
+# which are split to stay fork-safe), this only runs on `push` to main — already
+# trusted, merged code — so a single job can build AND deploy with secrets in
+# scope. It targets `--branch main`, the project's production branch, which is
+# what the custom domain serves. Per-PR previews keep their own pages.dev URLs.
+
+on:
+  push:
+    branches: [main]
+    # Only redeploy when the gallery (or this workflow) actually changes.
+    paths:
+      - "apps/mockups/**"
+      - ".github/workflows/deploy-mockups.yml"
+
+# One production deploy at a time; a newer push to main supersedes an older
+# pending run so the live site tracks the latest main.
+concurrency:
+  group: deploy-mockups
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build & deploy gallery
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Gate on Cloudflare creds; no-op until they're set (e.g. on a fork's main).
+      - name: Guard on Cloudflare credentials
+        id: guard
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
+            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup pnpm
+        if: steps.guard.outputs.enabled == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.guard.outputs.enabled == 'true'
+        run: pnpm install
+
+      # Static build → apps/mockups/dist. No codegen, landing, api, or DB.
+      - name: Build gallery
+        if: steps.guard.outputs.enabled == 'true'
+        run: pnpm --filter mockups build
+
+      # Deploy to the production branch. `pages_build_output_dir` in
+      # apps/mockups/wrangler.toml supplies the directory and project name;
+      # --branch main makes it the production deployment the custom domain serves.
+      - name: Deploy to Cloudflare Pages
+        if: steps.guard.outputs.enabled == 'true'
+        working-directory: apps/mockups
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: pnpm exec wrangler pages deploy --branch main --commit-dirty=true

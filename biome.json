@@ -15,8 +15,8 @@
       "!libs/api-zod/src/generated",
       "!.wrangler",
       "!apps/api/public",
-      "!apps/app/src/mockups",
-      "!apps/app/mockups.html"
+      "!apps/mockups/src",
+      "!apps/mockups/index.html"
     ]
   },
   "formatter": {

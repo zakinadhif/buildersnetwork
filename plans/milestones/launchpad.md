@@ -6,7 +6,7 @@
 
 ## Why
 
-The app's primary surface and navigation frame. Adopt the **Launchpad** direction (`apps/app/src/mockups/MockupB.tsx`): a calm, curated, reverse-chronological discovery home — **no ranking, no leaderboard** (FR-22) — inside a **persistent left-sidebar shell**. It goes first because it's the frame every later surface slots into: Matchmaking's "Cari Kolaborator" tab, "Karya Saya", etc. all live in this sidebar.
+The app's primary surface and navigation frame. Adopt the **Launchpad** direction (`apps/mockups/src/MockupB.tsx`): a calm, curated, reverse-chronological discovery home — **no ranking, no leaderboard** (FR-22) — inside a **persistent left-sidebar shell**. It goes first because it's the frame every later surface slots into: Matchmaking's "Cari Kolaborator" tab, "Karya Saya", etc. all live in this sidebar.
 
 ## Scope
 

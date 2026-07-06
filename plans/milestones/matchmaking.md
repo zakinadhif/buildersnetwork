@@ -16,7 +16,7 @@ People-discovery via **explicit intent** (FR-5, FR-27, FR-28). A member declares
 
 - Intent lives as `seeking_*` fields on the member's profile (alter `profiles`), not a new table — one active intent per member.
 - `seekingType` is a closed vocabulary validated in code, not a pg enum (repo convention; see [retro](retro.txt)).
-- **Presentation follows the PRD-minimal shape**: an intent badge on the profile + a filterable seeker board. The [Cari Kolaborator mockups](../../apps/app/src/mockups/) are design *reference* for the UI tasks, not a blocking decision — their two-sided ambition belongs to [Karya openings](karya-openings.md).
+- **Presentation follows the PRD-minimal shape**: an intent badge on the profile + a filterable seeker board. The [Cari Kolaborator mockups](../../apps/mockups/src/) are design *reference* for the UI tasks, not a blocking decision — their two-sided ambition belongs to [Karya openings](karya-openings.md).
 - The existing AI-`matches` feature stays **untouched** this milestone; its keep/replace fate is decided in [Karya openings](karya-openings.md).
 
 ## Exit

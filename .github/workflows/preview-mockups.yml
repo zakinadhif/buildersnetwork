@@ -9,12 +9,19 @@ name: Mockup preview
 # secret to leak. The privileged Cloudflare deploy happens in the separate
 # workflow_run workflow, which never executes PR code.
 #
-# Only static output is produced here — the mockup gallery has no API/DB
-# dependency (`build:mockups`), so nothing sensitive is in scope.
+# Only static output is produced here — the mockup gallery is its own app
+# (`apps/mockups`) with no API/DB dependency, so nothing sensitive is in scope.
 
 on:
   pull_request:
     branches: [main]
+    # Any PR that touches the gallery gets a preview — the path is the real
+    # signal now that mockups are their own app (replaces the old mockup/* and
+    # design/* branch-name convention, which only ever proxied for this).
+    # Includes the workflow itself so edits to it get a test build.
+    paths:
+      - "apps/mockups/**"
+      - ".github/workflows/preview-mockups.yml"
 
 # One build per PR; a new push supersedes the in-flight run.
 concurrency:
@@ -24,11 +31,6 @@ concurrency:
 jobs:
   build:
     name: Build mockup gallery
-    # Only design/mockup branches. github.head_ref is the PR's source branch
-    # (the fork's branch name for cross-repo PRs).
-    if: >-
-      startsWith(github.head_ref, 'mockup/') ||
-      startsWith(github.head_ref, 'design/')
     runs-on: ubuntu-latest
     # No secrets are used in this job; the default read-only token is enough.
     steps:
@@ -47,10 +49,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
-      # Static-only build of the gallery → apps/app/dist-mockups (base "/",
-      # mockups.html copied to index.html). No codegen, landing, api, or DB.
+      # Static build of the standalone gallery → apps/mockups/dist (base "/",
+      # index.html at the root). No codegen, landing, api, or DB.
       - name: Build mockups
-        run: pnpm --filter app run build:mockups
+        run: pnpm --filter mockups run build
 
       # Stage the built site plus the PR coordinates the deploy workflow needs
       # (workflow_run doesn't receive PR context directly, so we ferry it in the
@@ -58,7 +60,7 @@ jobs:
       - name: Stage artifact
         run: |
           mkdir -p artifact/site
-          cp -r apps/app/dist-mockups/. artifact/site/
+          cp -r apps/mockups/dist/. artifact/site/
           cat > artifact/pr-meta.json <<EOF
           {
             "pr": "${{ github.event.pull_request.number }}",

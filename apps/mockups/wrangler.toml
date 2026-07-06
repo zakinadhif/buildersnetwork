@@ -1,0 +1,37 @@
+# Cloudflare Pages deployment for the standalone mockup gallery.
+#
+# This is a Pages project (static site), separate from the root wrangler.toml
+# which deploys the app/API Worker. wrangler picks the config by directory, so
+# `wrangler deploy` at the repo root never sees this file, and the commands
+# below only apply when run from apps/mockups.
+#
+# One-time project creation:
+#   wrangler pages project create buildersnetwork-mockups --production-branch=main
+#
+# Custom domain: mockups.buildersnetwork.web.id. Pages custom domains can't be
+# declared here (unlike a Worker's `routes`) — attach it once to the project.
+# The zone buildersnetwork.web.id is already active in this account, so
+# Cloudflare auto-creates the CNAME to buildersnetwork-mockups.pages.dev. Via
+# the dashboard (Pages → the project → Custom domains → Set up a domain) or API:
+#   curl -X POST \
+#     "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/buildersnetwork-mockups/domains" \
+#     -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+#     -H "Content-Type: application/json" \
+#     -d '{"name":"mockups.buildersnetwork.web.id"}'
+# The custom domain serves the PRODUCTION deployment (the main branch), so it
+# only shows content once a production deploy exists (see below). Per-PR preview
+# deploys keep their own *.buildersnetwork-mockups.pages.dev URLs.
+#
+# Deploy to production (from apps/mockups on main, or `pnpm --filter mockups
+# deploy` from the root):
+#   pnpm build && wrangler pages deploy
+#
+# NOTE: the per-PR *preview* deploys (.github/workflows/preview-mockups-deploy.yml)
+# do NOT read this file. That job runs in a trusted context, downloads the
+# already-built static artifact, and passes --project-name / --branch on the CLI
+# so it never trusts config from a (possibly forked) PR. Keep the project name
+# here in sync with that workflow.
+
+name = "buildersnetwork-mockups"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./dist"
