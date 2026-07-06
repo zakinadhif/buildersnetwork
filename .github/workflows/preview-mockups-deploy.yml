@@ -1,0 +1,127 @@
+name: Mockup preview deploy
+
+# DEPLOY half of the isolated mockup preview (build half: preview-mockups.yml).
+#
+# `workflow_run` runs in the base repo's trusted context, so it CAN read repo
+# secrets — even when the triggering PR came from a fork. The safety property is
+# that this job NEVER runs PR code: it only downloads the already-built static
+# artifact and runs `wrangler pages deploy` (wrangler is fetched fresh from npm,
+# not from the PR's dependencies or scripts). The Cloudflare token is therefore
+# never exposed to untrusted code.
+#
+# Residual risk: a malicious PR could still make the build emit arbitrary static
+# files, which then get published to a *.buildersnetwork-mockups.pages.dev
+# subdomain. GitHub's default "require approval to run workflows from first-time
+# contributors" gates that; keep it enabled.
+#
+# NOTE: workflow_run only fires from the copy of this file on the DEFAULT branch
+# (main) — it takes effect once merged, not from within a PR.
+
+on:
+  workflow_run:
+    workflows: ["Mockup preview"]
+    types: [completed]
+
+# Supersede older deploys for the same source branch.
+concurrency:
+  group: preview-mockups-deploy-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy mockup preview
+    # Only for successful builds that were themselves triggered by a PR.
+    if: >-
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # download the artifact from the build run
+      pull-requests: write # upsert the preview comment
+    steps:
+      # Gate on Cloudflare creds; no-op until they're set.
+      - name: Guard on Cloudflare credentials
+        id: guard
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
+            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Cross-workflow artifact download needs the run id + a token.
+      - name: Download built gallery
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/download-artifact@v4
+        with:
+          name: mockups-preview
+          path: artifact
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Read PR metadata
+        id: meta
+        if: steps.guard.outputs.enabled == 'true'
+        run: |
+          echo "pr=$(jq -r .pr artifact/pr-meta.json)" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(jq -r .head_ref artifact/pr-meta.json)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(jq -r .sha artifact/pr-meta.json)" >> "$GITHUB_OUTPUT"
+
+      # Deploy the STATIC files only. `npx wrangler` pulls wrangler from npm — we
+      # never install or run the PR's dependencies here. Per-PR branch alias
+      # (pr-<n>) avoids collisions between forks that reuse a branch name; the
+      # surfaced URL is the unique per-deploy one.
+      - name: Deploy to Cloudflare Pages
+        id: deploy
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          npx --yes wrangler@4 pages deploy artifact/site \
+            --project-name=buildersnetwork-mockups \
+            --branch="pr-${{ steps.meta.outputs.pr }}" \
+            --commit-dirty=true 2>&1 | tee deploy.log
+          url="$(grep -oE 'https://[a-z0-9-]+\.buildersnetwork-mockups\.pages\.dev' deploy.log | head -n1)"
+          if [ -z "$url" ]; then
+            echo "::warning::Could not parse a Pages preview URL from wrangler output."
+          fi
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+
+      # Sticky comment on the originating PR.
+      - name: Comment preview URL
+        if: steps.guard.outputs.enabled == 'true' && steps.deploy.outputs.url != ''
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = "${{ steps.deploy.outputs.url }}";
+            const issue_number = Number("${{ steps.meta.outputs.pr }}");
+            const sha = "${{ steps.meta.outputs.sha }}";
+            const marker = "<!-- preview-mockups -->";
+            const body = [
+              marker,
+              "### 🎨 Mockup preview",
+              "",
+              `Static gallery for this branch: ${url}`,
+              "",
+              "_Isolated static build — no API, no database, no production bindings._",
+              "",
+              `<sub>Commit ${sha.slice(0, 7)} · updated ${new Date().toISOString()}</sub>`,
+            ].join("\n");
+
+            const { owner, repo } = context.repo;
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number },
+            );
+            const existing = comments.find((c) => (c.body || "").includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner, repo, comment_id: existing.id, body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner, repo, issue_number, body,
+              });
+            }

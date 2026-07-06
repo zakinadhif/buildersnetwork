@@ -20,6 +20,11 @@ concurrency:
 jobs:
   preview:
     name: Upload preview version
+    # Design/mockup branches get the lighter, prod-isolated static preview in
+    # preview-mockups.yml instead — skip the full Worker version upload for them.
+    if: >-
+      !startsWith(github.head_ref, 'mockup/') &&
+      !startsWith(github.head_ref, 'design/')
     runs-on: ubuntu-latest
     permissions:
       contents: read

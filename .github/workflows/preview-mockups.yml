@@ -1,0 +1,75 @@
+name: Mockup preview
+
+# BUILD half of the isolated mockup preview (deploy half: preview-mockups-deploy.yml).
+#
+# This runs on `pull_request`, so for PRs from forks it gets a read-only token
+# and NO repo secrets — GitHub's protection against untrusted PRs stealing
+# credentials. That's exactly why the build is split out: this job runs the
+# (potentially untrusted) PR code to produce the static gallery, but has no
+# secret to leak. The privileged Cloudflare deploy happens in the separate
+# workflow_run workflow, which never executes PR code.
+#
+# Only static output is produced here — the mockup gallery has no API/DB
+# dependency (`build:mockups`), so nothing sensitive is in scope.
+
+on:
+  pull_request:
+    branches: [main]
+
+# One build per PR; a new push supersedes the in-flight run.
+concurrency:
+  group: preview-mockups-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build mockup gallery
+    # Only design/mockup branches. github.head_ref is the PR's source branch
+    # (the fork's branch name for cross-repo PRs).
+    if: >-
+      startsWith(github.head_ref, 'mockup/') ||
+      startsWith(github.head_ref, 'design/')
+    runs-on: ubuntu-latest
+    # No secrets are used in this job; the default read-only token is enough.
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install
+
+      # Static-only build of the gallery → apps/app/dist-mockups (base "/",
+      # mockups.html copied to index.html). No codegen, landing, api, or DB.
+      - name: Build mockups
+        run: pnpm --filter app run build:mockups
+
+      # Stage the built site plus the PR coordinates the deploy workflow needs
+      # (workflow_run doesn't receive PR context directly, so we ferry it in the
+      # artifact). Contents: site/** + pr-meta.json.
+      - name: Stage artifact
+        run: |
+          mkdir -p artifact/site
+          cp -r apps/app/dist-mockups/. artifact/site/
+          cat > artifact/pr-meta.json <<EOF
+          {
+            "pr": "${{ github.event.pull_request.number }}",
+            "head_ref": "${{ github.event.pull_request.head.ref }}",
+            "sha": "${{ github.event.pull_request.head.sha }}"
+          }
+          EOF
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mockups-preview
+          path: artifact
+          retention-days: 3
