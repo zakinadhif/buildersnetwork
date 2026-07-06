@@ -275,38 +275,35 @@ pnpm cf:deploy
 
 ### PR previews
 
-GitHub Actions post a live URL on pull requests. All deploys are gated on the
-`CLOUDFLARE_API_TOKEN` / `CLOUDFLARE_ACCOUNT_ID` repo secrets.
+Design branches named `mockup/*` or `design/*` get a live static preview URL
+posted on their pull request. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
+`CLOUDFLARE_ACCOUNT_ID` repo secrets.
 
-- **`preview.yml`** — for app/API PRs. Uploads a Worker *version*
-  (`wrangler versions upload`, no traffic shift) and comments its
-  `*.workers.dev` URL. Runs against the **production** database/bindings, so
-  it's for eyeballing frontend/logic changes, not schema-changing flows.
-  **Maintainer-only:** on `pull_request` it can't read secrets for fork PRs, so
-  it no-ops there (auto-previewing untrusted code against the prod DB is not
-  something we enable — that needs the per-branch DB isolation still on the
-  roadmap). Skips `mockup/*` / `design/*` branches.
-- **`preview-mockups.yml`** + **`preview-mockups-deploy.yml`** — for design
-  branches named `mockup/*` or `design/*`, and **fork-safe** so community PRs
-  get previews. Split into two workflows on purpose:
-  - `preview-mockups.yml` (`pull_request`, no secrets) runs the PR code to build
-    the standalone gallery (`pnpm --filter app run build:mockups`, static, no
-    API/DB) and uploads it as an artifact. No secret is in scope, so a fork PR
-    has nothing to steal.
-  - `preview-mockups-deploy.yml` (`workflow_run`, trusted, has secrets)
-    downloads that artifact and runs `wrangler pages deploy` to a dedicated
-    Cloudflare **Pages** project. It never executes PR code, so the token stays
-    safe.
+There is intentionally **no full app/API preview**. A `wrangler versions upload`
+preview runs on a `*.workers.dev` origin, where auth is unusable — cookies are
+host-only and `baseURL`/redirects derive from the production `APP_URL`
+(`buildersnetwork.web.id`), so you can't log in and the preview is dead weight.
+Previewing app/API changes needs per-PR environment isolation (own DB + origin);
+that's tracked separately as an ephemeral-preview proposal, not this shortcut.
 
-  `preview.yml` skips these branches so each PR gets exactly one preview.
+The mockup preview is **fork-safe** so community PRs get previews. It's split
+into two workflows on purpose:
 
-  Setup: enable "Require approval for all outside collaborators" (or first-time
-  contributors) in the repo's Actions settings, create the Pages project, and
-  give the API token the "Cloudflare Pages — Edit" permission:
+- `preview-mockups.yml` (`pull_request`, no secrets) runs the PR code to build
+  the standalone gallery (`pnpm --filter app run build:mockups`, static, no
+  API/DB) and uploads it as an artifact. No secret is in scope, so a fork PR has
+  nothing to steal.
+- `preview-mockups-deploy.yml` (`workflow_run`, trusted, has secrets) downloads
+  that artifact and runs `wrangler pages deploy` to a dedicated Cloudflare
+  **Pages** project. It never executes PR code, so the token stays safe.
 
-  ```bash
-  wrangler pages project create buildersnetwork-mockups --production-branch=main
-  ```
+Setup: enable "Require approval for all outside collaborators" (or first-time
+contributors) in the repo's Actions settings, create the Pages project, and give
+the API token the "Cloudflare Pages — Edit" permission:
+
+```bash
+wrangler pages project create buildersnetwork-mockups --production-branch=main
+```
 
 ### EC2 3-tier (Ansible)
 
