@@ -21,11 +21,13 @@ This is normally a **maintainer grooming** activity. Issue title + body are writ
 
 `<Area>` is the feature/milestone (e.g. `Launchpad`) so grouping shows in `gh issue list`. Tag by **deliverable, not module** — don't split one feature into per-layer DB/API/UI issues; that manufactures dependencies. The only worthwhile break-out is UI, for review reasons.
 
-**Body — the contract** (a task must be completable cold from body + repo). Cover:
-- **Kriteria penerimaan** — acceptance criteria, incl. the required test (vitest API / Playwright e2e).
-- **Boundary — Touch / Don't touch** — which paths this task may change.
-- **Dependencies** — one `Depends on #N` line per blocker (drives Blocked status).
-- **Out of scope** — what this deliberately doesn't do.
+**Body — the contract** (a task must be completable cold from body + repo). Follow the house section order, all headings in Bahasa Indonesia:
+- **`## Kenapa`** — the why: what's thin today, what mockup/source it draws from, why this slice. Every issue leads with it.
+- **`## Ruang lingkup`** — the scope narrative (add `(vertikal)` when the slice cuts DB → API → UI). What actually gets built.
+- **`## Batas (touch / don't touch)`** — **Touch:** / **Don't touch:** path lists.
+- **`## Kriteria terima`** — acceptance criteria, incl. the required test (vitest API / Playwright e2e).
+- **`## Dependensi`** — one `Depends on #N` line per blocker (drives Blocked status). Omit the heading if none.
+- **`## Di luar lingkup`** — what this deliberately doesn't do.
 - Treatment where relevant (Hero / Dark / Deferred) and milestone.
 
 If the request is a broad, contentious, or vision/PRD-touching direction question, it's a `[Diskusi]` in **Proposed** — not a task. Don't manufacture acceptance criteria for something not yet decided.
@@ -34,17 +36,23 @@ If the request is a broad, contentious, or vision/PRD-touching direction questio
 
 ```bash
 gh issue create --title "[Fitur] <Area>: <brief>" --milestone "<milestone title>" --body "$(cat <<'EOF'
-## Kriteria penerimaan
+## Kenapa
+…
+
+## Ruang lingkup
 - …
 
-## Boundary
-**Touch:** …
-**Don't touch:** …
+## Batas (touch / don't touch)
+- **Touch:** …
+- **Don't touch:** …
 
-## Dependencies
-Depends on #<N>   # omit if none
+## Kriteria terima
+- …
 
-## Out of scope
+## Dependensi
+Depends on #<N>   # hapus section ini kalau nggak ada
+
+## Di luar lingkup
 - …
 EOF
 )"
