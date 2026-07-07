@@ -1,6 +1,17 @@
 import { CreateKaryaBody, CreatePostBody } from "@myapp/api-zod";
-import { atomicWrite, normalizePostKind, normalizeStages } from "@myapp/db";
-import { featured, karya, karyaMembers, posts } from "@myapp/db/schema";
+import {
+  atomicWrite,
+  normalizeOrientation,
+  normalizePostKind,
+  normalizeStages,
+} from "@myapp/db";
+import {
+  featured,
+  karya,
+  karyaMembers,
+  karyaScreenshots,
+  posts,
+} from "@myapp/db/schema";
 import { and, desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
@@ -20,10 +31,19 @@ import {
 import {
   karyaListItems,
   rostersByKaryaIds,
+  screenshotsForKarya,
   sortRoster,
+  toKaryaScreenshot,
   toRosterMember,
 } from "../lib/karya";
 import { getPostById, postsForKarya, toPost } from "../lib/posts";
+import {
+  contentTypeForKey as contentTypeForScreenshotKey,
+  extForContentType as extForScreenshotContentType,
+  MAX_SCREENSHOT_BYTES,
+  screenshotKeyFor,
+  screenshotUrlFor,
+} from "../lib/screenshots";
 
 const app = new Hono<AppEnv>();
 
@@ -123,6 +143,7 @@ app.get("/:id", async (c) => {
     stages: k.stages,
     interests: await interestsForKarya(db, id),
     coverUrl: coverUrlFor(k.id, k.coverKey),
+    screenshots: (await screenshotsForKarya(db, id)).map(toKaryaScreenshot),
     createdBy: k.createdBy,
     roster: members.map(toRosterMember),
     viewerMembership: viewerRow
@@ -437,6 +458,166 @@ app.get("/:id/cover", async (c) => {
 
   return c.body(new Uint8Array(bytes), 200, {
     "Content-Type": contentTypeForKey(k.coverKey),
+    "Cache-Control": "public, max-age=300",
+  });
+});
+
+// ── Karya screenshot gallery (issue #19) ────────────────────────────────────
+// Hand-written (not OpenAPI-first), same rationale as the cover routes. One
+// row per screenshot, ordered by `position` within each `orientation`
+// (landscape → feed carousel, portrait → detail gallery).
+
+// Upload a screenshot (owner-only). Multipart `file` + `orientation` field;
+// appended to the end of its orientation's order.
+app.post("/:id/screenshots", async (c) => {
+  const guard = await requireOwner(c);
+  if (!guard.ok) return guard.res;
+  const storage = c.get("storage");
+  if (!storage) return c.json({ error: "storage not configured" }, 503);
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const body = await c.req.parseBody();
+  const file = body.file;
+  if (!(file instanceof File)) return c.json({ error: "missing file" }, 400);
+  const orientation = normalizeOrientation(body.orientation);
+  if (!orientation) return c.json({ error: "invalid orientation" }, 400);
+  const ext = extForScreenshotContentType(file.type);
+  if (!ext) return c.json({ error: "unsupported image type" }, 400);
+  if (file.size > MAX_SCREENSHOT_BYTES) {
+    return c.json({ error: "image too large" }, 413);
+  }
+
+  const existing = await db
+    .select({ orientation: karyaScreenshots.orientation })
+    .from(karyaScreenshots)
+    .where(
+      and(
+        eq(karyaScreenshots.karyaId, id),
+        eq(karyaScreenshots.orientation, orientation),
+      ),
+    );
+
+  const screenshotId = crypto.randomUUID();
+  const key = screenshotKeyFor(id, screenshotId, ext);
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  await storage.put(key, bytes, { contentType: file.type });
+
+  const position = existing.length;
+  await db.insert(karyaScreenshots).values({
+    id: screenshotId,
+    karyaId: id,
+    key,
+    orientation,
+    position,
+  });
+
+  return c.json({
+    id: screenshotId,
+    url: screenshotUrlFor(id, screenshotId),
+    orientation,
+    position,
+  });
+});
+
+// Remove a screenshot (owner-only). Deletes the object best-effort, then the row.
+app.delete("/:id/screenshots/:screenshotId", async (c) => {
+  const guard = await requireOwner(c);
+  if (!guard.ok) return guard.res;
+  const db = c.get("db");
+  const id = c.req.param("id");
+  const screenshotId = c.req.param("screenshotId");
+
+  const [existing] = await db
+    .select({ key: karyaScreenshots.key })
+    .from(karyaScreenshots)
+    .where(
+      and(
+        eq(karyaScreenshots.karyaId, id),
+        eq(karyaScreenshots.id, screenshotId),
+      ),
+    )
+    .limit(1);
+  if (!existing) return c.json({ error: "not found" }, 404);
+
+  const storage = c.get("storage");
+  if (storage) await storage.delete(existing.key).catch(() => {});
+  await db
+    .delete(karyaScreenshots)
+    .where(
+      and(
+        eq(karyaScreenshots.karyaId, id),
+        eq(karyaScreenshots.id, screenshotId),
+      ),
+    );
+  return c.json({ ok: true });
+});
+
+// Reorder one orientation's screenshots (owner-only). Body: `{ orientation,
+// ids }` — `ids` is the full, ordered id list for that orientation; each
+// row's `position` becomes its index. Ids outside this karya/orientation are
+// ignored (scoped `where`), so a stale client can't touch other rows.
+app.post("/:id/screenshots/reorder", async (c) => {
+  const guard = await requireOwner(c);
+  if (!guard.ok) return guard.res;
+  const db = c.get("db");
+  const id = c.req.param("id");
+
+  const parsedBody = (await c.req.json().catch(() => null)) as {
+    orientation?: unknown;
+    ids?: unknown;
+  } | null;
+  const orientation = normalizeOrientation(parsedBody?.orientation);
+  if (!orientation) return c.json({ error: "invalid orientation" }, 400);
+  const ids = parsedBody?.ids;
+  if (!Array.isArray(ids) || ids.some((v) => typeof v !== "string")) {
+    return c.json({ error: "invalid ids" }, 400);
+  }
+
+  await atomicWrite(db, (e) =>
+    (ids as string[]).map((screenshotId, position) =>
+      e
+        .update(karyaScreenshots)
+        .set({ position })
+        .where(
+          and(
+            eq(karyaScreenshots.karyaId, id),
+            eq(karyaScreenshots.id, screenshotId),
+            eq(karyaScreenshots.orientation, orientation),
+          ),
+        ),
+    ),
+  );
+
+  return c.json({ ok: true });
+});
+
+// Serve a screenshot's bytes (public, same visibility as covers). Streams
+// from storage with the content-type recovered from the key.
+app.get("/:id/screenshots/:screenshotId", async (c) => {
+  const db = c.get("db");
+  const id = c.req.param("id");
+  const screenshotId = c.req.param("screenshotId");
+
+  const [s] = await db
+    .select({ key: karyaScreenshots.key })
+    .from(karyaScreenshots)
+    .where(
+      and(
+        eq(karyaScreenshots.karyaId, id),
+        eq(karyaScreenshots.id, screenshotId),
+      ),
+    )
+    .limit(1);
+  if (!s) return c.json({ error: "not found" }, 404);
+
+  const storage = c.get("storage");
+  if (!storage) return c.json({ error: "storage not configured" }, 503);
+  const bytes = await storage.get(s.key);
+  if (!bytes) return c.json({ error: "not found" }, 404);
+
+  return c.body(new Uint8Array(bytes), 200, {
+    "Content-Type": contentTypeForScreenshotKey(s.key),
     "Cache-Control": "public, max-age=300",
   });
 });

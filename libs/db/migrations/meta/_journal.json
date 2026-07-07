@@ -57,6 +57,13 @@
       "when": 1783157034393,
       "tag": "0007_odd_colossus",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1783352423124,
+      "tag": "0008_narrow_hulk",
+      "breakpoints": true
     }
   ]
 }

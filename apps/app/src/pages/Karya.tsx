@@ -49,6 +49,9 @@ export default function Karya({ id }: { id: string }) {
   const membership = karya.viewerMembership;
   const isOwner = membership?.role === "owner";
   const isMember = membership?.status === "member";
+  const portraitScreenshots = karya.screenshots.filter(
+    (s) => s.orientation === "portrait",
+  );
 
   async function act(fn: () => Promise<unknown>) {
     setBusy(true);
@@ -120,6 +123,25 @@ export default function Karya({ id }: { id: string }) {
         <p style={{ fontSize: 15, lineHeight: 1.65, marginBottom: 32 }}>
           {karya.description}
         </p>
+
+        {/* Portrait screenshot gallery (issue #19) — no screenshots, no
+            gallery, never an empty slot. */}
+        {portraitScreenshots.length > 0 && (
+          <section
+            className="screenshot-gallery"
+            aria-label={`Tangkapan layar ${karya.title}`}
+          >
+            {portraitScreenshots.map((s, i) => (
+              <img
+                key={s.id}
+                src={s.url}
+                alt={`${karya.title} — tangkapan layar ${i + 1}`}
+                loading="lazy"
+                className="screenshot-gallery-img"
+              />
+            ))}
+          </section>
+        )}
 
         {/* CTA driven by viewer membership */}
         {!membership && (

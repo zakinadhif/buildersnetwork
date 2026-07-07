@@ -1,4 +1,4 @@
-import type { FeedItem } from "@myapp/api-client-react";
+import type { FeedItem, KaryaScreenshot } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import {
   Avatar,
@@ -7,6 +7,37 @@ import {
   STAGE_LABELS,
   timeAgo,
 } from "@/components/ui-atoms";
+
+/**
+ * Play Store-style landscape screenshot carousel (issue #19), shown above a
+ * feed karya card's metadata row. Renders nothing when there are no landscape
+ * screenshots — never an empty slot.
+ */
+function LandscapeCarousel({
+  screenshots,
+  title,
+}: {
+  screenshots: KaryaScreenshot[];
+  title: string;
+}) {
+  if (screenshots.length === 0) return null;
+  return (
+    <section
+      className="landscape-carousel"
+      aria-label={`Tangkapan layar ${title}`}
+    >
+      {screenshots.map((s, i) => (
+        <img
+          key={s.id}
+          src={s.url}
+          alt={`${title} — layar ${i + 1}`}
+          loading="lazy"
+          className="landscape-carousel-img"
+        />
+      ))}
+    </section>
+  );
+}
 
 /**
  * The reverse-chron global feed (FR-22). Renders a `FeedItem[]` union as
@@ -63,6 +94,12 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             onClick={() => navigate(`/karya/${it.id}`)}
             onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${it.id}`)}
           >
+            <LandscapeCarousel
+              screenshots={it.screenshots.filter(
+                (s) => s.orientation === "landscape",
+              )}
+              title={it.title}
+            />
             <div className="karya-card-row">
               <KaryaCover url={it.coverUrl} size={48} />
               <div className="karya-card-body">
