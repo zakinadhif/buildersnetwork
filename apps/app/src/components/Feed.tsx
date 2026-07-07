@@ -95,7 +95,7 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${it.id}`)}
           >
             <LandscapeCarousel
-              screenshots={it.screenshots.filter(
+              screenshots={(it.screenshots ?? []).filter(
                 (s) => s.orientation === "landscape",
               )}
               title={it.title}

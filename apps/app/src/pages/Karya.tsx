@@ -49,7 +49,7 @@ export default function Karya({ id }: { id: string }) {
   const membership = karya.viewerMembership;
   const isOwner = membership?.role === "owner";
   const isMember = membership?.status === "member";
-  const portraitScreenshots = karya.screenshots.filter(
+  const portraitScreenshots = (karya.screenshots ?? []).filter(
     (s) => s.orientation === "portrait",
   );
 
