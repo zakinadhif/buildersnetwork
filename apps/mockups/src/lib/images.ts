@@ -3,27 +3,27 @@
  *
  * Editorial cover illustrations + product imagery, generated to match the
  * brand (terracotta / maroon on warm cream, four-petal + hash motif).
- * Imported as modules so Vite resolves the correct hashed, base-prefixed URLs
- * in both dev ("/") and the production "/app/" build.
+ * Imported as modules so Vite resolves the correct hashed URLs in both dev and
+ * the production build.
  */
 
-import ai from "./images/ai.jpg";
-import commerce from "./images/commerce.jpg";
-import community from "./images/community.jpg";
-import data from "./images/data.jpg";
-import devtools from "./images/devtools.jpg";
-import education from "./images/education.jpg";
-import environment from "./images/environment.jpg";
-import heroImg from "./images/hero.jpg";
-import maps from "./images/maps.jpg";
-import music from "./images/music.jpg";
-import productivity from "./images/productivity.jpg";
-import security from "./images/security.jpg";
-import shot1 from "./images/shot-1.jpg";
-import shot2 from "./images/shot-2.jpg";
-import shot3 from "./images/shot-3.jpg";
-import shot4 from "./images/shot-4.jpg";
-import writing from "./images/writing.jpg";
+import ai from "../images/ai.jpg";
+import commerce from "../images/commerce.jpg";
+import community from "../images/community.jpg";
+import data from "../images/data.jpg";
+import devtools from "../images/devtools.jpg";
+import education from "../images/education.jpg";
+import environment from "../images/environment.jpg";
+import heroImg from "../images/hero.jpg";
+import maps from "../images/maps.jpg";
+import music from "../images/music.jpg";
+import productivity from "../images/productivity.jpg";
+import security from "../images/security.jpg";
+import shot1 from "../images/shot-1.jpg";
+import shot2 from "../images/shot-2.jpg";
+import shot3 from "../images/shot-3.jpg";
+import shot4 from "../images/shot-4.jpg";
+import writing from "../images/writing.jpg";
 
 export type CoverTheme =
   | "community"

@@ -10,7 +10,7 @@ import { Avatar, KaryaCover, STAGE_LABELS } from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
 
 /**
- * The Launchpad home (issue #8) — the MockupB treatment of the feed-first
+ * The Launchpad home (issue #8) — the Launchpad-mockup treatment of the feed-first
  * community home: a calm curated "Pilihan inspiratif" strip over a reverse-chron
  * feed of recent posts + new karya. **No ranking, no leaderboard** (FR-22) — the
  * karya leads, nothing is "winning". Reuses `useGetFeatured()` / `useGetFeed()`

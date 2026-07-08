@@ -12,8 +12,9 @@ Run several agents **in parallel, each in its own git worktree** so they never c
 
 - One `Agent` call per direction, `subagent_type: "claude"`, `isolation: "worktree"`, each using the **`frontend-design` skill**.
 - Launch them in a **single message** so they run concurrently.
-- Keep each mockup **self-contained**: import only `react` and `./images` (`coverFor`); hardcode all data inline; copy design tokens/shell verbatim from an existing mockup so every direction renders under identical font/palette rules.
-- Land the results in `apps/mockups/src/` and register each in `main.tsx`'s gallery picker so you can flip between them in one view. (See the existing `MockupB` (Launchpad) + `MockupCari` for the pattern.) When several directions explore the *same* screen, keep them as variants in one file behind a per-screen variant picker — as `MockupCari.tsx` does for the Cari Kolaborator A/B/C/E explorations — sharing one design-token set and font switcher rather than duplicating them per file.
+- Keep each direction **self-contained in its own file**, but **import the shared chrome rather than copying it**: `lib/tokens` (`T`, `eyebrow`), `components/Shell` (background + global stylesheet + left nav), `components/{Avatar,Tag}`, `lib/format`, and `lib/images` (`coverFor`). That way every direction renders under identical font/palette rules without any of them re-declaring tokens. Do **not** re-emit a `<style>` block or re-implement the left nav — `Shell` owns both.
+- Put sample data in `apps/mockups/src/data/`, not inline in the render file. Reuse the canonical domain types there (e.g. `LookingFor` from `data/looking-for.ts`) instead of inventing a per-variant string union; a variant expresses its own vocabulary with a local `Record<LookingFor, string>` label map.
+- Land the results as `apps/mockups/src/screens/<Screen>.tsx` and register each in `main.tsx`'s `SCREENS` map. When several directions explore the *same* screen, give it a folder — `screens/cari/{index.tsx,VariantA.tsx,…}` — where `index.tsx` holds the variant registry + per-screen picker and each variant is its own file. (See `screens/cari/` for the Cari Kolaborator A/B/C/E explorations.)
 
 ## Shared context preamble (paste into every agent)
 

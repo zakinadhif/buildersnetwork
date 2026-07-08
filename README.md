@@ -361,7 +361,7 @@ ansible-playbook -i inventory.ini playbooks/site.yml --ask-vault-pass
 
 ## Design system
 
-Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`MockupB`).
+Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`apps/mockups/src/screens/Launchpad.tsx`).
 
 ---
 

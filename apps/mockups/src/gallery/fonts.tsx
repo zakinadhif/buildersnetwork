@@ -1,9 +1,7 @@
-import { createContext, useContext } from "react";
-
 // ─── Font options ─────────────────────────────────────────────────────────────
-// Shared by every screen. Each mockup applies the chosen fonts to its own design
-// tokens (see useFonts below); the switcher chrome and selection live here so a
-// font change persists as you navigate between screens.
+// Shared by every screen. The selection is published as CSS custom properties on
+// :root (see FontVars); screens read them through T.fontDisplay / T.fontBody, so
+// one switcher hot-swaps fonts everywhere without touching the token object.
 export const DISPLAY_FONTS = [
   { font: "'Lora', serif",             label: "Lora" },
   { font: "'Instrument Serif', serif", label: "Instrument Serif" },
@@ -17,22 +15,11 @@ export const BODY_FONTS = [
   { font: "'Outfit', sans-serif",            label: "Outfit" },
 ] as const;
 
-// ─── Font selection context ───────────────────────────────────────────────────
-export interface FontSelection {
-  displayFont: string;
-  bodyFont:    string;
-}
-
-const FontContext = createContext<FontSelection>({
-  displayFont: DISPLAY_FONTS[0].font,
-  bodyFont:    BODY_FONTS[0].font,
-});
-export const FontProvider = FontContext.Provider;
-
-/** The currently selected display + body font. A screen mutates its own tokens
- *  from these before render, so one switcher hot-swaps fonts everywhere. */
-export function useFonts(): FontSelection {
-  return useContext(FontContext);
+/** Publishes the chosen fonts as the CSS vars that lib/tokens.ts points at. */
+export function FontVars({ displayFont, bodyFont }: { displayFont: string; bodyFont: string }) {
+  return (
+    <style>{`:root { --font-display: ${displayFont}; --font-body: ${bodyFont}; }`}</style>
+  );
 }
 
 // ─── Switcher chrome ──────────────────────────────────────────────────────────
