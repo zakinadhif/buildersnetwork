@@ -15,6 +15,8 @@
 
 import { useState } from "react";
 import { coverFor, covers, screenshots } from "./images";
+import { useNavigate, NAV_SCREEN } from "./gallery";
+import { useFonts } from "./fonts";
 
 // ─── Design Tokens ───────────────────────────────────────────────────────────
 const T = {
@@ -52,19 +54,6 @@ const T = {
   radius: "8px",
   radiusLg: "16px",
 };
-
-const DISPLAY_FONTS = [
-  { font: "'Lora', serif",             label: "Lora" },
-  { font: "'Instrument Serif', serif", label: "Instrument Serif" },
-] as const;
-
-const BODY_FONTS = [
-  { font: "'Plus Jakarta Sans', sans-serif", label: "Plus Jakarta" },
-  { font: "'Figtree', sans-serif",           label: "Figtree" },
-  { font: "'DM Sans', sans-serif",           label: "DM Sans" },
-  { font: "'Manrope', sans-serif",           label: "Manrope" },
-  { font: "'Outfit', sans-serif",            label: "Outfit" },
-] as const;
 
 // ─── Sample Data ─────────────────────────────────────────────────────────────
 interface Roster { name: string; handle: string }
@@ -283,9 +272,9 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
 // ─── Left Nav Rail ─────────────────────────────────────────────────────────────
 type View = "launchpad" | "jelajahi";
 
-const NAV_ITEMS: { label: string; icon: string; view?: View }[] = [
-  { label: "Launchpad", icon: "◈", view: "launchpad" },
-  { label: "Jelajahi Karya", icon: "◉", view: "jelajahi" },
+const NAV_ITEMS: { label: string; icon: string }[] = [
+  { label: "Launchpad", icon: "◈" },
+  { label: "Jelajahi Karya", icon: "◉" },
   { label: "Cari Kolaborator", icon: "◎" },
   { label: "Minat Saya", icon: "◇" },
   { label: "Karya Saya", icon: "◆" },
@@ -293,12 +282,12 @@ const NAV_ITEMS: { label: string; icon: string; view?: View }[] = [
 
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"];
 
-function LeftNav({ view, onNav, activeFilter, onFilter }: {
+function LeftNav({ view, activeFilter, onFilter }: {
   view: View;
-  onNav: (v: View) => void;
   activeFilter: string;
   onFilter: (f: string) => void;
 }) {
+  const navigate = useNavigate();
   return (
     <aside className="bn-nav" style={{
       width: 200,
@@ -317,12 +306,13 @@ function LeftNav({ view, onNav, activeFilter, onFilter }: {
       {/* Nav items */}
       <nav className="bn-nav-items" style={{ marginBottom: 24 }}>
         {NAV_ITEMS.map((item) => {
-          const itemActive = item.view !== undefined && item.view === view;
+          const target = NAV_SCREEN[item.label];
+          const itemActive = target !== undefined && target === view;
           return (
             <button
               key={item.label}
               type="button"
-              onClick={item.view ? () => onNav(item.view as View) : undefined}
+              onClick={target ? () => navigate(target) : undefined}
               aria-current={itemActive ? "page" : undefined}
               style={{
                 display: "flex",
@@ -1244,70 +1234,16 @@ function Jelajahi() {
   );
 }
 
-// ─── Font Tweak Switcher ──────────────────────────────────────────────────────
-function FontSwitcher({ options, activeIdx, onChange }: {
-  options: readonly { font: string; label: string }[];
-  activeIdx: number;
-  onChange: (i: number) => void;
-}) {
-  return (
-    <div
-      role="group"
-      style={{
-        background: T.surface,
-        border: `1px solid ${T.lineDark}`,
-        borderRadius: 99,
-        boxShadow: "0 4px 16px oklch(0% 0 0 / 10%)",
-        display: "flex",
-        padding: 3,
-        gap: 2,
-      }}
-    >
-      {options.map((opt, i) => {
-        const active = i === activeIdx;
-        return (
-          <button
-            key={i}
-            onClick={() => onChange(i)}
-            aria-pressed={active}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 13px",
-              borderRadius: 99,
-              border: "none",
-              background: active ? T.ink : "transparent",
-              color: active ? T.bg : T.ink3,
-              fontFamily: T.fontBody,
-              fontSize: T.size.micro,
-              fontWeight: active ? T.weight.medium : T.weight.regular,
-              cursor: "pointer",
-              letterSpacing: T.track.tag,
-              whiteSpace: "nowrap" as const,
-              transition: "background 0.12s, color 0.12s",
-            }}
-          >
-            <span style={{ fontFamily: opt.font, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
 // ─── Root App ─────────────────────────────────────────────────────────────────
-export default function LaunchpadMockup() {
+export default function LaunchpadMockup({ screen }: { screen: "launchpad" | "jelajahi" }) {
+  const view = screen;
   const [filter, setFilter] = useState("Semua");
-  const [view, setView] = useState<"launchpad" | "jelajahi">("launchpad");
   const [appreciated, setAppreciated] = useState<Set<number>>(new Set());
-  const [displayIdx, setDisplayIdx] = useState(0);
-  const [bodyIdx, setBodyIdx] = useState(0);
 
   // Apply chosen fonts before render — all child refs to T.fontDisplay / T.fontBody pick this up.
-  T.fontDisplay = DISPLAY_FONTS[displayIdx].font;
-  T.fontBody = BODY_FONTS[bodyIdx].font;
+  const { displayFont, bodyFont } = useFonts();
+  T.fontDisplay = displayFont;
+  T.fontBody = bodyFont;
 
   function toggleAppreciate(id: number) {
     setAppreciated((prev) => {
@@ -1387,7 +1323,7 @@ export default function LaunchpadMockup() {
         gap: 24,
         alignItems: "flex-start",
       }}>
-        <LeftNav view={view} onNav={setView} activeFilter={filter} onFilter={setFilter} />
+        <LeftNav view={view} activeFilter={filter} onFilter={setFilter} />
         {view === "launchpad" ? (
           <>
             <CenterFeed filter={filter} appreciated={appreciated} onAppreciate={toggleAppreciate} />
@@ -1396,10 +1332,6 @@ export default function LaunchpadMockup() {
         ) : (
           <Jelajahi />
         )}
-      </div>
-      <div style={{ position: "fixed", bottom: 20, right: 20, zIndex: 100, display: "flex", flexDirection: "column", gap: 8, alignItems: "flex-end" }}>
-        <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={setDisplayIdx} />
-        <FontSwitcher options={BODY_FONTS} activeIdx={bodyIdx} onChange={setBodyIdx} />
       </div>
     </div>
   );

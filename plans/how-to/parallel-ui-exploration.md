@@ -13,7 +13,7 @@ Run several agents **in parallel, each in its own git worktree** so they never c
 - One `Agent` call per direction, `subagent_type: "claude"`, `isolation: "worktree"`, each using the **`frontend-design` skill**.
 - Launch them in a **single message** so they run concurrently.
 - Keep each mockup **self-contained**: import only `react` and `./images` (`coverFor`); hardcode all data inline; copy design tokens/shell verbatim from an existing mockup so every direction renders under identical font/palette rules.
-- Land the results in `apps/mockups/src/` and register each in `main.tsx`'s gallery picker so you can flip between them in one view. (See the existing `MockupB` + `MockupCari{A,B,C,E}` set for the pattern.)
+- Land the results in `apps/mockups/src/` and register each in `main.tsx`'s gallery picker so you can flip between them in one view. (See the existing `MockupB` (Launchpad) + `MockupCari` for the pattern.) When several directions explore the *same* screen, keep them as variants in one file behind a per-screen variant picker — as `MockupCari.tsx` does for the Cari Kolaborator A/B/C/E explorations — sharing one design-token set and font switcher rather than duplicating them per file.
 
 ## Shared context preamble (paste into every agent)
 
