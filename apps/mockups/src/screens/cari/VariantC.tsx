@@ -1,343 +1,47 @@
 /**
- * Al-Fath Berkarya — Cari Kolaborator Mockup C
- * Direction: Reciprocal match ("buat kamu") — personalized matchmaking.
+ * Cari Kolaborator — Variant C · Match
  *
- * Logged-in user: Zaki Nadhif (@zaki_n) · React, TypeScript, UI Design.
- * Center: two clearly-labeled sections —
- *   1. "Karya yang cocok buat kamu"  — karya whose open roles match Zaki's skills.
- *   2. "Orang yang cocok buat karyamu" — people who fill Zaki's karya's open seats.
- * Each card carries a warm "✦ cocok:" reason line. No numeric scores.
- * Right rail: Zaki's own state — editable looking-for badge, skills, his karya's open roles.
- * Hackathon gesture (FR-29): dismissible GEMASTIK 2026 prompt in the center.
- *
- * Self-contained: only imports are React (useState) and ./images (coverFor).
- * Design tokens, helpers, and CSS copied verbatim from MockupB.tsx so all
- * mockups render identically under the same font/palette rules.
+ * Recommendations, both directions: karya whose open roles fit Zaki's skills,
+ * and people whose skills fill the open roles in Zaki's karya. The right rail
+ * shows the inputs that drive both lists.
  */
 
 import { useState } from "react";
-import { coverFor } from "./images";
+import { Avatar } from "../../components/Avatar";
+import { Shell } from "../../components/Shell";
+import { Tag } from "../../components/Tag";
+import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
+import {
+  KARYA_MATCHES,
+  PERSON_MATCHES,
+  ZAKI,
+  ZAKI_KARYA,
+  type KaryaMatch,
+  type PersonMatch,
+} from "../../data/matches";
+import { coverFor } from "../../lib/images";
+import { T, eyebrow } from "../../lib/tokens";
 
-// ─── Design Tokens (verbatim from MockupB.tsx) ────────────────────────────────
-const T = {
-  bg: "oklch(98% 0 0)",              // gallery white (neutral)
-  ink: "oklch(18% 0 0)",             // soft neutral near-black
-  ink2: "oklch(46% 0 0)",            // muted body — ~4.7:1 on white (AA)
-  ink3: "oklch(53% 0 0)",            // meta text — ~5:1 on bg (AA)
-  accent: "oklch(39% 0.085 62)",     // terracotta (kept)
-  accentMid: "oklch(55% 0.085 62)",  // terracotta mid — ~4.7:1 on bg (AA)
-  accentFg: "oklch(99% 0 0)",        // text on accent
-  accentTint: "oklch(95% 0.015 62)", // light terracotta wash — chips, active rows
-  accentLine: "oklch(88% 0.03 62)",  // terracotta-tinted hairline
-  line: "oklch(91% 0 0)",            // neutral hairline
-  lineDark: "oklch(85% 0 0)",
-  surface: "oklch(100% 0 0)",        // pure white lifted card
-  fontDisplay: "'Lora', serif" as string,
-  fontBody: "'Plus Jakarta Sans', sans-serif" as string,
-  size: {
-    micro: 10,
-    caption: 11,
-    ui: 12,
-    body: 13,
-    stat: 15,
-    title: 18,
-    feature: 23,
-    display: 30,
-  },
-  weight: { light: 300, regular: 400, medium: 500, semibold: 600 },
-  track: { wide: "0.08em", tag: "0.02em", tight: "-0.01em" },
-  lh: { tight: 1.15, snug: 1.3, body: 1.55 },
-  radius: "8px",
-  radiusLg: "16px",
+/** This variant's wording for the three FR-29 categories. */
+const BADGE_LABEL: Record<LookingFor, string> = {
+  hackathon: "Tim Event/Hackathon",
+  project:   "Tim Project",
+  gig:       "Talenta/Gig",
 };
-
-const DISPLAY_FONTS = [
-  { font: "'Lora', serif",             label: "Lora" },
-  { font: "'Instrument Serif', serif", label: "Instrument Serif" },
-] as const;
-
-const BODY_FONTS = [
-  { font: "'Plus Jakarta Sans', sans-serif", label: "Plus Jakarta" },
-  { font: "'Figtree', sans-serif",           label: "Figtree" },
-  { font: "'DM Sans', sans-serif",           label: "DM Sans" },
-  { font: "'Manrope', sans-serif",           label: "Manrope" },
-  { font: "'Outfit', sans-serif",            label: "Outfit" },
-] as const;
-
-// ─── Data types ───────────────────────────────────────────────────────────────
-type LookingForType = "Tim Project" | "Tim Event/Hackathon" | "Talenta/Gig";
-
-interface Roster { name: string; handle: string }
-
-interface KaryaMatch {
-  id: number;
-  title: string;
-  description: string;
-  interests: string[];
-  stages: string[];
-  openRoles: string[];       // roles this karya needs filled
-  roster: Roster[];
-  lookingFor: LookingForType;
-  matchReason: string[];     // Zaki's skills that triggered the match
-}
-
-interface PersonMatch {
-  id: number;
-  name: string;
-  handle: string;
-  tingkat: number;
-  jurusan: string;
-  bio: string;
-  skills: string[];
-  lookingFor: LookingForType;
-  currentKarya: string | null;
-  fitsMyKarya: string;       // which of Zaki's karya they'd join
-  fitsRole: string;          // specific open role they'd fill
-  matchReason: string[];     // their skills that match the open role
-}
-
-interface ZakiKarya {
-  id: string;
-  title: string;
-  interests: string[];
-  openRoles: string[];
-}
-
-// ─── Zaki's profile (logged-in user) ─────────────────────────────────────────
-const ZAKI = {
-  name: "Zaki Nadhif",
-  handle: "@zaki_n",
-  tingkat: 3,
-  jurusan: "S1 Teknik Informatika",
-  skills: ["React", "TypeScript", "UI Design"],
-  bio: "Suka desain sistem yang nyaman dipakai orang — dari pixel sampai API.",
-};
-
-// Karya Zaki is already a member of — each has open seats he can't fill himself.
-const ZAKI_KARYA: ZakiKarya[] = [
-  {
-    id: "buku-saku",
-    title: "BukuSaku Kampus",
-    interests: ["Edukasi", "Mobile", "Konten"],
-    openRoles: ["Backend Go", "ML Engineer"],
-  },
-  {
-    id: "study-sync",
-    title: "StudySync",
-    interests: ["Produktivitas", "Web", "Kolaborasi"],
-    openRoles: ["iOS Developer", "UX Researcher"],
-  },
-];
-
-// ─── Karya whose open roles match Zaki's skills ───────────────────────────────
-const KARYA_MATCHES: KaryaMatch[] = [
-  {
-    id: 1,
-    title: "Peta Kost",
-    description: "Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif.",
-    interests: ["Web", "Maps", "Komunitas"],
-    stages: ["Beta"],
-    openRoles: ["1 Frontend React", "1 UI Designer"],
-    roster: [{ name: "Farhan Ardiansyah", handle: "@farhan_a" }],
-    lookingFor: "Tim Project",
-    matchReason: ["React", "UI Design"],
-  },
-  {
-    id: 2,
-    title: "KampusKerja",
-    description: "Platform lowongan magang khusus mahasiswa Telkom — terkoneksi langsung dengan alumni yang sudah bekerja.",
-    interests: ["Karir", "Networking", "Web"],
-    stages: ["Beta"],
-    openRoles: ["1 Frontend Developer", "1 UI Designer"],
-    roster: [
-      { name: "Arief Maulana", handle: "@arief_dev" },
-      { name: "Siti Rahmah",   handle: "@siti_ux" },
-    ],
-    lookingFor: "Tim Project",
-    matchReason: ["React", "TypeScript"],
-  },
-  {
-    id: 3,
-    title: "Warung Digital",
-    description: "Bantu UMKM sekitar kampus punya toko online sederhana — tanpa ribet, cukup WhatsApp.",
-    interests: ["UMKM", "Mobile", "Sosial"],
-    stages: ["Prototype"],
-    openRoles: ["1 UI Designer", "1 Frontend Mobile"],
-    roster: [
-      { name: "Dian Pertiwi",  handle: "@dianp" },
-      { name: "Eko Saputra",   handle: "@eko_s" },
-      { name: "Lina Marlina",  handle: "@linax" },
-    ],
-    lookingFor: "Tim Project",
-    matchReason: ["UI Design"],
-  },
-  {
-    id: 4,
-    title: "Sound Nusantara",
-    description: "Arsip dan label indie musik mahasiswa — upload gratis, lisensi terbuka, dikurasi komunitas.",
-    interests: ["Musik", "Komunitas", "Open Source"],
-    stages: ["Ide"],
-    openRoles: ["1 Web Developer"],
-    roster: [{ name: "Aldi Pratama", handle: "@aldip_music" }],
-    lookingFor: "Tim Event/Hackathon",
-    matchReason: ["React", "TypeScript"],
-  },
-];
-
-// ─── People whose skills fill Zaki's karya's open roles ──────────────────────
-const PERSON_MATCHES: PersonMatch[] = [
-  {
-    id: 1,
-    name: "Eko Saputra",
-    handle: "@eko_s",
-    tingkat: 3,
-    jurusan: "S1 Teknik Informatika",
-    bio: "Backend developer, hobi otomasi hal-hal yang bikin frustrasi.",
-    skills: ["Go", "Docker", "PostgreSQL"],
-    lookingFor: "Tim Project",
-    currentKarya: "Warung Digital",
-    fitsMyKarya: "BukuSaku Kampus",
-    fitsRole: "Backend Go",
-    matchReason: ["Go"],
-  },
-  {
-    id: 2,
-    name: "Rizal Hakim",
-    handle: "@rizalh",
-    tingkat: 4,
-    jurusan: "S1 Teknik Informatika",
-    bio: "ML enthusiast, tertarik pada bahasa daerah dan NLP.",
-    skills: ["Python", "PyTorch", "HuggingFace"],
-    lookingFor: "Tim Project",
-    currentKarya: "Aksara AI",
-    fitsMyKarya: "BukuSaku Kampus",
-    fitsRole: "ML Engineer",
-    matchReason: ["Python", "PyTorch"],
-  },
-  {
-    id: 3,
-    name: "Dian Pertiwi",
-    handle: "@dianp",
-    tingkat: 3,
-    jurusan: "S1 Sistem Informasi",
-    bio: "Senang riset pengguna dan problem-solve bareng komunitas.",
-    skills: ["UX Research", "Figma", "Notion"],
-    lookingFor: "Talenta/Gig",
-    currentKarya: "Warung Digital",
-    fitsMyKarya: "StudySync",
-    fitsRole: "UX Researcher",
-    matchReason: ["UX Research"],
-  },
-  {
-    id: 4,
-    name: "Hendra Wijaya",
-    handle: "@hendraw",
-    tingkat: 2,
-    jurusan: "S1 Teknik Informatika",
-    bio: "iOS developer yang obsesi sama smooth animations dan gesture.",
-    skills: ["Swift", "SwiftUI", "Xcode"],
-    lookingFor: "Tim Event/Hackathon",
-    currentKarya: null,
-    fitsMyKarya: "StudySync",
-    fitsRole: "iOS Developer",
-    matchReason: ["Swift", "SwiftUI"],
-  },
-  {
-    id: 5,
-    name: "Nadia Kusuma",
-    handle: "@nadiaku",
-    tingkat: 2,
-    jurusan: "S1 Desain Komunikasi Visual",
-    bio: "Desainer produk yang juga bisa koding CSS.",
-    skills: ["Figma", "Tailwind", "Vue"],
-    lookingFor: "Tim Project",
-    currentKarya: "BukuSaku Kampus",
-    fitsMyKarya: "StudySync",
-    fitsRole: "UX Researcher",
-    matchReason: ["Figma"],
-  },
-];
-
-// ─── Utilities (verbatim from MockupB.tsx) ────────────────────────────────────
-// Note: relativeTime is omitted here — this surface has no last-activity
-// timestamps on cards, so it would trigger noUnusedLocals. See MockupB.tsx.
-
-function initials(name: string): string {
-  return name.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-}
-
-// Stable pastel hues from a full-string hash (avoids first-letter collisions)
-function avatarColor(name: string): string {
-  const hues = [22, 40, 62, 90, 155, 200, 255, 310];
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0;
-  return `oklch(78% 0.08 ${hues[h % hues.length]})`;
-}
-
-// Shared style for short uppercase eyebrow/section labels.
-const eyebrow = {
-  fontFamily: T.fontBody,
-  fontSize: T.size.micro,
-  fontWeight: T.weight.medium,
-  letterSpacing: T.track.wide,
-  textTransform: "uppercase" as const,
-  color: T.ink3,
-};
-
-// ─── Micro Components (verbatim from MockupB.tsx) ─────────────────────────────
-function Tag({ label, accent }: { label: string; accent?: boolean }) {
-  return (
-    <span style={{
-      display: "inline-block",
-      fontFamily: T.fontBody,
-      fontSize: T.size.micro,
-      letterSpacing: T.track.tag,
-      padding: "1px 7px",
-      borderRadius: "3px",
-      border: `1px solid ${accent ? T.accent : T.line}`,
-      color: accent ? T.accent : T.ink2,
-      backgroundColor: accent ? T.accentTint : "transparent",
-      whiteSpace: "nowrap" as const,
-    }}>{label}</span>
-  );
-}
-
-function Avatar({ name, size = 28 }: { name: string; size?: number }) {
-  return (
-    <span aria-hidden="true" style={{
-      display: "inline-flex",
-      alignItems: "center",
-      justifyContent: "center",
-      width: size,
-      height: size,
-      borderRadius: "50%",
-      backgroundColor: avatarColor(name),
-      color: T.ink,
-      fontFamily: T.fontBody,
-      fontSize: size * 0.36,
-      fontWeight: T.weight.medium,
-      flexShrink: 0,
-      border: `1.5px solid ${T.line}`,
-      userSelect: "none" as const,
-    }}>
-      {initials(name)}
-    </span>
-  );
-}
 
 // ─── Looking-for badge — three types, distinct visual weight ──────────────────
-// Tim Event/Hackathon: filled accent (urgent, time-bound)
-// Tim Project:         tinted accent (steady, open-ended)
-// Talenta/Gig:         neutral (task-scoped, no commitment implied)
-const BADGE_ICON: Record<LookingForType, string> = {
-  "Tim Project":         "◆",
-  "Tim Event/Hackathon": "◎",
-  "Talenta/Gig":         "◇",
+// hackathon: filled accent (urgent, time-bound)
+// project:   tinted accent (steady, open-ended)
+// gig:       neutral (task-scoped, no commitment implied)
+const BADGE_ICON: Record<LookingFor, string> = {
+  project:   "◆",
+  hackathon: "◎",
+  gig:       "◇",
 };
 
-function LookingForBadge({ type }: { type: LookingForType }) {
-  const isEvent   = type === "Tim Event/Hackathon";
-  const isGig     = type === "Talenta/Gig";
+function LookingForBadge({ type }: { type: LookingFor }) {
+  const isEvent = type === "hackathon";
+  const isGig   = type === "gig";
   return (
     <span style={{
       display: "inline-flex",
@@ -355,86 +59,8 @@ function LookingForBadge({ type }: { type: LookingForType }) {
       whiteSpace: "nowrap" as const,
     }}>
       <span aria-hidden="true" style={{ fontSize: 9 }}>{BADGE_ICON[type]}</span>
-      {type}
+      {BADGE_LABEL[type]}
     </span>
-  );
-}
-
-// ─── Left Nav (adapted: "Cari Kolaborator" always active) ────────────────────
-const NAV_ITEMS = [
-  { label: "Launchpad",         icon: "◈" },
-  { label: "Jelajahi Karya",    icon: "◉" },
-  { label: "Cari Kolaborator",  icon: "◎" },
-  { label: "Minat Saya",        icon: "◇" },
-  { label: "Karya Saya",        icon: "◆" },
-];
-
-function LeftNav() {
-  return (
-    <aside className="bn-nav" style={{
-      width: 200,
-      flexShrink: 0,
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: 0,
-      paddingTop: 8,
-    }}>
-      {/* Logo */}
-      <div className="bn-nav-logo" style={{ padding: "0 12px 20px", borderBottom: `1px solid ${T.line}`, marginBottom: 16 }}>
-        <div style={{ ...eyebrow, marginBottom: 4 }}>Al-Fath</div>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, color: T.ink, lineHeight: 1 }}>Berkarya</div>
-      </div>
-
-      {/* Nav items */}
-      <nav className="bn-nav-items" style={{ marginBottom: 24 }}>
-        {NAV_ITEMS.map((item) => {
-          const active = item.label === "Cari Kolaborator";
-          return (
-            <button
-              key={item.label}
-              type="button"
-              aria-current={active ? "page" : undefined}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 10,
-                width: "100%",
-                textAlign: "left" as const,
-                border: "none",
-                padding: "7px 12px",
-                borderRadius: T.radius,
-                backgroundColor: active ? T.accentTint : "transparent",
-                color: active ? T.accent : T.ink2,
-                fontFamily: T.fontBody,
-                fontSize: T.size.body,
-                fontWeight: active ? T.weight.medium : T.weight.regular,
-                cursor: "pointer",
-                marginBottom: 1,
-              }}
-            >
-              <span aria-hidden="true" style={{ fontFamily: T.fontBody, fontSize: T.size.ui }}>{item.icon}</span>
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* User stub at bottom */}
-      <div className="bn-nav-user" style={{
-        marginTop: "auto",
-        borderTop: `1px solid ${T.line}`,
-        padding: "16px 12px 0",
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-      }}>
-        <Avatar name="Zaki Nadhif" size={28} />
-        <div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>Zaki Nadhif</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>@zaki_n</div>
-        </div>
-      </div>
-    </aside>
   );
 }
 
@@ -520,13 +146,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
 }
 
 // ─── Karya Match Card — karya whose open roles fit Zaki's skills ─────────────
-function KaryaMatchCard({
-  karya,
-  requested,
-  onRequest,
-  dmed,
-  onDm,
-}: {
+function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
   karya: KaryaMatch;
   requested: boolean;
   onRequest: () => void;
@@ -672,13 +292,7 @@ function KaryaMatchCard({
 }
 
 // ─── Person Match Card — people who can fill Zaki's karya's open roles ────────
-function PersonMatchCard({
-  person,
-  invited,
-  onInvite,
-  dmed,
-  onDm,
-}: {
+function PersonMatchCard({ person, invited, onInvite, dmed, onDm }: {
   person: PersonMatch;
   invited: boolean;
   onInvite: () => void;
@@ -914,22 +528,13 @@ function CariCenter({
 // ─── Right Rail — Zaki's own matching context ─────────────────────────────────
 // Shows what drives the recommendations: his looking-for status, skills, and
 // the open roles in his karya. Status badge is editable (cycles on click).
-const LOOKING_FOR_OPTIONS: LookingForType[] = [
-  "Tim Project",
-  "Tim Event/Hackathon",
-  "Talenta/Gig",
-];
-
-function ZakiRail({
-  lookingFor,
-  onChangeLookingFor,
-}: {
-  lookingFor: LookingForType;
-  onChangeLookingFor: (t: LookingForType) => void;
+function ZakiRail({ lookingFor, onChangeLookingFor }: {
+  lookingFor: LookingFor;
+  onChangeLookingFor: (t: LookingFor) => void;
 }) {
   function cycleStatus() {
-    const idx = LOOKING_FOR_OPTIONS.indexOf(lookingFor);
-    onChangeLookingFor(LOOKING_FOR_OPTIONS[(idx + 1) % LOOKING_FOR_OPTIONS.length]);
+    const idx = LOOKING_FOR.indexOf(lookingFor);
+    onChangeLookingFor(LOOKING_FOR[(idx + 1) % LOOKING_FOR.length]);
   }
 
   return (
@@ -954,13 +559,13 @@ function ZakiRail({
       }}>
         {/* Avatar + name */}
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Avatar name="Zaki Nadhif" size={40} />
+          <Avatar name={ZAKI.name} size={40} />
           <div>
             <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
-              Zaki Nadhif
+              {ZAKI.name}
             </div>
             <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
-              @zaki_n · Tkt {ZAKI.tingkat}
+              {ZAKI.handle} · Tkt {ZAKI.tingkat}
             </div>
           </div>
         </div>
@@ -973,7 +578,7 @@ function ZakiRail({
           <button
             onClick={cycleStatus}
             title="Klik untuk ganti status"
-            aria-label={`Status: ${lookingFor}. Klik untuk ganti.`}
+            aria-label={`Status: ${BADGE_LABEL[lookingFor]}. Klik untuk ganti.`}
             style={{
               background: "none",
               border: "none",
@@ -1065,64 +670,8 @@ function ZakiRail({
   );
 }
 
-// ─── Font Switcher (verbatim from MockupB.tsx) ────────────────────────────────
-function FontSwitcher({ options, activeIdx, onChange }: {
-  options: readonly { font: string; label: string }[];
-  activeIdx: number;
-  onChange: (i: number) => void;
-}) {
-  return (
-    <div
-      role="group"
-      style={{
-        background: T.surface,
-        border: `1px solid ${T.lineDark}`,
-        borderRadius: 99,
-        boxShadow: "0 4px 16px oklch(0% 0 0 / 10%)",
-        display: "flex",
-        padding: 3,
-        gap: 2,
-      }}
-    >
-      {options.map((opt, i) => {
-        const active = i === activeIdx;
-        return (
-          <button
-            key={i}
-            onClick={() => onChange(i)}
-            aria-pressed={active}
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-              padding: "5px 13px",
-              borderRadius: 99,
-              border: "none",
-              background: active ? T.ink : "transparent",
-              color: active ? T.bg : T.ink3,
-              fontFamily: T.fontBody,
-              fontSize: T.size.micro,
-              fontWeight: active ? T.weight.medium : T.weight.regular,
-              cursor: "pointer",
-              letterSpacing: T.track.tag,
-              whiteSpace: "nowrap" as const,
-              transition: "background 0.12s, color 0.12s",
-            }}
-          >
-            <span style={{ fontFamily: opt.font, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
-            {opt.label}
-          </button>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Root App ─────────────────────────────────────────────────────────────────
-export default function CariKolaboratorMockup() {
-  const [displayIdx,   setDisplayIdx]   = useState(0);
-  const [bodyIdx,      setBodyIdx]      = useState(0);
-  const [lookingFor,   setLookingFor]   = useState<LookingForType>("Tim Project");
+export default function VariantC() {
+  const [lookingFor,    setLookingFor]    = useState<LookingFor>("project");
   const [showHackathon, setShowHackathon] = useState(true);
 
   // Karya interaction state
@@ -1133,108 +682,29 @@ export default function CariKolaboratorMockup() {
   const [invitedPersons, setInvitedPersons] = useState<Set<number>>(new Set());
   const [dmedPersons,    setDmedPersons]    = useState<Set<number>>(new Set());
 
-  // Apply chosen fonts before render — all child refs to T.fontDisplay / T.fontBody pick this up.
-  T.fontDisplay = DISPLAY_FONTS[displayIdx].font;
-  T.fontBody    = BODY_FONTS[bodyIdx].font;
-
-  function toggleRequestKarya(id: number) {
-    setRequestedKarya((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  }
-  function toggleDmKarya(id: number) {
-    setDmedKarya((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  }
-  function toggleInvitePerson(id: number) {
-    setInvitedPersons((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
-  }
-  function toggleDmPerson(id: number) {
-    setDmedPersons((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  function toggle(set: (fn: (prev: Set<number>) => Set<number>) => void, id: number) {
+    set((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
   }
 
   return (
-    <div style={{ backgroundColor: T.bg, minHeight: "100vh", fontFamily: T.fontBody, color: T.ink }}>
-      <style>{`
-        /* Even line breaks on display type; fewer orphans in prose. */
-        h1, h2, h3 { text-wrap: balance; overflow-wrap: break-word; }
-        p { text-wrap: pretty; overflow-wrap: break-word; }
-        /* Visible keyboard focus on every interactive control. */
-        button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
-          outline: 2px solid ${T.accent};
-          outline-offset: 2px;
-          border-radius: ${T.radius};
-        }
-        /* Placeholder held to the body-text contrast bar, not the UA grey. */
-        input::placeholder { color: ${T.ink3}; opacity: 1; }
-        /* Honour reduced-motion: collapse state transitions. */
-        @media (prefers-reduced-motion: reduce) {
-          * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
-        }
-        /* ── Responsive ──────────────────────────────────────────────────────
-           Below ~900px the three columns can't hold their measure. Stack to a
-           single column led by the feed (mobile = consumption view), and
-           fold the left rail into a compact top nav bar. */
-        @media (max-width: 900px) {
-          .bn-shell { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
-          .bn-nav, .bn-main, .bn-rail { width: 100% !important; }
-          .bn-rail { position: static !important; top: auto !important; }
-          .bn-nav {
-            flex-direction: row !important;
-            flex-wrap: wrap;
-            align-items: center;
-            gap: 6px 16px;
-            padding-top: 0 !important;
-            padding-bottom: 14px;
-            border-bottom: 1px solid ${T.line};
-          }
-          .bn-nav-logo { margin: 0 auto 0 0 !important; padding: 0 !important; border-bottom: none !important; }
-          .bn-nav-items { display: flex !important; flex-flow: row wrap; gap: 2px 4px; margin: 0 !important; }
-          .bn-nav-items button { width: auto !important; }
-          .bn-nav-filters, .bn-nav-user { display: none !important; }
-        }
-        /* Comfortable touch targets where the pointer is coarse. */
-        @media (pointer: coarse) {
-          .bn-nav-items button { min-height: 44px; }
-        }
-      `}</style>
-
-      {/* Three-column layout — left nav · center board · right rail */}
-      <div className="bn-shell" style={{
-        maxWidth: 1100,
-        margin: "0 auto",
-        padding: "24px 24px 48px",
-        display: "flex",
-        gap: 24,
-        alignItems: "flex-start",
-      }}>
-        <LeftNav />
-        <CariCenter
-          showHackathon={showHackathon}
-          onDismissHackathon={() => setShowHackathon(false)}
-          requestedKarya={requestedKarya}
-          onRequestKarya={toggleRequestKarya}
-          dmedKarya={dmedKarya}
-          onDmKarya={toggleDmKarya}
-          invitedPersons={invitedPersons}
-          onInvitePerson={toggleInvitePerson}
-          dmedPersons={dmedPersons}
-          onDmPerson={toggleDmPerson}
-        />
-        <ZakiRail lookingFor={lookingFor} onChangeLookingFor={setLookingFor} />
-      </div>
-
-      {/* Font switchers — fixed bottom-right (verbatim from MockupB) */}
-      <div style={{
-        position: "fixed",
-        bottom: 20,
-        right: 20,
-        zIndex: 100,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        alignItems: "flex-end",
-      }}>
-        <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={setDisplayIdx} />
-        <FontSwitcher options={BODY_FONTS}    activeIdx={bodyIdx}    onChange={setBodyIdx}    />
-      </div>
-    </div>
+    <Shell active="cari">
+      <CariCenter
+        showHackathon={showHackathon}
+        onDismissHackathon={() => setShowHackathon(false)}
+        requestedKarya={requestedKarya}
+        onRequestKarya={(id) => toggle(setRequestedKarya, id)}
+        dmedKarya={dmedKarya}
+        onDmKarya={(id) => toggle(setDmedKarya, id)}
+        invitedPersons={invitedPersons}
+        onInvitePerson={(id) => toggle(setInvitedPersons, id)}
+        dmedPersons={dmedPersons}
+        onDmPerson={(id) => toggle(setDmedPersons, id)}
+      />
+      <ZakiRail lookingFor={lookingFor} onChangeLookingFor={setLookingFor} />
+    </Shell>
   );
 }
