@@ -1,8 +1,8 @@
 # Deploy to Coolify / Dokploy
 
 These self-hosting PaaS tools consume `deploy/docker-compose.selfhost.yml`
-directly — Postgres, MinIO, the app, the migration job, and Caddy all come up
-together.
+directly — the app, the migration job, MinIO, and Caddy all come up together.
+The database is a SQLite file on a shared volume; there is no database service.
 
 ## Prerequisites
 - A Coolify or Dokploy instance on your VPS
@@ -15,22 +15,21 @@ together.
 4. Set environment variables in the UI (see [`deploy/.env.example`](../.env.example)):
    - `APP_DOMAIN` — your domain (drives Caddy's auto-TLS)
    - `APP_URL` — `https://<APP_DOMAIN>`
-   - `BETTER_AUTH_SECRET`, `POSTGRES_PASSWORD`
+   - `BETTER_AUTH_SECRET`
    - `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY`, `STORAGE_BUCKET`,
      `STORAGE_REGION`, `STORAGE_FORCE_PATH_STYLE=true`
    - Google OAuth vars if used
 5. Deploy.
 
 The `migrate` service runs `node dist/scripts/migrate.js` once each deploy
-(after Postgres is healthy) and exits. Caddy obtains TLS certificates
-automatically for `APP_DOMAIN`.
+(applying migrations to the SQLite file on the shared volume) and exits. Caddy
+obtains TLS certificates automatically for `APP_DOMAIN`.
 
 ## Notes
 - If you'd rather pull a prebuilt image than build on the box, set `APP_IMAGE`
   to your GHCR image and the compose `build:` blocks are ignored.
-- Only Caddy is exposed (80/443). Postgres and MinIO stay on the internal
-  network.
+- Only Caddy is exposed (80/443). MinIO stays on the internal network.
 
 ## Cost
-- A single small VPS ($5–10/mo) comfortably serves low-thousands MAU since
-  Postgres, storage, and app all share the box.
+- A single small VPS ($5–10/mo) comfortably serves low-thousands MAU since the
+  database (a SQLite file), storage, and app all share the box.

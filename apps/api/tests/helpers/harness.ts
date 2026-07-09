@@ -22,7 +22,7 @@ export type MockUser = { id: string; email: string };
 // ---------------------------------------------------------------------------
 
 /**
- * Returns an object that behaves like a Drizzle (postgres-js) query builder
+ * Returns an object that behaves like a Drizzle (libSQL) query builder
  * result:
  * - Awaitable directly as a list  (`await db.select().from(table)`)
  * - Chainable `.limit(n)`          (`await db.select().from(table).where(...).limit(1)`)

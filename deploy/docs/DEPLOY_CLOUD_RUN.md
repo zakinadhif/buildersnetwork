@@ -4,7 +4,7 @@ Manifest: [`deploy/cloudrun.service.yaml`](../cloudrun.service.yaml)
 
 ## Prerequisites
 - `gcloud` CLI, authenticated, with a project set
-- Cloud SQL (Postgres) or external managed Postgres
+- A managed libSQL/Turso database (`libsql://` URL + auth token)
 - An S3-compatible bucket (R2/B2/S3)
 - Image pushed to a registry (the release workflow pushes to GHCR)
 
@@ -19,7 +19,7 @@ Manifest: [`deploy/cloudrun.service.yaml`](../cloudrun.service.yaml)
      --image ghcr.io/OWNER/comfort-stack:latest \
      --region asia-southeast1 \
      --command node --args dist/scripts/migrate.js \
-     --set-secrets DATABASE_URL=comfort-stack-secrets:DATABASE_URL
+     --set-secrets DATABASE_URL=comfort-stack-secrets:DATABASE_URL,DATABASE_AUTH_TOKEN=comfort-stack-secrets:DATABASE_AUTH_TOKEN
    ```
 
 ## First deploy
@@ -43,6 +43,7 @@ gcloud run services update-traffic comfort-stack \
 
 ## Notes & cost
 - `minScale: "1"` keeps one warm instance (no cold starts). Set `"0"` for
-  scale-to-zero — cheaper but cold starts, and fine because Postgres is external.
-- 100 MAU: scale-to-zero ≈ a few $/mo + Cloud SQL (the Postgres dominates)
-- 1k–10k MAU: ≈ $10–40/mo compute + Cloud SQL tier
+  scale-to-zero — cheaper but cold starts, and fine because the database is
+  external (Turso, reached over HTTPS).
+- 100 MAU: scale-to-zero ≈ a few $/mo; the Turso free tier covers a small app
+- 1k–10k MAU: ≈ $10–40/mo compute + a paid Turso tier

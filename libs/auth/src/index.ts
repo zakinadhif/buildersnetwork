@@ -27,7 +27,7 @@ function createAuth(config?: AuthConfig) {
     secret: config?.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET,
     // biome-ignore lint/suspicious/noExplicitAny: empty object is a CLI-only placeholder; real db is always passed at runtime
     database: drizzleAdapter(config?.db ?? ({} as any), {
-      provider: "pg",
+      provider: "sqlite",
       usePlural: true,
     }),
     emailAndPassword: {

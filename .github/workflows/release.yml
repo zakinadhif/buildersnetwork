@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@v4
 
       # Gate on the Cloudflare creds existing, mirroring the secret-guard idiom
-      # the platform deploys used. Until all three are set the job no-ops.
+      # the platform deploys used. Until both are set the job no-ops. The
+      # database is a D1 binding, so there is no DATABASE_URL secret to guard on.
       - name: Guard on Cloudflare credentials
         id: guard
         run: |
           if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
-            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] \
-            && [ -n "${{ secrets.DATABASE_URL }}" ]; then
+            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -56,13 +56,16 @@ jobs:
         if: steps.guard.outputs.enabled == 'true'
         run: pnpm build:cf
 
-      # Workers can't run migrations themselves — apply them against the prod DB
+      # Workers can't run migrations themselves — apply them to the D1 database
       # before publishing the new code that depends on the migrated schema.
-      - name: Run database migrations
+      # `wrangler d1 migrations apply` reads the same libs/db/migrations dir
+      # (migrations_dir in wrangler.toml) and tracks state in D1's own ledger.
+      - name: Run database migrations (D1)
         if: steps.guard.outputs.enabled == 'true'
-        run: pnpm db:migrate
+        run: pnpm exec wrangler d1 migrations apply buildersnetwork --remote
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
       - name: Deploy Worker
         if: steps.guard.outputs.enabled == 'true'

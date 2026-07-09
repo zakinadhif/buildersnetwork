@@ -8,15 +8,17 @@ import type { Db } from "./index";
 export type AtomicExec = Pick<Db, "insert" | "update" | "delete">;
 
 /**
- * Run a set of write statements atomically, abstracting over the two drivers we
- * ship:
+ * Run a set of write statements atomically, abstracting over how a driver gets
+ * its all-or-nothing guarantee:
  *
- * - `postgres-js` (Node) supports interactive transactions → wrap in
- *   `transaction()`.
- * - `neon-http` (Cloudflare Workers) has *no* interactive transactions — calling
- *   `transaction()` throws "No transactions support in neon-http driver". Its
- *   `batch()` runs the queries in a single implicit transaction, so we use that
- *   for the same all-or-nothing guarantee.
+ * - Drivers exposing `batch()` (both the ones we ship — `libsql` on Node and
+ *   `d1` on Cloudflare Workers) run the queries in a single implicit
+ *   transaction. D1 has no interactive transactions at all, so this is the only
+ *   path there.
+ * - Anything else falls back to an interactive `transaction()`. Note this
+ *   requires a driver whose `transaction()` awaits an async callback; a
+ *   *synchronous* one (e.g. `better-sqlite3`, whose native `transaction()`
+ *   rejects a promise-returning function) will not work here.
  *
  * `build` must return statements that don't depend on one another's results —
  * resolve any reads *before* calling this (see `resolveInterestIds`). That's what
@@ -26,7 +28,7 @@ export async function atomicWrite(
   db: Db,
   build: (e: AtomicExec) => unknown[],
 ): Promise<void> {
-  // Only the neon-http driver exposes `batch`; postgres-js does not.
+  // Both shipped drivers (libsql, d1) expose `batch`.
   const batch = (db as { batch?: unknown }).batch;
   if (typeof batch === "function") {
     const stmts = build(db as AtomicExec);

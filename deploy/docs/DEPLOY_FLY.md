@@ -4,7 +4,7 @@ Manifest: [`deploy/fly.toml`](../fly.toml)
 
 ## Prerequisites
 - `flyctl` installed and `fly auth login`
-- A managed Postgres (Neon/Supabase) connection string, or `fly postgres create`
+- A managed libSQL/Turso database — its `libsql://` URL and `DATABASE_AUTH_TOKEN`
 - An S3-compatible bucket (see [STORAGE_PROVIDERS.md](./STORAGE_PROVIDERS.md))
 
 ## Initial setup
@@ -14,7 +14,7 @@ fly launch --no-deploy --copy-config --dockerfile deploy/Dockerfile
 
 fly secrets set \
   APP_URL=https://<app>.fly.dev \
-  DATABASE_URL=postgres://... \
+  DATABASE_URL=libsql://... DATABASE_AUTH_TOKEN=... \
   BETTER_AUTH_SECRET=$(openssl rand -base64 32) \
   STORAGE_ENDPOINT=... STORAGE_REGION=... STORAGE_BUCKET=... \
   STORAGE_ACCESS_KEY=... STORAGE_SECRET_KEY=... STORAGE_FORCE_PATH_STYLE=false
@@ -38,6 +38,6 @@ fly deploy --image <previous-image-ref>   # or `fly releases rollback`
 ```
 
 ## Cost (rough)
-- 100 MAU: 1 shared-cpu-1x / 512MB ≈ free–$5/mo + managed Postgres
-- 1k MAU: same machine, maybe 2 for HA ≈ $5–15/mo + Postgres
-- 10k MAU: 2–3 machines + larger Postgres ≈ $30–60/mo
+- 100 MAU: 1 shared-cpu-1x / 512MB ≈ free–$5/mo; Turso free tier covers it
+- 1k MAU: same machine, maybe 2 for HA ≈ $5–15/mo + Turso
+- 10k MAU: 2–3 machines ≈ $30–60/mo + a paid Turso tier

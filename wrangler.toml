@@ -3,11 +3,13 @@
 # then deploy with `wrangler deploy`.
 #
 # Secrets (never commit these) — set via:
-#   wrangler secret put DATABASE_URL
 #   wrangler secret put BETTER_AUTH_SECRET
 #   wrangler secret put ANTHROPIC_API_KEY   # not needed when AI_PROVIDER=workers-ai
 #   wrangler secret put RESEND_API_KEY      # optional — sends email via Resend
 #                                           # instead of the [[send_email]] binding
+#
+# The database is a D1 binding, not a connection string — there is no
+# DATABASE_URL secret in the Worker.
 
 name = "buildersnetwork"
 main = "apps/api/src/worker.ts"
@@ -32,6 +34,16 @@ binding = "ASSETS"
 # Workers AI — free daily quota for inference.
 [ai]
 binding = "AI"
+
+# D1 — the SQLite database. Create it once before deploying:
+#   wrangler d1 create buildersnetwork
+# then paste the returned database_id below. Apply migrations with:
+#   wrangler d1 migrations apply buildersnetwork --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "buildersnetwork"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+migrations_dir = "libs/db/migrations"
 
 # R2 bucket for uploads (karya cover images, issue #18). Create the bucket once
 # before deploying:  wrangler r2 bucket create buildersnetwork-uploads

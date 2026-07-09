@@ -11,22 +11,6 @@ jobs:
     name: Lint · Type-check · E2E
     runs-on: ubuntu-latest
 
-    services:
-      # Clean, empty Postgres for the from-scratch migration check below.
-      postgres:
-        image: postgres:16-alpine
-        env:
-          POSTGRES_USER: comfort
-          POSTGRES_PASSWORD: comfort
-          POSTGRES_DB: comfort
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U comfort -d comfort"
-          --health-interval 5s
-          --health-timeout 5s
-          --health-retries 10
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -70,14 +54,13 @@ jobs:
           fi
 
       # Prove the generated migrations apply cleanly from an empty database —
-      # validates SQL/ordering/FKs that db:push never exercises locally.
+      # validates SQL/ordering/FKs that db:push never exercises locally. The
+      # target is a throwaway local SQLite file (drizzle-kit runs in libs/db);
+      # no database service to stand up.
       - name: Verify migrations apply on a clean database
         run: pnpm db:migrate
         env:
-          # 127.0.0.1, not localhost: on the runner `localhost` can resolve to
-          # IPv6 (::1) first, but the Postgres service only publishes on IPv4 —
-          # postgres-js then hits ECONNREFUSED. Forcing IPv4 avoids that.
-          DATABASE_URL: postgres://comfort:comfort@127.0.0.1:5432/comfort
+          DATABASE_URL: file:./ci-verify.db
 
       - name: Unit tests — api
         run: pnpm test:api

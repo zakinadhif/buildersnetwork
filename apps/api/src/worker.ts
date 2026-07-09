@@ -1,26 +1,30 @@
 import { createWorkersAI, type WorkersAIBinding } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
-import { createDb, type Db } from "@myapp/db";
+import type { Db } from "@myapp/db";
+import * as schema from "@myapp/db/schema";
 import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
 import { createR2Storage } from "@myapp/storage";
+import { drizzle } from "drizzle-orm/d1";
 
 import { type AppServices, createApp } from "./app";
 import { selectEmail } from "./lib/email";
 
 // Cloudflare Workers environment bindings + secrets.
-// Secrets (DATABASE_URL, BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
+// Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
 interface Env {
   // Workers Assets binding (configured in wrangler.toml)
   ASSETS: Fetcher;
   // Workers AI binding (configured in wrangler.toml)
   AI: WorkersAIBinding;
+  // D1 database binding (configured in wrangler.toml as [[d1_databases]]).
+  // Replaces the old DATABASE_URL secret — there is no connection string.
+  DB: D1Database;
   // Cloudflare Email Service binding (configured in wrangler.toml) — default sender.
   // Optional — absent (and no RESEND_API_KEY) → email is suppressed, not sent.
   // Preview environments omit the [[send_email]] entry to disable delivery.
   EMAIL?: WorkersEmailBinding;
   // Vars / secrets
   APP_URL: string;
-  DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   // Optional: set via `wrangler secret put RESEND_API_KEY` to send via Resend
   // instead of the Cloudflare Email Service binding.
@@ -44,7 +48,10 @@ let services: AppServices | null = null;
 function getServices(env: Env): AppServices {
   if (services) return services;
 
-  const db = createDb(env.DATABASE_URL, "neon-http") as unknown as Db;
+  // D1 speaks the same SQLite dialect as the libSQL client `createDb` builds for
+  // Node, and exposes `batch()` too — so `atomicWrite` and every query work
+  // unchanged. The cast bridges the two drivers' nominally distinct types.
+  const db = drizzle(env.DB, { schema }) as unknown as Db;
   const auth = createAuth({
     db,
     GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
