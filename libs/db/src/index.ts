@@ -44,4 +44,10 @@ export { dedupeBySlug, slugifyInterest } from "./interests";
 export { KARYA_STAGES, type KaryaStage, normalizeStages } from "./karya";
 export { normalizePostKind, POST_KINDS, type PostKind } from "./posts";
 export type { SeedContext, SeedDb, Seeder } from "./seed";
-export { runSeedCli, seeders } from "./seed";
+export {
+  buildSeedCredentialAccounts,
+  runSeedCli,
+  SEED_PASSWORD,
+  SEED_USERS,
+  seeders,
+} from "./seed";

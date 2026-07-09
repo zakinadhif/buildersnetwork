@@ -18,4 +18,11 @@ export const seeders: readonly Seeder[] = [
 ];
 
 export { runSeedCli } from "./runner";
+// Exported so tests can exercise the real seeded credentials rather than a
+// hand-copied fixture that could drift from what the seeder actually writes.
+export {
+  buildSeedCredentialAccounts,
+  SEED_PASSWORD,
+  SEED_USERS,
+} from "./seeders/members";
 export type { SeedContext, SeedDb, Seeder } from "./types";
