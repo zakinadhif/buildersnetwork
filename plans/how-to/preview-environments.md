@@ -50,7 +50,7 @@ Preview omits bindings rather than redirecting them.
 
 | Concern | Mechanism | Why nothing to build |
 |---|---|---|
-| Email | Omit `[[send_email]]`, omit `RESEND_API_KEY` | `apps/api/src/index.ts` already falls back to `createNoopEmail()`. `worker.ts` does not — that fallback is the one gap. |
+| Email | Omit `[[send_email]]`, omit `RESEND_API_KEY` | Both entrypoints fall back to `createNoopEmail()`: `apps/api/src/index.ts` always did; the Worker path was closed in [#42](https://github.com/zakinadhif/buildersnetwork/issues/42) (`apps/api/src/lib/email.ts`). |
 | Google OAuth | Omit `GOOGLE_CLIENT_ID` | `libs/auth/src/index.ts` only enables `socialProviders` when it is present. No per-PR redirect URI to register. |
 | R2 uploads | Omit the `UPLOADS` binding | `apps/api/src/routes/karya.ts` already returns `503` when storage is absent. |
 | Auth secret | Preview-only `BETTER_AUTH_SECRET` | Never the production value. |

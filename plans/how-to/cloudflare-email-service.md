@@ -3,9 +3,10 @@
 Beta transactional email service built into Cloudflare Workers. No third-party SDK needed.
 
 > **Heads up:** the Worker uses this binding *by default*, but it switches to
-> [Resend](https://resend.com) when a `RESEND_API_KEY` secret is set (see
-> `apps/api/src/worker.ts`). This doc covers the Cloudflare-native path; for the
-> Resend path see `libs/email/src/resend.ts` and `DEPLOY_CLOUDFLARE.md`.
+> [Resend](https://resend.com) when a `RESEND_API_KEY` secret is set, and falls
+> back to a no-op provider when neither is configured (see `selectEmail` in
+> `apps/api/src/lib/email.ts`). This doc covers the Cloudflare-native path; for
+> the Resend path see `libs/email/src/resend.ts` and `DEPLOY_CLOUDFLARE.md`.
 
 ## Two integration methods
 
