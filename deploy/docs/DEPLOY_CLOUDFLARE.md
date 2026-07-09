@@ -36,7 +36,7 @@ wrangler secret put APP_URL             # https://yourapp.workers.dev
 wrangler secret put GOOGLE_CLIENT_ID
 wrangler secret put GOOGLE_CLIENT_SECRET
 wrangler secret put ALLOWED_ORIGINS     # comma-separated if needed
-wrangler secret put RESEND_API_KEY      # send email via Resend instead of the [[send_email]] binding
+wrangler secret put RESEND_API_KEY      # the live email sender (Resend) — [[send_email]] needs Workers Paid
 ```
 
 There is no `DATABASE_URL` secret — the Worker reaches the database through the
@@ -44,12 +44,14 @@ D1 binding (`env.DB`) declared in `wrangler.toml`.
 
 ### Email
 
-By default the Worker sends transactional email (the OTP code) through the
-Cloudflare Email Service `[[send_email]]` binding in `wrangler.toml`, which
-requires the Workers Paid plan and a sender domain verified via Email Routing.
-Set the `RESEND_API_KEY` secret to send through [Resend](https://resend.com)
-instead — the Worker detects the key at startup and switches providers, no
-config change needed.
+This deployment sends transactional email (the OTP code) through
+[Resend](https://resend.com) — set the `RESEND_API_KEY` secret. The Worker's
+provider chain prefers Resend, then the Cloudflare Email Service `[[send_email]]`
+binding, then a no-op. The `[[send_email]]` binding in `wrangler.toml` requires
+the Workers Paid plan (a sender domain verified via Email Routing); the account
+is on the free tier, so that binding is dormant and Resend is the live sender.
+The Worker detects `RESEND_API_KEY` at startup and selects providers — no config
+change needed.
 
 The sender address comes from the `EMAIL_FROM` var in `wrangler.toml` (override
 per-deploy with `wrangler secret put EMAIL_FROM` if you'd rather not commit it);

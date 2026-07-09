@@ -242,7 +242,7 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
 | `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
 | `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-4-scout-17b-16e-instruct`) |
-| `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker; on Cloudflare, overrides the `[[send_email]]` binding when set) |
+| `RESEND_API_KEY` | Resend email API key — the live email sender in production (the `[[send_email]]` binding needs Workers Paid and is dormant on the free tier). Also the email path for Node.js / Docker. |
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
 | `EMAIL_FROM` | Sender address for outgoing email (default: `Al-Fath Berkarya <noreply@buildersnetwork.web.id>`); domain must be verified with the active provider |
@@ -280,7 +280,7 @@ wrangler login
 wrangler d1 create buildersnetwork   # once — paste the database_id into wrangler.toml
 wrangler secret put BETTER_AUTH_SECRET
 wrangler secret put APP_URL
-wrangler secret put RESEND_API_KEY   # optional — send via Resend instead of the [[send_email]] binding
+wrangler secret put RESEND_API_KEY   # the live email sender ([[send_email]] needs Workers Paid; dormant on free tier)
 pnpm cf:deploy
 ```
 
