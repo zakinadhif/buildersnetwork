@@ -11,7 +11,8 @@ calling App Runner.
 ## Prerequisites
 - `aws` CLI, authenticated to the target account/region
 - An ECR repo: `aws ecr create-repository --repository-name comfort-stack`
-- A managed Postgres (RDS, Neon, Supabase) reachable from App Runner
+- A managed libSQL/Turso database — its `libsql://` URL and auth token
+  (`DATABASE_URL` + `DATABASE_AUTH_TOKEN`). Reached over HTTPS, so no VPC.
 - An S3 bucket (App Runner can use the same AWS account's S3 via IAM, or any
   S3-compatible provider via `STORAGE_*`)
 - Two IAM roles (one-time setup):
@@ -24,7 +25,8 @@ calling App Runner.
 
 ## Initial setup
 1. Create one Secrets Manager secret per env var, named `comfort-stack/<NAME>`
-   (e.g. `comfort-stack/DATABASE_URL`). The manifest references them by ARN.
+   (e.g. `comfort-stack/DATABASE_URL` and `comfort-stack/DATABASE_AUTH_TOKEN`).
+   The manifest references them by ARN.
 2. Edit `deploy/apprunner.json`: replace every `ACCOUNT_ID` and `REGION`
    placeholder with your values. The `ImageIdentifier` must point at your ECR
    repo.
@@ -42,9 +44,10 @@ calling App Runner.
 Run the migration once against your production database, then create the
 service:
 ```bash
-# Migrate (run from anywhere with DATABASE_URL set — production credentials)
+# Migrate (run from anywhere with the Turso credentials set)
 docker run --rm \
   -e DATABASE_URL="$DATABASE_URL" \
+  -e DATABASE_AUTH_TOKEN="$DATABASE_AUTH_TOKEN" \
   "$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/comfort-stack:latest" \
   node dist/scripts/migrate.js
 
@@ -62,7 +65,7 @@ Push to `main` with `AWS_ROLE_TO_ASSUME` (OIDC) and `AWS_REGION` set as repo
 secrets, plus `APP_RUNNER_SERVICE_ARN`. `.github/workflows/release.yml` will:
 1. mirror the GHCR image into ECR,
 2. run `node dist/scripts/migrate.js` via `docker run` against the production
-   `DATABASE_URL`,
+   Turso database (`DATABASE_URL` + `DATABASE_AUTH_TOKEN`),
 3. call `aws apprunner start-deployment` to roll the service forward.
 
 Or manually:
@@ -91,8 +94,8 @@ aws apprunner start-deployment --service-arn "$APP_RUNNER_SERVICE_ARN"
 - Min instances default to 1 (no scale-to-zero on App Runner — there is a
   "paused" mode you can toggle, but that is not request-driven). Set `Cpu` /
   `Memory` in the manifest (`512`/`1024`, `1024`/`2048`, `2048`/`4096`, ...).
-- Connecting to RDS in a private VPC requires an
-  [App Runner VPC connector](https://docs.aws.amazon.com/apprunner/latest/dg/network-vpc.html);
-  swap `EgressType` to `VPC` and add `VpcConnectorArn`.
-- 100 MAU: 1 vCPU / 2 GB ≈ $25–45/mo + RDS (Postgres dominates)
-- 1k–10k MAU: ≈ $50–150/mo compute + RDS tier
+- Turso is a public HTTPS endpoint, so no VPC connector is needed — leave
+  `EgressType` at `DEFAULT`. (A VPC connector is only relevant if you point
+  `DATABASE_URL` at a database inside a private VPC instead.)
+- 100 MAU: 1 vCPU / 2 GB ≈ $25–45/mo; the Turso free tier covers a small app
+- 1k–10k MAU: ≈ $50–150/mo compute + a paid Turso tier

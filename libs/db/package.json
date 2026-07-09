@@ -17,10 +17,9 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4",
+    "@libsql/client": "^0.17.4",
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
-    "postgres": "^3.4.5",
     "zod": "catalog:"
   },
   "devDependencies": {

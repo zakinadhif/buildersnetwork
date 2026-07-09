@@ -49,6 +49,12 @@ spec:
                 secretKeyRef:
                   name: comfort-stack-secrets
                   key: DATABASE_URL
+            # Only needed when DATABASE_URL is a remote libsql:// (Turso) URL.
+            - name: DATABASE_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: comfort-stack-secrets
+                  key: DATABASE_AUTH_TOKEN
             - name: BETTER_AUTH_SECRET
               valueFrom:
                 secretKeyRef:

@@ -5,6 +5,12 @@
     state: directory
     mode: "0755"
 
+- name: Create SQLite data directory
+  file:
+    path: /opt/{{ app_name }}/data
+    state: directory
+    mode: "0700"
+
 - name: Template env file
   template:
     src: env.j2
@@ -18,16 +24,8 @@
     force_source: true
   when: api_image is defined
 
-- name: Run API container
-  community.docker.docker_container:
-    name: "{{ app_name }}-api"
-    image: "{{ api_image | default(app_name + '-api:latest') }}"
-    state: started
-    restart_policy: unless-stopped
-    env_file: /opt/{{ app_name }}/.env
-    ports:
-      - "{{ api_port }}:8080"
-
+# Migrate first so the SQLite file on the shared volume has its schema before
+# the API container starts serving against it.
 - name: Run database migrations
   community.docker.docker_container:
     name: "{{ app_name }}-migrate"
@@ -36,6 +34,8 @@
     restart_policy: "no"
     env_file: /opt/{{ app_name }}/.env
     command: node dist/scripts/migrate.js
+    volumes:
+      - /opt/{{ app_name }}/data:/data
   register: migrate_result
 
 - name: Wait for migrations to complete
@@ -45,3 +45,15 @@
   until: migrate_info.container.State.Status != 'running'
   retries: 30
   delay: 5
+
+- name: Run API container
+  community.docker.docker_container:
+    name: "{{ app_name }}-api"
+    image: "{{ api_image | default(app_name + '-api:latest') }}"
+    state: started
+    restart_policy: unless-stopped
+    env_file: /opt/{{ app_name }}/.env
+    ports:
+      - "{{ api_port }}:8080"
+    volumes:
+      - /opt/{{ app_name }}/data:/data

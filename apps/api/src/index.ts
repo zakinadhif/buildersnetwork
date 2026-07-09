@@ -17,7 +17,9 @@ import { createApp } from "./app";
 
 const config = loadConfig();
 
-const db = createDb(config.DATABASE_URL);
+const db = createDb(config.DATABASE_URL, {
+  authToken: config.DATABASE_AUTH_TOKEN,
+});
 const auth = createAuth({
   db,
   GOOGLE_CLIENT_ID: config.GOOGLE_CLIENT_ID,

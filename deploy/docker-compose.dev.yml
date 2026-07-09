@@ -1,32 +1,16 @@
-# Local development backing services: Postgres + MinIO (S3-compatible).
-# Run the app itself with `pnpm dev:api` / `pnpm dev:app` against these.
+# Local development backing service: MinIO (S3-compatible object storage).
+# The database is a local SQLite file — no container to run. Create it with
+# `pnpm db:migrate && pnpm db:seed`; DATABASE_URL defaults to a `file:` URL.
 #
 #   docker compose -f deploy/docker-compose.dev.yml up -d
 #
 # Then in apps/api/.env:
-#   DATABASE_URL=postgres://comfort:comfort@localhost:5432/comfort
+#   DATABASE_URL=file:../../libs/db/local.db
 #   STORAGE_ENDPOINT=http://localhost:9000  (access/secret = minioadmin)
 
 name: comfort-dev
 
 services:
-  postgres:
-    image: postgres:16-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: comfort
-      POSTGRES_PASSWORD: comfort
-      POSTGRES_DB: comfort
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U comfort -d comfort"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   minio:
     image: minio/minio
     restart: unless-stopped
@@ -59,5 +43,4 @@ services:
       "
 
 volumes:
-  pgdata:
   miniodata:

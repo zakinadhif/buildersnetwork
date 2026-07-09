@@ -21,8 +21,16 @@ const schema = z.object({
   /** Public base URL the app is served from (used for auth callbacks, links). */
   APP_URL: z.string().url(),
 
-  // --- Database (Postgres wire protocol) ---
-  DATABASE_URL: z.string().url(),
+  // --- Database (libSQL / SQLite) ---
+  /**
+   * A libSQL URL: `file:./local.db` for an on-disk SQLite file, `:memory:` for
+   * tests, `libsql://…` for a remote Turso database. Not validated with
+   * `.url()`: `:memory:` is not a URL, and a relative `file:` path is easy to
+   * write in a form `new URL()` rejects.
+   */
+  DATABASE_URL: z.string().min(1),
+  /** Turso auth token. Only needed when DATABASE_URL is a remote `libsql://`. */
+  DATABASE_AUTH_TOKEN: z.string().optional(),
 
   // --- Storage (S3-compatible: AWS S3, Cloudflare R2, Backblaze B2, MinIO) ---
   // Optional as a group: omit to run without object storage (e.g. local dev
