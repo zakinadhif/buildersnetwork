@@ -2,16 +2,12 @@ import { createWorkersAI, type WorkersAIBinding } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import type { Db } from "@myapp/db";
 import * as schema from "@myapp/db/schema";
-import {
-  createResendEmail,
-  createWorkersEmail,
-  DEFAULT_EMAIL_FROM,
-  type WorkersEmailBinding,
-} from "@myapp/email";
+import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
 import { createR2Storage } from "@myapp/storage";
 import { drizzle } from "drizzle-orm/d1";
 
 import { type AppServices, createApp } from "./app";
+import { selectEmail } from "./lib/email";
 
 // Cloudflare Workers environment bindings + secrets.
 // Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
@@ -24,7 +20,9 @@ interface Env {
   // Replaces the old DATABASE_URL secret — there is no connection string.
   DB: D1Database;
   // Cloudflare Email Service binding (configured in wrangler.toml) — default sender.
-  EMAIL: WorkersEmailBinding;
+  // Optional — absent (and no RESEND_API_KEY) → email is suppressed, not sent.
+  // Preview environments omit the [[send_email]] entry to disable delivery.
+  EMAIL?: WorkersEmailBinding;
   // Vars / secrets
   APP_URL: string;
   BETTER_AUTH_SECRET: string;
@@ -62,11 +60,7 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
-  // Default to the Cloudflare Email Service binding; switch to Resend when a
-  // RESEND_API_KEY secret is present.
-  const email = env.RESEND_API_KEY
-    ? createResendEmail({ apiKey: env.RESEND_API_KEY })
-    : createWorkersEmail(env.EMAIL);
+  const email = selectEmail(env);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
     ? env.ALLOWED_ORIGINS.split(",")

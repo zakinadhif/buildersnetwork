@@ -201,7 +201,7 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm db:migrate` | Apply migration files to `DATABASE_URL` (the deploy-step runner) |
 | `pnpm db:check` | Verify every migration `.sql` is registered in the journal (no DB needed) |
 | `pnpm db:studio` | Open Drizzle Studio |
-| `pnpm db:seed` | Run seeders against `DATABASE_URL` |
+| `pnpm db:seed` | Run seeders against `DATABASE_URL` (see [Seed accounts](#seed-accounts)) |
 | `pnpm format` | Format with Biome |
 | `pnpm lint` | Lint with Biome |
 | `pnpm test:db` | Run `@myapp/db` Vitest unit tests (pure helpers, no DB) |
@@ -210,6 +210,16 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm test:e2e` | Run Playwright e2e tests |
 | `pnpm build:frontend` | Build SPA + landing (runs codegen first) |
 | `pnpm cf:deploy` | Build everything and deploy to Cloudflare Workers |
+
+### Seed accounts
+
+`pnpm db:seed` creates five members with Better Auth `emailAndPassword` credentials, so you can sign in immediately in local dev or a preview environment:
+
+| Email | Password |
+|---|---|
+| `hafiz@seed.local`, `fatimah@seed.local`, `rizal@seed.local`, `dinda@seed.local`, `arya@seed.local` | `seedpassword123` |
+
+The password is not a secret — seed data is for local dev and previews only, and the seed runner refuses to run under `NODE_ENV=production` without `--force`. Re-running the seeder is idempotent.
 
 ---
 

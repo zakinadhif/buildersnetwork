@@ -27,6 +27,7 @@
   "devDependencies": {
     "@cloudflare/workers-types": "^4.20250525.0",
     "@types/node": "catalog:",
+    "better-auth": "^1.5.5",
     "tsup": "^8.5.0",
     "tsx": "^4.19.4",
     "vitest": "^3.2.4",
