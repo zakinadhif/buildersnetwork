@@ -1,15 +1,60 @@
+import { hashPassword } from "better-auth/crypto";
 import { inArray } from "drizzle-orm";
 import { dedupeBySlug, slugifyInterest } from "../../interests";
-import { interests, profiles, userInterests, users } from "../../schema";
+import {
+  accounts,
+  interests,
+  profiles,
+  userInterests,
+  users,
+} from "../../schema";
 import type { Seeder } from "../types";
 
-const SEED_USERS = [
+export const SEED_USERS = [
   { id: "seed_m1", name: "Hafiz Maulana", email: "hafiz@seed.local" },
   { id: "seed_m2", name: "Fatimah Zahra", email: "fatimah@seed.local" },
   { id: "seed_m3", name: "Rizal Anwar", email: "rizal@seed.local" },
   { id: "seed_m4", name: "Dinda Pratiwi", email: "dinda@seed.local" },
   { id: "seed_m5", name: "Arya Kusuma", email: "arya@seed.local" },
 ];
+
+/**
+ * Password for every seeded account. Deliberately not a secret: seed data is
+ * for local dev and per-PR preview environments, where reviewers need a known
+ * way in. `runner.ts` refuses to run under NODE_ENV=production without
+ * `--force`, so these known-password accounts can't reach prod by accident.
+ */
+export const SEED_PASSWORD = "seedpassword123";
+
+/**
+ * Better Auth credential rows for the seed users — without these, a seeded
+ * user has no password to verify against and `emailAndPassword` sign-in fails.
+ *
+ * Shape mirrors what Better Auth's own sign-up writes: `providerId:
+ * "credential"` (what sign-in looks up by) and `accountId` set to the user id.
+ * Hashing goes through `better-auth/crypto`'s `hashPassword` because that is
+ * the default `verify` counterpart Better Auth uses at sign-in — a hand-rolled
+ * scheme would store a hash that silently never verifies.
+ *
+ * Ids are deterministic (not `randomUUID`) so re-running the seeder conflicts
+ * on the primary key and no-ops, rather than piling up duplicate credentials.
+ */
+export async function buildSeedCredentialAccounts() {
+  // One hash reused across all five: the password is identical and public, so
+  // per-row salts would buy nothing but seed time.
+  const password = await hashPassword(SEED_PASSWORD);
+  return SEED_USERS.map((u) => ({
+    id: `seed_acct_${u.id}`,
+    accountId: u.id,
+    providerId: "credential",
+    userId: u.id,
+    password,
+    // `accounts.updated_at` is NOT NULL with no DB default (unlike
+    // `users.updated_at`), and `$onUpdate` only fires on UPDATE — so an insert
+    // has to supply it explicitly.
+    updatedAt: new Date(),
+  }));
+}
 
 // Interests are kept here for linking but stored normalized (see `run`), not as
 // a column on `profiles`. Some names overlap the curated starter list (reused
@@ -83,6 +128,12 @@ export const memberSeeder: Seeder = {
     await db
       .insert(users)
       .values(SEED_USERS.map((u) => ({ ...u, emailVerified: true })))
+      .onConflictDoNothing();
+
+    log("inserting seed credential accounts…");
+    await db
+      .insert(accounts)
+      .values(await buildSeedCredentialAccounts())
       .onConflictDoNothing();
 
     log("inserting seed profiles…");

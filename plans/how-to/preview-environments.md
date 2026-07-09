@@ -63,7 +63,9 @@ Worth stating plainly, because it is easy to get backwards.
 
 `apps/api/src/routes/otp.ts` is a custom route, not Better Auth. Its `/verify` sets `emailVerified: true` and **never creates a session** — it is a signup step, not a login path. Actual login is Better Auth `emailAndPassword`.
 
-So preview login needs **no email delivery at all**, which is why the noop provider suffices. What it does need: the seeder currently inserts users with no `accounts` rows, meaning no password credential, meaning **seeded users cannot log in**. Seeding Better Auth `accounts` rows with hashed passwords is the real prerequisite.
+So preview login needs **no email delivery at all**, which is why the noop provider suffices. What it did need was the credential itself: the seeder used to insert users with no `accounts` rows, meaning no password, meaning seeded users could not log in. Resolved in [#43](https://github.com/zakinadhif/buildersnetwork/issues/43) — `seeders/members.ts` now writes a `providerId: "credential"` account per seed user, hashed with `better-auth/crypto`'s `hashPassword` (the same function Better Auth verifies against).
+
+Sign in to a preview as any seed user — `hafiz@seed.local`, `fatimah@seed.local`, `rizal@seed.local`, `dinda@seed.local`, `arya@seed.local` — with the password `seedpassword123`. It is not a secret: preview databases hold only seed data, and the seed runner refuses to run under `NODE_ENV=production` without `--force`.
 
 Exercising the OTP *signup* flow inside a preview would require reading the code back out of the `verifications` table. Deferred.
 

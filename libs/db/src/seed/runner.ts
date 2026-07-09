@@ -46,6 +46,18 @@ Examples:
   pnpm db:seed -- --only items
   pnpm db:seed -- --reset --yes
   pnpm db:seed -- --force --reset --yes      # production (be careful)
+
+Seed accounts:
+  The members seeder creates Better Auth credentials for each seed user, so
+  they can sign in with email + password (needed to review anything behind
+  auth in a preview environment).
+
+    email     hafiz@seed.local, fatimah@seed.local, rizal@seed.local,
+              dinda@seed.local, arya@seed.local
+    password  seedpassword123
+
+  Not a secret: seed data is for local dev and previews only, and this runner
+  refuses to run under NODE_ENV=production without --force.
 `;
 
 function parseFlags(argv: string[]): ParsedFlags {
