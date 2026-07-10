@@ -44,6 +44,8 @@ Revisit behind a GitHub Environment approval gate (required reviewers) if commun
 
 A wildcard `*.preview.buildersnetwork.web.id` buys nothing: cookies are host-only either way, and `APP_URL` is per-PR under both options.
 
+**Preview deploys from a separate config file, not an `[env.preview]` block.** Per the [wrangler config docs](https://developers.cloudflare.com/workers/wrangler/configuration/), bindings (`d1_databases`, `r2_buckets`, `send_email`, `vars`) are *non-inheritable* — which is exactly the isolation the table below assumes, and it comes for free. But `routes` **is** inheritable, so any preview deploying against the top-level `wrangler.toml` would inherit the production custom domain `buildersnetwork.web.id`. A config file that simply has no `routes` key sidesteps this; an env block cannot drop an inheritable key by omission.
+
 ### Side effects are absent, not trapped
 
 Preview omits bindings rather than redirecting them.
