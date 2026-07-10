@@ -52,7 +52,18 @@ export const createD1HttpDb = (options: D1HttpOptions) => {
         const detail =
           body.errors?.map((e) => `${e.code}: ${e.message}`).join("; ") ??
           `HTTP ${response.status}`;
-        throw new Error(`D1 HTTP query failed (${detail})\n  sql: ${sql}`);
+        // D1 caps bound parameters at 100 per query; libSQL allows 32766, so a
+        // multi-row insert can pass locally and only fail here. Say so, because
+        // "too many SQL variables" does not suggest its own fix.
+        const hint = /too many SQL variables/i.test(detail)
+          ? `\n  ${params.length} bound parameters exceeds D1's limit of 100.` +
+            " Multi-row inserts go through insertInChunks()" +
+            " (libs/db/src/seed/chunk.ts); a long inArray() list binds one" +
+            " parameter per element and must be batched too."
+          : "";
+        throw new Error(
+          `D1 HTTP query failed (${detail})${hint}\n  sql: ${sql}`,
+        );
       }
 
       const rows = body.result?.[0]?.results?.rows ?? [];

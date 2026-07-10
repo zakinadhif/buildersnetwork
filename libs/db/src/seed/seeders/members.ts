@@ -8,6 +8,7 @@ import {
   userInterests,
   users,
 } from "../../schema";
+import { insertInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 export const SEED_USERS = [
@@ -135,41 +136,41 @@ export const memberSeeder: Seeder = {
   tables: [users, accounts, profiles, userInterests],
   async run({ db, log }) {
     log("inserting seed users…");
-    await db
-      .insert(users)
-      .values(SEED_USERS.map((u) => ({ ...u, emailVerified: true })))
-      .onConflictDoNothing();
+    const userRows = SEED_USERS.map((u) => ({ ...u, emailVerified: true }));
+    await insertInChunks(users, userRows, (chunk) =>
+      db.insert(users).values(chunk).onConflictDoNothing(),
+    );
 
     log("inserting seed credential accounts…");
-    await db
-      .insert(accounts)
-      .values(await buildSeedCredentialAccounts())
-      .onConflictDoNothing();
+    const accountRows = await buildSeedCredentialAccounts();
+    await insertInChunks(accounts, accountRows, (chunk) =>
+      db.insert(accounts).values(chunk).onConflictDoNothing(),
+    );
 
     log("inserting seed profiles…");
-    await db
-      .insert(profiles)
-      .values(
-        SEED_PROFILES.map(({ interests: _interests, ...profile }) => profile),
-      )
-      .onConflictDoNothing();
+    const profileRows = SEED_PROFILES.map(
+      ({ interests: _interests, ...profile }) => profile,
+    );
+    await insertInChunks(profiles, profileRows, (chunk) =>
+      db.insert(profiles).values(chunk).onConflictDoNothing(),
+    );
 
     log("linking member interests…");
     // Find-or-create every referenced interest by slug. Curated rows already
     // exist (slug conflict → skipped); the rest become free-text rows.
     const deduped = dedupeBySlug(SEED_PROFILES.flatMap((p) => p.interests));
     if (deduped.length > 0) {
-      await db
-        .insert(interests)
-        .values(
-          deduped.map((d) => ({
-            id: crypto.randomUUID(),
-            name: d.name,
-            slug: d.slug,
-            curated: false,
-          })),
-        )
-        .onConflictDoNothing({ target: interests.slug });
+      const interestRows = deduped.map((d) => ({
+        id: crypto.randomUUID(),
+        name: d.name,
+        slug: d.slug,
+        curated: false,
+      }));
+      await insertInChunks(interests, interestRows, (chunk) =>
+        db.insert(interests).values(chunk).onConflictDoNothing({
+          target: interests.slug,
+        }),
+      );
 
       const rows = await db
         .select({ id: interests.id, slug: interests.slug })
@@ -191,9 +192,9 @@ export const memberSeeder: Seeder = {
           return [{ userId: p.userId, interestId: id }];
         });
       });
-      if (links.length > 0) {
-        await db.insert(userInterests).values(links).onConflictDoNothing();
-      }
+      await insertInChunks(userInterests, links, (chunk) =>
+        db.insert(userInterests).values(chunk).onConflictDoNothing(),
+      );
       log(`linked ${links.length} member-interest rows`);
     }
 
