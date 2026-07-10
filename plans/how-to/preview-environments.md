@@ -4,7 +4,9 @@
 
 Ratified decisions for per-PR preview environments. Discussion: [#23](https://github.com/zakinadhif/buildersnetwork/issues/23). The prerequisite data-layer migration is [#40](https://github.com/zakinadhif/buildersnetwork/issues/40).
 
-> **State of the world:** there is no app preview today. `.github/workflows/preview.yml` was deleted in `15cdbb2` — it uploaded a Worker version bound to *production* secrets, including the prod `DATABASE_URL`. Mockup PRs still get an isolated static preview (`preview-mockups.yml` + `preview-mockups-deploy.yml`); that is unrelated and stays.
+> **State of the world:** provisioning landed in [#44](https://github.com/zakinadhif/buildersnetwork/issues/44) — `.github/workflows/preview.yml` creates a per-PR D1 database, R2 bucket and Worker for trusted PRs. Teardown ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) has not; previews are reaped by hand until it does.
+>
+> The *previous* `preview.yml` (deleted in `15cdbb2`) is a different thing: it uploaded a Worker version bound to *production* secrets, including the prod `DATABASE_URL`. Mockup PRs still get an isolated static preview (`preview-mockups.yml` + `preview-mockups-deploy.yml`); that is unrelated and stays.
 
 ## Decisions
 
@@ -78,6 +80,20 @@ Two consequences worth stating before someone implements this:
   This is not a new class of exposure — it is a second instance of one CI already carries and cannot shed. Per-PR *databases* are the whole design, Cloudflare's `D1:Edit` permission is account-scoped with no way to restrict it to a set of databases, and so `CLOUDFLARE_API_TOKEN` can already run `wrangler d1 delete buildersnetwork` against production. D1 Time Travel restores a point in time *within* a database; it does not resurrect a deleted one. Teardown already deletes a resource whose name is computed from a PR number, on a token that reaches production, on every PR close.
 
   Accepted, deliberately, because the alternative buys a narrower credential with application code. The mitigation is therefore uniform across both resources and lives in the script, not the credential: anchored `^buildersnetwork-pr-[0-9]+$` and `^buildersnetwork-pr-[0-9]+-uploads$` matches, names built from `github.event.pull_request.number`, and explicit tests that the production database and bucket names are refused.
+
+### Seeding reaches D1 by transplant, not by connection
+
+Decided while implementing [#44](https://github.com/zakinadhif/buildersnetwork/issues/44).
+
+`pnpm db:seed` builds a libSQL client from `DATABASE_URL`, and D1 speaks neither `file:` nor `libsql://` — it has its own HTTP API. From outside a Worker the only thing in CI that speaks that API is `wrangler`, and wrangler takes **SQL**, not driver calls. So the problem is not "connect, then insert"; it is "produce SQL, and let wrangler apply it."
+
+The workflow therefore seeds a throwaway local SQLite file with the existing, unmodified toolchain — which is where the hard part lives, since Better Auth password hashing runs in Node and bakes the hash into the row — then dumps the rows table by table (`sqlite3 … .dump --data-only`) and applies them to the already-migrated D1 with `wrangler d1 execute --file`. Zero new runtime drivers, zero application-code changes.
+
+Schema still arrives the production way, `wrangler d1 migrations apply`, so previews exercise the same migration path and the same D1 ledger as prod. Dumping per table (rather than filtering one big dump) is what keeps the local `__drizzle_migrations` ledger out of the transplant.
+
+**On a second push, seed data is reset and reloaded**, not merged. The generated SQL deletes every table children-first before re-inserting, so it is replayable. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
+
+Two version traps, both guarded in the workflow rather than assumed: `.dump --data-only` needs sqlite3 ≥ 3.41, and sqlite3 ≥ 3.47 encodes control characters as `unistr('…')`, a function D1's older SQLite does not have — such a dump loads locally and fails on D1. No seed value contains a control character today.
 
 ## How preview login works
 
