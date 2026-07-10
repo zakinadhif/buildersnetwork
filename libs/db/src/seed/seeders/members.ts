@@ -120,9 +120,19 @@ const SEED_PROFILES = [
 export const memberSeeder: Seeder = {
   name: "members",
   description: "Seed 5 initial community members",
-  // Owns profiles + the user_interests links. NOT `interests` — that catalog is
-  // owned/truncated by the interests seeder; here we find-or-create into it.
-  tables: [profiles, userInterests],
+  // Owns the seed users and everything hanging off them. The runner only empties
+  // tables a seeder *declares*, so every table this seeder inserts into must be
+  // listed: omit one and a re-seed leaves the first run's rows in place, where
+  // the `onConflictDoNothing` calls below silently preserve them.
+  //
+  // `accounts` is listed rather than left to `users`' ON DELETE cascade, because
+  // it holds the credential hash — the one row whose staleness would break
+  // preview login, and the one we least want depending on whether a given SQLite
+  // has foreign keys enforced.
+  //
+  // NOT `interests` — that catalog is owned/truncated by the interests seeder;
+  // here we find-or-create into it.
+  tables: [users, accounts, profiles, userInterests],
   async run({ db, log }) {
     log("inserting seed users…");
     await db

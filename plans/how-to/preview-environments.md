@@ -81,19 +81,23 @@ Two consequences worth stating before someone implements this:
 
   Accepted, deliberately, because the alternative buys a narrower credential with application code. The mitigation is therefore uniform across both resources and lives in the script, not the credential: anchored `^buildersnetwork-pr-[0-9]+$` and `^buildersnetwork-pr-[0-9]+-uploads$` matches, names built from `github.event.pull_request.number`, and explicit tests that the production database and bucket names are refused.
 
-### Seeding reaches D1 by transplant, not by connection
+### Seeding connects to D1 directly, over its HTTP API
 
-Decided while implementing [#44](https://github.com/zakinadhif/buildersnetwork/issues/44).
+Decided while implementing [#44](https://github.com/zakinadhif/buildersnetwork/issues/44); reworked immediately after, before the PR merged.
 
-`pnpm db:seed` builds a libSQL client from `DATABASE_URL`, and D1 speaks neither `file:` nor `libsql://` — it has its own HTTP API. From outside a Worker the only thing in CI that speaks that API is `wrangler`, and wrangler takes **SQL**, not driver calls. So the problem is not "connect, then insert"; it is "produce SQL, and let wrangler apply it."
+Neither shipped driver can reach a remote D1 from Node: `@libsql/client` speaks `file:` and `libsql://`, and `drizzle-orm/d1` needs a Worker binding that CI does not have. The first implementation worked around that by producing **SQL** instead of making driver calls — seed a throwaway local SQLite file, `sqlite3 … .dump --data-only` it table by table, apply with `wrangler d1 execute --file`. It worked, but the dump pipeline was a second, divergent implementation of the seeding logic: it carried a hand-maintained `INSERT_ORDER` list of every table, so adding one table to a seeder meant editing CI.
 
-The workflow therefore seeds a throwaway local SQLite file with the existing, unmodified toolchain — which is where the hard part lives, since Better Auth password hashing runs in Node and bakes the hash into the row — then dumps the rows table by table (`sqlite3 … .dump --data-only`) and applies them to the already-migrated D1 with `wrangler d1 execute --file`. Zero new runtime drivers, zero application-code changes.
+The fix was to add the missing driver rather than route around it. `libs/db/src/d1-http.ts` wires `drizzle-orm/sqlite-proxy` to D1's REST API, and `pnpm db:seed` picks it up whenever `D1_DATABASE_ID` is set — so CI seeds with the same command, seeders, and registry order as local dev. The workflow step is now `pnpm db:seed -- --reset --yes`, and **a new table is registered in its seeder's `tables`, nowhere else.**
 
-Schema still arrives the production way, `wrangler d1 migrations apply`, so previews exercise the same migration path and the same D1 ledger as prod. Dumping per table (rather than filtering one big dump) is what keeps the local `__drizzle_migrations` ledger out of the transplant.
+Three things that pin the design, all discovered the hard way:
 
-**On a second push, seed data is reset and reloaded**, not merged. The generated SQL deletes every table children-first before re-inserting, so it is replayable. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
+- **`/raw`, not `/query`.** sqlite-proxy maps result rows *positionally* against the selected fields, so it needs D1's array-of-arrays rows. `/query` returns row objects, which map to `undefined` columns without erroring.
+- **No transactions.** The runner normally hands each seeder a transaction. sqlite-proxy fakes `transaction()` by issuing `begin`/`commit` as ordinary statements and D1 rejects both — it has no interactive transactions at any layer. Hence `supportsTransactions: false`, which unwraps the seeder. A preview seed that dies halfway leaves partly-written tables; that is only tolerable because the next push re-seeds from scratch.
+- **A seeder must declare every table it resets.** `--reset` empties only the tables a seeder names. `memberSeeder` inserts into `users` but used to declare only `[profiles, userInterests]`, so switching to `--reset` would have left the first push's users in place, where `onConflictDoNothing` silently preserves them — the exact staleness bug reset-then-seed exists to prevent. `users` is now declared; `accounts` and `sessions` come along by cascade.
 
-Two version traps, both guarded in the workflow rather than assumed: `.dump --data-only` needs sqlite3 ≥ 3.41, and sqlite3 ≥ 3.47 encodes control characters as `unistr('…')`, a function D1's older SQLite does not have — such a dump loads locally and fails on D1. No seed value contains a control character today.
+Schema still arrives the production way, `wrangler d1 migrations apply`, so previews exercise the same migration path and the same D1 ledger as prod. Nothing else can: the seeder writes rows, never DDL.
+
+**On a second push, seed data is reset and reloaded**, not merged. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
 
 ## How preview login works
 
