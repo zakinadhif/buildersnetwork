@@ -5,8 +5,10 @@
 # Secrets (never commit these) — set via:
 #   wrangler secret put BETTER_AUTH_SECRET
 #   wrangler secret put ANTHROPIC_API_KEY   # not needed when AI_PROVIDER=workers-ai
-#   wrangler secret put RESEND_API_KEY      # optional — sends email via Resend
-#                                           # instead of the [[send_email]] binding
+#   wrangler secret put RESEND_API_KEY      # the LIVE email sender (Resend, free
+#                                           # tier). Takes precedence over the
+#                                           # [[send_email]] binding below, which is
+#                                           # dormant on this free-tier account.
 #
 # The database is a D1 binding, not a connection string — there is no
 # DATABASE_URL secret in the Worker.
@@ -52,9 +54,12 @@ migrations_dir = "libs/db/migrations"
 binding = "UPLOADS"
 bucket_name = "buildersnetwork-uploads"
 
-# Cloudflare Email Service (beta) — default transactional email sender.
-# Requires Workers Paid plan. Set sender domain via Cloudflare Email Routing.
-# Overridden at runtime by Resend when the RESEND_API_KEY secret is set.
+# Cloudflare Email Service (beta). Requires the Workers Paid plan — this account
+# is on the free tier, so this binding is currently DORMANT: transactional email
+# is actually sent through Resend (set the RESEND_API_KEY secret). Kept here for
+# when the account moves to Paid. At runtime Resend wins whenever RESEND_API_KEY
+# is set; this binding is only reached if that key is absent. Sender domain is
+# configured via Cloudflare Email Routing.
 [[send_email]]
 name = "EMAIL"
 
