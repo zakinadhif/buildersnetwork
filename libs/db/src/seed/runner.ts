@@ -166,7 +166,13 @@ function formatList(seeders: readonly Seeder[]): string {
  * the non-zero exit code reaches the shell.
  */
 export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
-  const argv = opts.argv ?? process.argv.slice(2);
+  // Strip `--` separators. `pnpm db:seed -- --reset --yes` forwards through two
+  // `pnpm run` hops (root script -> api script), and the inner one receives the
+  // separator as a literal argv entry. `parseArgs` reads `--` as end-of-options
+  // and reports every flag after it as a positional, which `allowPositionals:
+  // false` then rejects — so every documented `pnpm db:seed -- <flag>` form
+  // fails from the repo root without this.
+  const argv = (opts.argv ?? process.argv.slice(2)).filter((a) => a !== "--");
   let flags: ParsedFlags;
   try {
     flags = parseFlags(argv);
