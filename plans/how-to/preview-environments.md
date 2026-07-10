@@ -26,7 +26,7 @@ What it changes here: **D1 has no branching.** There is no copy-on-write branch 
 
 Neon's copy-on-write was never the appealing part; branching *from production* is precisely what creates the PII problem above.
 
-**Open constraint:** D1 caps the number of databases per account — **10 on the free tier**, which this account deliberately stays on until Al-Fath Berkarya is formalised. Prod takes one, leaving nine for previews. Per-PR ephemeral databases consume that quota, and it sets the hard ceiling on concurrent previews. Each preview now also consumes an R2 bucket (see below); whichever cap is tighter is the one that binds. Establish both numbers before designing the reaper.
+**Open constraint:** D1 caps the number of databases per account — **10 on the free tier**, which this account deliberately stays on until Al-Fath Berkarya is formalised. Prod takes one, leaving nine for previews. Per-PR ephemeral databases consume that quota, and it sets the hard ceiling on concurrent previews. Each preview now also consumes an R2 bucket (see below), but R2 allows a million per account, so D1 remains the binding constraint.
 
 ### Trusted PRs only
 
@@ -70,8 +70,8 @@ Nothing seeds into it. No seeder sets `coverKey` (`libs/db/src/schema/app.ts:94`
 
 Two consequences worth stating before someone implements this:
 
-- **Teardown grows a third resource, and it is the awkward one.** Deleting a D1 database is one call. R2 has no bulk-delete and no `r2 object list` in wrangler, and `--force` on `r2 bucket delete` only skips the confirmation prompt — it does not force-delete a non-empty bucket. Whether a non-empty bucket can be deleted at all is unverified. A lifecycle expiry rule set at creation keeps objects from accumulating forever if teardown never runs. Tracked in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45).
-- **The production bucket is now inside the reaper's blast radius.** `buildersnetwork-uploads` shares a prefix with preview buckets and shares the `-uploads` suffix too. Filter on `buildersnetwork-pr-*`; a naive `buildersnetwork-*` or `*-uploads` matches production.
+- **Teardown grows a third resource, and it is the awkward one.** Deleting a D1 database is one synchronous call. Deleting an R2 bucket is two phases: [the R2 docs](https://developers.cloudflare.com/r2/buckets/delete-buckets/) state *"a bucket must be completely empty before it can be deleted."* Wrangler offers no bulk delete and no `r2 object list`, and `--force` on `r2 bucket delete` only skips the confirmation prompt. So emptying happens via a script over the S3 API (`rclone purge` or equivalent), synchronously, at PR close. A lifecycle expiry rule set at creation is the backstop for when teardown never runs at all — not the mechanism. Tracked in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45).
+- **The production bucket is now inside the reaper's blast radius, and the blast is irreversible.** `buildersnetwork-uploads` shares the `buildersnetwork-` prefix with preview buckets *and* the `-uploads` suffix. Worse, an R2 S3 token cannot be scoped to buckets that do not exist yet, so the credential that empties preview buckets is necessarily account-wide — it can purge production. R2 has no object versioning by default. The guard therefore lives in the script, not the credential: match `^buildersnetwork-pr-[0-9]+-uploads$`, anchored, and test that the production bucket name is refused.
 
 ## How preview login works
 
