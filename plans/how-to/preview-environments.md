@@ -26,7 +26,7 @@ What it changes here: **D1 has no branching.** There is no copy-on-write branch 
 
 Neon's copy-on-write was never the appealing part; branching *from production* is precisely what creates the PII problem above.
 
-**Open constraint:** D1 caps the number of databases per account — **10 on the free tier**, which this account deliberately stays on until Al-Fath Berkarya is formalised. Prod takes one, leaving nine for previews. Per-PR ephemeral databases consume that quota, and it sets the hard ceiling on concurrent previews. Storage costs nothing here: previews share a single R2 bucket and are separated by key prefix (see below), so D1 is the only scarce resource.
+**Open constraint:** D1 caps the number of databases per account — **10 on the free tier**, which this account deliberately stays on until Al-Fath Berkarya is formalised. Prod takes one, leaving nine for previews. Per-PR ephemeral databases consume that quota, and it sets the hard ceiling on concurrent previews. Each preview now also consumes an R2 bucket (see below), but R2 allows a million per account, so D1 remains the binding constraint.
 
 ### Trusted PRs only
 
@@ -44,7 +44,7 @@ Revisit behind a GitHub Environment approval gate (required reviewers) if commun
 
 A wildcard `*.preview.buildersnetwork.web.id` buys nothing: cookies are host-only either way, and `APP_URL` is per-PR under both options.
 
-**Preview deploys from a separate config file, not an `[env.preview]` block.** Per the [wrangler config docs](https://developers.cloudflare.com/workers/wrangler/configuration/), bindings (`d1_databases`, `r2_buckets`, `send_email`, `vars`) are *non-inheritable*. For email and OAuth that hands us the omission-based isolation below for free; for D1 and R2 it means a preview must name its own database and its bucket explicitly, and so cannot silently attach to production's. But `routes` **is** inheritable, so any preview deploying against the top-level `wrangler.toml` would inherit the production custom domain `buildersnetwork.web.id`. A config file that simply has no `routes` key sidesteps this; an env block cannot drop an inheritable key by omission.
+**Preview deploys from a separate config file, not an `[env.preview]` block.** Per the [wrangler config docs](https://developers.cloudflare.com/workers/wrangler/configuration/), bindings (`d1_databases`, `r2_buckets`, `send_email`, `vars`) are *non-inheritable*. For email and OAuth that hands us the omission-based isolation below for free; for D1 and R2 it means a preview must name its own database and bucket explicitly, and so cannot silently attach to production's. But `routes` **is** inheritable, so any preview deploying against the top-level `wrangler.toml` would inherit the production custom domain `buildersnetwork.web.id`. A config file that simply has no `routes` key sidesteps this; an env block cannot drop an inheritable key by omission.
 
 ### Side effects are absent, not trapped
 
@@ -58,28 +58,26 @@ Preview omits bindings rather than redirecting them.
 
 No runtime feature-flag mechanism is required. The earlier belief that one was is the single largest thing #23 got wrong: provider selection is already driven by binding presence, so *absence is the flag*.
 
-### R2 storage is namespaced, not absent
+### R2 storage is duplicated, not absent
 
 The one exception, and the exception proves the rule.
 
-Omitting a binding isolates a side effect only when reaching outward is the *point* of the binding. Email and OAuth reach outward: absent, nothing escapes, and nothing of value is lost inside the preview. Storage is different. Omitting `UPLOADS` doesn't isolate anything — it **turns the feature off**. `apps/api/src/routes/karya.ts` returns `503` when storage is absent, which means a PR that touches cover uploads cannot be reviewed in its own preview. The reviewer clicks upload and gets an error. That is a coverage hole wearing the costume of graceful degradation.
+Omitting a binding isolates a side effect only when the side effect is the *point* of the binding. Email and OAuth reach outward: absent, nothing escapes, and nothing of value is lost inside the preview. Storage is different. Omitting `UPLOADS` doesn't isolate anything — it **turns the feature off**. `apps/api/src/routes/karya.ts` returns `503` when storage is absent, which means a PR that touches cover uploads cannot be reviewed in its own preview. The reviewer clicks upload and gets an error. That is a coverage hole wearing the costume of graceful degradation.
 
-So previews get storage. **All of them share one bucket**, `buildersnetwork-preview-uploads`, created once out-of-band and bound as `UPLOADS`, with each preview confined to the key prefix `pr-<n>/`.
+So each preview gets its **own R2 bucket**, `buildersnetwork-pr-<n>-uploads`, bound as `UPLOADS`. Same invariant as the database: every preview URL is a window into its own storage. It also keeps the preview tier purely orchestration — no application code learns what a preview is.
 
-**Why shared rather than a bucket per PR — this is a security decision, not a convenience one.** [R2 API tokens](https://developers.cloudflare.com/r2/api/tokens/) can be scoped to specific buckets only at the *Object Read & Write* level. Creating and deleting buckets requires *Admin Read & Write*, which is always account-wide and cannot be scoped. Per-PR buckets are born dynamically, so the credential managing them can necessarily reach `buildersnetwork-uploads` — the production bucket — and R2 has no object versioning by default. That design *requires* storing an un-narrowable, production-destroying credential in CI.
+A single shared bucket namespaced by key prefix was considered and rejected. It would work, and it would let the teardown credential be scoped to one bucket. But it collides by default: `coverKeyFor` (`apps/api/src/lib/cover.ts`) returns `karya/${karyaId}/cover.${ext}` and the seeders plant fixed ids (`seed_k1`…`seed_k3`) into *every* preview database, so two reviewers uploading a cover for the same seeded karya write byte-identical keys — and `karya.ts` deletes the previous object when the extension differs. Avoiding that needs a prefix wrapper at the storage boundary plus a var threaded into `worker.ts`, i.e. application code that exists solely to serve previews. Per-PR buckets buy the same isolation with none of it.
 
-A shared bucket never creates or deletes buckets. It needs object read/write/list/delete on one bucket that already exists, so its token scopes to exactly that bucket. **Production becomes unreachable by construction, not by our regex being correct.** That is a different class of guarantee, and it is the whole reason for the design.
-
-**The prefix is load-bearing.** `coverKeyFor` (`apps/api/src/lib/cover.ts:40`) returns `karya/${karyaId}/cover.${ext}`, and the seeders plant *fixed literal ids* — `seed_k1`, `seed_k2`, `seed_k3`. Every preview database contains the same ones. Without a prefix, a reviewer uploading a cover for `seed_k1` in one PR and a reviewer doing the same in another write to byte-identical keys. That is not a collision risk; it is a certainty, on the first thing anyone tests. Worse, `karya.ts` deletes the previous object when the extension differs, so one preview's `.jpg` upload deletes another's `.png`.
-
-The prefix belongs at the storage boundary, not in the key builder: wrap `StorageProvider` so `put`/`get`/`delete`/`getSignedUrl` prepend it, and select the wrapper in `worker.ts` when `UPLOAD_KEY_PREFIX` is set. The stored `coverKey` therefore stays *unprefixed* in the database, routes are untouched, and production — which sets no prefix — takes the identical code path and writes byte-identical keys. Nothing to migrate. A namespace, not a feature flag.
-
-Nothing seeds into it. No seeder sets `coverKey` (`libs/db/src/schema/app.ts:94`, nullable → client shows a placeholder), so a preview's namespace starts empty and the reviewer fills it by exercising the feature. That is the behaviour under test.
+Nothing seeds into it. No seeder sets `coverKey` (`libs/db/src/schema/app.ts:94`, nullable → client shows a placeholder), so a preview bucket starts empty and the reviewer fills it by exercising the feature. That is the behaviour under test.
 
 Two consequences worth stating before someone implements this:
 
-- **Teardown purges a prefix; it never deletes a bucket.** `rclone purge <bucket>/pr-<n>/`, synchronously, at PR close. This sidesteps R2's two-phase bucket deletion entirely — [the docs](https://developers.cloudflare.com/r2/buckets/delete-buckets/) require a bucket be completely empty before it can be deleted, and wrangler has no bulk delete — because no bucket is ever deleted. A lifecycle rule on the shared bucket is the backstop for orphans, not the mechanism. Tracked in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45).
-- **The dangerous input is now the empty prefix, not the bucket name.** Production is out of the token's reach, so the worst remaining mistake is purging `""` — which would empty the storage of every *open* PR at once. The guard is an anchored `^pr-[0-9]+/$` on a prefix built from `github.event.pull_request.number`, with the bucket name hardcoded. Note the improvement in kind: the failure mode went from *permanently destroying production* to *inconveniencing reviewers on open PRs*.
+- **Teardown grows a third resource, and it is the awkward one.** Deleting a D1 database is one synchronous call. Deleting an R2 bucket is two phases: [the R2 docs](https://developers.cloudflare.com/r2/buckets/delete-buckets/) state *"a bucket must be completely empty before it can be deleted."* Wrangler offers no bulk delete and no `r2 object list`, and `--force` on `r2 bucket delete` only skips the confirmation prompt. So emptying happens via a script over the S3 API (`rclone purge` or equivalent), synchronously, at PR close. A lifecycle expiry rule set at creation is the backstop for when teardown never runs at all — not the mechanism. Tracked in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45).
+- **The production bucket joins the production database inside the reaper's blast radius.** An R2 token cannot be scoped to buckets that do not exist yet, so the credential that manages per-PR buckets is necessarily account-wide and can purge `buildersnetwork-uploads`, which R2 does not version.
+
+  This is not a new class of exposure — it is a second instance of one CI already carries and cannot shed. Per-PR *databases* are the whole design, Cloudflare's `D1:Edit` permission is account-scoped with no way to restrict it to a set of databases, and so `CLOUDFLARE_API_TOKEN` can already run `wrangler d1 delete buildersnetwork` against production. D1 Time Travel restores a point in time *within* a database; it does not resurrect a deleted one. Teardown already deletes a resource whose name is computed from a PR number, on a token that reaches production, on every PR close.
+
+  Accepted, deliberately, because the alternative buys a narrower credential with application code. The mitigation is therefore uniform across both resources and lives in the script, not the credential: anchored `^buildersnetwork-pr-[0-9]+$` and `^buildersnetwork-pr-[0-9]+-uploads$` matches, names built from `github.event.pull_request.number`, and explicit tests that the production database and bucket names are refused.
 
 ## How preview login works
 
