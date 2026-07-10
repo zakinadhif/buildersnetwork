@@ -44,7 +44,7 @@ binding = "AI"
 [[d1_databases]]
 binding = "DB"
 database_name = "buildersnetwork"
-database_id = "REPLACE_WITH_D1_DATABASE_ID"
+database_id = "1a06c788-e588-4420-b9ed-e7cab1bda2de"
 migrations_dir = "libs/db/migrations"
 
 # R2 bucket for uploads (karya cover images, issue #18). Create the bucket once
