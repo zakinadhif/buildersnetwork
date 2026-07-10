@@ -57,9 +57,9 @@ export const createD1HttpDb = (options: D1HttpOptions) => {
         // "too many SQL variables" does not suggest its own fix.
         const hint = /too many SQL variables/i.test(detail)
           ? `\n  ${params.length} bound parameters exceeds D1's limit of 100.` +
-            " Multi-row inserts go through insertInChunks()" +
-            " (libs/db/src/seed/chunk.ts); a long inArray() list binds one" +
-            " parameter per element and must be batched too."
+            " Multi-row inserts go through insertInChunks(), and a long" +
+            " inArray() list — one parameter per element — through" +
+            " selectInChunks(). Both live in libs/db/src/seed/chunk.ts."
           : "";
         throw new Error(
           `D1 HTTP query failed (${detail})${hint}\n  sql: ${sql}`,

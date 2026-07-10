@@ -2,7 +2,7 @@ import { inArray } from "drizzle-orm";
 import { dedupeBySlug, slugifyInterest } from "../../interests";
 import type { KaryaStage } from "../../karya";
 import { interests, karya, karyaInterests, karyaMembers } from "../../schema";
-import { insertInChunks } from "../chunk";
+import { insertInChunks, selectInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 // Example karya owned by existing seed members. Each carries a couple stages,
@@ -104,15 +104,14 @@ export const karyaSeeder: Seeder = {
         }),
       );
 
-      const rows = await db
-        .select({ id: interests.id, slug: interests.slug })
-        .from(interests)
-        .where(
-          inArray(
-            interests.slug,
-            deduped.map((d) => d.slug),
-          ),
-        );
+      const rows = await selectInChunks(
+        deduped.map((d) => d.slug),
+        (chunk) =>
+          db
+            .select({ id: interests.id, slug: interests.slug })
+            .from(interests)
+            .where(inArray(interests.slug, chunk)),
+      );
       const idBySlug = new Map(rows.map((r) => [r.slug, r.id]));
 
       const links = SEED_KARYA.flatMap((k) => {

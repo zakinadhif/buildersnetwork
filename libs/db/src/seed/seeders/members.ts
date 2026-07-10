@@ -8,7 +8,7 @@ import {
   userInterests,
   users,
 } from "../../schema";
-import { insertInChunks } from "../chunk";
+import { insertInChunks, selectInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 export const SEED_USERS = [
@@ -172,15 +172,14 @@ export const memberSeeder: Seeder = {
         }),
       );
 
-      const rows = await db
-        .select({ id: interests.id, slug: interests.slug })
-        .from(interests)
-        .where(
-          inArray(
-            interests.slug,
-            deduped.map((d) => d.slug),
-          ),
-        );
+      const rows = await selectInChunks(
+        deduped.map((d) => d.slug),
+        (chunk) =>
+          db
+            .select({ id: interests.id, slug: interests.slug })
+            .from(interests)
+            .where(inArray(interests.slug, chunk)),
+      );
       const idBySlug = new Map(rows.map((r) => [r.slug, r.id]));
 
       const links = SEED_PROFILES.flatMap((p) => {
