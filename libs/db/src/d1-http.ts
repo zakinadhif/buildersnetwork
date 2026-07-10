@@ -74,6 +74,24 @@ export const createD1HttpDb = (options: D1HttpOptions) => {
       if (method === "get") return { rows: rows[0] ?? [] };
       return { rows };
     },
+    // sqlite-proxy defines `batch()` unconditionally and dispatches it to this
+    // callback, so omitting it leaves `db.batch()` throwing "batchCLient is not
+    // a function". Worse, `atomicWrite` feature-detects `typeof db.batch ===
+    // "function"` and would take that branch.
+    //
+    // D1's HTTP surface is `/query` and `/raw`, each taking ONE sql string and
+    // ONE flat params array — there is no batch endpoint, and no way to give N
+    // statements their own bindings. Running them sequentially would return the
+    // right rows while quietly dropping the all-or-nothing guarantee that is the
+    // only reason to call `batch()`. Fail loudly instead.
+    () => {
+      throw new Error(
+        "D1's HTTP API has no batch endpoint, so this driver cannot honour " +
+          "batch()'s atomicity. Atomic writes need the Workers D1 binding " +
+          "(drizzle-orm/d1); over HTTP, issue the statements individually and " +
+          "make them idempotent.",
+      );
+    },
     { schema },
   );
 };
