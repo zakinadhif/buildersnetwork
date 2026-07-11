@@ -34,9 +34,10 @@ routes = [
 # route — /app/minat, /app/karya/:id, ...) its default behavior is a
 # `307 -> /app/` redirect, not a fallthrough to the Worker. That silently
 # broke every deep link into the app (confirmed in prod via curl on
-# 2026-07-11) despite the SPA-fallback code below appearing to handle it —
-# the code was simply never reached. `/app/assets/*` (the hashed Vite bundle)
-# is excluded so those still serve straight from the edge with no Worker hop.
+# 2026-07-11) despite the SPA-fallback code in apps/api/src/worker.ts
+# appearing to handle it — the code was simply never reached. `/app/assets/*`
+# (the hashed Vite bundle) is excluded so those still serve straight from
+# the edge with no Worker hop.
 [assets]
 directory = "apps/api/public"
 binding = "ASSETS"
