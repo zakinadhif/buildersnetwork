@@ -21,18 +21,20 @@ The decision merges as a **diff**, not a board move. Open a PR amending the dura
 
 Keep the PR focused on the decision — it becomes the source of truth every resulting task cites. Note the PR URL; step 3 needs it.
 
-## 3. Decompose into tasks — reuse the gate
+## 3. Decompose into tasks — design-first, reuse the gate
 
-The doc you just wrote **grounds** the work, so Gate A is satisfied by construction. For **each shippable deliverable**, run the [`/new-task`](../new-task/SKILL.md) flow — decomposition re-enters the issue-creation gate rather than re-inventing it, so **Gate B still holds**: a non-trivial user-facing surface needs a graduated `[UI]` mockup first (draw it before the `[Fitur]`).
+The doc you just wrote **grounds** the work, so Gate A is satisfied by construction. For **each shippable deliverable**, run the [`/new-task`](../new-task/SKILL.md) flow — decomposition re-enters the issue-creation gate rather than re-inventing it, so **Gate B still holds**. Gate B is design-first *on purpose*: the data schema should take the shape the UI needs, so a UI-heavy feature is authored **around** its mockup, never before one exists.
 
+- **UI-heavy deliverable → file a `[Desain]`, not a `[Fitur]`.** No mockup is decided yet, so a `[Fitur]` now would be a hollow, ungroomable placeholder (its scope, criteria, and schema-touch list are all outputs of the design). File the `[Desain]` exploration now and record its intended `[Fitur]` in the **doc PR** from step 2 — the durable list — *not* as a task-list in the proposal's issue body (that would spawn a second progress bar competing with the sub-issue one; GitHub doesn't merge them). Put a pointer on the `[Desain]` body: *"Setelah desain ini diputuskan, buat `[Fitur]` yang membangunnya, grounded di mockup ini."* The feature gets authored later, once the mockup lands — that's Gate B doing its job on the next pass, not a dependency to auto-flip.
+- **Trivial-surface or pure-backend deliverable → file the `[Fitur]` now.** Gate B is N/A; these don't wait on a design.
 - Split by **deliverable, not module** — vertical `[Fitur]` slices, not per-layer DB/API/UI issues. (Don't reach for sub-issues to organize a feature by layer — that's the same [module-splitting](../../../plans/how-to/build-workflow.md#sub-issues--one-sanctioned-use), just hierarchical.)
 - Each new issue's `## Kenapa` cites the doc PR / section from step 2 — that's the trace back to the ratified decision.
-- Set dependencies (`Depends on #N`); dependent tasks land **Blocked**, not Ready.
+- Set real dependencies (`Depends on #N`); dependent tasks land **Blocked**, not Ready. The design→feature link is *not* one of these — the `[Fitur]` isn't filed yet, so there's nothing to mark Blocked.
 - Some proposals **update** existing issues rather than spawn new ones — edit those bodies instead.
 - **Link each spawned task as a sub-issue of the proposal.** This makes the lineage structural — a live progress bar on the proposal (which stays on the board as the *why* record) instead of a comment that rots — and the "Auto-add sub-issues" workflow lands the child on the board. `gh` has no sub-issue command yet; use the GraphQL mutation with each issue's node id:
   ```bash
   PARENT=$(gh issue view <proposal-n> --json id --jq .id)   # the [Diskusi]
-  CHILD=$(gh issue view <task-n> --json id --jq .id)         # the new [Fitur]/[UI]
+  CHILD=$(gh issue view <task-n> --json id --jq .id)         # the new [Desain]/[Fitur]
   gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){issue{number}}}' -f p="$PARENT" -f c="$CHILD"
   ```
   This is the **only** sanctioned use of sub-issues — parent/child is reserved for proposal → tasks, never feature → layers.
