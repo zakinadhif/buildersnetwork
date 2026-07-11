@@ -134,18 +134,40 @@ Every preview workflow follows the same secret-guard idiom as `release.yml`: it 
 
 Until all four teardown inputs are set, `preview-teardown.yml` and `preview-reaper.yml` skip, and closed previews accumulate until reaped by hand (the 7-day object-lifecycle rule keeps buckets from filling forever in the meantime).
 
-### Why the R2 S3 token is a separate credential
+### Why the emptying phase needs S3-shaped credentials
 
-`CLOUDFLARE_API_TOKEN` drives everything wrangler does, but **emptying a bucket is not one of those things**. [R2 refuses to delete a non-empty bucket](https://developers.cloudflare.com/r2/buckets/delete-buckets/) — *"a bucket must be completely empty before it can be deleted"* — and wrangler has no bulk object delete and no `r2 object list`, so there is no wrangler path to empty it. Cloudflare's own documented workaround is to script the deletes over the **S3-compatible API**, which `.github/scripts/preview-reaper.mjs` does with `aws s3 rm --recursive`. The `aws` CLI authenticates with S3-style HMAC credentials, not a Cloudflare bearer token — hence a distinct access-key/secret pair.
+`CLOUDFLARE_API_TOKEN` drives everything wrangler does, but **emptying a bucket is not one of those things**. [R2 refuses to delete a non-empty bucket](https://developers.cloudflare.com/r2/buckets/delete-buckets/) — *"a bucket must be completely empty before it can be deleted"* — and wrangler has no bulk object delete and no `r2 object list`, so there is no wrangler path to empty it. Cloudflare's own documented workaround is to script the deletes over the **S3-compatible API**, which `.github/scripts/preview-reaper.mjs` does with `aws s3 rm --recursive`. The `aws` CLI authenticates with S3-style HMAC credentials (an Access Key ID + Secret Access Key), **not** a Cloudflare bearer token — hence `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`.
 
-### Creating the token
+Note what this credential does **not** buy: it is *not* a smaller blast radius. An R2 token cannot be scoped to buckets that do not exist yet, so it is account-wide and can purge production `buildersnetwork-uploads` — exactly like `CLOUDFLARE_API_TOKEN` can already `d1 delete buildersnetwork`. The mitigation is the script's anchored name guard, not the credential (see *R2 storage is duplicated* above). The credential exists purely because the S3 protocol needs S3-shaped keys, which is why the two options below are equivalent on safety and differ only on operational hygiene.
+
+### Providing the credentials — two options
+
+Cloudflare lets **any** API token double as S3 credentials ([R2 tokens docs](https://developers.cloudflare.com/r2/api/tokens/)): the Access Key ID is the token's `id`, and the Secret Access Key is the **SHA-256 hash of the token's value**. That means the emptying credential can either be minted fresh or derived from the token the workflows already use.
+
+**Option A — dedicated R2 token (recommended default).** Cleanest to reason about: named for its job, unambiguously carries object permissions, and rotatable/revocable independently of `CLOUDFLARE_API_TOKEN`.
 
 1. Cloudflare dashboard → **R2** → **Manage R2 API Tokens** → **Create API token**.
-2. Permission **Object Read & Write**. The token **cannot be scoped to the preview buckets** — they are born per-PR and do not exist at token-creation time — so it is account-wide and *can* reach `buildersnetwork-uploads` (production). That exposure is accepted and mitigated in the script's anchored name guard, not the credential (see *R2 storage is duplicated* above); it is not something a narrower token can fix.
-3. On creation Cloudflare shows an **Access Key ID** and a **Secret Access Key** *once*. Copy both.
-4. Repo → **Settings → Secrets and variables → Actions**:
-   - `CLOUDFLARE_WORKERS_SUBDOMAIN` goes under **Variables**.
-   - everything else, including the two R2 keys, under **Secrets** — `R2_S3_ACCESS_KEY_ID` = Access Key ID, `R2_S3_SECRET_ACCESS_KEY` = Secret Access Key.
+2. Permission **Object Read & Write** (or **Admin Read & Write**). Account-wide, per the note above.
+3. On creation Cloudflare shows an **Access Key ID** and a **Secret Access Key** *once*. Copy both → `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`.
+
+**Option B — reuse the existing `CLOUDFLARE_API_TOKEN`.** Avoids creating a second credential, and slots into the workflows with **no code change** — the script only ever sees `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`. Valid only if **both** hold:
+
+- the existing token carries R2 **Admin Read & Write** (per the docs, `Object *` permissions are S3-only, but `Admin Read & Write` works for both the Cloudflare REST API *and* S3 object operations — so a token that already creates/deletes buckets can also delete objects over S3); **and**
+- you still have the token's **raw value**, because GitHub secrets are write-only and you cannot read `CLOUDFLARE_API_TOKEN` back out to hash it.
+
+Then set:
+
+- `R2_S3_ACCESS_KEY_ID` = the token's **ID** (its identifier, not the value).
+- `R2_S3_SECRET_ACCESS_KEY` = the **hex SHA-256** of the token value, e.g. `printf '%s' "$TOKEN_VALUE" | sha256sum`.
+
+The trade-off is pure hygiene, not security (blast radius is identical): Option B couples object-purge to the credential everything else uses, so you can no longer rotate or revoke the purge capability on its own.
+
+### Wiring the secrets
+
+Repo → **Settings → Secrets and variables → Actions**:
+
+- `CLOUDFLARE_WORKERS_SUBDOMAIN` goes under **Variables**.
+- everything else, including the two R2 keys from whichever option above, under **Secrets**.
 
 The two R2 keys are exposed **only to the reap step's `env:`** in each workflow, never job-wide, so nothing else in the job can read the credential that can purge production storage.
 
