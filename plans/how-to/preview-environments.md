@@ -56,7 +56,7 @@ Preview omits bindings rather than redirecting them.
 |---|---|---|
 | Email | Omit `RESEND_API_KEY` (and `[[send_email]]`) | Prod email actually runs through **Resend** (`RESEND_API_KEY`); the `[[send_email]]` binding needs Workers Paid and is dormant on the free-tier account, so omitting `RESEND_API_KEY` is the operative step. With neither set, both entrypoints fall back to `createNoopEmail()`: `apps/api/src/index.ts` always did; the Worker path was closed in [#42](https://github.com/zakinadhif/buildersnetwork/issues/42) (`apps/api/src/lib/email.ts`). |
 | Google OAuth | Omit `GOOGLE_CLIENT_ID` | `libs/auth/src/index.ts` only enables `socialProviders` when it is present. No per-PR redirect URI to register. |
-| Auth secret | Preview-only `BETTER_AUTH_SECRET` | Never the production value. |
+| Auth secret | `BETTER_AUTH_SECRET` generated fresh per run | Never the production value, and never a stored one: `wrangler deploy`'s bindings banner leaks a truncated prefix into the public Actions log past GitHub's exact-substring mask, so the value must be a single-deploy throwaway. Cookies don't survive a push anyway (`--reset` empties `users`, sessions cascade). |
 
 No runtime feature-flag mechanism is required. The earlier belief that one was is the single largest thing #23 got wrong: provider selection is already driven by binding presence, so *absence is the flag*.
 

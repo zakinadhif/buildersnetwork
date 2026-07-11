@@ -318,8 +318,8 @@ database credentials, the app preview is **trusted PRs only**; fork PRs get CI
 and the mockup preview. Seed data is reset on every push; the bucket is not.
 Teardown is not yet automated ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) —
 preview databases and buckets are deleted by hand, with a 7-day object lifecycle
-rule as the backstop. Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable
-and the `PREVIEW_BETTER_AUTH_SECRET` repo secret. Design notes:
+rule as the backstop. Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable;
+the auth-signing secret is generated fresh per run, not stored. Design notes:
 [plans/how-to/preview-environments.md](plans/how-to/preview-environments.md).
 
 **Mockup preview.** Any pull request that modifies `apps/mockups/**` also gets a
