@@ -148,5 +148,6 @@ per-project AI (S3).
   are 100% seed data — create, migrate, seed, delete. Ratified decisions in
   plans/how-to/preview-environments.md; discussion in #23.
   Unblocked once #40 landed. Provisioning (create/migrate/seed/deploy) shipped
-  in #44 as .github/workflows/preview.yml; teardown remains open (#45), so
-  preview DBs and R2 buckets are reaped by hand until it lands.
+  in #44 as .github/workflows/preview.yml; teardown + scheduled reaper + a live
+  concurrency cap shipped in #45 (preview-teardown.yml, preview-reaper.yml, and
+  the shared .github/scripts/preview-reaper.mjs).

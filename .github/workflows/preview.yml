@@ -35,6 +35,11 @@ permissions:
 env:
   PROD_DATABASE_NAME: buildersnetwork
   PROD_BUCKET_NAME: buildersnetwork-uploads
+  # Max concurrent preview environments. Sits BELOW D1's free-tier cap of 10
+  # (prod takes 1 → 9 available) with 2 slots of headroom, so provision never
+  # meets a raw "too many databases" D1 error mid-run. A knob: raise if preview
+  # concurrency genuinely runs tight, lower to be safer. See issue #45.
+  PREVIEW_CAP: 7
 
 jobs:
   provision:
@@ -107,9 +112,98 @@ jobs:
             echo "app_url=$app_url"
           } >> "$GITHUB_OUTPUT"
 
+      # Cap concurrent previews below D1's hard limit. Counted LIVE from the
+      # databases that actually exist right now, never a stored counter — so
+      # every re-run self-corrects: close a preview elsewhere and re-run here,
+      # and the freed slot is seen immediately with no state to reconcile.
+      #
+      # A PR that ALREADY has a preview database is never blocked — otherwise a
+      # push to an existing preview would start failing the moment the account
+      # fills. The cap only gates NEW environments.
+      - name: Check preview capacity
+        id: cap
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DB_NAME: ${{ steps.names.outputs.database }}
+        run: |
+          set -euo pipefail
+          json="$(pnpm exec wrangler d1 list --json)"
+          norm='(if type == "array" then . else (.result // []) end)'
+          count="$(printf '%s' "$json" | jq "[ ${norm}[] | select(.name | test(\"^buildersnetwork-pr-[0-9]+$\")) ] | length")"
+          exists="$(printf '%s' "$json" | jq --arg n "$DB_NAME" "[ ${norm}[] | select(.name == \$n) ] | length")"
+
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          echo "cap=$PREVIEW_CAP" >> "$GITHUB_OUTPUT"
+
+          if [ "$exists" -gt 0 ]; then
+            echo "This PR already has a preview database ($count/$PREVIEW_CAP used) — provisioning continues."
+            echo "proceed=true"  >> "$GITHUB_OUTPUT"
+            echo "capped=false"  >> "$GITHUB_OUTPUT"
+          elif [ "$count" -ge "$PREVIEW_CAP" ]; then
+            echo "::notice::Preview capacity reached ($count/$PREVIEW_CAP) — skipping provision for this PR."
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+            echo "capped=true"   >> "$GITHUB_OUTPUT"
+          else
+            echo "Capacity available ($count/$PREVIEW_CAP used) — provisioning a new preview."
+            echo "proceed=true"  >> "$GITHUB_OUTPUT"
+            echo "capped=false"  >> "$GITHUB_OUTPUT"
+          fi
+
+      # Sticky, actionable feedback. When full, tell the reviewer HOW to get a
+      # preview (free a slot, then push/re-run) — not just that it's full. When
+      # capacity is available, clear any earlier rejection so a now-succeeding
+      # PR doesn't keep showing a stale "full" notice.
+      - name: Comment on preview capacity
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/github-script@v7
+        env:
+          CAPPED: ${{ steps.cap.outputs.capped }}
+          COUNT: ${{ steps.cap.outputs.count }}
+          CAP: ${{ steps.cap.outputs.cap }}
+        with:
+          script: |
+            const marker = "<!-- preview-cap -->";
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(
+              github.rest.issues.listComments,
+              { owner, repo, issue_number },
+            );
+            const existing = comments.find((c) => (c.body || "").includes(marker));
+
+            if (process.env.CAPPED !== "true") {
+              if (existing) {
+                await github.rest.issues.deleteComment({ owner, repo, comment_id: existing.id });
+              }
+              return;
+            }
+
+            const { COUNT, CAP } = process.env;
+            const body = [
+              marker,
+              "### ⛔ Preview penuh",
+              "",
+              `Semua **${COUNT}/${CAP}** slot preview lagi kepakai, jadi PR ini belum dapat app preview sendiri.`,
+              "",
+              `D1 membatasi akun ini di 10 database (free tier); preview ditahan di ${CAP} biar ada headroom. Buat dapat preview di sini:`,
+              "",
+              "1. Tutup salah satu PR preview yang sudah nggak dipakai — environment-nya dibongkar saat ditutup, dan slotnya kebuka, lalu",
+              "2. **push commit baru** ke PR ini (atau re-run workflow **Preview**).",
+              "",
+              "_\"Re-run jobs\" mengulang commit lama; push commit baru adalah retrigger yang paling andal._",
+            ].join("\n");
+
+            if (existing) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: existing.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }
+
       # Idempotent: a second push to the same PR reuses the existing database.
       - name: Create per-PR D1 database
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -132,7 +226,7 @@ jobs:
       # accept either spelling and fail loudly when neither is present.
       - name: Resolve database_id
         id: db
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -163,7 +257,7 @@ jobs:
       # Rendered with node rather than sed/envsubst so the auth secret is
       # substituted literally and TOML-escaped, whatever characters it holds.
       - name: Render wrangler.preview.toml
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           PR: ${{ github.event.pull_request.number }}
           DATABASE_ID: ${{ steps.db.outputs.id }}
@@ -207,7 +301,7 @@ jobs:
       # The single most expensive failure this workflow can have is a preview
       # command reaching production. Assert the rendered config cannot.
       - name: Assert preview config is isolated from production
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         run: |
           set -euo pipefail
           cfg=wrangler.preview.toml
@@ -242,7 +336,7 @@ jobs:
       # exactly as it is. Reviewers' uploads from earlier pushes must survive.
       - name: Create per-PR R2 bucket
         id: bucket
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -265,7 +359,7 @@ jobs:
       # never runs, objects expire on their own and the bucket becomes deletable
       # — R2 refuses to delete a non-empty bucket.
       - name: Set bucket lifecycle expiry
-        if: steps.guard.outputs.enabled == 'true' && steps.bucket.outputs.created == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true' && steps.bucket.outputs.created == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -288,7 +382,7 @@ jobs:
       # placeholder id from wrangler.toml. Drop --config here and PR-authored
       # migrations run against the PRODUCTION database.
       - name: Apply migrations to preview D1
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -314,7 +408,7 @@ jobs:
       # NODE_ENV must be set: the seed runner refuses to run under "production"
       # without --force, and that is the default when it is unset.
       - name: Seed preview D1
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           NODE_ENV: development
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -327,11 +421,11 @@ jobs:
       # The frontend needs no per-PR configuration: auth-client.ts falls back to
       # window.location.origin.
       - name: Build for Cloudflare
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         run: pnpm build:cf
 
       - name: Deploy preview Worker
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -341,7 +435,7 @@ jobs:
           pnpm exec wrangler deploy --name "$WORKER" --config wrangler.preview.toml
 
       - name: Comment preview URL
-        if: steps.guard.outputs.enabled == 'true'
+        if: steps.guard.outputs.enabled == 'true' && steps.cap.outputs.proceed == 'true'
         uses: actions/github-script@v7
         env:
           APP_URL: ${{ steps.names.outputs.app_url }}
