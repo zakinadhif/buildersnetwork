@@ -25,20 +25,27 @@ Keep the PR focused on the decision — it becomes the source of truth every res
 
 The doc you just wrote **grounds** the work, so Gate A is satisfied by construction. For **each shippable deliverable**, run the [`/new-task`](../new-task/SKILL.md) flow — decomposition re-enters the issue-creation gate rather than re-inventing it, so **Gate B still holds**: a non-trivial user-facing surface needs a graduated `[UI]` mockup first (draw it before the `[Fitur]`).
 
-- Split by **deliverable, not module** — vertical `[Fitur]` slices, not per-layer DB/API/UI issues.
+- Split by **deliverable, not module** — vertical `[Fitur]` slices, not per-layer DB/API/UI issues. (Don't reach for sub-issues to organize a feature by layer — that's the same [module-splitting](../../../plans/how-to/build-workflow.md#sub-issues--one-sanctioned-use), just hierarchical.)
 - Each new issue's `## Kenapa` cites the doc PR / section from step 2 — that's the trace back to the ratified decision.
 - Set dependencies (`Depends on #N`); dependent tasks land **Blocked**, not Ready.
 - Some proposals **update** existing issues rather than spawn new ones — edit those bodies instead.
+- **Link each spawned task as a sub-issue of the proposal.** This makes the lineage structural — a live progress bar on the proposal (which stays on the board as the *why* record) instead of a comment that rots — and the "Auto-add sub-issues" workflow lands the child on the board. `gh` has no sub-issue command yet; use the GraphQL mutation with each issue's node id:
+  ```bash
+  PARENT=$(gh issue view <proposal-n> --json id --jq .id)   # the [Diskusi]
+  CHILD=$(gh issue view <task-n> --json id --jq .id)         # the new [Fitur]/[UI]
+  gh api graphql -f query='mutation($p:ID!,$c:ID!){addSubIssue(input:{issueId:$p,subIssueId:$c}){issue{number}}}' -f p="$PARENT" -f c="$CHILD"
+  ```
+  This is the **only** sanctioned use of sub-issues — parent/child is reserved for proposal → tasks, never feature → layers.
 
 ## 4. Curate, then close the proposal
 
 - Flip the resulting tasks **Proposed → Ready** (`177864ee`) — but keep **Ready short (~6)**; park overflow in **Backlog** (`d9a7d606`). Only the maintainer flips into Ready. (Field/project ids and the item-edit call are in [`/new-task` §4](../new-task/SKILL.md); status option ids: Ready `177864ee` · Backlog `d9a7d606` · Blocked `0b102e6a`.)
-- **Close the `[Diskusi]`** with a comment linking the doc PR and listing the issues it spawned — so the decision is never orphaned:
+- **Close the `[Diskusi]`** with a comment linking the doc PR — the sub-issue links from step 3 already carry the task lineage, so the comment is a human-readable backstop, not the only thread:
 
 ```bash
-gh issue close <n> --comment "Diratifikasi di <doc-PR-url>. Task turunan: #<a>, #<b>, …"
+gh issue close <n> --comment "Diratifikasi di <doc-PR-url>. Task turunan: #<a>, #<b>, … (tertaut sebagai sub-issue)."
 ```
 
-  **Leave the board item in place — closed, not archived.** A ratified proposal is the durable record of *why* the tasks exist; it stays on the board (in **Proposed**, now showing closed) so the decision remains visible. Don't `gh project item-archive` it. (If project #8 has an auto-archive-on-close workflow, it would defeat this — flag that to the maintainer rather than working around it.)
+  **Leave the board item in place — closed, not archived.** A ratified proposal is the durable record of *why* the tasks exist; it stays on the board (in **Proposed**, now showing closed) so the decision remains visible. Don't `gh project item-archive` it. (Project #8's "Item closed" and auto-archive workflows are **disabled**, so closing won't move or remove it — if a maintainer ever enables one, flag that rather than working around it.)
 
 Then report: the doc PR, each spawned/updated issue with its Status, and confirm the proposal is closed (and still on the board).

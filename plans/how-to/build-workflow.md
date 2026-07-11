@@ -103,6 +103,12 @@ Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technic
 
 Never start building from a Proposed item.
 
+## Sub-issues — one sanctioned use
+
+GitHub's **sub-issues** give a parent issue a live checklist of children and a progress bar. We use them for **exactly one thing**: linking a ratified `[Diskusi]` to the tasks it spawned. Because a ratified proposal stays on the board as the durable *why* record, making its tasks sub-issues turns that record **live** — the proposal shows how much of the decided direction has actually shipped (e.g. "3 of 5 done"), and the link is structural and bidirectional instead of a closing comment that rots. `/ratify-proposal` wires this automatically; the project's "Auto-add sub-issues" workflow lands the children on the board.
+
+**Do not use sub-issues to decompose a feature by module.** Giving a `[Fitur]` a DB / API / UI set of sub-issues is [module-splitting](#issue-title-tags) under a new name — it manufactures dependencies and half-landed layers, exactly what *"tag by deliverable, not module"* forbids. A `[Fitur]` stays **one vertical slice**. Real dependencies between separate deliverables stay `Depends on #N`; grouping a set of tasks under a theme stays the **GitHub Milestone**. Parent/child is reserved for the proposal → spawned-tasks relationship, nothing else.
+
 ## The loop (human + agent)
 
 Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth refresh -s project,read:project` (board access). Claude Code picks up the repo skills automatically.
