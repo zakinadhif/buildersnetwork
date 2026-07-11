@@ -30,4 +30,4 @@ gh project item-edit --id <item-id> --project-id PVT_kwHOA14JB84BcRLr --field-id
 
 ## 3. Hand off
 
-Tell the user the PR URL and that merge is the maintainer's call. Merging auto-closes the issue; **after any dependency merges, check its dependents** — issues whose `Depends on #N` are now all closed — and flip them Blocked → Ready (option id `177864ee`; or Backlog `1902d9fe` if Ready is already long) so the queue never silently stalls. (Maintainer: move the merged item to Done, id `0f0738c1`.)
+Tell the user the PR URL and that merge is the maintainer's call. Merging auto-closes the issue; **after any dependency merges, check its dependents** — issues whose `Depends on #N` are now all closed — and flip them Blocked → Ready (option id `177864ee`; or Backlog `d9a7d606` if Ready is already long) so the queue never silently stalls. (Maintainer: move the merged item to Done, id `0f0738c1`.)

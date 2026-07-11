@@ -86,7 +86,7 @@ ITEM=$(gh project item-add 8 --owner zakinadhif --url <issue-url> --format json 
 
 Choose the option id by the table in step 1 and the board rules:
 - **Ready** `177864ee` — a `[Fitur]`/`[UI]`/`[Bug]`/`[Security]` that's unblocked, uncontentious, and wanted *now*. Keep Ready short (**~6**, a soft cap); if it already looks long, use Backlog instead.
-- **Backlog** `1902d9fe` — the holding pool: groomed-but-unprioritized work (Ready overflow), not-yet-groomed items, plus non-urgent `[Bug]`/`[Security]` and parked tasks. Claimable only once groomed and unblocked — not pre-vetted like Ready.
+- **Backlog** `d9a7d606` — the holding pool: groomed-but-unprioritized work (Ready overflow), not-yet-groomed items, plus non-urgent `[Bug]`/`[Security]` and parked tasks. Claimable only once groomed and unblocked — not pre-vetted like Ready.
 - **Blocked** `0b102e6a` — not workable now: a `Depends on #N` whose blocker is still open. (Flips to Ready — or Backlog if Ready is already long — when the blocker merges; `/ship-task` handles that.) Contributors also move a card here mid-task when they hit a blocker.
 - **Proposed** `e1ac50ba` — every `[Diskusi]`, and anything contentious.
 
@@ -94,7 +94,7 @@ Choose the option id by the table in step 1 and the board rules:
 gh project item-edit --id "$ITEM" --project-id PVT_kwHOA14JB84BcRLr --field-id PVTSSF_lAHOA14JB84BcRLrzhW7QCc --single-select-option-id <option-id>
 ```
 
-(Full status option ids: Backlog `1902d9fe` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
+(Full status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
 
 > Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification. Don't self-serve into Ready.
 

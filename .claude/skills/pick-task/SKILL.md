@@ -33,7 +33,7 @@ Move the board item to **In Progress**: find the item id via `gh project item-li
 gh project item-edit --id <item-id> --project-id PVT_kwHOA14JB84BcRLr --field-id PVTSSF_lAHOA14JB84BcRLrzhW7QCc --single-select-option-id 2f8ef994
 ```
 
-(Status option ids: Backlog `1902d9fe` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
+(Status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
 
 ## 3. Load context, then build
 
