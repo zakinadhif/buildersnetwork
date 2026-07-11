@@ -4,7 +4,7 @@
 
 Ratified decisions for per-PR preview environments. Discussion: [#23](https://github.com/zakinadhif/buildersnetwork/issues/23). The prerequisite data-layer migration is [#40](https://github.com/zakinadhif/buildersnetwork/issues/40).
 
-> **State of the world:** provisioning landed in [#44](https://github.com/zakinadhif/buildersnetwork/issues/44) — `.github/workflows/preview.yml` creates a per-PR D1 database, R2 bucket and Worker for trusted PRs. Teardown ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) has not; previews are reaped by hand until it does.
+> **State of the world:** provisioning landed in [#44](https://github.com/zakinadhif/buildersnetwork/issues/44) — `.github/workflows/preview.yml` creates a per-PR D1 database, R2 bucket and Worker for trusted PRs, capped at 7 concurrent previews. Teardown landed in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45): `preview-teardown.yml` reaps all three resources when a PR closes, and `preview-reaper.yml` sweeps stragglers on a schedule — both through the shared, guard-tested `.github/scripts/preview-reaper.mjs`.
 >
 > The *previous* `preview.yml` (deleted in `15cdbb2`) is a different thing: it uploaded a Worker version bound to *production* secrets, including the prod `DATABASE_URL`. Mockup PRs still get an isolated static preview (`preview-mockups.yml` + `preview-mockups-deploy.yml`); that is unrelated and stays.
 
@@ -74,7 +74,7 @@ Nothing seeds into it. No seeder sets `coverKey` (`libs/db/src/schema/app.ts:94`
 
 Two consequences worth stating before someone implements this:
 
-- **Teardown grows a third resource, and it is the awkward one.** Deleting a D1 database is one synchronous call. Deleting an R2 bucket is two phases: [the R2 docs](https://developers.cloudflare.com/r2/buckets/delete-buckets/) state *"a bucket must be completely empty before it can be deleted."* Wrangler offers no bulk delete and no `r2 object list`, and `--force` on `r2 bucket delete` only skips the confirmation prompt. So emptying happens via a script over the S3 API (`rclone purge` or equivalent), synchronously, at PR close. A lifecycle expiry rule set at creation is the backstop for when teardown never runs at all — not the mechanism. Tracked in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45).
+- **Teardown grows a third resource, and it is the awkward one.** Deleting a D1 database is one synchronous call. Deleting an R2 bucket is two phases: [the R2 docs](https://developers.cloudflare.com/r2/buckets/delete-buckets/) state *"a bucket must be completely empty before it can be deleted."* Wrangler offers no bulk delete and no `r2 object list`, and `--force` on `r2 bucket delete` only skips the confirmation prompt. So emptying happens via a script over the S3 API (`aws s3 rm --recursive`), synchronously, at PR close. A lifecycle expiry rule set at creation is the backstop for when teardown never runs at all — not the mechanism. Shipped in [#45](https://github.com/zakinadhif/buildersnetwork/issues/45): `.github/scripts/preview-reaper.mjs` empties over the S3 API then `wrangler r2 bucket delete`s, shared by `preview-teardown.yml` and `preview-reaper.yml`.
 - **The production bucket joins the production database inside the reaper's blast radius.** An R2 token cannot be scoped to buckets that do not exist yet, so the credential that manages per-PR buckets is necessarily account-wide and can purge `buildersnetwork-uploads`, which R2 does not version.
 
   This is not a new class of exposure — it is a second instance of one CI already carries and cannot shed. Per-PR *databases* are the whole design, Cloudflare's `D1:Edit` permission is account-scoped with no way to restrict it to a set of databases, and so `CLOUDFLARE_API_TOKEN` can already run `wrangler d1 delete buildersnetwork` against production. D1 Time Travel restores a point in time *within* a database; it does not resurrect a deleted one. Teardown already deletes a resource whose name is computed from a PR number, on a token that reaches production, on every PR close.
@@ -119,6 +119,57 @@ Almost all the work is orchestration, not application code.
 - `apps/app/src/lib/auth-client.ts` falls back to `window.location.origin`, so the **frontend needs no per-PR build configuration**.
 - Setting the Worker's `APP_URL` var drives `BETTER_AUTH_URL` and `ALLOWED_ORIGINS` for free (`apps/api/src/worker.ts`). That one variable is what makes auth cookies and redirects consistent within each preview.
 - `libs/db/src/atomic.ts` already abstracts over batch-vs-interactive transactions, so the D1 driver needs no changes to the write surface.
+
+## Configuring the credentials
+
+Every preview workflow follows the same secret-guard idiom as `release.yml`: it **no-ops until its inputs exist**, so the workflows can merge before any credential is set and simply do nothing until you configure them. Provisioning ([#44](https://github.com/zakinadhif/buildersnetwork/issues/44)) and teardown/reaper ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) gate on overlapping but different sets.
+
+| Name | Kind | Provision (`preview.yml`) | Teardown / reaper | What it is |
+|---|---|:---:|:---:|---|
+| `CLOUDFLARE_API_TOKEN` | secret | ✅ | ✅ | Cloudflare API token wrangler authenticates with — creates/deletes D1, R2 buckets, Workers. |
+| `CLOUDFLARE_ACCOUNT_ID` | secret | ✅ | ✅ | Account id. Also builds the R2 S3 endpoint `https://<id>.r2.cloudflarestorage.com`. |
+| `CLOUDFLARE_WORKERS_SUBDOMAIN` | **variable** | ✅ | — | The `*.workers.dev` subdomain, used to compute `APP_URL` before deploy. |
+| `R2_S3_ACCESS_KEY_ID` | secret | — | ✅ | R2 **S3-API** access key id — the emptying phase only. |
+| `R2_S3_SECRET_ACCESS_KEY` | secret | — | ✅ | R2 **S3-API** secret access key — paired with the above. |
+
+Until all four teardown inputs are set, `preview-teardown.yml` and `preview-reaper.yml` skip, and closed previews accumulate until reaped by hand (the 7-day object-lifecycle rule keeps buckets from filling forever in the meantime).
+
+### Why the emptying phase needs S3-shaped credentials
+
+`CLOUDFLARE_API_TOKEN` drives everything wrangler does, but **emptying a bucket is not one of those things**. [R2 refuses to delete a non-empty bucket](https://developers.cloudflare.com/r2/buckets/delete-buckets/) — *"a bucket must be completely empty before it can be deleted"* — and wrangler has no bulk object delete and no `r2 object list`, so there is no wrangler path to empty it. Cloudflare's own documented workaround is to script the deletes over the **S3-compatible API**, which `.github/scripts/preview-reaper.mjs` does with `aws s3 rm --recursive`. The `aws` CLI authenticates with S3-style HMAC credentials (an Access Key ID + Secret Access Key), **not** a Cloudflare bearer token — hence `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`.
+
+Note what this credential does **not** buy: it is *not* a smaller blast radius. An R2 token cannot be scoped to buckets that do not exist yet, so it is account-wide and can purge production `buildersnetwork-uploads` — exactly like `CLOUDFLARE_API_TOKEN` can already `d1 delete buildersnetwork`. The mitigation is the script's anchored name guard, not the credential (see *R2 storage is duplicated* above). The credential exists purely because the S3 protocol needs S3-shaped keys, which is why the two options below are equivalent on safety and differ only on operational hygiene.
+
+### Providing the credentials — two options
+
+Cloudflare lets **any** API token double as S3 credentials ([R2 tokens docs](https://developers.cloudflare.com/r2/api/tokens/)): the Access Key ID is the token's `id`, and the Secret Access Key is the **SHA-256 hash of the token's value**. That means the emptying credential can either be minted fresh or derived from the token the workflows already use.
+
+**Option A — dedicated R2 token (recommended default).** Cleanest to reason about: named for its job, unambiguously carries object permissions, and rotatable/revocable independently of `CLOUDFLARE_API_TOKEN`.
+
+1. Cloudflare dashboard → **R2** → **Manage R2 API Tokens** → **Create API token**.
+2. Permission **Object Read & Write** (or **Admin Read & Write**). Account-wide, per the note above.
+3. On creation Cloudflare shows an **Access Key ID** and a **Secret Access Key** *once*. Copy both → `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`.
+
+**Option B — reuse the existing `CLOUDFLARE_API_TOKEN`.** Avoids creating a second credential, and slots into the workflows with **no code change** — the script only ever sees `R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY`. Valid only if **both** hold:
+
+- the existing token carries R2 **Admin Read & Write** (per the docs, `Object *` permissions are S3-only, but `Admin Read & Write` works for both the Cloudflare REST API *and* S3 object operations — so a token that already creates/deletes buckets can also delete objects over S3); **and**
+- you still have the token's **raw value**, because GitHub secrets are write-only and you cannot read `CLOUDFLARE_API_TOKEN` back out to hash it.
+
+Then set:
+
+- `R2_S3_ACCESS_KEY_ID` = the token's **ID** (its identifier, not the value).
+- `R2_S3_SECRET_ACCESS_KEY` = the **hex SHA-256** of the token value, e.g. `printf '%s' "$TOKEN_VALUE" | sha256sum`.
+
+The trade-off is pure hygiene, not security (blast radius is identical): Option B couples object-purge to the credential everything else uses, so you can no longer rotate or revoke the purge capability on its own.
+
+### Wiring the secrets
+
+Repo → **Settings → Secrets and variables → Actions**:
+
+- `CLOUDFLARE_WORKERS_SUBDOMAIN` goes under **Variables**.
+- everything else, including the two R2 keys from whichever option above, under **Secrets**.
+
+The two R2 keys are exposed **only to the reap step's `env:`** in each workflow, never job-wide, so nothing else in the job can read the credential that can purge production storage.
 
 ## Not decided here
 

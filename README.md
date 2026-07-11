@@ -300,6 +300,12 @@ repo** gets a full ephemeral environment at
 (`buildersnetwork-pr-<n>-uploads`), and its own Worker. A sticky comment posts
 the URL and the seed credentials. Sign in with any [seed account](#seed-accounts).
 
+Concurrent previews are **capped at 7** (a knob in `preview.yml`), counted live
+from the D1 databases that exist — the free tier allows 10, prod takes one, and
+the margin keeps provisioning off D1's hard limit. A PR that already has a
+preview is never blocked; a PR that hits the cap gets a sticky comment telling it
+to close another preview, then push or re-run.
+
 The earlier `wrangler versions upload` shortcut was deleted (`15cdbb2`) because
 it bound the preview to *production* bindings and login was broken on the
 `*.workers.dev` origin. Both are fixed by isolation: each preview sets its own
@@ -316,10 +322,22 @@ and Google sign-in in previews — absence is the flag.
 Because applying PR-authored migrations means running PR-authored code with
 database credentials, the app preview is **trusted PRs only**; fork PRs get CI
 and the mockup preview. Seed data is reset on every push; the bucket is not.
-Teardown is not yet automated ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) —
-preview databases and buckets are deleted by hand, with a 7-day object lifecycle
-rule as the backstop. Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable;
-the auth-signing secret is generated fresh per run, not stored. Design notes:
+
+**Teardown** (`preview-teardown.yml`) runs when a PR closes or merges, deleting
+all three resources — the bucket emptied over the S3 API first, since R2 refuses
+to delete a non-empty bucket, then deleted. A scheduled **reaper**
+(`preview-reaper.yml`) is the backstop: it sweeps environments whose PR is no
+longer open (derived from `d1 list` + `r2 bucket list`, since no wrangler
+command lists Workers), and the 7-day object lifecycle rule catches the rest.
+Both share one guarded script (`.github/scripts/preview-reaper.mjs`) whose
+anchored `^buildersnetwork-pr-<n>$` name checks — unit-tested in CI against the
+production names — are the only thing standing between an account-wide token and
+deleting production D1/R2. Teardown and reaper additionally need the
+`R2_S3_ACCESS_KEY_ID` / `R2_S3_SECRET_ACCESS_KEY` secrets (an R2 S3 token, used
+only to empty buckets); they no-op until those are set.
+
+Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable; the auth-signing
+secret is generated fresh per run, not stored. Design notes:
 [plans/how-to/preview-environments.md](plans/how-to/preview-environments.md).
 
 **Mockup preview.** Any pull request that modifies `apps/mockups/**` also gets a

@@ -1,0 +1,81 @@
+name: Preview reaper
+
+# Backstop for preview teardown. On a schedule, sweeps every preview environment
+# whose PR is no longer open and reaps it — the safety net for when teardown
+# failed, or never ran because the teardown workflow itself was changed inside
+# the PR that closed. Shares .github/scripts/preview-reaper.mjs with teardown,
+# so the anchored name guard lives in exactly one place.
+#
+# Enumeration is deliberately derived from D1 + R2, NOT from listing Workers:
+# no wrangler command lists all Workers, and deriving stale PR numbers from the
+# resources that DO list (d1 list --json, r2 bucket list) avoids a REST-API
+# detour. A Worker orphaned with neither its DB nor its bucket is not seen and
+# is intentionally left — see issue #45. Each resource is reaped independently,
+# so one failure never halts the sweep.
+
+on:
+  schedule:
+    # Daily at 03:17 UTC. Off the hour to dodge the top-of-hour scheduler surge.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+
+# Never let two sweeps run at once — concurrent deletes of the same stale
+# environment would race. Not cancel-in-progress: let a running sweep finish.
+concurrency:
+  group: preview-reaper
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  reap:
+    name: Reap stale preview environments
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Guard on reaper configuration
+        id: guard
+        run: |
+          if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
+            && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] \
+            && [ -n "${{ secrets.R2_S3_ACCESS_KEY_ID }}" ] \
+            && [ -n "${{ secrets.R2_S3_SECRET_ACCESS_KEY }}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::Preview reaper skipped — set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, R2_S3_ACCESS_KEY_ID and R2_S3_SECRET_ACCESS_KEY to enable it."
+          fi
+
+      - name: Checkout
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        if: steps.guard.outputs.enabled == 'true'
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        if: steps.guard.outputs.enabled == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.guard.outputs.enabled == 'true'
+        run: pnpm install
+
+      # GH_TOKEN lets the script enumerate open PRs (gh pr list); the S3 keys are
+      # scoped to this step alone. Same guard as teardown asserts every name is a
+      # per-PR name before any delete, so the account-wide token cannot touch
+      # production `buildersnetwork` / `buildersnetwork-uploads`.
+      - name: Sweep and reap
+        if: steps.guard.outputs.enabled == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
+        run: node .github/scripts/preview-reaper.mjs reap

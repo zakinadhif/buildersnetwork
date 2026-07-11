@@ -27,11 +27,21 @@ routes = [
 ]
 
 # Workers Assets — serves the built SPA and landing from apps/api/public/.
-# Requests matching a static file are served directly; everything else falls
-# through to the Worker's fetch handler.
+#
+# `run_worker_first` is NOT optional for `/app/*`. Without it, Cloudflare's
+# asset router handles a request BEFORE the Worker ever runs, and for any
+# extensionless path that isn't a literal file (i.e. every client-side SPA
+# route — /app/minat, /app/karya/:id, ...) its default behavior is a
+# `307 -> /app/` redirect, not a fallthrough to the Worker. That silently
+# broke every deep link into the app (confirmed in prod via curl on
+# 2026-07-11) despite the SPA-fallback code in apps/api/src/worker.ts
+# appearing to handle it — the code was simply never reached. `/app/assets/*`
+# (the hashed Vite bundle) is excluded so those still serve straight from
+# the edge with no Worker hop.
 [assets]
 directory = "apps/api/public"
 binding = "ASSETS"
+run_worker_first = ["/app/*", "!/app/assets/*"]
 
 # Workers AI — free daily quota for inference.
 [ai]

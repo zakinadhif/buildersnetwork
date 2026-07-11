@@ -30,9 +30,14 @@ workers_dev = true
 
 # Serves the SPA + landing built by `pnpm build:cf` into apps/api/public/.
 # Deploying without that build yields a Worker with empty or stale assets.
+#
+# `run_worker_first` for `/app/*` is required for deep links to work — see the
+# comment in wrangler.toml. `/app/assets/*` (hashed Vite bundle) is excluded so
+# it still serves straight from the edge.
 [assets]
 directory = "apps/api/public"
 binding = "ASSETS"
+run_worker_first = ["/app/*", "!/app/assets/*"]
 
 [ai]
 binding = "AI"
