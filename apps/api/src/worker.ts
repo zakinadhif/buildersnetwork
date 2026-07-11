@@ -107,14 +107,22 @@ export default {
     // miss on an extensionless path comes back as a 307 (e.g. to /app/), not a
     // 404 — forwarding that verbatim would reproduce the exact redirect this
     // fallback exists to avoid.
-    //
-    // The fallback target is "/app/" (trailing slash), NOT "/app/index.html":
-    // requesting the literal index.html filename undergoes the SAME
-    // auto-trailing-slash normalization and itself 307s to "/app/" — fetching
-    // the already-canonical folder URL is what actually returns 200.
     if (url.pathname.startsWith("/app/")) {
       const assetResponse = await env.ASSETS.fetch(request);
       if (assetResponse.ok) return assetResponse;
+
+      // Only a miss on an EXTENSIONLESS path is a client-side SPA route.
+      // A miss on a path with an extension (/app/favicon.ico, /app/foo.js,
+      // a stale/broken asset reference, ...) is a genuine missing file —
+      // masking it as a 200 HTML shell would hide broken asset URLs and
+      // confuse caching (a browser expecting an image getting HTML back).
+      if (url.pathname.match(/\.\w+$/)) return assetResponse;
+
+      // The fallback target is "/app/" (trailing slash), NOT
+      // "/app/index.html": requesting the literal index.html filename
+      // undergoes the SAME auto-trailing-slash normalization and itself
+      // 307s to "/app/" — fetching the already-canonical folder URL is
+      // what actually returns 200.
       return env.ASSETS.fetch(
         new Request(new URL("/app/", url.origin), request),
       );
