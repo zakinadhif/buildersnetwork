@@ -1,5 +1,6 @@
 import type { PostKind } from "../../posts";
 import { posts } from "../../schema";
+import { insertInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 // Example karya updates so the feed + karya streams are non-empty on a fresh
@@ -77,19 +78,17 @@ export const postSeeder: Seeder = {
   tables: [posts],
   async run({ db, log }) {
     log("inserting seed posts…");
-    await db
-      .insert(posts)
-      .values(
-        SEED_POSTS.map((p) => ({
-          id: p.id,
-          karyaId: p.karyaId,
-          authorId: p.authorId,
-          kind: p.kind,
-          body: p.body,
-          createdAt: new Date(BASE + p.dayOffset * DAY),
-        })),
-      )
-      .onConflictDoNothing();
+    const rows = SEED_POSTS.map((p) => ({
+      id: p.id,
+      karyaId: p.karyaId,
+      authorId: p.authorId,
+      kind: p.kind,
+      body: p.body,
+      createdAt: new Date(BASE + p.dayOffset * DAY),
+    }));
+    await insertInChunks(posts, rows, (chunk) =>
+      db.insert(posts).values(chunk).onConflictDoNothing(),
+    );
 
     log(`seeded ${SEED_POSTS.length} posts`);
   },

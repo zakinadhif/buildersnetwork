@@ -3,11 +3,15 @@
 # then deploy with `wrangler deploy`.
 #
 # Secrets (never commit these) — set via:
-#   wrangler secret put DATABASE_URL
 #   wrangler secret put BETTER_AUTH_SECRET
 #   wrangler secret put ANTHROPIC_API_KEY   # not needed when AI_PROVIDER=workers-ai
-#   wrangler secret put RESEND_API_KEY      # optional — sends email via Resend
-#                                           # instead of the [[send_email]] binding
+#   wrangler secret put RESEND_API_KEY      # the LIVE email sender (Resend, free
+#                                           # tier). Takes precedence over the
+#                                           # [[send_email]] binding below, which is
+#                                           # dormant on this free-tier account.
+#
+# The database is a D1 binding, not a connection string — there is no
+# DATABASE_URL secret in the Worker.
 
 name = "buildersnetwork"
 main = "apps/api/src/worker.ts"
@@ -23,15 +27,35 @@ routes = [
 ]
 
 # Workers Assets — serves the built SPA and landing from apps/api/public/.
-# Requests matching a static file are served directly; everything else falls
-# through to the Worker's fetch handler.
+#
+# `run_worker_first` is NOT optional for `/app/*`. Without it, Cloudflare's
+# asset router handles a request BEFORE the Worker ever runs, and for any
+# extensionless path that isn't a literal file (i.e. every client-side SPA
+# route — /app/minat, /app/karya/:id, ...) its default behavior is a
+# `307 -> /app/` redirect, not a fallthrough to the Worker. That silently
+# broke every deep link into the app (confirmed in prod via curl on
+# 2026-07-11) despite the SPA-fallback code in apps/api/src/worker.ts
+# appearing to handle it — the code was simply never reached. `/app/assets/*`
+# (the hashed Vite bundle) is excluded so those still serve straight from
+# the edge with no Worker hop.
 [assets]
 directory = "apps/api/public"
 binding = "ASSETS"
+run_worker_first = ["/app/*", "!/app/assets/*"]
 
 # Workers AI — free daily quota for inference.
 [ai]
 binding = "AI"
+
+# D1 — the SQLite database. Create it once before deploying:
+#   wrangler d1 create buildersnetwork
+# then paste the returned database_id below. Apply migrations with:
+#   wrangler d1 migrations apply buildersnetwork --remote
+[[d1_databases]]
+binding = "DB"
+database_name = "buildersnetwork"
+database_id = "1a06c788-e588-4420-b9ed-e7cab1bda2de"
+migrations_dir = "libs/db/migrations"
 
 # R2 bucket for uploads (karya cover images, issue #18). Create the bucket once
 # before deploying:  wrangler r2 bucket create buildersnetwork-uploads
@@ -40,9 +64,12 @@ binding = "AI"
 binding = "UPLOADS"
 bucket_name = "buildersnetwork-uploads"
 
-# Cloudflare Email Service (beta) — default transactional email sender.
-# Requires Workers Paid plan. Set sender domain via Cloudflare Email Routing.
-# Overridden at runtime by Resend when the RESEND_API_KEY secret is set.
+# Cloudflare Email Service (beta). Requires the Workers Paid plan — this account
+# is on the free tier, so this binding is currently DORMANT: transactional email
+# is actually sent through Resend (set the RESEND_API_KEY secret). Kept here for
+# when the account moves to Paid. At runtime Resend wins whenever RESEND_API_KEY
+# is set; this binding is only reached if that key is absent. Sender domain is
+# configured via Cloudflare Email Routing.
 [[send_email]]
 name = "EMAIL"
 

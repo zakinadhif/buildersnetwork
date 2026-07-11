@@ -1,14 +1,35 @@
 import { parseArgs } from "node:util";
-import { getTableName, sql } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
-import * as schema from "../schema";
-import type { Seeder } from "./types";
+import { getTableName } from "drizzle-orm";
+import type { D1HttpDb } from "../d1-http";
+import type { Db } from "../index";
+import type { SeedDb, Seeder } from "./types";
+
+/** Any client the runner can drive: libSQL on Node, or D1 over its HTTP API. */
+export type SeedRunnerDb = Db | D1HttpDb;
 
 export interface SeedRuntimeConfig {
-  databaseUrl: string;
+  /**
+   * An already-constructed client. The runner is deliberately written against
+   * the driver-agnostic `Db` type rather than any one vendor's CLI, so seeding
+   * a remote libSQL/Turso or D1 database from Node stays possible without
+   * changing this file.
+   */
+  db: SeedRunnerDb;
   /** When true, refuse to run without `--force`; require `--yes` for `--reset`. */
   isProduction: boolean;
+  /**
+   * Whether the driver has interactive transactions. Defaults to true.
+   *
+   * D1 has none — at any layer. `sqlite-proxy` fakes `transaction()` by issuing
+   * `begin`/`commit` as ordinary statements, which D1 rejects. When false, each
+   * seeder's `--reset` deletes and inserts run unwrapped: a seeder that fails
+   * halfway leaves its tables partly written. That is acceptable only because
+   * the run is against a disposable preview database whose next push re-seeds it
+   * from scratch. Never pass false for a database anyone relies on.
+   */
+  supportsTransactions?: boolean;
+  /** Optional teardown for the underlying client, run after the last seeder. */
+  close?: () => void | Promise<void>;
 }
 
 export interface RunSeedOptions {
@@ -35,7 +56,7 @@ const HELP = `Usage: seed [options]
 
 Options:
   --only <name>     Run only the named seeder (repeatable)
-  --reset           Truncate each seeder's tables before running it
+  --reset           Empty each seeder's tables before running it
   --force           Allow running when NODE_ENV=production
   --yes             Confirm destructive flags (required with --reset)
   --list            List available seeders and exit
@@ -46,7 +67,38 @@ Examples:
   pnpm db:seed -- --only items
   pnpm db:seed -- --reset --yes
   pnpm db:seed -- --force --reset --yes      # production (be careful)
+
+Seed accounts:
+  The members seeder creates Better Auth credentials for each seed user, so
+  they can sign in with email + password (needed to review anything behind
+  auth in a preview environment).
+
+    email     hafiz@seed.local, fatimah@seed.local, rizal@seed.local,
+              dinda@seed.local, arya@seed.local
+    password  seedpassword123
+
+  Not a secret: seed data is for local dev and previews only, and this runner
+  refuses to run under NODE_ENV=production without --force.
 `;
+
+/**
+ * SQLite has no `TRUNCATE`. An unfiltered `DELETE FROM` is the equivalent, and
+ * needs no `CASCADE` keyword: SQLite enforces `ON DELETE CASCADE` for us —
+ * libSQL and D1 both have `PRAGMA foreign_keys` on by default. There is no
+ * `RESTART IDENTITY` analogue and no purpose for one here: every table keys on
+ * a `text` id, so there are no sequences to reset.
+ *
+ * Tables are emptied children-first (reverse of declaration order) so the
+ * result doesn't depend on cascade doing the work.
+ */
+async function emptyTables(
+  tx: SeedDb,
+  tables: NonNullable<Seeder["tables"]>,
+): Promise<void> {
+  for (const table of [...tables].reverse()) {
+    await tx.delete(table);
+  }
+}
 
 function parseFlags(argv: string[]): ParsedFlags {
   const { values } = parseArgs({
@@ -114,7 +166,13 @@ function formatList(seeders: readonly Seeder[]): string {
  * the non-zero exit code reaches the shell.
  */
 export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
-  const argv = opts.argv ?? process.argv.slice(2);
+  // Strip `--` separators. `pnpm db:seed -- --reset --yes` forwards through two
+  // `pnpm run` hops (root script -> api script), and the inner one receives the
+  // separator as a literal argv entry. `parseArgs` reads `--` as end-of-options
+  // and reports every flag after it as a positional, which `allowPositionals:
+  // false` then rejects — so every documented `pnpm db:seed -- <flag>` form
+  // fails from the repo root without this.
+  const argv = (opts.argv ?? process.argv.slice(2)).filter((a) => a !== "--");
   let flags: ParsedFlags;
   try {
     flags = parseFlags(argv);
@@ -135,7 +193,7 @@ export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
   }
 
   if (flags.reset && !flags.yes) {
-    throw new Error("seed: --reset truncates tables. Pass --yes to confirm.");
+    throw new Error("seed: --reset empties tables. Pass --yes to confirm.");
   }
 
   const selected = selectSeeders(opts.seeders, flags.only);
@@ -152,8 +210,7 @@ export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
     );
   }
 
-  const client = postgres(config.databaseUrl, { max: 1, onnotice: () => {} });
-  const db = drizzle(client, { schema });
+  const { db } = config;
 
   const startedAll = Date.now();
   process.stdout.write(
@@ -165,28 +222,30 @@ export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
       const started = Date.now();
       process.stdout.write(`  → ${seeder.name}\n`);
 
-      await db.transaction(async (tx) => {
+      const runOne = async (handle: SeedDb) => {
         if (flags.reset && seeder.tables && seeder.tables.length > 0) {
           const names = seeder.tables.map((t) => getTableName(t)).join(", ");
-          process.stdout.write(`    reset: truncating ${names}\n`);
-          const targets = sql.join(
-            seeder.tables.map((t) => sql`${t}`),
-            sql.raw(", "),
-          );
-          await tx.execute(
-            sql`TRUNCATE TABLE ${targets} RESTART IDENTITY CASCADE`,
-          );
+          process.stdout.write(`    reset: emptying ${names}\n`);
+          await emptyTables(handle, seeder.tables);
         }
         await seeder.run({
-          db: tx,
+          db: handle,
           log: (m) => process.stdout.write(`    ${m}\n`),
         });
-      });
+      };
+
+      if (config.supportsTransactions === false) {
+        // No transaction to open. A seeder only ever needs insert/delete/select,
+        // so the base handle satisfies `SeedDb` structurally.
+        await runOne(db as unknown as SeedDb);
+      } else {
+        await (db as Db).transaction(runOne);
+      }
 
       process.stdout.write(`    ok (${Date.now() - started}ms)\n`);
     }
     process.stdout.write(`seed: done in ${Date.now() - startedAll}ms\n`);
   } finally {
-    await client.end();
+    await config.close?.();
   }
 }

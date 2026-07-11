@@ -7,7 +7,9 @@ Free Workers AI replaces the Anthropic API for AI inference.
 
 - Cloudflare account
 - `wrangler` (installed as a devDep: `pnpm --filter api exec wrangler`)
-- A Neon Postgres database (free tier works) for `DATABASE_URL`
+
+The database is a **D1** binding, not a connection string — there is no
+`DATABASE_URL` secret on the Worker.
 
 ## 1. Authenticate Wrangler
 
@@ -15,34 +17,48 @@ Free Workers AI replaces the Anthropic API for AI inference.
 wrangler login
 ```
 
-## 2. Set secrets
+## 2. Create the D1 database
 
 ```bash
-wrangler secret put DATABASE_URL        # postgres://... (Neon connection string)
+wrangler d1 create buildersnetwork
+```
+
+Paste the returned `database_id` into the `[[d1_databases]]` block in
+`wrangler.toml` (replacing `REPLACE_WITH_D1_DATABASE_ID`). This is a one-time
+step per Cloudflare account.
+
+## 3. Set secrets
+
+```bash
 wrangler secret put BETTER_AUTH_SECRET  # random 32+ char string
 wrangler secret put APP_URL             # https://yourapp.workers.dev
 # Optional:
 wrangler secret put GOOGLE_CLIENT_ID
 wrangler secret put GOOGLE_CLIENT_SECRET
 wrangler secret put ALLOWED_ORIGINS     # comma-separated if needed
-wrangler secret put RESEND_API_KEY      # send email via Resend instead of the [[send_email]] binding
+wrangler secret put RESEND_API_KEY      # the live email sender (Resend) — [[send_email]] needs Workers Paid
 ```
+
+There is no `DATABASE_URL` secret — the Worker reaches the database through the
+D1 binding (`env.DB`) declared in `wrangler.toml`.
 
 ### Email
 
-By default the Worker sends transactional email (the OTP code) through the
-Cloudflare Email Service `[[send_email]]` binding in `wrangler.toml`, which
-requires the Workers Paid plan and a sender domain verified via Email Routing.
-Set the `RESEND_API_KEY` secret to send through [Resend](https://resend.com)
-instead — the Worker detects the key at startup and switches providers, no
-config change needed.
+This deployment sends transactional email (the OTP code) through
+[Resend](https://resend.com) — set the `RESEND_API_KEY` secret. The Worker's
+provider chain prefers Resend, then the Cloudflare Email Service `[[send_email]]`
+binding, then a no-op. The `[[send_email]]` binding in `wrangler.toml` requires
+the Workers Paid plan (a sender domain verified via Email Routing); the account
+is on the free tier, so that binding is dormant and Resend is the live sender.
+The Worker detects `RESEND_API_KEY` at startup and selects providers — no config
+change needed.
 
 The sender address comes from the `EMAIL_FROM` var in `wrangler.toml` (override
 per-deploy with `wrangler secret put EMAIL_FROM` if you'd rather not commit it);
 it falls back to `DEFAULT_EMAIL_FROM` when unset. Its domain must be verified
 with whichever provider is active.
 
-## 3. Build and deploy
+## 4. Build and deploy
 
 ```bash
 pnpm cf:deploy
@@ -75,28 +91,30 @@ the dashboard, enable Workers Logs by adding an `[observability]` block to
 - Workers Assets binding serves `/` (landing) and `/app/*` (SPA) directly from Cloudflare's CDN.
 - The Worker's `fetch` handler only runs for `/api/*` and `/healthz`.
 - `AI_PROVIDER` defaults to `workers-ai` via the `AI` binding configured in `wrangler.toml`.
-- Database uses the Neon HTTP driver (no TCP sockets — compatible with Workers).
+- The database is a **D1** binding (`env.DB`) — SQLite at the edge, no TCP sockets, no connection string. `apps/api/src/worker.ts` hands the binding to `drizzle-orm/d1`.
 
 ## Run database migrations
 
 Workers can't run migrations themselves (no long-lived scripts), so they run
-*before* the Worker is published.
+*before* the Worker is published. D1 has its own migration runner —
+`wrangler d1 migrations apply` — which reads the same `libs/db/migrations`
+directory (`migrations_dir` in `wrangler.toml`) and tracks applied migrations in
+D1's own ledger.
 
-- **In CI (normal path):** `.github/workflows/release.yml` runs `pnpm db:migrate`
-  against the prod `DATABASE_URL` secret on every push to `main`, then deploys.
-  No manual step needed.
+- **In CI (normal path):** `.github/workflows/release.yml` runs
+  `wrangler d1 migrations apply buildersnetwork --remote` on every push to
+  `main`, then deploys. No manual step needed.
 - **Manually (initial schema / out-of-band):**
 
   ```bash
-  # run from a local machine against the Neon DB directly
-  DATABASE_URL=postgres://... pnpm db:migrate   # apply migration files
+  # applies libs/db/migrations to the remote D1 database
+  pnpm exec wrangler d1 migrations apply buildersnetwork --remote
+  # drop --remote to apply to the local D1 simulator instead
   ```
 
-> **Use `db:migrate`, never `db:push`, on any DB the release workflow targets.**
-> `db:push` creates tables directly and records nothing in the
-> `drizzle.__drizzle_migrations` ledger, so a later `db:migrate` thinks nothing
-> is applied, tries to run `0000` from scratch, and fails on the already-existing
-> tables. `db:push` is for throwaway local iteration only.
+> The D1 migration runner tracks applied files itself — don't reach for
+> `db:push` against a D1 database the release workflow targets. `db:push` is for
+> throwaway local iteration against a `file:` SQLite database only.
 
 ## Redeploy after code changes
 
@@ -106,22 +124,18 @@ pnpm cf:deploy
 
 ## PR preview deploys (CI)
 
-`.github/workflows/preview.yml` uploads a Worker *version* on every PR and
-comments its `*.workers.dev` preview URL. `wrangler versions upload` does **not**
-shift production traffic — it's a clickable build for eyeballing changes.
+There is **no app preview today.** The old `.github/workflows/preview.yml` —
+which uploaded a Worker version bound to *production* secrets — was deleted in
+`15cdbb2` precisely because sharing the production database with previews leaks
+real PII into public links.
 
-It runs only when both repo secrets are set (otherwise the job no-ops, like the
-guarded deploys in `release.yml`):
-
-```
-CLOUDFLARE_API_TOKEN    # token with "Edit Workers" permission
-CLOUDFLARE_ACCOUNT_ID   # Cloudflare account ID
-```
-
-The preview version uses the **production** bindings/secrets, including the prod
-`DATABASE_URL`. So it's safe for frontend/logic PRs but not schema-changing ones
-— those need per-branch DB isolation (Neon branching), tracked as Tier 2 in
-`plans/sprint/retro.txt`.
+The ratified replacement is a per-PR ephemeral D1 database (create → migrate →
+seed → delete), giving each preview a synthetic, PII-free database. The design
+and its open constraints (D1's per-account database cap, trusted-PRs-only) live
+in [`plans/how-to/preview-environments.md`](../../plans/how-to/preview-environments.md);
+it is not yet implemented. Mockup PRs still get an isolated *static* preview via
+`preview-mockups.yml` + `preview-mockups-deploy.yml` — that path is unrelated
+and unaffected.
 
 ## Redeploy after frontend-only changes
 

@@ -839,6 +839,24 @@ components:
           type: string
       required: [id]
 
+    ScreenshotOrientation:
+      type: string
+      enum: [landscape, portrait]
+
+    KaryaScreenshot:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+          description: Relative URL to serve the screenshot's bytes.
+        orientation:
+          $ref: "#/components/schemas/ScreenshotOrientation"
+        position:
+          type: integer
+      required: [id, url, orientation, position]
+
     Karya:
       type: object
       properties:
@@ -861,7 +879,15 @@ components:
           description: >-
             Relative URL of the owner-uploaded cover image
             (`/api/karya/{id}/cover`), or null when none has been uploaded.
-      required: [id, title, description, stages, interests, coverUrl]
+        screenshots:
+          type: array
+          items:
+            $ref: "#/components/schemas/KaryaScreenshot"
+          description: >-
+            Owner-uploaded screenshot gallery (issue #19), ordered by
+            `position` within each orientation.
+      required:
+        [id, title, description, stages, interests, coverUrl, screenshots]
 
     KaryaMembership:
       type: object

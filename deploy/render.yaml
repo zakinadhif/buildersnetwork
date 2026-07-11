@@ -16,6 +16,9 @@ services:
         sync: false
       - key: DATABASE_URL
         sync: false
+      # Only needed when DATABASE_URL is a remote libsql:// (Turso) URL.
+      - key: DATABASE_AUTH_TOKEN
+        sync: false
       - key: BETTER_AUTH_SECRET
         sync: false
       - key: BETTER_AUTH_URL

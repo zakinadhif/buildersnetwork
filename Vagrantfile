@@ -5,10 +5,11 @@ Vagrant.configure("2") do |config|
   # Disable default rsync — causes issues on Windows
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
+  # Two VMs: web + api. The database is a SQLite file on the api host, so there
+  # is no separate db VM.
   {
     "bn-frontend" => "192.168.56.10",
     "bn-api"      => "192.168.56.11",
-    "bn-db"       => "192.168.56.12",
   }.each do |name, ip|
     config.vm.define name do |node|
       node.vm.hostname = name

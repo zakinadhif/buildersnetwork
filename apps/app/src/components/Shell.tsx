@@ -6,7 +6,8 @@ import type { Member } from "@/lib/members";
  * The persistent Launchpad app shell (issue #8): a left-sidebar rail + a content
  * slot, and an optional right rail (issue #20) a page can fill. Every logged-in
  * route renders *inside* this shell; auth/welcome/login stay outside it (see
- * App.tsx). Ported from MockupB's three-column `bn-*` layout.
+ * App.tsx). Ported from the mockup gallery's `bn-nav` rail
+ * (`apps/mockups/src/components/LeftNav.tsx`).
  *
  * The rail is route-aware — the active item follows `wouter`'s location and is
  * marked with `aria-current="page"`. "Cari Kolaborator" ships disabled until the

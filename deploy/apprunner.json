@@ -14,6 +14,7 @@
         "RuntimeEnvironmentSecrets": {
           "APP_URL": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/APP_URL",
           "DATABASE_URL": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/DATABASE_URL",
+          "DATABASE_AUTH_TOKEN": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/DATABASE_AUTH_TOKEN",
           "BETTER_AUTH_SECRET": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/BETTER_AUTH_SECRET",
           "BETTER_AUTH_URL": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/BETTER_AUTH_URL",
           "GOOGLE_CLIENT_ID": "arn:aws:secretsmanager:REGION:ACCOUNT_ID:secret:comfort-stack/GOOGLE_CLIENT_ID",

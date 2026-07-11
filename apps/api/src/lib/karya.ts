@@ -1,8 +1,14 @@
-import type { createDb, KaryaStage } from "@myapp/db";
-import { karyaMembers, profiles, users } from "@myapp/db/schema";
-import { eq, inArray } from "drizzle-orm";
+import type { createDb, KaryaStage, ScreenshotOrientation } from "@myapp/db";
+import {
+  karyaMembers,
+  karyaScreenshots,
+  profiles,
+  users,
+} from "@myapp/db/schema";
+import { asc, eq, inArray } from "drizzle-orm";
 import { coverUrlFor } from "./cover";
 import { interestsByKaryaIds } from "./interests";
+import { screenshotUrlFor } from "./screenshots";
 
 type Db = ReturnType<typeof createDb>;
 
@@ -78,16 +84,77 @@ export interface KaryaListRow {
   coverKey: string | null;
 }
 
+// One screenshot row (issue #19), joined to its serve URL. Carries `karyaId`
+// so callers can batch across many karya without N+1 (mirrors `RosterRow`).
+export interface ScreenshotRow {
+  id: string;
+  karyaId: string;
+  key: string;
+  orientation: ScreenshotOrientation;
+  position: number;
+}
+
+export function toKaryaScreenshot(r: ScreenshotRow) {
+  return {
+    id: r.id,
+    url: screenshotUrlFor(r.karyaId, r.id),
+    orientation: r.orientation,
+    position: r.position,
+  };
+}
+
+/**
+ * Fetch every screenshot row for the given karya in one grouped query, ordered
+ * by orientation then position — don't N+1 the listing (mirrors
+ * `rostersByKaryaIds`).
+ */
+export async function screenshotsByKaryaIds(
+  db: Db,
+  karyaIds: string[],
+): Promise<Map<string, ScreenshotRow[]>> {
+  const grouped = new Map<string, ScreenshotRow[]>();
+  if (karyaIds.length === 0) return grouped;
+
+  const rows = await db
+    .select({
+      id: karyaScreenshots.id,
+      karyaId: karyaScreenshots.karyaId,
+      key: karyaScreenshots.key,
+      orientation: karyaScreenshots.orientation,
+      position: karyaScreenshots.position,
+    })
+    .from(karyaScreenshots)
+    .where(inArray(karyaScreenshots.karyaId, karyaIds))
+    .orderBy(asc(karyaScreenshots.orientation), asc(karyaScreenshots.position));
+
+  for (const r of rows) {
+    const row = r as ScreenshotRow;
+    const list = grouped.get(row.karyaId);
+    if (list) list.push(row);
+    else grouped.set(row.karyaId, [row]);
+  }
+  return grouped;
+}
+
+/** Single-karya convenience over {@link screenshotsByKaryaIds}. */
+export async function screenshotsForKarya(
+  db: Db,
+  karyaId: string,
+): Promise<ScreenshotRow[]> {
+  return (await screenshotsByKaryaIds(db, [karyaId])).get(karyaId) ?? [];
+}
+
 /**
  * Assemble a single `KaryaListItem` from a karya row + its already-batched
- * interests and roster (approved members only, owner first). Pure — the
- * batching is done once by {@link karyaListItems} so neither the list, the
- * feed, nor the featured read N+1s.
+ * interests, roster (approved members only, owner first), and screenshots.
+ * Pure — the batching is done once by {@link karyaListItems} so neither the
+ * list, the feed, nor the featured read N+1s.
  */
 export function toKaryaListItem(
   k: KaryaListRow,
   interests: string[],
   roster: RosterRow[],
+  screenshots: ScreenshotRow[] = [],
 ) {
   const members = sortRoster(roster.filter((r) => r.status === "member"));
   return {
@@ -97,26 +164,29 @@ export function toKaryaListItem(
     stages: k.stages,
     interests,
     coverUrl: coverUrlFor(k.id, k.coverKey),
+    screenshots: screenshots.map(toKaryaScreenshot),
     roster: members.map(toRosterMember),
     memberCount: members.length,
   };
 }
 
 /**
- * Build `KaryaListItem`s for a set of karya rows, batching interests + rosters
- * in two queries total (no N+1). Shared by `GET /karya` (S3.6), the feed
- * (S3.9), and the featured read (S3.10).
+ * Build `KaryaListItem`s for a set of karya rows, batching interests, rosters,
+ * and screenshots in three queries total (no N+1). Shared by `GET /karya`
+ * (S3.6), the feed (S3.9), and the featured read (S3.10).
  */
 export async function karyaListItems(db: Db, rows: KaryaListRow[]) {
   if (rows.length === 0) return [];
   const ids = rows.map((k) => k.id);
   const interestsByKarya = await interestsByKaryaIds(db, ids);
   const rosters = await rostersByKaryaIds(db, ids);
+  const screenshots = await screenshotsByKaryaIds(db, ids);
   return rows.map((k) =>
     toKaryaListItem(
       k,
       interestsByKarya.get(k.id) ?? [],
       rosters.get(k.id) ?? [],
+      screenshots.get(k.id) ?? [],
     ),
   );
 }

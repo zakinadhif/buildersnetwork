@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema/index.ts",
+    "./d1-http": "./src/d1-http.ts"
   },
   "scripts": {
     "db:push": "drizzle-kit push --config drizzle.config.ts",
@@ -17,10 +18,10 @@
     "test:watch": "vitest"
   },
   "dependencies": {
-    "@neondatabase/serverless": "^0.10.4",
+    "@libsql/client": "^0.17.4",
+    "better-auth": "^1.5.5",
     "drizzle-orm": "catalog:",
     "drizzle-zod": "^0.8.3",
-    "postgres": "^3.4.5",
     "zod": "catalog:"
   },
   "devDependencies": {

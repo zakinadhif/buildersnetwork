@@ -1,28 +1,30 @@
 import { createWorkersAI, type WorkersAIBinding } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
-import { createDb, type Db } from "@myapp/db";
-import {
-  createResendEmail,
-  createWorkersEmail,
-  DEFAULT_EMAIL_FROM,
-  type WorkersEmailBinding,
-} from "@myapp/email";
+import type { Db } from "@myapp/db";
+import * as schema from "@myapp/db/schema";
+import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
 import { createR2Storage } from "@myapp/storage";
+import { drizzle } from "drizzle-orm/d1";
 
 import { type AppServices, createApp } from "./app";
+import { selectEmail } from "./lib/email";
 
 // Cloudflare Workers environment bindings + secrets.
-// Secrets (DATABASE_URL, BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
+// Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
 interface Env {
   // Workers Assets binding (configured in wrangler.toml)
   ASSETS: Fetcher;
   // Workers AI binding (configured in wrangler.toml)
   AI: WorkersAIBinding;
+  // D1 database binding (configured in wrangler.toml as [[d1_databases]]).
+  // Replaces the old DATABASE_URL secret — there is no connection string.
+  DB: D1Database;
   // Cloudflare Email Service binding (configured in wrangler.toml) — default sender.
-  EMAIL: WorkersEmailBinding;
+  // Optional — absent (and no RESEND_API_KEY) → email is suppressed, not sent.
+  // Preview environments omit the [[send_email]] entry to disable delivery.
+  EMAIL?: WorkersEmailBinding;
   // Vars / secrets
   APP_URL: string;
-  DATABASE_URL: string;
   BETTER_AUTH_SECRET: string;
   // Optional: set via `wrangler secret put RESEND_API_KEY` to send via Resend
   // instead of the Cloudflare Email Service binding.
@@ -46,7 +48,10 @@ let services: AppServices | null = null;
 function getServices(env: Env): AppServices {
   if (services) return services;
 
-  const db = createDb(env.DATABASE_URL, "neon-http") as unknown as Db;
+  // D1 speaks the same SQLite dialect as the libSQL client `createDb` builds for
+  // Node, and exposes `batch()` too — so `atomicWrite` and every query work
+  // unchanged. The cast bridges the two drivers' nominally distinct types.
+  const db = drizzle(env.DB, { schema }) as unknown as Db;
   const auth = createAuth({
     db,
     GOOGLE_CLIENT_ID: env.GOOGLE_CLIENT_ID,
@@ -55,11 +60,7 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
-  // Default to the Cloudflare Email Service binding; switch to Resend when a
-  // RESEND_API_KEY secret is present.
-  const email = env.RESEND_API_KEY
-    ? createResendEmail({ apiKey: env.RESEND_API_KEY })
-    : createWorkersEmail(env.EMAIL);
+  const email = selectEmail(env);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
     ? env.ALLOWED_ORIGINS.split(",")
@@ -95,11 +96,35 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // Workers Assets serves exact static file matches before this handler runs.
-    // For client-side routes under /app/ (no file extension), serve the SPA shell.
-    if (url.pathname.startsWith("/app/") && !url.pathname.match(/\.\w+$/)) {
+    // `run_worker_first` (wrangler.toml) routes all of /app/* through here
+    // except /app/assets/* — including real files like /app/index.html, not
+    // just extensionless SPA routes. Serve the exact match first (index.html,
+    // favicon, ...); anything else means it's a client-side route (/app/minat,
+    // /app/karya/:id, ...), so fall back to the SPA shell.
+    //
+    // Checking for `.ok`, not `status !== 404`: the ASSETS binding applies the
+    // same auto-trailing-slash html_handling as Cloudflare's edge router, so a
+    // miss on an extensionless path comes back as a 307 (e.g. to /app/), not a
+    // 404 — forwarding that verbatim would reproduce the exact redirect this
+    // fallback exists to avoid.
+    if (url.pathname.startsWith("/app/")) {
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (assetResponse.ok) return assetResponse;
+
+      // Only a miss on an EXTENSIONLESS path is a client-side SPA route.
+      // A miss on a path with an extension (/app/favicon.ico, /app/foo.js,
+      // a stale/broken asset reference, ...) is a genuine missing file —
+      // masking it as a 200 HTML shell would hide broken asset URLs and
+      // confuse caching (a browser expecting an image getting HTML back).
+      if (url.pathname.match(/\.\w+$/)) return assetResponse;
+
+      // The fallback target is "/app/" (trailing slash), NOT
+      // "/app/index.html": requesting the literal index.html filename
+      // undergoes the SAME auto-trailing-slash normalization and itself
+      // 307s to "/app/" — fetching the already-canonical folder URL is
+      // what actually returns 200.
       return env.ASSETS.fetch(
-        new Request(new URL("/app/index.html", url.origin), request),
+        new Request(new URL("/app/", url.origin), request),
       );
     }
 

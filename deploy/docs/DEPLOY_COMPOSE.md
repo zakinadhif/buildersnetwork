@@ -1,7 +1,8 @@
 # Deploy with Docker Compose (bare VPS)
 
 For a plain VPS with Docker installed — no PaaS. Uses
-`deploy/docker-compose.selfhost.yml` (Caddy + app + Postgres + MinIO + migrate).
+`deploy/docker-compose.selfhost.yml` (Caddy + app + MinIO + migrate). The
+database is a SQLite file on a shared `dbdata` volume — no database container.
 
 ## Prerequisites
 - A VPS with Docker + Docker Compose
@@ -16,7 +17,6 @@ cp deploy/.env.example deploy/.env
 #   APP_DOMAIN=app.example.com
 #   APP_URL=https://app.example.com
 #   BETTER_AUTH_SECRET=$(openssl rand -base64 32)
-#   POSTGRES_PASSWORD=<strong-password>
 #   STORAGE_ACCESS_KEY / STORAGE_SECRET_KEY / STORAGE_BUCKET
 #   STORAGE_REGION=us-east-1   STORAGE_FORCE_PATH_STYLE=true
 ```
@@ -25,8 +25,8 @@ cp deploy/.env.example deploy/.env
 ```bash
 docker compose -f deploy/docker-compose.selfhost.yml up -d --build
 ```
-Order of operations: Postgres starts → `migrate` runs and exits → `app` starts →
-Caddy fetches TLS for `APP_DOMAIN` and proxies to the app on `:8080`.
+Order of operations: `migrate` runs against the SQLite file and exits → `app`
+starts → Caddy fetches TLS for `APP_DOMAIN` and proxies to the app on `:8080`.
 
 Verify:
 ```bash
@@ -46,7 +46,7 @@ Check out the previous commit/tag and re-run the `up -d --build` command, or pin
 `APP_IMAGE` to a known-good `sha-<short>` tag and `up -d` without `--build`.
 
 ## Local full-stack smoke test (no domain/TLS)
-The dev compose only runs Postgres + MinIO; run the app with `pnpm dev`. To test
+The dev compose only runs MinIO; run the app with `pnpm dev`. To test
 the **bundled image** locally, build and run it directly:
 ```bash
 docker build -f deploy/Dockerfile -t comfort-stack .

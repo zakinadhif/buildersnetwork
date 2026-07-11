@@ -4,7 +4,7 @@ Manifest: [`deploy/render.yaml`](../render.yaml)
 
 ## Prerequisites
 - A Render account
-- A Postgres instance (Render Postgres or external managed)
+- A managed libSQL/Turso database (`libsql://` URL + auth token)
 - An S3-compatible bucket
 
 ## Initial setup
@@ -12,7 +12,8 @@ Manifest: [`deploy/render.yaml`](../render.yaml)
    (Or: New → Web Service, runtime Docker, Dockerfile `./deploy/Dockerfile`,
    context `.`.)
 2. Set the `sync: false` env vars in the dashboard — they are intentionally not
-   committed: `APP_URL`, `DATABASE_URL`, `BETTER_AUTH_SECRET`, `STORAGE_*`, etc.
+   committed: `APP_URL`, `DATABASE_URL` (the `libsql://` URL),
+   `DATABASE_AUTH_TOKEN`, `BETTER_AUTH_SECRET`, `STORAGE_*`, etc.
    See [`deploy/.env.example`](../.env.example).
 
 ## First deploy
@@ -28,6 +29,6 @@ Dashboard → the service → "Manual Deploy" → "Deploy a previous commit", or
 "Rollback" on a prior deploy.
 
 ## Cost (rough)
-- 100 MAU: Starter web ($7/mo) + Starter Postgres ($7/mo) ≈ $14/mo
-- 1k MAU: same tier ≈ $14–25/mo
-- 10k MAU: Standard instances ≈ $50–100/mo
+- 100 MAU: Starter web ($7/mo) + Turso free tier ≈ $7/mo
+- 1k MAU: same tier ≈ $7–20/mo
+- 10k MAU: Standard instances ≈ $50–100/mo + a paid Turso tier

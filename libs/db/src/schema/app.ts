@@ -1,19 +1,23 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
-  boolean,
   index,
   integer,
-  jsonb,
-  pgTable,
   primaryKey,
+  sqliteTable,
   text,
-  timestamp,
-} from "drizzle-orm/pg-core";
+} from "drizzle-orm/sqlite-core";
 import type { KaryaStage } from "../karya";
 import type { PostKind } from "../posts";
 import { users } from "./auth";
 
-export const profiles = pgTable("profiles", {
+// Timestamps are Unix epoch *milliseconds* (`integer` + `mode: "timestamp_ms"`),
+// the SQLite counterpart of the old `timestamp ... default now()`. Milliseconds,
+// not seconds, to match what `better-auth:generate` emits into `./auth.ts` — one
+// precision for the whole database — and to keep the reverse-chron feed from
+// tying rows written in the same second.
+const now = sql`(cast(unixepoch('subsecond') * 1000 as integer))`;
+
+export const profiles = sqliteTable("profiles", {
   userId: text("user_id")
     .primaryKey()
     .references(() => users.id, { onDelete: "cascade" }),
@@ -25,10 +29,15 @@ export const profiles = pgTable("profiles", {
   // Interests are normalized into `interests` + `user_interests` (Sprint 1).
   year: text("year").notNull(),
   major: text("major").notNull(),
-  skills: jsonb("skills").$type<string[]>().notNull().default([]),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
+  skills: text("skills", { mode: "json" })
+    .$type<string[]>()
+    .notNull()
+    .default([]),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(now)
+    .notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .default(now)
     .$onUpdate(() => new Date())
     .notNull(),
 });
@@ -37,16 +46,18 @@ export const profiles = pgTable("profiles", {
 // deduped by `slug`. `curated` marks rows from the starter list vs free-text
 // additions reconciled in on save. Both members (this sprint) and karya
 // (Sprint 2's `karya_interests`) tag against this same table.
-export const interests = pgTable("interests", {
+export const interests = sqliteTable("interests", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
-  curated: boolean("curated").notNull().default(false),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
+  curated: integer("curated", { mode: "boolean" }).notNull().default(false),
+  createdAt: integer("created_at", { mode: "timestamp_ms" })
+    .default(now)
+    .notNull(),
 });
 
 // Join table linking members to interests (FR-14).
-export const userInterests = pgTable(
+export const userInterests = sqliteTable(
   "user_interests",
   {
     userId: text("user_id")
@@ -65,14 +76,17 @@ export const userInterests = pgTable(
 
 // A karya — the unit of work people build and collaborate around (FR-10).
 // Creatable at any maturity; `stages` is an owner-set lifecycle signal, stored
-// as a jsonb string array like `profiles.skills` (DECISION-B), not a join.
-export const karya = pgTable(
+// as a json string array like `profiles.skills` (DECISION-B), not a join.
+export const karya = sqliteTable(
   "karya",
   {
     id: text("id").primaryKey(),
     title: text("title").notNull(),
     description: text("description").notNull(),
-    stages: jsonb("stages").$type<KaryaStage[]>().notNull().default(["idea"]),
+    stages: text("stages", { mode: "json" })
+      .$type<KaryaStage[]>()
+      .notNull()
+      .default(["idea"]),
     // Object-storage key of an owner-uploaded cover image (nullable). The
     // content-type is encoded in the key's extension so the serve route
     // (`GET /karya/:id/cover`) needs no companion column. Absent → the client
@@ -81,9 +95,11 @@ export const karya = pgTable(
     createdBy: text("created_by").references(() => users.id, {
       onDelete: "cascade",
     }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at")
-      .defaultNow()
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(now)
       .$onUpdate(() => new Date())
       .notNull(),
   },
@@ -94,10 +110,35 @@ export const karya = pgTable(
   ],
 );
 
+// A karya's screenshot gallery (issue #19) — Play Store-style proof shots,
+// separate from the single `coverKey` icon. `orientation` picks the display
+// slot: `landscape` feeds the feed-row carousel, `portrait` the detail/Spotlight
+// gallery. `position` is owner-set ordering within one orientation (DECISION
+// mirrors `featured.rank` — lower sorts first).
+export const karyaScreenshots = sqliteTable(
+  "karya_screenshots",
+  {
+    id: text("id").primaryKey(),
+    karyaId: text("karya_id")
+      .notNull()
+      .references(() => karya.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    orientation: text("orientation").notNull(), // "landscape" | "portrait"
+    position: integer("position").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+  },
+  (table) => [
+    // Ordered gallery read, batched by karya (mirrors rostersByKaryaIds).
+    index("karya_screenshots_karyaId_idx").on(table.karyaId),
+  ],
+);
+
 // Contributor roster + join requests (FR-12). The creator is one row with
 // `role: "owner", status: "member"` (DECISION-G); join requests are
 // `role: "member", status: "pending"` until the owner approves.
-export const karyaMembers = pgTable(
+export const karyaMembers = sqliteTable(
   "karya_members",
   {
     karyaId: text("karya_id")
@@ -108,7 +149,9 @@ export const karyaMembers = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     role: text("role").notNull().default("member"), // "owner" | "member"
     status: text("status").notNull().default("pending"), // "member" | "pending"
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
   },
   (table) => [
     primaryKey({ columns: [table.karyaId, table.userId] }),
@@ -119,7 +162,7 @@ export const karyaMembers = pgTable(
 
 // Karya interest tags — a join into the *same* shared `interests` catalog used
 // by `user_interests` (DECISION-C). One vocabulary, deduped by slug.
-export const karyaInterests = pgTable(
+export const karyaInterests = sqliteTable(
   "karya_interests",
   {
     karyaId: text("karya_id")
@@ -140,7 +183,7 @@ export const karyaInterests = pgTable(
 // `kind` is a closed 3-value vocabulary stored as plain text (DECISION-B),
 // validated by `normalizePostKind`. Read two ways (DECISION-D): the karya stream
 // (by karya_id) and the global feed (reverse-chron by created_at).
-export const posts = pgTable(
+export const posts = sqliteTable(
   "posts",
   {
     id: text("id").primaryKey(),
@@ -152,7 +195,9 @@ export const posts = pgTable(
       .references(() => users.id, { onDelete: "cascade" }),
     kind: text("kind").$type<PostKind>().notNull(), // PostKind (DECISION-B)
     body: text("body").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
   },
   (table) => [
     // Karya stream (DECISION-D).
@@ -165,14 +210,16 @@ export const posts = pgTable(
 // Hand-curated "Top picked" karya for the homepage (FR-24). One row per featured
 // karya; `rank` gives the team explicit ordering (lower sorts first). Edited
 // in-app via the `ADMIN_EMAILS` allowlist toggle (DECISION-A) — not RBAC.
-export const featured = pgTable(
+export const featured = sqliteTable(
   "featured",
   {
     karyaId: text("karya_id")
       .primaryKey()
       .references(() => karya.id, { onDelete: "cascade" }),
     rank: integer("rank").notNull().default(0),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
   },
   (table) => [
     // Ordered "Top picked" read.
@@ -180,7 +227,7 @@ export const featured = pgTable(
   ],
 );
 
-export const matches = pgTable(
+export const matches = sqliteTable(
   "matches",
   {
     id: text("id").primaryKey(),
@@ -191,7 +238,9 @@ export const matches = pgTable(
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
     reason: text("reason").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
   },
   (table) => [index("matches_userId_idx").on(table.userId)],
 );
@@ -225,7 +274,18 @@ export const karyaRelations = relations(karya, ({ one, many }) => ({
   interests: many(karyaInterests),
   posts: many(posts),
   featured: one(featured),
+  screenshots: many(karyaScreenshots),
 }));
+
+export const karyaScreenshotsRelations = relations(
+  karyaScreenshots,
+  ({ one }) => ({
+    karya: one(karya, {
+      fields: [karyaScreenshots.karyaId],
+      references: [karya.id],
+    }),
+  }),
+);
 
 export const postsRelations = relations(posts, ({ one }) => ({
   karya: one(karya, {

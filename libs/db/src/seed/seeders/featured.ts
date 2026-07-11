@@ -1,4 +1,5 @@
 import { featured } from "../../schema";
+import { insertInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 // Pre-mark a couple seed karya as featured so the homepage "Top picked" section
@@ -16,7 +17,9 @@ export const featuredSeeder: Seeder = {
   tables: [featured],
   async run({ db, log }) {
     log("marking featured karya…");
-    await db.insert(featured).values(SEED_FEATURED).onConflictDoNothing();
+    await insertInChunks(featured, SEED_FEATURED, (chunk) =>
+      db.insert(featured).values(chunk).onConflictDoNothing(),
+    );
 
     log(`featured ${SEED_FEATURED.length} karya`);
   },

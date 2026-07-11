@@ -1,5 +1,6 @@
 ---
-# Full 3-tier deploy. Run order matters: database → api → web.
+# Two-tier deploy: api → web. The database is a SQLite file on the API host
+# (no separate database VM), so there is no db play to import.
 #
 # Usage:
 #   ansible-playbook -i ../inventory.ini playbooks/site.yml --ask-vault-pass
@@ -7,6 +8,5 @@
 # For a targeted re-deploy of a single tier:
 #   ansible-playbook -i ../inventory.ini playbooks/api.yml --ask-vault-pass
 
-- import_playbook: db.yml
 - import_playbook: api.yml
 - import_playbook: web.yml
