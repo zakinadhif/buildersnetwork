@@ -6,6 +6,7 @@ ai_provider: gemini
 #   $ANSIBLE_VAULT;1.1;AES256
 #   ...
 # better_auth_secret: !vault | ...
-# database_url is set at deploy time referencing the db host:
-database_url: "postgres://app:{{ postgres_password }}@{{ hostvars[groups['db'][0]].ansible_host }}:5432/{{ app_name }}"
+# The database is a SQLite file inside the app's data dir on this host, mounted
+# into the API and migrate containers at /data (see the backend-api role).
+database_url: "file:/data/app.db"
 serve_static: "false"

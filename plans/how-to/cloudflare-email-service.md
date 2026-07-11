@@ -2,14 +2,18 @@
 
 Beta transactional email service built into Cloudflare Workers. No third-party SDK needed.
 
-> **Heads up:** the Worker uses this binding *by default*, but it switches to
-> [Resend](https://resend.com) when a `RESEND_API_KEY` secret is set (see
-> `apps/api/src/worker.ts`). This doc covers the Cloudflare-native path; for the
-> Resend path see `libs/email/src/resend.ts` and `DEPLOY_CLOUDFLARE.md`.
+> **Heads up:** the provider chain prefers [Resend](https://resend.com)
+> (`RESEND_API_KEY`) first, then this `[[send_email]]` binding, then a no-op
+> provider when neither is configured (see `selectEmail` in
+> `apps/api/src/lib/email.ts`). **On the current account this binding is dormant:**
+> it needs the Workers Paid plan and Al-Fath is on the free tier, so live email
+> actually goes through Resend. This doc covers the Cloudflare-native path for when
+> the account moves to Paid; for the Resend path see `libs/email/src/resend.ts` and
+> `DEPLOY_CLOUDFLARE.md`.
 
 ## Two integration methods
 
-### 1. Workers Binding (preferred in production)
+### 1. Workers Binding (Cloudflare-native; requires Workers Paid)
 
 Configure in `wrangler.toml`:
 

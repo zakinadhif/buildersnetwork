@@ -30,6 +30,9 @@ dist-mockups/
 .claude/settings.local.json
 .claude/worktrees/
 
+# Impeccable tool cache (per-machine / transient)
+.impeccable/
+
 # Generated API client and Zod schemas
 libs/api-client-react/src/generated/
 libs/api-zod/src/generated/
@@ -37,3 +40,16 @@ libs/api-zod/src/generated/
 # Ansible secret vault
 deploy/ansible/group_vars/all/vault.yml
 .vagrant
+
+# Local SQLite database files (libSQL). The dev DB is disposable —
+# `pnpm db:migrate && pnpm db:seed` rebuilds it.
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+# Wrangler's local D1 / Miniflare state
+.wrangler/
+
+# Per-PR preview config, rendered in CI from wrangler.preview.template.toml.
+# It carries a live database_id and the preview auth secret.
+wrangler.preview.toml

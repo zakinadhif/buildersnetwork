@@ -1,16 +1,15 @@
-# Deploy with Vagrant (Local 3-tier)
+# Deploy with Vagrant (Local 2-tier)
 
-Runs the same three-tier architecture as the EC2 deployment but on local Vagrant VMs. Uses the same Ansible roles and the same Docker images — only the inventory and SSH credentials differ.
+Runs the same two-tier architecture as the EC2 deployment but on local Vagrant VMs. Uses the same Ansible roles and the same Docker images — only the inventory and SSH credentials differ. The database is a SQLite file on the API VM; there is no separate database VM.
 
 ## Architecture
 
 | VM | Private IP | Role |
 |---|---|---|
 | `bn-frontend` | `192.168.56.10` | nginx + SPA Docker container |
-| `bn-api` | `192.168.56.11` | Hono API Docker container |
-| `bn-db` | `192.168.56.12` | Postgres Docker container |
+| `bn-api` | `192.168.56.11` | Hono API Docker container + SQLite file |
 
-All three VMs share a VirtualBox host-only network. The frontend IP is reachable from your Windows browser.
+Both VMs share a VirtualBox host-only network. The frontend IP is reachable from your Windows browser.
 
 ## Prerequisites
 
@@ -30,7 +29,7 @@ All three VMs share a VirtualBox host-only network. The frontend IP is reachable
 vagrant up
 ```
 
-Downloads the Ubuntu 22.04 box on first run (~600 MB) and boots all three VMs. Takes 3–5 minutes.
+Downloads the Ubuntu 22.04 box on first run (~600 MB) and boots both VMs. Takes 3–5 minutes.
 
 ### 2. Copy Vagrant SSH keys to WSL
 
@@ -40,7 +39,6 @@ Ansible rejects keys from `/mnt/z/` because Windows mounts appear world-writable
 mkdir -p ~/.ssh/vagrant-bn
 cp /mnt/z/buildersnetwork/.vagrant/machines/bn-frontend/virtualbox/private_key ~/.ssh/vagrant-bn/frontend.key
 cp /mnt/z/buildersnetwork/.vagrant/machines/bn-api/virtualbox/private_key     ~/.ssh/vagrant-bn/api.key
-cp /mnt/z/buildersnetwork/.vagrant/machines/bn-db/virtualbox/private_key      ~/.ssh/vagrant-bn/db.key
 chmod 600 ~/.ssh/vagrant-bn/*.key
 ```
 
@@ -57,7 +55,6 @@ ansible-vault edit deploy/ansible/group_vars/all/vault.yml
 Required keys:
 
 ```yaml
-postgres_password: "your-strong-db-password"
 better_auth_secret: "at-least-32-character-random-string"
 gemini_api_key: "AIza..."
 resend_api_key: "re_..."
@@ -101,12 +98,7 @@ ansible-playbook deploy/ansible/playbooks/site.yml \
 Or provision each tier separately (useful when iterating):
 
 ```bash
-# Database first
-ANSIBLE_ROLES_PATH=deploy/ansible/roles \
-ansible-playbook deploy/ansible/playbooks/db.yml \
-  -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass
-
-# API second (needs DB up)
+# API first (its role also runs migrations against the SQLite file)
 ANSIBLE_ROLES_PATH=deploy/ansible/roles \
 ansible-playbook deploy/ansible/playbooks/api.yml \
   -i deploy/ansible/inventory.vagrant.ini --ask-vault-pass \
@@ -201,9 +193,6 @@ vagrant ssh bn-api -c "docker logs buildersnetwork-api --tail 50 -f"
 
 # Web/nginx logs
 vagrant ssh bn-frontend -c "docker logs buildersnetwork-web --tail 50 -f"
-
-# Database logs
-vagrant ssh bn-db -c "docker logs buildersnetwork-db --tail 50 -f"
 ```
 
 ### Checking container status
@@ -211,7 +200,6 @@ vagrant ssh bn-db -c "docker logs buildersnetwork-db --tail 50 -f"
 ```bash
 vagrant ssh bn-api -c "docker ps"
 vagrant ssh bn-frontend -c "docker ps"
-vagrant ssh bn-db -c "docker ps"
 ```
 
 A container with status `Restarting` means it's crash-looping. Check logs immediately.
@@ -238,7 +226,6 @@ vagrant ssh bn-api -c "docker run --rm \
 ```powershell
 vagrant ssh bn-api
 vagrant ssh bn-frontend
-vagrant ssh bn-db
 ```
 
 ---
@@ -268,7 +255,6 @@ Vagrant.configure("2") do |config|
   {
     "bn-frontend" => "192.168.56.10",
     "bn-api"      => "192.168.56.11",
-    "bn-db"       => "192.168.56.12",
   }.each do |name, ip|
     config.vm.define name do |node|
       node.vm.hostname = name
@@ -291,9 +277,6 @@ frontend ansible_host=192.168.56.10 ansible_user=vagrant ansible_ssh_private_key
 
 [api]
 backend  ansible_host=192.168.56.11 ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/vagrant-bn/api.key
-
-[db]
-database ansible_host=192.168.56.12 ansible_user=vagrant ansible_ssh_private_key_file=~/.ssh/vagrant-bn/db.key
 
 [all:vars]
 ansible_python_interpreter=/usr/bin/python3

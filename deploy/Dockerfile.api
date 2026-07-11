@@ -1,5 +1,5 @@
 # API-only image — no static frontend assets bundled in.
-# Use this for the 3-tier EC2 deployment where a dedicated nginx VM serves the
+# Use this for the 2-tier EC2 deployment where a dedicated nginx VM serves the
 # SPA and landing. Set SERVE_STATIC=false to disable Hono's static middleware.
 #
 # Build context is the repo root:

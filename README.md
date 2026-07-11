@@ -10,7 +10,7 @@ Community platform for builder students at Telkom University. Students discover 
 |---|---|
 | **Runtime** | Node.js 22 |
 | **API** | Hono v4 |
-| **Database ORM** | Drizzle ORM (PostgreSQL) |
+| **Database ORM** | Drizzle ORM (SQLite dialect — D1 on Workers, libSQL on Node) |
 | **Auth** | Better Auth (drizzle adapter, DB-backed sessions) |
 | **AI** | Pluggable — Gemini API (Node/Docker), Anthropic API, or Cloudflare Workers AI |
 | **Storage** | Pluggable — AWS S3, Cloudflare R2, GCS, MinIO |
@@ -40,12 +40,12 @@ buildersnetwork/
 │   │   └── src/react.ts      # useStream hook for frontend streaming
 │   ├── auth/      # Better Auth config
 │   ├── config/    # Zod-validated env loader
-│   ├── db/        # Drizzle schema + postgres-js / Neon HTTP clients
+│   ├── db/        # Drizzle schema (SQLite) + libSQL (Node) / D1 (Workers) clients
 │   └── storage/   # S3-compatible / GCS storage adapters
 └── deploy/
     ├── Dockerfile            # Single-container image (API + SPA + landing)
-    ├── Dockerfile.api        # API-only image for 3-tier EC2 deployment
-    ├── ansible/              # 3-tier EC2 deployment (database / api / web VMs)
+    ├── Dockerfile.api        # API-only image for 2-tier EC2 deployment
+    ├── ansible/              # 2-tier EC2 deployment (api / web VMs; DB is a SQLite file)
     ├── docker-compose.dev.yml
     ├── docker-compose.selfhost.yml
     └── docs/
@@ -94,7 +94,7 @@ The AI provider is selected per runtime entrypoint, not via env var:
 ```bash
 pnpm install
 
-# Start local backing services (Postgres + MinIO)
+# Start local backing services (MinIO — the DB is a local SQLite file, no server)
 docker compose -f deploy/docker-compose.dev.yml up -d
 
 # Copy and fill in env vars
@@ -196,12 +196,12 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm dev:landing` | Start Astro landing page |
 | `pnpm codegen` | Regenerate React Query hooks + Zod validators from `openapi.yaml` |
 | `pnpm better-auth:generate` | Regenerate `libs/db/src/schema/auth.ts` from auth config |
-| `pnpm db:push` | Push Drizzle schema to Postgres |
+| `pnpm db:push` | Push Drizzle schema to a local SQLite file |
 | `pnpm db:generate` | Write SQL migration files from schema changes |
 | `pnpm db:migrate` | Apply migration files to `DATABASE_URL` (the deploy-step runner) |
 | `pnpm db:check` | Verify every migration `.sql` is registered in the journal (no DB needed) |
 | `pnpm db:studio` | Open Drizzle Studio |
-| `pnpm db:seed` | Run seeders against `DATABASE_URL` |
+| `pnpm db:seed` | Run seeders against `DATABASE_URL` (see [Seed accounts](#seed-accounts)) |
 | `pnpm format` | Format with Biome |
 | `pnpm lint` | Lint with Biome |
 | `pnpm test:db` | Run `@myapp/db` Vitest unit tests (pure helpers, no DB) |
@@ -210,6 +210,16 @@ Do not use the orval-generated `aiStream` function for this — it does not cons
 | `pnpm test:e2e` | Run Playwright e2e tests |
 | `pnpm build:frontend` | Build SPA + landing (runs codegen first) |
 | `pnpm cf:deploy` | Build everything and deploy to Cloudflare Workers |
+
+### Seed accounts
+
+`pnpm db:seed` creates five members with Better Auth `emailAndPassword` credentials, so you can sign in immediately in local dev or a preview environment:
+
+| Email | Password |
+|---|---|
+| `hafiz@seed.local`, `fatimah@seed.local`, `rizal@seed.local`, `dinda@seed.local`, `arya@seed.local` | `seedpassword123` |
+
+The password is not a secret — seed data is for local dev and previews only, and the seed runner refuses to run under `NODE_ENV=production` without `--force`. Re-running the seeder is idempotent.
 
 ---
 
@@ -221,7 +231,8 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 |---|---|
 | `PORT` | Server port (default: `8080`) |
 | `APP_URL` | Public origin the app is served from |
-| `DATABASE_URL` | Postgres connection string |
+| `DATABASE_URL` | libSQL URL (`file:` local SQLite, `libsql://` Turso). Not used on Cloudflare — the Worker binds a D1 database instead. |
+| `DATABASE_AUTH_TOKEN` | Auth token for a remote `libsql://` (Turso) URL; unset for `file:` |
 | `BETTER_AUTH_SECRET` | Secret for signing auth tokens (min 32 chars) |
 | `BETTER_AUTH_URL` | Base URL for auth callbacks (defaults to `APP_URL`) |
 | `GOOGLE_CLIENT_ID` | Google OAuth client ID (optional) |
@@ -231,12 +242,12 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 | `GEMINI_API_KEY` | Required for Node.js / Docker deployments (Gemini AI) |
 | `ANTHROPIC_API_KEY` | Required only if switching `index.ts` to `createAnthropicAI` |
 | `AI_WORKERS_MODEL` | Workers AI model override (default: `@cf/meta/llama-4-scout-17b-16e-instruct`) |
-| `RESEND_API_KEY` | Resend email API key (preferred for Node.js / Docker; on Cloudflare, overrides the `[[send_email]]` binding when set) |
+| `RESEND_API_KEY` | Resend email API key — the live email sender in production (the `[[send_email]]` binding needs Workers Paid and is dormant on the free tier). Also the email path for Node.js / Docker. |
 | `CF_EMAIL_ACCOUNT_ID` | Cloudflare Email REST API — alternative to Resend |
 | `CF_EMAIL_API_TOKEN` | Cloudflare Email REST API — alternative to Resend |
 | `EMAIL_FROM` | Sender address for outgoing email (default: `Al-Fath Berkarya <noreply@buildersnetwork.web.id>`); domain must be verified with the active provider |
 | `STORAGE_*` | S3-compatible object storage for the **Node/Docker** path (karya cover + screenshot uploads) — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md). Point at R2's S3 API for local dev. On **Cloudflare Workers**, uploads use the native R2 binding `UPLOADS` (in `wrangler.toml`) instead — run `wrangler r2 bucket create buildersnetwork-uploads` once before deploying. Absent storage → the cover/screenshot routes return 503. |
-| `SERVE_STATIC` | `false` to disable Hono's static file serving (3-tier EC2 mode) |
+| `SERVE_STATIC` | `false` to disable Hono's static file serving (2-tier EC2 mode) |
 
 ---
 
@@ -244,16 +255,16 @@ All vars are validated at startup by `@myapp/config`. See [`deploy/.env.example`
 
 Two deployment targets are supported. The same codebase, switched by env vars:
 
-| Target | AI | DB driver | Static files | Guide |
+| Target | AI | Database | Static files | Guide |
 |---|---|---|---|---|
-| **Cloudflare Workers** | Workers AI (free) | Neon HTTP | Workers Assets | [DEPLOY_CLOUDFLARE.md](deploy/docs/DEPLOY_CLOUDFLARE.md) |
-| **AWS EC2 3-tier (Ansible)** | Gemini API | postgres-js | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
-| Fly.io | Gemini API | postgres-js | Hono static | [DEPLOY_FLY.md](deploy/docs/DEPLOY_FLY.md) |
-| Railway | Gemini API | postgres-js | Hono static | [DEPLOY_RAILWAY.md](deploy/docs/DEPLOY_RAILWAY.md) |
-| Render | Gemini API | postgres-js | Hono static | [DEPLOY_RENDER.md](deploy/docs/DEPLOY_RENDER.md) |
-| Cloud Run | Gemini API | postgres-js | Hono static | [DEPLOY_CLOUD_RUN.md](deploy/docs/DEPLOY_CLOUD_RUN.md) |
-| Coolify / Dokploy | Gemini API | postgres-js | Hono static | [DEPLOY_COOLIFY.md](deploy/docs/DEPLOY_COOLIFY.md) |
-| Bare VPS (Compose) | Gemini API | postgres-js | Hono static | [DEPLOY_COMPOSE.md](deploy/docs/DEPLOY_COMPOSE.md) |
+| **Cloudflare Workers** | Workers AI (free) | D1 (SQLite binding) | Workers Assets | [DEPLOY_CLOUDFLARE.md](deploy/docs/DEPLOY_CLOUDFLARE.md) |
+| **AWS EC2 2-tier (Ansible)** | Gemini API | SQLite file | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
+| Fly.io | Gemini API | libSQL (Turso) | Hono static | [DEPLOY_FLY.md](deploy/docs/DEPLOY_FLY.md) |
+| Railway | Gemini API | libSQL (Turso) | Hono static | [DEPLOY_RAILWAY.md](deploy/docs/DEPLOY_RAILWAY.md) |
+| Render | Gemini API | libSQL (Turso) | Hono static | [DEPLOY_RENDER.md](deploy/docs/DEPLOY_RENDER.md) |
+| Cloud Run | Gemini API | libSQL (Turso) | Hono static | [DEPLOY_CLOUD_RUN.md](deploy/docs/DEPLOY_CLOUD_RUN.md) |
+| Coolify / Dokploy | Gemini API | SQLite file | Hono static | [DEPLOY_COOLIFY.md](deploy/docs/DEPLOY_COOLIFY.md) |
+| Bare VPS (Compose) | Gemini API | SQLite file | Hono static | [DEPLOY_COMPOSE.md](deploy/docs/DEPLOY_COMPOSE.md) |
 
 ### Local single-container
 
@@ -266,25 +277,53 @@ docker run --rm -p 8080:8080 --env-file deploy/.env buildersnetwork
 
 ```bash
 wrangler login
-wrangler secret put DATABASE_URL
+wrangler d1 create buildersnetwork   # once — paste the database_id into wrangler.toml
 wrangler secret put BETTER_AUTH_SECRET
 wrangler secret put APP_URL
-wrangler secret put RESEND_API_KEY   # optional — send via Resend instead of the [[send_email]] binding
+wrangler secret put RESEND_API_KEY   # the live email sender ([[send_email]] needs Workers Paid; dormant on free tier)
 pnpm cf:deploy
 ```
 
+The Worker reaches the database through the D1 binding (`env.DB`), so there is
+no `DATABASE_URL` secret. Migrations apply via
+`wrangler d1 migrations apply buildersnetwork --remote` (run by `release.yml`).
+
 ### PR previews
 
-Any pull request that modifies `apps/mockups/**` gets a live static preview URL
-posted on it. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
-`CLOUDFLARE_ACCOUNT_ID` repo secrets.
+Two independent previews, both gated on the `CLOUDFLARE_API_TOKEN` /
+`CLOUDFLARE_ACCOUNT_ID` repo secrets and no-ops until those are set.
 
-There is intentionally **no full app/API preview**. A `wrangler versions upload`
-preview runs on a `*.workers.dev` origin, where auth is unusable — cookies are
-host-only and `baseURL`/redirects derive from the production `APP_URL`
-(`buildersnetwork.web.id`), so you can't log in and the preview is dead weight.
-Previewing app/API changes needs per-PR environment isolation (own DB + origin);
-that's tracked separately as an ephemeral-preview proposal, not this shortcut.
+**App preview** (`preview.yml`). Every pull request **from a branch in this
+repo** gets a full ephemeral environment at
+`https://buildersnetwork-pr-<n>.<subdomain>.workers.dev`: its own D1 database
+(created, migrated, seeded), its own R2 bucket
+(`buildersnetwork-pr-<n>-uploads`), and its own Worker. A sticky comment posts
+the URL and the seed credentials. Sign in with any [seed account](#seed-accounts).
+
+The earlier `wrangler versions upload` shortcut was deleted (`15cdbb2`) because
+it bound the preview to *production* bindings and login was broken on the
+`*.workers.dev` origin. Both are fixed by isolation: each preview sets its own
+`APP_URL`, which drives `BETTER_AUTH_URL` and `ALLOWED_ORIGINS` in `worker.ts`.
+
+Preview deploys from **`wrangler.preview.toml`**, rendered in CI from
+`wrangler.preview.template.toml` — a separate file rather than an
+`[env.preview]` block, because `routes` is an *inheritable* wrangler key and a
+preview deploying against the top-level `wrangler.toml` would try to claim the
+production apex domain. Bindings are non-inheritable, so omitting
+`RESEND_API_KEY`, `GOOGLE_CLIENT_ID` and `[[send_email]]` is what disables email
+and Google sign-in in previews — absence is the flag.
+
+Because applying PR-authored migrations means running PR-authored code with
+database credentials, the app preview is **trusted PRs only**; fork PRs get CI
+and the mockup preview. Seed data is reset on every push; the bucket is not.
+Teardown is not yet automated ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) —
+preview databases and buckets are deleted by hand, with a 7-day object lifecycle
+rule as the backstop. Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable;
+the auth-signing secret is generated fresh per run, not stored. Design notes:
+[plans/how-to/preview-environments.md](plans/how-to/preview-environments.md).
+
+**Mockup preview.** Any pull request that modifies `apps/mockups/**` also gets a
+live static preview URL posted on it.
 
 The mockup preview is **fork-safe** so community PRs get previews. It's split
 into two workflows on purpose:
@@ -334,7 +373,7 @@ The preview-deploy workflow deliberately does **not** read the config: it passes
 `--project-name`/`--branch` on the CLI so the trusted job never trusts config
 from a forked PR (keep the project name in the two places in sync).
 
-### EC2 3-tier (Ansible)
+### EC2 2-tier (Ansible)
 
 ```bash
 # 1. Build and transfer the API image to the backend EC2 VM
@@ -352,16 +391,20 @@ ansible-playbook -i inventory.ini playbooks/site.yml --ask-vault-pass
 
 ## Database
 
+One SQLite dialect (`sqlite-core`) runs on all backends: **D1** on Cloudflare
+Workers, **libSQL** (a `file:` SQLite or a remote Turso database) on Node.
+
 - **Schema**: `libs/db/src/schema/*.ts` — add a file per entity, re-export from `index.ts`
-- **Auth schema**: auto-generated by `pnpm better-auth:generate` — do not edit manually
-- **Local dev**: `pnpm db:push` syncs schema directly
-- **Production**: `pnpm db:generate` writes migration files to `libs/db/migrations/`; applied by `node dist/scripts/migrate.js` as a deploy step
+- **Auth schema**: auto-generated by `pnpm better-auth:generate` — treat as read-only output; put your own tables in `app.ts` and point FKs at the generated `users` table
+- **Local dev**: `pnpm db:push` syncs the schema straight to a local `file:` SQLite database
+- **Production (Node)**: `pnpm db:generate` writes migration files to `libs/db/migrations/`; applied by `node dist/scripts/migrate.js` as a deploy step
+- **Production (Cloudflare)**: the same migrations apply to D1 via `wrangler d1 migrations apply buildersnetwork --remote`
 
 ---
 
 ## Design system
 
-Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`MockupB`).
+Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`apps/mockups/src/screens/Launchpad.tsx`).
 
 ---
 

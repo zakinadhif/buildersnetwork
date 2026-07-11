@@ -1,6 +1,0 @@
-# postgres_password: !vault |
-#   $ANSIBLE_VAULT;1.1;AES256
-#   ...
-postgres_db: "{{ app_name }}"
-postgres_user: app
-postgres_port: 5432

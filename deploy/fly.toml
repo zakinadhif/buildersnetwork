@@ -28,6 +28,7 @@ primary_region = "sin"  # Singapore — change to your nearest region
   memory_mb = 512
 
 # Migrations run as a release command before the new version goes live.
-# Secrets (DATABASE_URL, STORAGE_*, BETTER_AUTH_SECRET, ...) via `fly secrets set`.
+# Secrets (DATABASE_URL — a libsql:// Turso URL — plus DATABASE_AUTH_TOKEN,
+# STORAGE_*, BETTER_AUTH_SECRET, ...) via `fly secrets set`.
 [deploy]
   release_command = "node dist/scripts/migrate.js"
