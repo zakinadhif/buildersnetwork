@@ -39,4 +39,6 @@ The doc you just wrote **grounds** the work, so Gate A is satisfied by construct
 gh issue close <n> --comment "Diratifikasi di <doc-PR-url>. Task turunan: #<a>, #<b>, …"
 ```
 
-Then report: the doc PR, each spawned/updated issue with its Status, and confirm the proposal is closed.
+  **Leave the board item in place — closed, not archived.** A ratified proposal is the durable record of *why* the tasks exist; it stays on the board (in **Proposed**, now showing closed) so the decision remains visible. Don't `gh project item-archive` it. (If project #8 has an auto-archive-on-close workflow, it would defeat this — flag that to the maintainer rather than working around it.)
+
+Then report: the doc PR, each spawned/updated issue with its Status, and confirm the proposal is closed (and still on the board).

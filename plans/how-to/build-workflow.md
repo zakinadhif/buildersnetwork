@@ -99,7 +99,7 @@ Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technic
 
 1. **Write the decision down** where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
 2. **Decompose into tasks.** Create (or update) the affected issues — one vertical deliverable each — through the normal [`/new-task`](#the-issue-creation-gate) flow, so **Gate B still applies** (a non-trivial surface needs a `[UI]` mockup first). Each new issue's `## Kenapa` cites the doc PR. Then flip them **Proposed → Ready** (keeping Ready ~6; overflow to Backlog) — only the maintainer (@zakinadhif) flips into Ready today.
-3. **Close the proposal** with a comment linking the doc PR and the issues it spawned.
+3. **Close the proposal** with a comment linking the doc PR and the issues it spawned — but **leave it on the board** (closed, not archived): it's the durable record of *why* those tasks exist.
 
 Never start building from a Proposed item.
 
