@@ -96,7 +96,7 @@ gh project item-edit --id "$ITEM" --project-id PVT_kwHOA14JB84BcRLr --field-id P
 
 (Full status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
 
-> Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification. Don't self-serve into Ready.
+> Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification (the maintainer later runs [`/ratify-proposal`](../ratify-proposal/SKILL.md) to turn it into Ready tasks). Don't self-serve into Ready.
 
 ## 5. For a batch
 

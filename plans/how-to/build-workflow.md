@@ -95,11 +95,11 @@ Proposed┘                                          ⇅
 
 ## The proposal gate (vision / PRD changes)
 
-Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it graduates to its own issue in **Proposed** and is decided in that thread. Ratification means:
+Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it graduates to its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
 
-1. The decision is written down where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff).
-2. Affected task issues are created or updated, and flipped **Proposed → Ready** — only the maintainer (@zakinadhif) flips this today.
-3. The proposal issue is closed with a comment linking the doc PR.
+1. **Write the decision down** where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
+2. **Decompose into tasks.** Create (or update) the affected issues — one vertical deliverable each — through the normal [`/new-task`](#the-issue-creation-gate) flow, so **Gate B still applies** (a non-trivial surface needs a `[UI]` mockup first). Each new issue's `## Kenapa` cites the doc PR. Then flip them **Proposed → Ready** (keeping Ready ~6; overflow to Backlog) — only the maintainer (@zakinadhif) flips into Ready today.
+3. **Close the proposal** with a comment linking the doc PR and the issues it spawned.
 
 Never start building from a Proposed item.
 
