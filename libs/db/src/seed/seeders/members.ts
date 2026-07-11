@@ -8,6 +8,7 @@ import {
   userInterests,
   users,
 } from "../../schema";
+import { insertInChunks, selectInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 export const SEED_USERS = [
@@ -120,56 +121,65 @@ const SEED_PROFILES = [
 export const memberSeeder: Seeder = {
   name: "members",
   description: "Seed 5 initial community members",
-  // Owns profiles + the user_interests links. NOT `interests` — that catalog is
-  // owned/truncated by the interests seeder; here we find-or-create into it.
-  tables: [profiles, userInterests],
+  // Owns the seed users and everything hanging off them. The runner only empties
+  // tables a seeder *declares*, so every table this seeder inserts into must be
+  // listed: omit one and a re-seed leaves the first run's rows in place, where
+  // the `onConflictDoNothing` calls below silently preserve them.
+  //
+  // `accounts` is listed rather than left to `users`' ON DELETE cascade, because
+  // it holds the credential hash — the one row whose staleness would break
+  // preview login, and the one we least want depending on whether a given SQLite
+  // has foreign keys enforced.
+  //
+  // NOT `interests` — that catalog is owned/truncated by the interests seeder;
+  // here we find-or-create into it.
+  tables: [users, accounts, profiles, userInterests],
   async run({ db, log }) {
     log("inserting seed users…");
-    await db
-      .insert(users)
-      .values(SEED_USERS.map((u) => ({ ...u, emailVerified: true })))
-      .onConflictDoNothing();
+    const userRows = SEED_USERS.map((u) => ({ ...u, emailVerified: true }));
+    await insertInChunks(users, userRows, (chunk) =>
+      db.insert(users).values(chunk).onConflictDoNothing(),
+    );
 
     log("inserting seed credential accounts…");
-    await db
-      .insert(accounts)
-      .values(await buildSeedCredentialAccounts())
-      .onConflictDoNothing();
+    const accountRows = await buildSeedCredentialAccounts();
+    await insertInChunks(accounts, accountRows, (chunk) =>
+      db.insert(accounts).values(chunk).onConflictDoNothing(),
+    );
 
     log("inserting seed profiles…");
-    await db
-      .insert(profiles)
-      .values(
-        SEED_PROFILES.map(({ interests: _interests, ...profile }) => profile),
-      )
-      .onConflictDoNothing();
+    const profileRows = SEED_PROFILES.map(
+      ({ interests: _interests, ...profile }) => profile,
+    );
+    await insertInChunks(profiles, profileRows, (chunk) =>
+      db.insert(profiles).values(chunk).onConflictDoNothing(),
+    );
 
     log("linking member interests…");
     // Find-or-create every referenced interest by slug. Curated rows already
     // exist (slug conflict → skipped); the rest become free-text rows.
     const deduped = dedupeBySlug(SEED_PROFILES.flatMap((p) => p.interests));
     if (deduped.length > 0) {
-      await db
-        .insert(interests)
-        .values(
-          deduped.map((d) => ({
-            id: crypto.randomUUID(),
-            name: d.name,
-            slug: d.slug,
-            curated: false,
-          })),
-        )
-        .onConflictDoNothing({ target: interests.slug });
+      const interestRows = deduped.map((d) => ({
+        id: crypto.randomUUID(),
+        name: d.name,
+        slug: d.slug,
+        curated: false,
+      }));
+      await insertInChunks(interests, interestRows, (chunk) =>
+        db.insert(interests).values(chunk).onConflictDoNothing({
+          target: interests.slug,
+        }),
+      );
 
-      const rows = await db
-        .select({ id: interests.id, slug: interests.slug })
-        .from(interests)
-        .where(
-          inArray(
-            interests.slug,
-            deduped.map((d) => d.slug),
-          ),
-        );
+      const rows = await selectInChunks(
+        deduped.map((d) => d.slug),
+        (chunk) =>
+          db
+            .select({ id: interests.id, slug: interests.slug })
+            .from(interests)
+            .where(inArray(interests.slug, chunk)),
+      );
       const idBySlug = new Map(rows.map((r) => [r.slug, r.id]));
 
       const links = SEED_PROFILES.flatMap((p) => {
@@ -181,9 +191,9 @@ export const memberSeeder: Seeder = {
           return [{ userId: p.userId, interestId: id }];
         });
       });
-      if (links.length > 0) {
-        await db.insert(userInterests).values(links).onConflictDoNothing();
-      }
+      await insertInChunks(userInterests, links, (chunk) =>
+        db.insert(userInterests).values(chunk).onConflictDoNothing(),
+      );
       log(`linked ${links.length} member-interest rows`);
     }
 

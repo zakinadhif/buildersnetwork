@@ -4,7 +4,9 @@
 
 Ratified decisions for per-PR preview environments. Discussion: [#23](https://github.com/zakinadhif/buildersnetwork/issues/23). The prerequisite data-layer migration is [#40](https://github.com/zakinadhif/buildersnetwork/issues/40).
 
-> **State of the world:** there is no app preview today. `.github/workflows/preview.yml` was deleted in `15cdbb2` — it uploaded a Worker version bound to *production* secrets, including the prod `DATABASE_URL`. Mockup PRs still get an isolated static preview (`preview-mockups.yml` + `preview-mockups-deploy.yml`); that is unrelated and stays.
+> **State of the world:** provisioning landed in [#44](https://github.com/zakinadhif/buildersnetwork/issues/44) — `.github/workflows/preview.yml` creates a per-PR D1 database, R2 bucket and Worker for trusted PRs. Teardown ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) has not; previews are reaped by hand until it does.
+>
+> The *previous* `preview.yml` (deleted in `15cdbb2`) is a different thing: it uploaded a Worker version bound to *production* secrets, including the prod `DATABASE_URL`. Mockup PRs still get an isolated static preview (`preview-mockups.yml` + `preview-mockups-deploy.yml`); that is unrelated and stays.
 
 ## Decisions
 
@@ -54,7 +56,7 @@ Preview omits bindings rather than redirecting them.
 |---|---|---|
 | Email | Omit `RESEND_API_KEY` (and `[[send_email]]`) | Prod email actually runs through **Resend** (`RESEND_API_KEY`); the `[[send_email]]` binding needs Workers Paid and is dormant on the free-tier account, so omitting `RESEND_API_KEY` is the operative step. With neither set, both entrypoints fall back to `createNoopEmail()`: `apps/api/src/index.ts` always did; the Worker path was closed in [#42](https://github.com/zakinadhif/buildersnetwork/issues/42) (`apps/api/src/lib/email.ts`). |
 | Google OAuth | Omit `GOOGLE_CLIENT_ID` | `libs/auth/src/index.ts` only enables `socialProviders` when it is present. No per-PR redirect URI to register. |
-| Auth secret | Preview-only `BETTER_AUTH_SECRET` | Never the production value. |
+| Auth secret | `BETTER_AUTH_SECRET` generated fresh per run | Never the production value, and never a stored one: `wrangler deploy`'s bindings banner leaks a truncated prefix into the public Actions log past GitHub's exact-substring mask, so the value must be a single-deploy throwaway. Cookies don't survive a push anyway (`--reset` empties `users`, sessions cascade). |
 
 No runtime feature-flag mechanism is required. The earlier belief that one was is the single largest thing #23 got wrong: provider selection is already driven by binding presence, so *absence is the flag*.
 
@@ -78,6 +80,25 @@ Two consequences worth stating before someone implements this:
   This is not a new class of exposure — it is a second instance of one CI already carries and cannot shed. Per-PR *databases* are the whole design, Cloudflare's `D1:Edit` permission is account-scoped with no way to restrict it to a set of databases, and so `CLOUDFLARE_API_TOKEN` can already run `wrangler d1 delete buildersnetwork` against production. D1 Time Travel restores a point in time *within* a database; it does not resurrect a deleted one. Teardown already deletes a resource whose name is computed from a PR number, on a token that reaches production, on every PR close.
 
   Accepted, deliberately, because the alternative buys a narrower credential with application code. The mitigation is therefore uniform across both resources and lives in the script, not the credential: anchored `^buildersnetwork-pr-[0-9]+$` and `^buildersnetwork-pr-[0-9]+-uploads$` matches, names built from `github.event.pull_request.number`, and explicit tests that the production database and bucket names are refused.
+
+### Seeding connects to D1 directly, over its HTTP API
+
+Decided while implementing [#44](https://github.com/zakinadhif/buildersnetwork/issues/44); reworked immediately after, before the PR merged.
+
+Neither shipped driver can reach a remote D1 from Node: `@libsql/client` speaks `file:` and `libsql://`, and `drizzle-orm/d1` needs a Worker binding that CI does not have. The first implementation worked around that by producing **SQL** instead of making driver calls — seed a throwaway local SQLite file, `sqlite3 … .dump --data-only` it table by table, apply with `wrangler d1 execute --file`. It worked, but the dump pipeline was a second, divergent implementation of the seeding logic: it carried a hand-maintained `INSERT_ORDER` list of every table, so adding one table to a seeder meant editing CI.
+
+The fix was to add the missing driver rather than route around it. `libs/db/src/d1-http.ts` wires `drizzle-orm/sqlite-proxy` to D1's REST API, and `pnpm db:seed` picks it up whenever `D1_DATABASE_ID` is set — so CI seeds with the same command, seeders, and registry order as local dev. The workflow step is now `pnpm db:seed -- --reset --yes`, and **a new table is registered in its seeder's `tables`, nowhere else.**
+
+Four things pin the design, all discovered the hard way:
+
+- **`/raw`, not `/query`.** sqlite-proxy maps result rows *positionally* against the selected fields, so it needs D1's array-of-arrays rows. `/query` returns row objects, which map to `undefined` columns without erroring.
+- **No transactions.** The runner normally hands each seeder a transaction. sqlite-proxy fakes `transaction()` by issuing `begin`/`commit` as ordinary statements and D1 rejects both — it has no interactive transactions at any layer. Hence `supportsTransactions: false`, which unwraps the seeder. A preview seed that dies halfway leaves partly-written tables; that is only tolerable because the next push re-seeds from scratch.
+- **D1 binds at most 100 parameters per query**; libSQL allows 32766. The old dump pipeline never met this limit because `wrangler d1 execute --file` inlined literals rather than binding them — seeding over a driver binds. 28 interests × 4 columns = 112 was the first statement to trip it. Multi-row inserts therefore go through `insertInChunks` (`libs/db/src/seed/chunk.ts`), which slices by the table's *column count* rather than the row's keys, because Drizzle also binds a parameter for any JS-valued default (`$defaultFn`) the row omits. A long `inArray()` list binds one parameter per element and hits the same ceiling, so the find-or-create lookups go through the companion `selectInChunks`. The driver rewrites D1's "too many SQL variables" into a message naming both helpers, because the raw error suggests no fix.
+- **A seeder must declare every table it resets.** `--reset` empties only the tables a seeder names. `memberSeeder` inserts into `users` but used to declare only `[profiles, userInterests]`, so switching to `--reset` would have left the first push's users in place, where `onConflictDoNothing` silently preserves them — the exact staleness bug reset-then-seed exists to prevent. `users` and `accounts` are now declared; `accounts` explicitly rather than by cascade, since it holds the credential hash that preview login depends on.
+
+Schema still arrives the production way, `wrangler d1 migrations apply`, so previews exercise the same migration path and the same D1 ledger as prod. Nothing else can: the seeder writes rows, never DDL.
+
+**On a second push, seed data is reset and reloaded**, not merged. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
 
 ## How preview login works
 

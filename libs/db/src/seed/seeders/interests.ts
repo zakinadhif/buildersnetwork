@@ -1,5 +1,6 @@
 import { slugifyInterest } from "../../interests";
 import { interests } from "../../schema";
+import { insertInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 // Curated starter vocabulary (FR-15). Campus-wide / all-faculties per Sprint 0
@@ -47,17 +48,17 @@ export const interestSeeder: Seeder = {
   tables: [interests],
   async run({ db, log }) {
     log("inserting curated interests…");
-    await db
-      .insert(interests)
-      .values(
-        CURATED_INTERESTS.map((name) => ({
-          id: crypto.randomUUID(),
-          name,
-          slug: slugifyInterest(name),
-          curated: true,
-        })),
-      )
-      .onConflictDoNothing({ target: interests.slug });
+    const rows = CURATED_INTERESTS.map((name) => ({
+      id: crypto.randomUUID(),
+      name,
+      slug: slugifyInterest(name),
+      curated: true,
+    }));
+    await insertInChunks(interests, rows, (chunk) =>
+      db.insert(interests).values(chunk).onConflictDoNothing({
+        target: interests.slug,
+      }),
+    );
 
     log(`seeded ${CURATED_INTERESTS.length} curated interests`);
   },

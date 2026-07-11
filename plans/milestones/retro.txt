@@ -146,4 +146,7 @@ per-project AI (S3).
   no branching; and copy-on-write from prod was itself the hazard, since every
   preview URL would then be a public window onto real student PII. Preview DBs
   are 100% seed data — create, migrate, seed, delete. Ratified decisions in
-  plans/how-to/preview-environments.md; discussion in #23. Blocked on #40.
+  plans/how-to/preview-environments.md; discussion in #23.
+  Unblocked once #40 landed. Provisioning (create/migrate/seed/deploy) shipped
+  in #44 as .github/workflows/preview.yml; teardown remains open (#45), so
+  preview DBs and R2 buckets are reaped by hand until it lands.

@@ -1,18 +1,33 @@
 import { parseArgs } from "node:util";
 import { getTableName } from "drizzle-orm";
+import type { D1HttpDb } from "../d1-http";
 import type { Db } from "../index";
-import type { Seeder } from "./types";
+import type { SeedDb, Seeder } from "./types";
+
+/** Any client the runner can drive: libSQL on Node, or D1 over its HTTP API. */
+export type SeedRunnerDb = Db | D1HttpDb;
 
 export interface SeedRuntimeConfig {
   /**
    * An already-constructed client. The runner is deliberately written against
    * the driver-agnostic `Db` type rather than any one vendor's CLI, so seeding
-   * a remote libSQL/Turso database from Node stays possible without changing
-   * this file.
+   * a remote libSQL/Turso or D1 database from Node stays possible without
+   * changing this file.
    */
-  db: Db;
+  db: SeedRunnerDb;
   /** When true, refuse to run without `--force`; require `--yes` for `--reset`. */
   isProduction: boolean;
+  /**
+   * Whether the driver has interactive transactions. Defaults to true.
+   *
+   * D1 has none — at any layer. `sqlite-proxy` fakes `transaction()` by issuing
+   * `begin`/`commit` as ordinary statements, which D1 rejects. When false, each
+   * seeder's `--reset` deletes and inserts run unwrapped: a seeder that fails
+   * halfway leaves its tables partly written. That is acceptable only because
+   * the run is against a disposable preview database whose next push re-seeds it
+   * from scratch. Never pass false for a database anyone relies on.
+   */
+  supportsTransactions?: boolean;
   /** Optional teardown for the underlying client, run after the last seeder. */
   close?: () => void | Promise<void>;
 }
@@ -77,7 +92,7 @@ Seed accounts:
  * result doesn't depend on cascade doing the work.
  */
 async function emptyTables(
-  tx: Parameters<Parameters<Db["transaction"]>[0]>[0],
+  tx: SeedDb,
   tables: NonNullable<Seeder["tables"]>,
 ): Promise<void> {
   for (const table of [...tables].reverse()) {
@@ -151,7 +166,13 @@ function formatList(seeders: readonly Seeder[]): string {
  * the non-zero exit code reaches the shell.
  */
 export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
-  const argv = opts.argv ?? process.argv.slice(2);
+  // Strip `--` separators. `pnpm db:seed -- --reset --yes` forwards through two
+  // `pnpm run` hops (root script -> api script), and the inner one receives the
+  // separator as a literal argv entry. `parseArgs` reads `--` as end-of-options
+  // and reports every flag after it as a positional, which `allowPositionals:
+  // false` then rejects — so every documented `pnpm db:seed -- <flag>` form
+  // fails from the repo root without this.
+  const argv = (opts.argv ?? process.argv.slice(2)).filter((a) => a !== "--");
   let flags: ParsedFlags;
   try {
     flags = parseFlags(argv);
@@ -201,17 +222,25 @@ export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
       const started = Date.now();
       process.stdout.write(`  → ${seeder.name}\n`);
 
-      await db.transaction(async (tx) => {
+      const runOne = async (handle: SeedDb) => {
         if (flags.reset && seeder.tables && seeder.tables.length > 0) {
           const names = seeder.tables.map((t) => getTableName(t)).join(", ");
           process.stdout.write(`    reset: emptying ${names}\n`);
-          await emptyTables(tx, seeder.tables);
+          await emptyTables(handle, seeder.tables);
         }
         await seeder.run({
-          db: tx,
+          db: handle,
           log: (m) => process.stdout.write(`    ${m}\n`),
         });
-      });
+      };
+
+      if (config.supportsTransactions === false) {
+        // No transaction to open. A seeder only ever needs insert/delete/select,
+        // so the base handle satisfies `SeedDb` structurally.
+        await runOne(db as unknown as SeedDb);
+      } else {
+        await (db as Db).transaction(runOne);
+      }
 
       process.stdout.write(`    ok (${Date.now() - started}ms)\n`);
     }

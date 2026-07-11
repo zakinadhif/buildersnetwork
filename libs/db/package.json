@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./schema": "./src/schema/index.ts"
+    "./schema": "./src/schema/index.ts",
+    "./d1-http": "./src/d1-http.ts"
   },
   "scripts": {
     "db:push": "drizzle-kit push --config drizzle.config.ts",

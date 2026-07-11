@@ -2,6 +2,7 @@ import { inArray } from "drizzle-orm";
 import { dedupeBySlug, slugifyInterest } from "../../interests";
 import type { KaryaStage } from "../../karya";
 import { interests, karya, karyaInterests, karyaMembers } from "../../schema";
+import { insertInChunks, selectInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
 // Example karya owned by existing seed members. Each carries a couple stages,
@@ -54,18 +55,16 @@ export const karyaSeeder: Seeder = {
   tables: [karya, karyaMembers, karyaInterests],
   async run({ db, log }) {
     log("inserting seed karya…");
-    await db
-      .insert(karya)
-      .values(
-        SEED_KARYA.map((k) => ({
-          id: k.id,
-          title: k.title,
-          description: k.description,
-          stages: k.stages,
-          createdBy: k.createdBy,
-        })),
-      )
-      .onConflictDoNothing();
+    const karyaRows = SEED_KARYA.map((k) => ({
+      id: k.id,
+      title: k.title,
+      description: k.description,
+      stages: k.stages,
+      createdBy: k.createdBy,
+    }));
+    await insertInChunks(karya, karyaRows, (chunk) =>
+      db.insert(karya).values(chunk).onConflictDoNothing(),
+    );
 
     log("inserting karya rosters…");
     const memberRows = SEED_KARYA.flatMap((k) => [
@@ -84,34 +83,35 @@ export const karyaSeeder: Seeder = {
         status: "pending",
       })),
     ]);
-    await db.insert(karyaMembers).values(memberRows).onConflictDoNothing();
+    await insertInChunks(karyaMembers, memberRows, (chunk) =>
+      db.insert(karyaMembers).values(chunk).onConflictDoNothing(),
+    );
 
     log("linking karya interests…");
     // Find-or-create every referenced interest by slug. Curated rows already
     // exist (slug conflict → skipped); the rest become free-text rows.
     const deduped = dedupeBySlug(SEED_KARYA.flatMap((k) => k.interests));
     if (deduped.length > 0) {
-      await db
-        .insert(interests)
-        .values(
-          deduped.map((d) => ({
-            id: crypto.randomUUID(),
-            name: d.name,
-            slug: d.slug,
-            curated: false,
-          })),
-        )
-        .onConflictDoNothing({ target: interests.slug });
+      const interestRows = deduped.map((d) => ({
+        id: crypto.randomUUID(),
+        name: d.name,
+        slug: d.slug,
+        curated: false,
+      }));
+      await insertInChunks(interests, interestRows, (chunk) =>
+        db.insert(interests).values(chunk).onConflictDoNothing({
+          target: interests.slug,
+        }),
+      );
 
-      const rows = await db
-        .select({ id: interests.id, slug: interests.slug })
-        .from(interests)
-        .where(
-          inArray(
-            interests.slug,
-            deduped.map((d) => d.slug),
-          ),
-        );
+      const rows = await selectInChunks(
+        deduped.map((d) => d.slug),
+        (chunk) =>
+          db
+            .select({ id: interests.id, slug: interests.slug })
+            .from(interests)
+            .where(inArray(interests.slug, chunk)),
+      );
       const idBySlug = new Map(rows.map((r) => [r.slug, r.id]));
 
       const links = SEED_KARYA.flatMap((k) => {
@@ -123,9 +123,9 @@ export const karyaSeeder: Seeder = {
           return [{ karyaId: k.id, interestId: id }];
         });
       });
-      if (links.length > 0) {
-        await db.insert(karyaInterests).values(links).onConflictDoNothing();
-      }
+      await insertInChunks(karyaInterests, links, (chunk) =>
+        db.insert(karyaInterests).values(chunk).onConflictDoNothing(),
+      );
       log(`linked ${links.length} karya-interest rows`);
     }
 

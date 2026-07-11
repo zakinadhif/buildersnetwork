@@ -290,16 +290,40 @@ no `DATABASE_URL` secret. Migrations apply via
 
 ### PR previews
 
-Any pull request that modifies `apps/mockups/**` gets a live static preview URL
-posted on it. Deploys are gated on the `CLOUDFLARE_API_TOKEN` /
-`CLOUDFLARE_ACCOUNT_ID` repo secrets.
+Two independent previews, both gated on the `CLOUDFLARE_API_TOKEN` /
+`CLOUDFLARE_ACCOUNT_ID` repo secrets and no-ops until those are set.
 
-There is intentionally **no full app/API preview**. A `wrangler versions upload`
-preview runs on a `*.workers.dev` origin, where auth is unusable — cookies are
-host-only and `baseURL`/redirects derive from the production `APP_URL`
-(`buildersnetwork.web.id`), so you can't log in and the preview is dead weight.
-Previewing app/API changes needs per-PR environment isolation (own DB + origin);
-that's tracked separately as an ephemeral-preview proposal, not this shortcut.
+**App preview** (`preview.yml`). Every pull request **from a branch in this
+repo** gets a full ephemeral environment at
+`https://buildersnetwork-pr-<n>.<subdomain>.workers.dev`: its own D1 database
+(created, migrated, seeded), its own R2 bucket
+(`buildersnetwork-pr-<n>-uploads`), and its own Worker. A sticky comment posts
+the URL and the seed credentials. Sign in with any [seed account](#seed-accounts).
+
+The earlier `wrangler versions upload` shortcut was deleted (`15cdbb2`) because
+it bound the preview to *production* bindings and login was broken on the
+`*.workers.dev` origin. Both are fixed by isolation: each preview sets its own
+`APP_URL`, which drives `BETTER_AUTH_URL` and `ALLOWED_ORIGINS` in `worker.ts`.
+
+Preview deploys from **`wrangler.preview.toml`**, rendered in CI from
+`wrangler.preview.template.toml` — a separate file rather than an
+`[env.preview]` block, because `routes` is an *inheritable* wrangler key and a
+preview deploying against the top-level `wrangler.toml` would try to claim the
+production apex domain. Bindings are non-inheritable, so omitting
+`RESEND_API_KEY`, `GOOGLE_CLIENT_ID` and `[[send_email]]` is what disables email
+and Google sign-in in previews — absence is the flag.
+
+Because applying PR-authored migrations means running PR-authored code with
+database credentials, the app preview is **trusted PRs only**; fork PRs get CI
+and the mockup preview. Seed data is reset on every push; the bucket is not.
+Teardown is not yet automated ([#45](https://github.com/zakinadhif/buildersnetwork/issues/45)) —
+preview databases and buckets are deleted by hand, with a 7-day object lifecycle
+rule as the backstop. Requires the `CLOUDFLARE_WORKERS_SUBDOMAIN` repo variable;
+the auth-signing secret is generated fresh per run, not stored. Design notes:
+[plans/how-to/preview-environments.md](plans/how-to/preview-environments.md).
+
+**Mockup preview.** Any pull request that modifies `apps/mockups/**` also gets a
+live static preview URL posted on it.
 
 The mockup preview is **fork-safe** so community PRs get previews. It's split
 into two workflows on purpose:
