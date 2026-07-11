@@ -259,6 +259,86 @@ authed(
 );
 
 authed(
+  "launchpad rail: real pulse counts + builders to meet (self excluded) + CTA",
+  async ({ page }) => {
+    await mockMe(page);
+
+    // Feed/featured empty — this test is about the right rail (issue #20).
+    for (const path of ["**/api/featured", "**/api/feed"]) {
+      await page.route(path, (route) =>
+        route.fulfill({
+          status: 200,
+          contentType: "application/json",
+          body: "[]",
+        }),
+      );
+    }
+
+    // Live pulse counts — the rail must reflect these, not hardcoded numbers.
+    await page.route("**/api/stats", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ karya: 7, builders: 3, updatesThisWeek: 5 }),
+      }),
+    );
+
+    // Members: the viewer (test-user-id) plus two others — the viewer is never
+    // surfaced to themselves in "kenalan dengan builder".
+    await page.route("**/api/members", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([
+          {
+            id: "test-user-id",
+            name: "Test User",
+            handle: "test",
+            bio: null,
+            interests: [],
+            year: "Tingkat 2",
+            major: "Informatika",
+            skills: [],
+          },
+          {
+            id: "m2",
+            name: "Fatimah Zahra",
+            handle: "fatimah",
+            bio: null,
+            interests: [],
+            year: "Tingkat 3",
+            major: "Informatika",
+            skills: ["Python", "FastAPI"],
+          },
+        ]),
+      }),
+    );
+
+    await page.goto("/home");
+
+    // The third column renders with the pulse strip and its live values.
+    const rail = page.locator(".bn-rail");
+    await expect(rail).toBeVisible();
+    const karyaRow = rail.locator(".bn-pulse-row", { hasText: "Karya aktif" });
+    await expect(karyaRow.locator(".bn-pulse-value")).toHaveText("7");
+    const updateRow = rail.locator(".bn-pulse-row", {
+      hasText: "Update minggu ini",
+    });
+    await expect(updateRow.locator(".bn-pulse-value")).toHaveText("5");
+
+    // A builder to meet shows; the viewer themselves does not.
+    await expect(rail.getByText("Fatimah Zahra")).toBeVisible();
+    await expect(
+      rail.locator(".bn-builder-name", { hasText: "Test User" }),
+    ).toHaveCount(0);
+
+    // The accent CTA points at creating a karya.
+    await rail.getByRole("button", { name: "Mulai karya baru" }).click();
+    await expect(page).toHaveURL(/\/karya\/new/);
+  },
+);
+
+authed(
   "admin: feature toggle shows and fires POST .../feature",
   async ({ page }) => {
     await mockMe(page);
