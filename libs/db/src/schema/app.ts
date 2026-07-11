@@ -115,7 +115,7 @@ export const karya = sqliteTable(
 // slot: `landscape` feeds the feed-row carousel, `portrait` the detail/Spotlight
 // gallery. `position` is owner-set ordering within one orientation (DECISION
 // mirrors `featured.rank` — lower sorts first).
-export const karyaScreenshots = pgTable(
+export const karyaScreenshots = sqliteTable(
   "karya_screenshots",
   {
     id: text("id").primaryKey(),
@@ -125,7 +125,9 @@ export const karyaScreenshots = pgTable(
     key: text("key").notNull(),
     orientation: text("orientation").notNull(), // "landscape" | "portrait"
     position: integer("position").notNull().default(0),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
   },
   (table) => [
     // Ordered gallery read, batched by karya (mirrors rostersByKaryaIds).
