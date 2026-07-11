@@ -19,7 +19,7 @@ If `gh project` fails with a scope error, tell the user to run `gh auth refresh 
 
 ## Render
 
-Group items by status in pipeline order — **Ready** first (that's what people came for), then In Progress, In Review, Blocked, Proposed; skip Done unless asked. For each: `#N title — @assignee`. Follow with open PRs and milestone progress lines.
+Group items by status — **Ready** first (the curated shortlist people came for), then **Backlog** (the mixed pool — claimable once checked), then In Progress, **Blocked** (say what's stuck — the `Depends on` line or the blocker comment), In Review, Proposed; skip Done unless asked. For each: `#N title — @assignee`. Follow with open PRs and milestone progress lines.
 
 Close with one actionable sentence, e.g. "Ready to claim: #1 — run /pick-task 1" or, if 3+ PRs are In Review, note that reviewing beats claiming (WIP limit).
 
@@ -28,3 +28,4 @@ Close with one actionable sentence, e.g. "Ready to claim: #1 — run /pick-task 
 - "what am I working on" → filter In Progress by `gh api user --jq .login`.
 - Details of one task → `gh issue view <n>`.
 - Proposals ("what's being discussed") → Proposed items + `gh issue view <n> --comments`.
+- Blockers ("what's stuck") → Blocked items + `gh issue view <n> --comments` for the reason (dependency or mid-task blocker).

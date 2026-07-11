@@ -1,6 +1,6 @@
 # How-to: parallel UI exploration with worktree agents
 
-*A repeatable way to generate several distinct UI/UX directions for a surface at once, then pull the winner into the app. This is step 5 of the build loop ("2–4 mockup approaches before implementing"). Non-authoritative working knowledge — trust the code when they diverge.*
+*A repeatable way to generate several distinct UI/UX directions for a surface at once, then pull the winner into the app. This is how a `[UI]` exploration gets built — the mockup that [Gate B of the issue-creation gate](build-workflow.md#the-issue-creation-gate) requires before a non-trivial surface can graduate to a `[Fitur]`. Non-authoritative working knowledge — trust the code when they diverge.*
 
 ## When to use it
 
