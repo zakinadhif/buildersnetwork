@@ -93,6 +93,15 @@ Proposed┘                                          ⇅
 - **In Review** — PR open, linked with `Closes #N`.
 - **Done** — merged.
 
+## Who curates — the one authority rule
+
+**Creation is open; curation is gated.** The Queue is continuous pull (you claim, nobody assigns), and the same openness applies to filing work — but not to prioritizing it.
+
+- **Anyone** (contributor or maintainer, human or agent) may: file an issue; land it in **Backlog** or **Proposed**; file `[Bug]`/`[Security]` directly; claim a **Ready** task (or a **Backlog** one they've checked is groomed + unblocked); build; and open a PR.
+- **Only the maintainer** (@zakinadhif) may: flip anything into **Ready** (the curated ~6 shortlist); ratify a `[Diskusi]` (`/ratify-proposal`); and merge.
+
+So a contributor's *strategic* work waits in **Proposed** for ratification and their overflow sits in **Backlog** — never self-served into Ready. This keeps Ready a real, single-owner priority signal without gatekeeping *who can contribute* — the bar is only on *what gets called next-up*.
+
 ## The proposal gate (vision / PRD changes)
 
 Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it graduates to its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
