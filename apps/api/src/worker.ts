@@ -96,11 +96,35 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    // Workers Assets serves exact static file matches before this handler runs.
-    // For client-side routes under /app/ (no file extension), serve the SPA shell.
-    if (url.pathname.startsWith("/app/") && !url.pathname.match(/\.\w+$/)) {
+    // `run_worker_first` (wrangler.toml) routes all of /app/* through here
+    // except /app/assets/* — including real files like /app/index.html, not
+    // just extensionless SPA routes. Serve the exact match first (index.html,
+    // favicon, ...); anything else means it's a client-side route (/app/minat,
+    // /app/karya/:id, ...), so fall back to the SPA shell.
+    //
+    // Checking for `.ok`, not `status !== 404`: the ASSETS binding applies the
+    // same auto-trailing-slash html_handling as Cloudflare's edge router, so a
+    // miss on an extensionless path comes back as a 307 (e.g. to /app/), not a
+    // 404 — forwarding that verbatim would reproduce the exact redirect this
+    // fallback exists to avoid.
+    if (url.pathname.startsWith("/app/")) {
+      const assetResponse = await env.ASSETS.fetch(request);
+      if (assetResponse.ok) return assetResponse;
+
+      // Only a miss on an EXTENSIONLESS path is a client-side SPA route.
+      // A miss on a path with an extension (/app/favicon.ico, /app/foo.js,
+      // a stale/broken asset reference, ...) is a genuine missing file —
+      // masking it as a 200 HTML shell would hide broken asset URLs and
+      // confuse caching (a browser expecting an image getting HTML back).
+      if (url.pathname.match(/\.\w+$/)) return assetResponse;
+
+      // The fallback target is "/app/" (trailing slash), NOT
+      // "/app/index.html": requesting the literal index.html filename
+      // undergoes the SAME auto-trailing-slash normalization and itself
+      // 307s to "/app/" — fetching the already-canonical folder URL is
+      // what actually returns 200.
       return env.ASSETS.fetch(
-        new Request(new URL("/app/index.html", url.origin), request),
+        new Request(new URL("/app/", url.origin), request),
       );
     }
 
