@@ -8,6 +8,13 @@
       "when": 1783515094478,
       "tag": "0000_odd_hitman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1783745994801,
+      "tag": "0001_serious_human_robot",
+      "breakpoints": true
     }
   ]
 }

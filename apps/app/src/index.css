@@ -445,6 +445,52 @@ body {
   display: block;
   margin-bottom: 20px;
 }
+/* Screenshot gallery (issue #19) — Play Store-style proof shots, separate from
+   the app-icon cover. Landscape feeds the feed-row carousel above the
+   metadata row; portrait feeds the detail-page gallery. */
+.landscape-carousel,
+.screenshot-gallery {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.landscape-carousel {
+  gap: 10px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.landscape-carousel-img {
+  width: 240px;
+  height: 135px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  scroll-snap-align: start;
+  display: block;
+}
+.screenshot-gallery {
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.screenshot-gallery-img {
+  height: 360px;
+  width: auto;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  scroll-snap-align: start;
+  display: block;
+}
+@media (prefers-reduced-motion: reduce) {
+  .landscape-carousel,
+  .screenshot-gallery {
+    scroll-behavior: auto;
+  }
+}
+
 /* Icon-left row inside a karya card when a cover is present */
 .karya-card-row {
   display: flex;

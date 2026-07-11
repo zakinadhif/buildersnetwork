@@ -110,6 +110,31 @@ export const karya = sqliteTable(
   ],
 );
 
+// A karya's screenshot gallery (issue #19) — Play Store-style proof shots,
+// separate from the single `coverKey` icon. `orientation` picks the display
+// slot: `landscape` feeds the feed-row carousel, `portrait` the detail/Spotlight
+// gallery. `position` is owner-set ordering within one orientation (DECISION
+// mirrors `featured.rank` — lower sorts first).
+export const karyaScreenshots = sqliteTable(
+  "karya_screenshots",
+  {
+    id: text("id").primaryKey(),
+    karyaId: text("karya_id")
+      .notNull()
+      .references(() => karya.id, { onDelete: "cascade" }),
+    key: text("key").notNull(),
+    orientation: text("orientation").notNull(), // "landscape" | "portrait"
+    position: integer("position").notNull().default(0),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+  },
+  (table) => [
+    // Ordered gallery read, batched by karya (mirrors rostersByKaryaIds).
+    index("karya_screenshots_karyaId_idx").on(table.karyaId),
+  ],
+);
+
 // Contributor roster + join requests (FR-12). The creator is one row with
 // `role: "owner", status: "member"` (DECISION-G); join requests are
 // `role: "member", status: "pending"` until the owner approves.
@@ -249,7 +274,18 @@ export const karyaRelations = relations(karya, ({ one, many }) => ({
   interests: many(karyaInterests),
   posts: many(posts),
   featured: one(featured),
+  screenshots: many(karyaScreenshots),
 }));
+
+export const karyaScreenshotsRelations = relations(
+  karyaScreenshots,
+  ({ one }) => ({
+    karya: one(karya, {
+      fields: [karyaScreenshots.karyaId],
+      references: [karya.id],
+    }),
+  }),
+);
 
 export const postsRelations = relations(posts, ({ one }) => ({
   karya: one(karya, {

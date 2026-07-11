@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { KARYA_STAGES, normalizeStages } from "./karya";
+import { KARYA_STAGES, normalizeOrientation, normalizeStages } from "./karya";
 
 describe("normalizeStages", () => {
   it("keeps valid stage strings", () => {
@@ -35,5 +35,19 @@ describe("normalizeStages", () => {
 
   it("accepts every canonical stage", () => {
     expect(normalizeStages([...KARYA_STAGES])).toEqual([...KARYA_STAGES]);
+  });
+});
+
+describe("normalizeOrientation", () => {
+  it("returns known orientations unchanged", () => {
+    expect(normalizeOrientation("landscape")).toBe("landscape");
+    expect(normalizeOrientation("portrait")).toBe("portrait");
+  });
+
+  it("returns null for unknown or non-string input, with no default", () => {
+    expect(normalizeOrientation("sideways")).toBeNull();
+    expect(normalizeOrientation(null)).toBeNull();
+    expect(normalizeOrientation(undefined)).toBeNull();
+    expect(normalizeOrientation(42)).toBeNull();
   });
 });

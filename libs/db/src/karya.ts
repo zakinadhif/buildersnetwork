@@ -41,3 +41,24 @@ export function normalizeStages(input: unknown): KaryaStage[] {
   // Preserve canonical order regardless of input order.
   return KARYA_STAGES.filter((s) => seen.has(s));
 }
+
+/**
+ * Screenshot gallery orientation (issue #19) — a closed 2-value vocabulary,
+ * like {@link PostKind}. `landscape` feeds the feed-row carousel, `portrait`
+ * the detail gallery. No default: an upload must declare its orientation, so
+ * the API maps an unknown value to 400.
+ */
+export const SCREENSHOT_ORIENTATIONS = ["landscape", "portrait"] as const;
+
+export type ScreenshotOrientation = (typeof SCREENSHOT_ORIENTATIONS)[number];
+
+const ORIENTATION_SET = new Set<string>(SCREENSHOT_ORIENTATIONS);
+
+export function normalizeOrientation(
+  input: unknown,
+): ScreenshotOrientation | null {
+  if (typeof input === "string" && ORIENTATION_SET.has(input)) {
+    return input as ScreenshotOrientation;
+  }
+  return null;
+}
