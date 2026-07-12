@@ -44,7 +44,7 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 **Step 0 — strategic or not?**
 
 - **Non-strategic** (`[Bug]`, `[Security]`, chores, docs) → file directly, skip the gate. These fix or harden what exists; they don't change what we build.
-- **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear both gates below.
+- **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear the gates below: Gate A grounds all three, Gate B is `[Fitur]`-only (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
 
 **Gate A — grounding.** Does the [Vision](../al-fath-berkarya-vision.md), [PRD](../al-fath-berkarya-prd.md), or an active [milestone doc](../milestones/) actually call for this?
 
