@@ -6,7 +6,7 @@
 
 | Unit | Criterion | Lives in |
 |---|---|---|
-| **Milestone** | One human judgment: one grooming decision + one testable exit criterion. Done when the exit passes — no time-box. | Half-page doc in `plans/milestones/` (the why, decisions, exit) + a GitHub Milestone grouping its tasks |
+| **Milestone** | One human judgment: one grooming decision + one testable exit criterion. Done when the exit passes. Carries a **target date** as a planning aim (a countdown in `/project-status`), but the date is an *aim, not a gate* — closure is still exit-driven, never date-driven. | Half-page doc in `plans/milestones/` (the why, decisions, exit) + a GitHub Milestone grouping its tasks (its `due_on` holds the target date) |
 | **Task** | One agent session: completable cold from the issue body + the repo, producing **one PR** for **one shippable deliverable** — usually a *vertical* slice (migration + API + wired UI, as the feature needs), not a single layer. | A GitHub Issue — acceptance criteria, boundary (touch / don't touch), dependencies, out-of-scope |
 | **Queue** | Continuous pull — no cycles, no assignments handed down. You claim; nobody assigns you. | The [project board](https://github.com/users/zakinadhif/projects/8) Status field |
 
@@ -14,17 +14,48 @@
 
 ## Issue title tags
 
-Every issue title opens with a bracket tag — the "what is this?" signal that shows in `gh issue list` and `/board`, where labels stay hidden. Three, no more:
+Every issue title opens with a bracket tag — the "what is this?" signal that shows in `gh issue list` and `/project-status`, where labels stay hidden. Tags split into two groups by whether the work touches **what or why we build**.
+
+**Strategic** — shapes the product. Must clear the [issue-creation gate](#the-issue-creation-gate) before it's filed:
 
 | Tag | Means | Claimable? |
 |---|---|---|
 | **`[Diskusi]`** | A question to decide *before* building — proposal, open exploration, vision input. Board = **Proposed**. | No — discuss, don't pick. |
 | **`[Fitur]`** | A shippable deliverable: one agent session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default for build work. | Yes. |
-| **`[UI]`** | A UI *approach* built to be reviewed before it's locked in — mockups, design directions, visual options (see [parallel-ui-exploration](parallel-ui-exploration.md)). | Yes — to explore; the winner then graduates to a `[Fitur]`. |
+| **`[Desain]`** | A design *approach* built to be reviewed before it's locked in — mockups, directions, visual options (see [parallel-ui-exploration](parallel-ui-exploration.md)). A design *decision*, not the feature's UI layer: it **grounds** a later `[Fitur]`, it doesn't become one. | Yes — to explore; the chosen mockup then grounds a **sibling** `[Fitur]` via Gate B. |
+
+**Non-strategic** — keeps the product healthy without changing *what* we build. **Skips the gate**, filed directly:
+
+| Tag | Means | Claimable? |
+|---|---|---|
+| **`[Bug]`** | A reproducible defect to fix — the reactive lane. Needs a repro and a regression test. | Yes. |
+| **`[Security]`** | A security *hardening* task — proactive posture work where nothing is yet broken (audit, add guards, tighten config). | Yes. |
+
+A **security bug** — a reproducible vulnerability with a fix — rides the **`[Bug]`** lane, not `[Security]`; it's a defect like any other. Flag it with a `security` label if disclosure sensitivity matters. `[Security]` is only for hardening where there's no specific defect. Tie-breaker: *is there a reproducible defect?* Yes → `[Bug]`; no → `[Security]`.
 
 **Title shape:** `[Tag] <Area>: <brief>`. `<Area>` is the feature or milestone (e.g. `Launchpad`), so the grouping shows up in `gh issue list` where the Milestone field doesn't. `[Fitur]` covers any shippable deliverable in service of a feature — **building new or reshaping existing**.
 
-We tag by **deliverable, not by module.** A real feature cuts through `libs/db` → `apps/api` → `apps/app` in one slice, so a `[DB]`/`[API]`/`[UI]`-per-layer split would only manufacture dependencies and half-landed entities. The one worthwhile break-out is **UI** — for a review reason (seeing options before committing), not a module reason. Titles stay in Bahasa Indonesia; `UI` keeps its English name.
+We tag by **deliverable, not by module.** A real feature cuts through `libs/db` → `apps/api` → `apps/app` in one slice, so a `[DB]`/`[API]`/UI-per-layer split would only manufacture dependencies and half-landed entities. The one worthwhile break-out is **design** — a `[Desain]` exploration, for a review reason (seeing options before committing), not a module reason. And it's a *precursor*, not a slice of the feature: it grounds the `[Fitur]`, it isn't a piece carved off it. Titles stay in Bahasa Indonesia.
+
+## The issue-creation gate
+
+Before a **strategic** issue is filed, it clears this gate. Its job is to stop two failures we've actually hit: a `[Fitur]` that no vision/PRD/milestone ever asked for, and a `[Fitur]` for a screen nobody has drawn yet. An agent may **warn and recommend** at each gate — it may **never** self-override. Only the maintainer overrides a gate, on their own explicit insistence.
+
+**Step 0 — strategic or not?**
+
+- **Non-strategic** (`[Bug]`, `[Security]`, chores, docs) → file directly, skip the gate. These fix or harden what exists; they don't change what we build.
+- **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear the gates below: Gate A grounds all three, Gate B is `[Fitur]`-only (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
+
+**Gate A — grounding.** Does the [Vision](../al-fath-berkarya-vision.md), [PRD](../al-fath-berkarya-prd.md), or an active [milestone doc](../milestones/) actually call for this?
+
+- **Grounded** → cite *where* (the citation goes in `## Kenapa`), continue to Gate B.
+- **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the proposal gate](#the-proposal-gate-vision--prd-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
+
+**Gate B — mockup.** Only for a **non-trivial** user-facing surface.
+
+- **A `[Desain]` mockup for this surface exists in `apps/mockups/`** → file the `[Fitur]`, cite the mockup in `## Kenapa`. It *grounds* the feature: the scope and schema follow from what the UI needs to serve.
+- **No mockup yet** → **don't groom a `[Fitur]` for a surface nobody's drawn.** File a `[Desain]` exploration first (or point at the one that should be built); the feature's contract — scope, schema — is written only *after* the design lands. (In a ratification the feature can sit meanwhile as an ungroomed **Backlog** stub under the proposal — see [the proposal gate](#the-proposal-gate-vision--prd-changes).)
+- **Trivial surface** (a settings toggle, a copy tweak) **or no surface at all** (pure backend/infra) → Gate B is N/A; file the `[Fitur]`.
 
 ## Scope treatments — how much a feature gets *right now*
 
@@ -48,47 +79,64 @@ A feature carries **both** tags, e.g. *"Launchpad — P0, hero"* or *"Messaging 
 ## Board statuses
 
 ```
-Proposed ──(discussion + ratification)──▶ Ready ──(claim)──▶ In Progress ──(PR)──▶ In Review ──(merge)──▶ Done
-                                            ▲
-              Blocked ──(dependency merges)─┘
+Backlog ┐
+        ├─(promote / ratify)─▶ Ready ─(claim)─▶ In Progress ─(PR)─▶ In Review ─(merge)─▶ Done
+Proposed┘                                          ⇅
+                                                Blocked   ← unmet dependency, or a blocker hit mid-task; back to the queue when cleared
 ```
 
+- **Backlog** — the holding pool: accepted work that isn't on the Ready shortlist — **ungroomed** items and **groomed-but-unprioritized** ones, mixed. Claimable *only if* an item is groomed and unblocked, so read the issue before pulling one — it isn't the pre-vetted queue Ready is. Non-urgent `[Bug]`/`[Security]`, parked tasks, and ratification `[Fitur]` stubs awaiting their `[Desain]` live here too.
 - **Proposed** — under discussion; **do not pick**. Vision/PRD-touching questions live here (see gate below).
-- **Ready** — ratified, unblocked, claimable by anyone.
-- **Blocked** — ratified but waiting on a `Depends on #N` task. Flips to Ready when the dependency merges.
-- **In Progress** — claimed (assignee set). One task per person at a time.
+- **Ready** — the maintainer's curated next-up, kept short (**around 6**) so it stays a real priority signal — a soft target, not a hard limit. Unblocked, groomed, claimable by anyone; if it's getting long, park the rest in Backlog.
+- **Blocked** — **not workable right now**, for either reason: an unmet `Depends on #N`, *or* a blocker hit **mid-task**. Set at grooming (planned dependency) or from In Progress (a builder got stuck) — leave a comment saying what's stuck. Returns to Ready / In Progress when cleared. **Doesn't count** against your one-in-progress limit.
+- **In Progress** — claimed (assignee set), building. One per person — though a Blocked task doesn't count, so you can pull another while it clears.
 - **In Review** — PR open, linked with `Closes #N`.
 - **Done** — merged.
 
+## Who curates — the one authority rule
+
+**Creation is open; curation is gated.** The Queue is continuous pull (you claim, nobody assigns), and the same openness applies to filing work — but not to prioritizing it.
+
+- **Anyone** (contributor or maintainer, human or agent) may: file an issue; land it in **Backlog** or **Proposed**; file `[Bug]`/`[Security]` directly; claim a **Ready** task (or a **Backlog** one they've checked is groomed + unblocked); build; and open a PR.
+- **Only the maintainer** (@zakinadhif) may: flip anything into **Ready** (the curated ~6 shortlist); ratify a `[Diskusi]` (`/ratify-proposal`); and merge.
+
+So a contributor's *strategic* work waits in **Proposed** for ratification and their overflow sits in **Backlog** — never self-served into Ready. This keeps Ready a real, single-owner priority signal without gatekeeping *who can contribute* — the bar is only on *what gets called next-up*.
+
 ## The proposal gate (vision / PRD changes)
 
-Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it graduates to its own issue in **Proposed** and is decided in that thread. Ratification means:
+Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it becomes its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
 
-1. The decision is written down where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff).
-2. Affected task issues are created or updated, and flipped **Proposed → Ready** — only the maintainer (@zakinadhif) flips this today.
-3. The proposal issue is closed with a comment linking the doc PR.
+1. **Write the decision down** where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
+2. **Decompose — design first, then the features it grounds.** A feature's scope and schema follow from its UI, so the design leads. For each non-trivial surface the decision introduces, file its **`[Desain]`** exploration and flip it **Ready** — the immediate, buildable output of ratification. File each `[Fitur]` the design will feed **now too, but as an ungroomed stub in Backlog** (body just a `## Kenapa` citing the doc PR + *"menunggu desain #N"*), and link all of them — designs and stubs alike — as **sub-issues** of the proposal. That gives the proposal a live, **full-scope progress bar from day one** and makes the sub-issue list the single record of what the decision spawns. The stub stays **Backlog** (ungroomed, not claimable until groomed) — **not** Blocked and **not** Ready: the design→feature link is a *grooming* dependency, not a `Depends on #N`, so nothing auto-promotes it. When a `[Desain]` lands, its follow-on is to **groom that stub from the merged mockup** (Gate B now satisfied; schema follows the UI) and move it Backlog → Ready. Backend-only deliverables (no surface) skip the design step and are filed as a groomed `[Fitur]` straight away. Every issue's `## Kenapa` cites the doc PR; only the maintainer (@zakinadhif) flips anything into Ready.
+3. **Close the proposal** with a comment linking the doc PR and the issues it spawned — but **leave it on the board** (closed, not archived): it's the durable record of *why* those tasks exist.
 
 Never start building from a Proposed item.
+
+## Sub-issues — one sanctioned use
+
+GitHub's **sub-issues** give a parent issue a live checklist of children and a progress bar. We use them for **exactly one thing**: linking a ratified `[Diskusi]` to the tasks it spawned. Because a ratified proposal stays on the board as the durable *why* record, making its tasks sub-issues turns that record **live** — the proposal shows how much of the decided direction has actually shipped (e.g. "3 of 5 done"), and the link is structural and bidirectional instead of a closing comment that rots. `/ratify-proposal` wires this automatically; the project's "Auto-add sub-issues" workflow lands the children on the board.
+
+**Do not use sub-issues to decompose a feature by module.** Giving a `[Fitur]` a DB / API / UI set of sub-issues is [module-splitting](#issue-title-tags) under a new name — it manufactures dependencies and half-landed layers, exactly what *"tag by deliverable, not module"* forbids. A `[Fitur]` stays **one vertical slice**. Real dependencies between separate deliverables stay `Depends on #N`; grouping a set of tasks under a theme stays the **GitHub Milestone**. Parent/child is reserved for the proposal → spawned-tasks relationship, nothing else.
 
 ## The loop (human + agent)
 
 Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth refresh -s project,read:project` (board access). Claude Code picks up the repo skills automatically.
 
-1. **`/board`** — see the queue: what's Ready, who's on what, what's in review. No website needed.
+1. **`/project-status`** — where we are: the active phase & bet, each milestone's progress and target-date countdown, then today's board (Ready, who's on what, what's in review). No website needed.
 2. **`/pick-task`** — claim a Ready task: assigns you, moves it to In Progress, creates a branch, and loads the issue + milestone doc + conventions into your agent's context.
-3. Build. Stay inside the issue's **Boundary**; if the task turns out bigger than one session, stop and comment on the issue instead of sprawling.
+3. Build. Stay inside the issue's **Boundary**. If you hit a blocker you can't clear in-session — or the task turns out bigger than one session — move the card to **Blocked**, comment what's stuck, and stop instead of sprawling.
 4. **`/ship-task`** — push, open a PR with `Closes #N`, board moves to In Review.
-5. Maintainer reviews (with `/code-review` as second reviewer) and merges → Done, dependents flip to Ready.
+5. Maintainer reviews (with `/code-review` as second reviewer) and merges → Done; dependents unblock → Ready (or Backlog if Ready is already long).
 
-**WIP limit:** review capacity is the bottleneck — if 3+ PRs are already In Review, prefer helping review over claiming another task.
+**Limits.** Keep **Ready short — around 6** — a curated shortlist, not a dumping ground; park the rest in **Backlog**. It's a **soft cap**: set it as the Ready column's limit in the board view (**UI only** — GitHub has no API for it), where it just shows a warning when exceeded — nothing blocks. Separately, **review is the bottleneck**: if 3+ PRs are already In Review, prefer helping review over claiming another task.
 
 ## Grooming (maintainer)
 
 Groom one milestone at a time, straight into issues — the doc never carries a task list. **Issues (title + body) are written in Bahasa Indonesia** — the team's language; keep code identifiers, file paths, and FR/NFR codes as-is:
 
 1. Write the half-page milestone doc (why, decisions, exit) in `plans/milestones/`.
-2. Create the GitHub Milestone; decompose into session-sized issues, each a **vertical deliverable** (`[Fitur]`) — split further only when one won't fit a session, or when a **UI** approach needs review before locking (`[UI]`). Dependencies explicit (`Depends on #N`).
+2. Create the GitHub Milestone; decompose into session-sized issues, each a **vertical deliverable** (`[Fitur]`) — split further only when one won't fit a session, or when a **design** approach needs review before locking (`[Desain]`). Grooming from a milestone doc clears Gate A by construction, but **Gate B still holds**: a `[Fitur]` with a non-trivial surface needs a `[Desain]` mockup first — draw the design before the build issue and let the feature's schema follow the UI. Dependencies explicit (`Depends on #N`).
 3. Anything contentious becomes a **Proposed** issue instead of a task.
-4. Unblocked + uncontentious tasks start **Ready**; dependent ones start **Blocked**.
+4. Unblocked + uncontentious tasks start **Ready** (keep it to ~6) — the rest start **Backlog** (still claimable, just uncurated); dependent ones start **Blocked**.
 
 When the milestone's exit criterion passes: close the GitHub Milestone, distill anything worth keeping into `plans/milestones/retro.txt`.

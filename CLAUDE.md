@@ -10,4 +10,4 @@ The `plans/` directory is a loose collection of project knowledge — vision doc
 
 ## Team workflow
 
-Work is coordinated per `plans/how-to/build-workflow.md`: milestone docs in `plans/milestones/` hold intent (why/decisions/exit), GitHub Issues hold task contracts, and the GitHub project board holds live status. **Never write task lists or status into `plans/` files.** The repo skills `/board`, `/pick-task`, and `/ship-task` drive the loop.
+Work is coordinated per `plans/how-to/build-workflow.md`: milestone docs in `plans/milestones/` hold intent (why/decisions/exit), GitHub Issues hold task contracts, and the GitHub project board holds live status. **Never write task lists or status into `plans/` files.** The repo skills `/project-status`, `/pick-task`, and `/ship-task` drive the loop.
