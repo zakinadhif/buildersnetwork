@@ -23,16 +23,18 @@ Keep the PR focused on the decision — it becomes the source of truth every res
 
 ## 3. Decompose — design first, then the features it grounds
 
-The doc you just wrote **grounds** the work, so Gate A is satisfied by construction. Decompose by re-entering the [`/new-task`](../new-task/SKILL.md) flow rather than re-inventing it — but respect the ordering the gate implies: **a feature's scope and schema follow from its UI**, so the design leads and the `[Fitur]` is authored only once the design exists.
+The doc you just wrote **grounds** the work, so Gate A is satisfied by construction. Decompose respecting the ordering the gate implies: **a feature's scope and schema follow from its UI**, so the design leads and a UI-bearing `[Fitur]` isn't groomed until its design exists.
 
-- **File the `[Desain]` explorations now** — one per non-trivial surface the decision introduces — and flip them **Ready**. They're the immediate, buildable output of ratification. Backend-only deliverables (no surface, Gate B N/A) skip this and are filed as `[Fitur]` straight away.
-- **List the `[Fitur]`s the design will feed as a checklist in the doc / proposal — but don't file them yet.** An ungroomed feature whose UI isn't decided has no honest scope or schema-touch list; a hollow shell on the board would be fiction. Leave the reminder on the `[Desain]` issue, e.g. *"Saat mockup ini di-merge, buat `[Fitur]` turunannya (grounded di mockup ini, skema mengikuti UI)."*
-- **When a `[Desain]` lands, re-run `/new-task` for each `[Fitur]` it grounds** — Gate B is now satisfied by the merged mockup, the schema falls out of what the UI needs to serve, and you link the new `[Fitur]` as a sub-issue of the proposal too (see below).
+- **File the `[Desain]` explorations** — one per non-trivial surface the decision introduces — via the [`/new-task`](../new-task/SKILL.md) flow, and flip them **Ready**. They're the immediate, buildable output of ratification.
+- **File each UI-bearing `[Fitur]` now too, but as an ungroomed stub in Backlog** (`d9a7d606`). Body is minimal — a `## Kenapa` citing the doc PR + *"menunggu desain #N; skema mengikuti UI, jangan di-groom/mulai sebelum desain merge."* This is a sanctioned exception to Gate B: the stub is a deliberate placeholder, not a groomed contract. Filing it now (vs. later) gives the proposal a **live, full-scope progress bar** and makes the sub-issue list the single record of what the decision spawns — nothing to remember to file later.
+  - Keep it **Backlog**, not Blocked and not Ready: the design→feature link is a *grooming* dependency, **not** a `Depends on #N`, so no auto-promotion fires. (Optionally tag `menunggu-desain` so it reads as "don't pull.")
+- **Backend-only deliverables** (no surface, Gate B N/A) are filed as a groomed `[Fitur]` straight away, **Ready**.
+- **When a `[Desain]` lands, groom its stub from the merged mockup** — rewrite the `[Fitur]` body into a real contract (Gate B now satisfied; the schema falls out of what the UI serves), then move it Backlog → Ready. That's the follow-on `/ship-task` flags — a *groom* step on an existing issue, not a new file.
 - Split by **deliverable, not module** — vertical `[Fitur]` slices, not per-layer DB/API/UI issues. (Don't reach for sub-issues to organize a feature by layer — that's the same [module-splitting](../../../plans/how-to/build-workflow.md#sub-issues--one-sanctioned-use), just hierarchical.)
-- Each issue's `## Kenapa` cites the doc PR / section from step 2 — that's the trace back to the ratified decision.
-- Set real dependencies *between deliverables* (`Depends on #N`); a dependent lands **Blocked**, not Ready. (The design → feature ordering is **not** such a dependency — the `[Fitur]` simply isn't filed until its `[Desain]` merges, so there's no Blocked shell to unblock.)
+- Each issue's `## Kenapa` cites the doc PR / section from step 2 — the trace back to the ratified decision.
+- Set real dependencies *between deliverables* (`Depends on #N`); a dependent lands **Blocked**. (The design→feature ordering is **not** such a dependency — see above.)
 - Some proposals **update** existing issues rather than spawn new ones — edit those bodies instead.
-- **Link each spawned task as a sub-issue of the proposal.** This makes the lineage structural — a live progress bar on the proposal (which stays on the board as the *why* record) instead of a comment that rots — and the "Auto-add sub-issues" workflow lands the child on the board. `gh` has no sub-issue command yet; use the GraphQL mutation with each issue's node id:
+- **Link every spawned task — designs and feature stubs alike — as a sub-issue of the proposal** (flat siblings, never design-over-feature). This makes the lineage structural — a live progress bar on the proposal (which stays on the board as the *why* record) instead of a comment that rots — and the "Auto-add sub-issues" workflow lands the child on the board. `gh` has no sub-issue command yet; use the GraphQL mutation with each issue's node id:
   ```bash
   PARENT=$(gh issue view <proposal-n> --json id --jq .id)   # the [Diskusi]
   CHILD=$(gh issue view <task-n> --json id --jq .id)         # the new [Desain]/[Fitur]
@@ -42,14 +44,14 @@ The doc you just wrote **grounds** the work, so Gate A is satisfied by construct
 
 ## 4. Curate, then close the proposal
 
-- Flip the tasks you filed now — the `[Desain]` explorations (and any backend `[Fitur]`) — **Proposed → Ready** (`177864ee`), keeping **Ready short (~6)**; park overflow in **Backlog** (`d9a7d606`). Only the maintainer flips into Ready. (Field/project ids and the item-edit call are in [`/new-task` §4](../new-task/SKILL.md); status option ids: Ready `177864ee` · Backlog `d9a7d606` · Blocked `0b102e6a`.) The UI-bearing `[Fitur]`s are filed later, each when its `[Desain]` lands (§3) — they don't exist to flip yet.
+- Flip the `[Desain]` explorations (and any backend `[Fitur]`) **Proposed → Ready** (`177864ee`), keeping **Ready short (~6)**; park overflow in **Backlog** (`d9a7d606`). Only the maintainer flips into Ready. (Field/project ids and the item-edit call are in [`/new-task` §4](../new-task/SKILL.md); status option ids: Ready `177864ee` · Backlog `d9a7d606` · Blocked `0b102e6a`.) The UI-bearing `[Fitur]` **stubs** stay in **Backlog** — they move to Ready only once their `[Desain]` lands and they're groomed from the mockup (§3).
 - **Close the `[Diskusi]`** with a comment linking the doc PR — the sub-issue links from step 3 already carry the task lineage, so the comment is a human-readable backstop, not the only thread:
 
 ```bash
 gh issue close <n> --comment "Diratifikasi di <doc-PR-url>. Task turunan: #<a>, #<b>, … (tertaut sebagai sub-issue)."
 ```
 
-  Closing now is fine even though the UI-bearing `[Fitur]`s come later: **sub-issues can be added to a closed parent**, so as each design lands and spawns its feature (§3), link it under the proposal too — the progress bar keeps growing and reflects the full decision over time.
+  Closing now is fine: every spawned task — the `[Desain]` explorations and the Backlog `[Fitur]` stubs — is already linked, so the proposal's progress bar shows the **full decided scope from day one** and ticks up as each ships. (If a design later reveals a feature nobody foresaw, **sub-issues can be added to a closed parent**, so link it then too.)
 
   **Leave the board item in place — closed, not archived.** A ratified proposal is the durable record of *why* the tasks exist; it stays on the board (in **Proposed**, now showing closed) so the decision remains visible. Don't `gh project item-archive` it. (Project #8's "Item closed" and auto-archive workflows are **disabled**, so closing won't move or remove it — if a maintainer ever enables one, flag that rather than working around it.)
 

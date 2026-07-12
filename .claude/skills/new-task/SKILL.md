@@ -17,7 +17,7 @@ The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-crea
    - **Non-strategic** (`[Bug]`, `[Security]`, chore, docs) → skip to §1 and file directly. No grounding, no mockup check.
    - **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → run Gates A and B before filing.
 2. **Gate A — grounding.** Read the [Vision](../../../plans/al-fath-berkarya-vision.md) / [PRD](../../../plans/al-fath-berkarya-prd.md) / active [milestone doc](../../../plans/milestones/) and confirm they actually call for this. If yes, note *where* — it becomes the `## Kenapa` citation. If it falls outside all three, **stop**: recommend a `[Diskusi]` in **Proposed** instead of a `[Fitur]`. File build work only if the maintainer insists, and record the ungrounded exception in the body.
-3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a `[Desain]` mockup of this surface. If one exists, cite it in `## Kenapa` — it grounds the feature, so scope and schema follow from what the UI needs to serve. If none exists, **don't file a `[Fitur]`** — recommend a `[Desain]` exploration first (or point at the one that should be built); the `[Fitur]` is authored *after* the design lands, not before. Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B.
+3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a `[Desain]` mockup of this surface. If one exists, cite it in `## Kenapa` — it grounds the feature, so scope and schema follow from what the UI needs to serve. If none exists, **don't file a groomed `[Fitur]`** — recommend a `[Desain]` exploration first (or point at the one that should be built); the feature's contract is written only *after* the design lands. (One exception: during a ratification a feature may be filed now as an ungroomed **Backlog stub** under the proposal — see [`/ratify-proposal`](../ratify-proposal/SKILL.md) §3 — then groomed from the mockup when the design merges.) Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B.
 
 For a batch (`open issues for X`, `groom this into tasks`), run this gate for **each** proposed issue — the four-`[Fitur]`-with-no-mockup dump is the exact failure this step prevents.
 
@@ -86,7 +86,7 @@ ITEM=$(gh project item-add 8 --owner zakinadhif --url <issue-url> --format json 
 
 Choose the option id by the table in step 1 and the board rules:
 - **Ready** `177864ee` — a `[Fitur]`/`[Desain]`/`[Bug]`/`[Security]` that's unblocked, uncontentious, and wanted *now*. Keep Ready short (**~6**, a soft cap); if it already looks long, use Backlog instead.
-- **Backlog** `d9a7d606` — the holding pool: groomed-but-unprioritized work (Ready overflow), not-yet-groomed items, plus non-urgent `[Bug]`/`[Security]` and parked tasks. Claimable only once groomed and unblocked — not pre-vetted like Ready.
+- **Backlog** `d9a7d606` — the holding pool: groomed-but-unprioritized work (Ready overflow), not-yet-groomed items (including ratification `[Fitur]` stubs awaiting their `[Desain]`), plus non-urgent `[Bug]`/`[Security]` and parked tasks. Claimable only once groomed and unblocked — not pre-vetted like Ready.
 - **Blocked** `0b102e6a` — not workable now: a `Depends on #N` whose blocker is still open. (Flips to Ready — or Backlog if Ready is already long — when the blocker merges; `/ship-task` handles that.) Contributors also move a card here mid-task when they hit a blocker.
 - **Proposed** `e1ac50ba` — every `[Diskusi]`, and anything contentious.
 
