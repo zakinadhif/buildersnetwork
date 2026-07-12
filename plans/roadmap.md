@@ -58,7 +58,7 @@ A grounding pass over the repo (React SPA + Hono API on Cloudflare Workers + Dri
 
 ## Conventions
 
-- **A milestone ends shippable:** migration + API route + wired UI + a test (vitest API / Playwright e2e), no half-landed entities. It closes when its **Exit** criterion demonstrably passes — there is no time-box.
+- **A milestone ends shippable:** migration + API route + wired UI + a test (vitest API / Playwright e2e), no half-landed entities. It closes when its **Exit** criterion demonstrably passes. A milestone carries a **target date** (its GitHub `due_on`, shown as a countdown in `/project-status`) as a planning aim — but closure stays exit-driven; a blown date is a signal to surface, not a gate that closes or forces the work.
 - **Definition of Done per task:** its issue's acceptance criteria met, happy-path test green, README touched if it documents the surface (per repo convention).
 - Don't over-engineer (NFR-6) — community scale.
 

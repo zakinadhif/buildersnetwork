@@ -6,7 +6,7 @@
 
 | Unit | Criterion | Lives in |
 |---|---|---|
-| **Milestone** | One human judgment: one grooming decision + one testable exit criterion. Done when the exit passes — no time-box. | Half-page doc in `plans/milestones/` (the why, decisions, exit) + a GitHub Milestone grouping its tasks |
+| **Milestone** | One human judgment: one grooming decision + one testable exit criterion. Done when the exit passes. Carries a **target date** as a planning aim (a countdown in `/project-status`), but the date is an *aim, not a gate* — closure is still exit-driven, never date-driven. | Half-page doc in `plans/milestones/` (the why, decisions, exit) + a GitHub Milestone grouping its tasks (its `due_on` holds the target date) |
 | **Task** | One agent session: completable cold from the issue body + the repo, producing **one PR** for **one shippable deliverable** — usually a *vertical* slice (migration + API + wired UI, as the feature needs), not a single layer. | A GitHub Issue — acceptance criteria, boundary (touch / don't touch), dependencies, out-of-scope |
 | **Queue** | Continuous pull — no cycles, no assignments handed down. You claim; nobody assigns you. | The [project board](https://github.com/users/zakinadhif/projects/8) Status field |
 
@@ -14,7 +14,7 @@
 
 ## Issue title tags
 
-Every issue title opens with a bracket tag — the "what is this?" signal that shows in `gh issue list` and `/board`, where labels stay hidden. Tags split into two groups by whether the work touches **what or why we build**.
+Every issue title opens with a bracket tag — the "what is this?" signal that shows in `gh issue list` and `/project-status`, where labels stay hidden. Tags split into two groups by whether the work touches **what or why we build**.
 
 **Strategic** — shapes the product. Must clear the [issue-creation gate](#the-issue-creation-gate) before it's filed:
 
@@ -122,7 +122,7 @@ GitHub's **sub-issues** give a parent issue a live checklist of children and a p
 
 Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth refresh -s project,read:project` (board access). Claude Code picks up the repo skills automatically.
 
-1. **`/board`** — see the queue: what's Ready, who's on what, what's in review. No website needed.
+1. **`/project-status`** — where we are: the active phase & bet, each milestone's progress and target-date countdown, then today's board (Ready, who's on what, what's in review). No website needed.
 2. **`/pick-task`** — claim a Ready task: assigns you, moves it to In Progress, creates a branch, and loads the issue + milestone doc + conventions into your agent's context.
 3. Build. Stay inside the issue's **Boundary**. If you hit a blocker you can't clear in-session — or the task turns out bigger than one session — move the card to **Blocked**, comment what's stuck, and stop instead of sprawling.
 4. **`/ship-task`** — push, open a PR with `Closes #N`, board moves to In Review.

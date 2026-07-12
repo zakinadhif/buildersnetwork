@@ -428,7 +428,7 @@ Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/hea
 
 ## Contributing
 
-Team workflow (milestones → task issues → project board) is defined in [plans/how-to/build-workflow.md](plans/how-to/build-workflow.md); roadmap in [plans/roadmap.md](plans/roadmap.md). One-time setup beyond Quick start: `gh auth login`, then `gh auth refresh -s project,read:project`. Claude Code users get the loop as repo skills: `/board` (see the queue), `/pick-task` (claim + load context), `/ship-task` (PR + board update).
+Team workflow (milestones → task issues → project board) is defined in [plans/how-to/build-workflow.md](plans/how-to/build-workflow.md); roadmap in [plans/roadmap.md](plans/roadmap.md). One-time setup beyond Quick start: `gh auth login`, then `gh auth refresh -s project,read:project`. Claude Code users get the loop as repo skills: `/project-status` (where we are — phase, milestone countdowns, board), `/pick-task` (claim + load context), `/ship-task` (PR + board update).
 
 ---
 

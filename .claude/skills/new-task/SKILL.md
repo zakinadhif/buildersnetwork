@@ -5,7 +5,7 @@ description: Create a GitHub issue AND put it on the project board with the righ
 
 # /new-task — create an issue *and* land it on the board
 
-Author a well-formed issue per the [build workflow](../../../plans/how-to/build-workflow.md), then **add it to the board and set its Status**. Creating the issue is only half the job — an issue that isn't on the board is invisible to `/board` and unclaimable by `/pick-task`. Never stop after `gh issue create`.
+Author a well-formed issue per the [build workflow](../../../plans/how-to/build-workflow.md), then **add it to the board and set its Status**. Creating the issue is only half the job — an issue that isn't on the board is invisible to `/project-status` and unclaimable by `/pick-task`. Never stop after `gh issue create`.
 
 This is normally a **maintainer grooming** activity. Issue title + body are written in **Bahasa Indonesia** (the team's language); keep code identifiers, file paths, and FR/NFR codes as-is.
 
