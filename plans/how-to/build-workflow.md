@@ -22,7 +22,7 @@ Every issue title opens with a bracket tag — the "what is this?" signal that s
 |---|---|---|
 | **`[Diskusi]`** | A question to decide *before* building — proposal, open exploration, vision input. Board = **Proposed**. | No — discuss, don't pick. |
 | **`[Fitur]`** | A shippable deliverable: one agent session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default for build work. | Yes. |
-| **`[Desain]`** | A design *decision* made visually before a feature is built — mockups, design directions, visual options in `apps/mockups/` (see [parallel-ui-exploration](parallel-ui-exploration.md)). Its winning mockup *grounds* a `[Fitur]` via Gate B; it is a sibling that feeds the feature, not an early draft that becomes it. | Yes — to explore and decide. |
+| **`[Desain]`** | A design *approach* built to be reviewed before it's locked in — mockups, directions, visual options (see [parallel-ui-exploration](parallel-ui-exploration.md)). A design *decision*, not the feature's UI layer: it **grounds** a later `[Fitur]`, it doesn't become one. | Yes — to explore; the chosen mockup then grounds a **sibling** `[Fitur]` via Gate B. |
 
 **Non-strategic** — keeps the product healthy without changing *what* we build. **Skips the gate**, filed directly:
 
@@ -35,7 +35,7 @@ A **security bug** — a reproducible vulnerability with a fix — rides the **`
 
 **Title shape:** `[Tag] <Area>: <brief>`. `<Area>` is the feature or milestone (e.g. `Launchpad`), so the grouping shows up in `gh issue list` where the Milestone field doesn't. `[Fitur]` covers any shippable deliverable in service of a feature — **building new or reshaping existing**.
 
-We tag by **deliverable, not by module.** A real feature cuts through `libs/db` → `apps/api` → `apps/app` in one slice, so a `[DB]`/`[API]`/`[Desain]`-per-layer split would only manufacture dependencies and half-landed entities. The one worthwhile break-out is **design** — a `[Desain]` split out for a *decision* reason (settling the surface before committing to build it), not a module reason. And note it's a break-*before*, not a break-*apart*: the `[Desain]` is a precursor sibling, and the `[Fitur]` still ships the UI as part of its own vertical slice. Titles stay in Bahasa Indonesia.
+We tag by **deliverable, not by module.** A real feature cuts through `libs/db` → `apps/api` → `apps/app` in one slice, so a `[DB]`/`[API]`/UI-per-layer split would only manufacture dependencies and half-landed entities. The one worthwhile break-out is **design** — a `[Desain]` exploration, for a review reason (seeing options before committing), not a module reason. And it's a *precursor*, not a slice of the feature: it grounds the `[Fitur]`, it isn't a piece carved off it. Titles stay in Bahasa Indonesia.
 
 ## The issue-creation gate
 
@@ -51,10 +51,10 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 - **Grounded** → cite *where* (the citation goes in `## Kenapa`), continue to Gate B.
 - **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the proposal gate](#the-proposal-gate-vision--prd-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
 
-**Gate B — mockup.** Only for a **non-trivial** user-facing surface. Design comes first here on purpose: the data schema should take the shape the UI needs, so a UI-heavy feature is authored *around* a decided mockup, never groomed before one exists.
+**Gate B — mockup.** Only for a **non-trivial** user-facing surface.
 
-- **A decided `[Desain]` mockup exists in `apps/mockups/`** → file the `[Fitur]`, reference the mockup in `## Kenapa`.
-- **No mockup yet** → **don't file the `[Fitur]` — not even as a blocked placeholder.** An ungroomed feature is a hollow issue: its scope, acceptance criteria, and schema-touch list are all *outputs* of the design that doesn't exist yet. File a `[Desain]` exploration first (or point at the one that should decide it), and author the `[Fitur]` once it lands.
+- **A `[Desain]` mockup for this surface exists in `apps/mockups/`** → file the `[Fitur]`, cite the mockup in `## Kenapa`. It *grounds* the feature: the scope and schema follow from what the UI needs to serve.
+- **No mockup yet** → **don't jump to `[Fitur]`.** File a `[Desain]` exploration first (or point at the one that should be built). The `[Fitur]` gets authored *after* the design lands — not before, because there's no honest schema to write until the UI is decided.
 - **Trivial surface** (a settings toggle, a copy tweak) **or no surface at all** (pure backend/infra) → Gate B is N/A; file the `[Fitur]`.
 
 ## Scope treatments — how much a feature gets *right now*
@@ -104,19 +104,17 @@ So a contributor's *strategic* work waits in **Proposed** for ratification and t
 
 ## The proposal gate (vision / PRD changes)
 
-Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it moves to its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
+Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it becomes its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
 
 1. **Write the decision down** where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
-2. **Decompose into tasks — design-first.** Take each deliverable through the normal [`/new-task`](#the-issue-creation-gate) flow so **Gate B still applies**. A **UI-heavy** deliverable starts as a `[Desain]`, *not* a `[Fitur]`: file the design task now, and record its intended feature in the doc PR from step 1 (the durable list) rather than opening a hollow `[Fitur]` — the feature gets authored later, once the mockup is decided and the schema can take the shape the UI needs. **Trivial-surface or pure-backend** deliverables skip Gate B and can be filed as `[Fitur]` straight away. Each new issue's `## Kenapa` cites the doc PR; flip them **Proposed → Ready** (keeping Ready ~6; overflow to Backlog) — only the maintainer (@zakinadhif) flips into Ready today.
+2. **Decompose — design first, then the features it grounds.** A feature's scope and schema follow from its UI, so the design leads. For each non-trivial surface the decision introduces, file its **`[Desain]`** exploration now and flip it **Ready** — that's the immediate, buildable output of ratification. List the `[Fitur]`s each design will feed as a checklist in the doc/proposal, but **don't file them yet**: an ungroomed feature whose UI isn't decided has no honest scope or schema-touch list, and a hollow shell on the board is fiction. When a `[Desain]` lands, re-run `/new-task` for each `[Fitur]` it grounds — Gate B is now satisfied by the merged mockup. Backend-only deliverables (no surface) skip the design step and are filed as `[Fitur]` straight away. Every issue's `## Kenapa` cites the doc PR; only the maintainer (@zakinadhif) flips anything into Ready.
 3. **Close the proposal** with a comment linking the doc PR and the issues it spawned — but **leave it on the board** (closed, not archived): it's the durable record of *why* those tasks exist.
 
 Never start building from a Proposed item.
 
 ## Sub-issues — one sanctioned use
 
-GitHub's **sub-issues** give a parent issue a structured, bidirectional link to its children. We use them for **exactly one thing**: linking a ratified `[Diskusi]` to the tasks it spawned. Because a ratified proposal stays on the board as the durable *why* record, making its tasks sub-issues keeps that lineage **structural** — from the proposal you see which tasks the decision produced, and from each task which decision it traces to, instead of a closing comment that rots. `/ratify-proposal` wires this automatically; the project's "Auto-add sub-issues" workflow lands the children on the board.
-
-Keep the proposal's **intended-features list in the doc PR**, not in the proposal's issue body. The doc is the durable record of intent (*one fact, one home*), and the sub-issue links already show which tasks the decision spawned — a hand-kept checklist in the issue body would only duplicate them and drift.
+GitHub's **sub-issues** give a parent issue a live checklist of children and a progress bar. We use them for **exactly one thing**: linking a ratified `[Diskusi]` to the tasks it spawned. Because a ratified proposal stays on the board as the durable *why* record, making its tasks sub-issues turns that record **live** — the proposal shows how much of the decided direction has actually shipped (e.g. "3 of 5 done"), and the link is structural and bidirectional instead of a closing comment that rots. `/ratify-proposal` wires this automatically; the project's "Auto-add sub-issues" workflow lands the children on the board.
 
 **Do not use sub-issues to decompose a feature by module.** Giving a `[Fitur]` a DB / API / UI set of sub-issues is [module-splitting](#issue-title-tags) under a new name — it manufactures dependencies and half-landed layers, exactly what *"tag by deliverable, not module"* forbids. A `[Fitur]` stays **one vertical slice**. Real dependencies between separate deliverables stay `Depends on #N`; grouping a set of tasks under a theme stays the **GitHub Milestone**. Parent/child is reserved for the proposal → spawned-tasks relationship, nothing else.
 
@@ -137,7 +135,7 @@ Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth r
 Groom one milestone at a time, straight into issues — the doc never carries a task list. **Issues (title + body) are written in Bahasa Indonesia** — the team's language; keep code identifiers, file paths, and FR/NFR codes as-is:
 
 1. Write the half-page milestone doc (why, decisions, exit) in `plans/milestones/`.
-2. Create the GitHub Milestone; decompose into session-sized issues, each a **vertical deliverable** (`[Fitur]`) — split further only when one won't fit a session, or when a **design** approach needs deciding before locking (`[Desain]`). Grooming from a milestone doc clears Gate A by construction, but **Gate B still holds**: a `[Fitur]` with a non-trivial surface waits on a decided mockup — file the `[Desain]` and author the `[Fitur]` around it once it lands, rather than groom a feature whose UI isn't drawn. Dependencies explicit (`Depends on #N`).
+2. Create the GitHub Milestone; decompose into session-sized issues, each a **vertical deliverable** (`[Fitur]`) — split further only when one won't fit a session, or when a **design** approach needs review before locking (`[Desain]`). Grooming from a milestone doc clears Gate A by construction, but **Gate B still holds**: a `[Fitur]` with a non-trivial surface needs a `[Desain]` mockup first — draw the design before the build issue and let the feature's schema follow the UI. Dependencies explicit (`Depends on #N`).
 3. Anything contentious becomes a **Proposed** issue instead of a task.
 4. Unblocked + uncontentious tasks start **Ready** (keep it to ~6) — the rest start **Backlog** (still claimable, just uncurated); dependent ones start **Blocked**.
 

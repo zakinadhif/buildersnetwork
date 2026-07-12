@@ -17,7 +17,7 @@ The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-crea
    - **Non-strategic** (`[Bug]`, `[Security]`, chore, docs) → skip to §1 and file directly. No grounding, no mockup check.
    - **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → run Gates A and B before filing.
 2. **Gate A — grounding.** Read the [Vision](../../../plans/al-fath-berkarya-vision.md) / [PRD](../../../plans/al-fath-berkarya-prd.md) / active [milestone doc](../../../plans/milestones/) and confirm they actually call for this. If yes, note *where* — it becomes the `## Kenapa` citation. If it falls outside all three, **stop**: recommend a `[Diskusi]` in **Proposed** instead of a `[Fitur]`. File build work only if the maintainer insists, and record the ungrounded exception in the body.
-3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a decided `[Desain]` mockup. If one exists, reference it in `## Kenapa`. If none exists, **don't file a `[Fitur]` — not even as a blocked placeholder** (its scope + criteria + schema-touch list are outputs of the design that doesn't exist yet, so the issue would be hollow). Recommend a `[Desain]` exploration first (or point at the one that should decide it), and author the `[Fitur]` once it lands. Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B. Design-first is the point: the schema takes the shape the UI needs, not the reverse.
+3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a `[Desain]` mockup of this surface. If one exists, cite it in `## Kenapa` — it grounds the feature, so scope and schema follow from what the UI needs to serve. If none exists, **don't file a `[Fitur]`** — recommend a `[Desain]` exploration first (or point at the one that should be built); the `[Fitur]` is authored *after* the design lands, not before. Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B.
 
 For a batch (`open issues for X`, `groom this into tasks`), run this gate for **each** proposed issue — the four-`[Fitur]`-with-no-mockup dump is the exact failure this step prevents.
 
@@ -29,11 +29,11 @@ For a batch (`open issues for X`, `groom this into tasks`), run this gate for **
 |---|---|---|
 | `[Fitur]` | A shippable deliverable — one session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default. Strategic — clears the gate. | Ready / Backlog / Blocked |
 | `[Diskusi]` | A question to decide *before* building — proposal, PRD/vision/milestone change. Strategic. | Proposed |
-| `[Desain]` | A design *decision* made visually before its feature is built — a reviewable mockup that grounds a later `[Fitur]` via Gate B (see [parallel-ui-exploration](../../../plans/how-to/parallel-ui-exploration.md)). A precursor sibling, not an early draft of the feature. Strategic. | Ready (or Backlog) |
+| `[Desain]` | A design *approach* built to be reviewed before it's locked in (see [parallel-ui-exploration](../../../plans/how-to/parallel-ui-exploration.md)). Grounds a later `[Fitur]`; it doesn't become one. Strategic. | Ready (or Backlog) |
 | `[Bug]` | A reproducible defect to fix — the reactive lane. Non-strategic; skips the gate. A security *bug* goes here (add a `security` label if sensitive), not `[Security]`. | Ready (Backlog if not urgent) |
 | `[Security]` | A security *hardening* task with no specific defect — audit, add guards, tighten config. Non-strategic; skips the gate. | Backlog (Ready if urgent) |
 
-`<Area>` is the feature/milestone (e.g. `Launchpad`) so grouping shows in `gh issue list`. Tag by **deliverable, not module** — don't split one feature into per-layer DB/API/UI issues; that manufactures dependencies. The only worthwhile break-out is design (a `[Desain]` decided *before* the feature), for a review reason — not the feature's own UI layer, which ships inside its vertical slice.
+`<Area>` is the feature/milestone (e.g. `Launchpad`) so grouping shows in `gh issue list`. Tag by **deliverable, not module** — don't split one feature into per-layer DB/API/UI issues; that manufactures dependencies. The only worthwhile break-out is design (`[Desain]`), for review reasons — and it's a precursor that grounds the feature, not a slice of it.
 
 **Body — the contract** (a task must be completable cold from body + repo). Follow the house section order, all headings in Bahasa Indonesia:
 - **`## Kenapa`** — the why: what's thin today, what mockup/source it draws from, why this slice. Every issue leads with it.
