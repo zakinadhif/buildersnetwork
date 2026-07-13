@@ -5,7 +5,7 @@ description: Turn a decided [Diskusi] proposal into durable docs + board tasks �
 
 # /ratify-proposal — a decided [Diskusi] becomes docs + tasks
 
-Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-workflow.md#the-proposal-gate-vision--prd-changes). This is the one transition that used to have no skill — it's how a crystallized discussion turns into buildable work without losing the decision. **Maintainer only** (@zakinadhif curates Ready and closes the proposal). Issues and doc prose are written in **Bahasa Indonesia**; keep code identifiers, paths, and FR/NFR codes as-is.
+Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-workflow.md#the-proposal-gate-vision--requirements--roadmap-changes). This is the one transition that used to have no skill — it's how a crystallized discussion turns into buildable work without losing the decision. **Maintainer only** (@zakinadhif curates Ready and closes the proposal). Issues and doc prose are written in **Bahasa Indonesia**; keep code identifiers, paths, and FR/NFR codes as-is.
 
 ## 1. Confirm the proposal is actually decided
 
