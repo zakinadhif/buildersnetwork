@@ -16,7 +16,7 @@ Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-
 
 The decision merges as a **diff**, not a board move. Open a PR amending the durable doc where it belongs:
 
-- A PRD/vision change → edit `plans/al-fath-berkarya-prd.md` / `plans/al-fath-berkarya-vision.md`.
+- A vision / requirements / roadmap change → edit `plans/vision.md`, `plans/reference/requirements.md`, or `plans/roadmap.md` (schedule).
 - A milestone scope change → edit that `plans/milestones/<name>.md`; if it's a brand-new milestone, write the half-page doc (why, decisions, exit) now.
 
 Keep the PR focused on the decision — it becomes the source of truth every resulting task cites. Note the PR URL; step 3 needs it.

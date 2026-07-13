@@ -1,6 +1,6 @@
 # Sprint 1 — Interests anchor + profile completion
 
-*Part of the [Roadmap](../roadmap.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](../reference/requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
 Goal: the interest vocabulary that everything else tags against. Turn the throwaway `profiles.interests` jsonb (added in Sprint 0a) into a real, browsable, shared anchor — a curated catalog plus a `user_interests` join — so people (this sprint) and karya ([Sprint 2](sprint-2.md)) tag against the *same* vocabulary instead of fragmenting.
 

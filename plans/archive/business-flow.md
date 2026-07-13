@@ -1,5 +1,7 @@
 # Business Flow: Al-Fath Berkarya (Builder Network)
 
+> **Obsolete — archived, not maintained.** This describes the original matches-and-onboarding app (`/matches`, `/review`, a 5-member seed directory, AI-suggested matches at publish time) — the product *before* the karya became the spine. The karya model, the explicit "looking for…" intent model, and the current surfaces all supersede it; the AI-`matches` feature it documents is itself flagged **Divergent** in the [roadmap](../roadmap.md). Kept for the auth/OTP flow and the API-surface snapshot. **Trust the code over anything here.**
+
 An AI-powered community platform for builder students at Telkom University. Students discover collaborators through conversational onboarding and AI-driven matching — no forms, just a chat that builds your profile.
 
 Access is exclusive to Telkom University students (`@student.telkomuniversity.ac.id`).

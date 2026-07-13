@@ -37,6 +37,6 @@ gh project item-edit --id <item-id> --project-id PVT_kwHOA14JB84BcRLr --field-id
 
 ## 3. Load context, then build
 
-Read, in order: the issue body (`gh issue view <n>`) — the contract; the milestone doc it links in `plans/milestones/` — the why; `plans/milestones/retro.txt` — repo principles; plus README sections the boundary touches (OpenAPI-first workflow for API tasks, Design system for UI tasks).
+Read, in order: the issue body (`gh issue view <n>`) — the contract; the milestone doc it links in `plans/milestones/` — the why; `plans/archive/retro.txt` — repo principles; plus README sections the boundary touches (OpenAPI-first workflow for API tasks, Design system for UI tasks).
 
 Then restate the acceptance criteria and boundary in one short summary and start. Stay inside **Boundary — Touch**. If you hit a blocker you can't clear in-session, or the task can't fit one session, **move the card to Blocked (`0b102e6a`), comment what's stuck**, and stop rather than sprawl.
