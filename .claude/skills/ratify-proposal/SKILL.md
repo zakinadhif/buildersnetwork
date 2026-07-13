@@ -5,12 +5,12 @@ description: Turn a decided [Diskusi] proposal into durable docs + board tasks �
 
 # /ratify-proposal — a decided [Diskusi] becomes docs + tasks
 
-Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-workflow.md#the-proposal-gate-vision--prd-changes). This is the one transition that used to have no skill — it's how a crystallized discussion turns into buildable work without losing the decision. **Maintainer only** (@zakinadhif curates Ready and closes the proposal). Issues and doc prose are written in **Bahasa Indonesia**; keep code identifiers, paths, and FR/NFR codes as-is.
+Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-workflow.md#the-proposal-gate-vision--requirements--roadmap-changes). This is the one transition that used to have no skill — it's how a crystallized discussion turns into buildable work without losing the decision. **Maintainer only** (@zakinadhif curates Ready and closes the proposal). Issues and doc prose are written in **Bahasa Indonesia**; keep code identifiers, paths, and FR/NFR codes as-is.
 
 ## 1. Confirm the proposal is actually decided
 
 - Identify the `[Diskusi]` issue (it's in **Proposed**) from the argument or ask. Read the whole thread: `gh issue view <n> --comments`.
-- Ratify **only** if it has crystallized into a **concrete change to what we build** — a PRD amendment, a milestone scope change, a design divergence with a chosen direction. If the thread is still open-ended debate, it stays Proposed — don't ratify. If it's broad vision/sequencing talk with no concrete decision yet, it belongs in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12), not a ratification.
+- Ratify **only** if it has crystallized into a **concrete change to what we build** — a new or amended requirement, a roadmap re-ordering, a milestone scope change, a design divergence with a chosen direction. If the thread is still open-ended debate, it stays Proposed — don't ratify. If it's broad vision/sequencing talk with no concrete decision yet, it belongs in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12), not a ratification.
 
 ## 2. Write the decision down — docs are code
 

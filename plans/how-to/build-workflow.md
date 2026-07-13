@@ -39,7 +39,7 @@ We tag by **deliverable, not by module.** A real feature cuts through `libs/db` 
 
 ## The issue-creation gate
 
-Before a **strategic** issue is filed, it clears this gate. Its job is to stop two failures we've actually hit: a `[Fitur]` that no vision/PRD/milestone ever asked for, and a `[Fitur]` for a screen nobody has drawn yet. An agent may **warn and recommend** at each gate — it may **never** self-override. Only the maintainer overrides a gate, on their own explicit insistence.
+Before a **strategic** issue is filed, it clears this gate. Its job is to stop two failures we've actually hit: a `[Fitur]` that no vision/requirements/milestone ever asked for, and a `[Fitur]` for a screen nobody has drawn yet. An agent may **warn and recommend** at each gate — it may **never** self-override. Only the maintainer overrides a gate, on their own explicit insistence.
 
 **Step 0 — strategic or not?**
 
@@ -49,12 +49,12 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 **Gate A — grounding.** Does the [Vision](../vision.md), the [requirements catalog](../reference/requirements.md), or an active [milestone doc](../milestones/) actually call for this?
 
 - **Grounded** → cite *where* (the citation goes in `## Kenapa`), continue to Gate B.
-- **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the proposal gate](#the-proposal-gate-vision--prd-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
+- **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the proposal gate](#the-proposal-gate-vision--requirements--roadmap-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
 
 **Gate B — mockup.** Only for a **non-trivial** user-facing surface.
 
 - **A `[Desain]` mockup for this surface exists in `apps/mockups/`** → file the `[Fitur]`, cite the mockup in `## Kenapa`. It *grounds* the feature: the scope and schema follow from what the UI needs to serve.
-- **No mockup yet** → **don't groom a `[Fitur]` for a surface nobody's drawn.** File a `[Desain]` exploration first (or point at the one that should be built); the feature's contract — scope, schema — is written only *after* the design lands. (In a ratification the feature can sit meanwhile as an ungroomed **Backlog** stub under the proposal — see [the proposal gate](#the-proposal-gate-vision--prd-changes).)
+- **No mockup yet** → **don't groom a `[Fitur]` for a surface nobody's drawn.** File a `[Desain]` exploration first (or point at the one that should be built); the feature's contract — scope, schema — is written only *after* the design lands. (In a ratification the feature can sit meanwhile as an ungroomed **Backlog** stub under the proposal — see [the proposal gate](#the-proposal-gate-vision--requirements--roadmap-changes).)
 - **Trivial surface** (a settings toggle, a copy tweak) **or no surface at all** (pure backend/infra) → Gate B is N/A; file the `[Fitur]`.
 
 ## Scope treatments — how much a feature gets *right now*
@@ -86,7 +86,7 @@ Proposed┘                                          ⇅
 ```
 
 - **Backlog** — the holding pool: accepted work that isn't on the Ready shortlist — **ungroomed** items and **groomed-but-unprioritized** ones, mixed. Claimable *only if* an item is groomed and unblocked, so read the issue before pulling one — it isn't the pre-vetted queue Ready is. Non-urgent `[Bug]`/`[Security]`, parked tasks, and ratification `[Fitur]` stubs awaiting their `[Desain]` live here too.
-- **Proposed** — under discussion; **do not pick**. Vision/PRD-touching questions live here (see gate below).
+- **Proposed** — under discussion; **do not pick**. Vision/requirements/roadmap-touching questions live here (see gate below).
 - **Ready** — the maintainer's curated next-up, kept short (**around 6**) so it stays a real priority signal — a soft target, not a hard limit. Unblocked, groomed, claimable by anyone; if it's getting long, park the rest in Backlog.
 - **Blocked** — **not workable right now**, for either reason: an unmet `Depends on #N`, *or* a blocker hit **mid-task**. Set at grooming (planned dependency) or from In Progress (a builder got stuck) — leave a comment saying what's stuck. Returns to Ready / In Progress when cleared. **Doesn't count** against your one-in-progress limit.
 - **In Progress** — claimed (assignee set), building. One per person — though a Blocked task doesn't count, so you can pull another while it clears.
@@ -102,11 +102,11 @@ Proposed┘                                          ⇅
 
 So a contributor's *strategic* work waits in **Proposed** for ratification and their overflow sits in **Backlog** — never self-served into Ready. This keeps Ready a real, single-owner priority signal without gatekeeping *who can contribute* — the bar is only on *what gets called next-up*.
 
-## The proposal gate (vision / PRD changes)
+## The proposal gate (vision / requirements / roadmap changes)
 
-Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a PRD amendment, a milestone scope change, a design divergence — it becomes its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
+Broad, open-ended direction talk (vision, ideas, sequencing debates, non-technical input) lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — always open, for everyone. When a discussion there crystallizes into a concrete change to *what we're building* — a new or amended requirement, a roadmap re-ordering, a milestone scope change, a design divergence — it becomes its own issue in **Proposed** and is decided in that thread. Once decided, the maintainer runs `/ratify-proposal`, which drives these three steps:
 
-1. **Write the decision down** where it durably belongs — a PR amending the PRD / vision / milestone doc in `plans/` (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
+1. **Write the decision down** where it durably belongs — a PR amending the vision / roadmap / requirements / milestone doc in `plans/`, whichever rung of the [precedence ladder](../README.md) owns it (docs are code: decisions merge via diff). This doc *grounds* the work, so Gate A of the issue-creation gate is satisfied by construction.
 2. **Decompose — design first, then the features it grounds.** A feature's scope and schema follow from its UI, so the design leads. For each non-trivial surface the decision introduces, file its **`[Desain]`** exploration and flip it **Ready** — the immediate, buildable output of ratification. File each `[Fitur]` the design will feed **now too, but as an ungroomed stub in Backlog** (body just a `## Kenapa` citing the doc PR + *"menunggu desain #N"*), and link all of them — designs and stubs alike — as **sub-issues** of the proposal. That gives the proposal a live, **full-scope progress bar from day one** and makes the sub-issue list the single record of what the decision spawns. The stub stays **Backlog** (ungroomed, not claimable until groomed) — **not** Blocked and **not** Ready: the design→feature link is a *grooming* dependency, not a `Depends on #N`, so nothing auto-promotes it. When a `[Desain]` lands, its follow-on is to **groom that stub from the merged mockup** (Gate B now satisfied; schema follows the UI) and move it Backlog → Ready. Backend-only deliverables (no surface) skip the design step and are filed as a groomed `[Fitur]` straight away. Every issue's `## Kenapa` cites the doc PR; only the maintainer (@zakinadhif) flips anything into Ready.
 3. **Close the proposal** with a comment linking the doc PR and the issues it spawned — but **leave it on the board** (closed, not archived): it's the durable record of *why* those tasks exist.
 

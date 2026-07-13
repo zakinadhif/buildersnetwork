@@ -11,7 +11,7 @@ This is normally a **maintainer grooming** activity. Issue title + body are writ
 
 ## 0. Clear the issue-creation gate — do this *before* shaping anything
 
-The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-creation-gate) exists to stop two real failures: a `[Fitur]` no vision/PRD/milestone asked for, and a `[Fitur]` for a screen nobody has drawn. **Warn and recommend — never self-override.** Only the maintainer overrides, on their explicit say-so.
+The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-creation-gate) exists to stop two real failures: a `[Fitur]` no vision/requirements/milestone asked for, and a `[Fitur]` for a screen nobody has drawn. **Warn and recommend — never self-override.** Only the maintainer overrides, on their explicit say-so.
 
 1. **Strategic or non-strategic?**
    - **Non-strategic** (`[Bug]`, `[Security]`, chore, docs) → skip to §1 and file directly. No grounding, no mockup check.
@@ -28,7 +28,7 @@ For a batch (`open issues for X`, `groom this into tasks`), run this gate for **
 | Tag | For | Initial Status |
 |---|---|---|
 | `[Fitur]` | A shippable deliverable — one session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default. Strategic — clears the gate. | Ready / Backlog / Blocked |
-| `[Diskusi]` | A question to decide *before* building — proposal, PRD/vision/milestone change. Strategic. | Proposed |
+| `[Diskusi]` | A question to decide *before* building — proposal, vision/requirements/roadmap/milestone change. Strategic. | Proposed |
 | `[Desain]` | A design *approach* built to be reviewed before it's locked in (see [parallel-ui-exploration](../../../plans/how-to/parallel-ui-exploration.md)). Grounds a later `[Fitur]`; it doesn't become one. Strategic. | Ready (or Backlog) |
 | `[Bug]` | A reproducible defect to fix — the reactive lane. Non-strategic; skips the gate. A security *bug* goes here (add a `security` label if sensitive), not `[Security]`. | Ready (Backlog if not urgent) |
 | `[Security]` | A security *hardening* task with no specific defect — audit, add guards, tighten config. Non-strategic; skips the gate. | Backlog (Ready if urgent) |
@@ -44,7 +44,7 @@ For a batch (`open issues for X`, `groom this into tasks`), run this gate for **
 - **`## Di luar lingkup`** — what this deliberately doesn't do.
 - Treatment where relevant (Hero / Dark / Deferred) and milestone.
 
-If the request is a broad, contentious, or vision/PRD-touching direction question, it's a `[Diskusi]` in **Proposed** — not a task. Don't manufacture acceptance criteria for something not yet decided.
+If the request is a broad, contentious, or vision/requirements/roadmap-touching direction question, it's a `[Diskusi]` in **Proposed** — not a task. Don't manufacture acceptance criteria for something not yet decided.
 
 ## 2. Create the issue
 
