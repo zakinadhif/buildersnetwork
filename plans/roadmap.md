@@ -20,10 +20,10 @@
 | Posts + feed | [archive/sprint-3.md](archive/sprint-3.md) | **dark** — built, unvalidated. The *feed display* is absorbed into Launchpad and polished there; the *microblog posting* concept waits for validation (→ P1) | FR-18/19/22–24 | Done, frozen |
 | Discovery | [archive/sprint-4.md](archive/sprint-4.md) | **dark** — search/filters present but thin; fuller discovery is P1 | FR-25, FR-44 | Done, frozen |
 | **Launchpad** | [milestones/launchpad.md](milestones/launchpad.md) | **hero** — the one surface we finish | FR-22/23/25, FR-6 | **Active** |
-| Feedback loop — the community's response | — <br> `TODO(human): assign owning milestone / surface at grooming (likely the karya page)` | closes the P0 core loop (see below) | FR-42, FR-21 | Not yet groomed |
+| Feedback loop — the community's response | [milestones/feedback-loop.md](milestones/feedback-loop.md) | closes the P0 core loop — comments on posts (see below) | FR-42, FR-21 | Planned |
 | Seed + hardening | [milestones/seed-hardening.md](milestones/seed-hardening.md) | supports the hero — seed content so the feed lands alive | NFR-1/3/4/5/7 | Later |
 
-> **Why the feedback loop is P0.** The P0 core loop is *create karya → post → **community responds** → post again*, and "responds" needs a channel. A post is a whole object only through its first layer of response; comments are that layer, so they're in P0. Likes (FR-20), threading, replies-to-replies, and notifications are richness *above* the first layer and stay P1. This is what keeps the P0/P1 line from being re-cut later as if it were arbitrary. *(Promoted out of P1 by decision — resolves what was open priority call #1.)*
+> **Why the feedback loop is P0.** The P0 core loop is *create karya → post → **community responds** → post again*, and "responds" needs a channel. A post is a whole object only through its first layer of response; comments are that layer, so they're in P0. Likes (FR-20), threading, replies-to-replies, and notifications are richness *above* the first layer and stay P1. This is what keeps the P0/P1 line from being re-cut later as if it were arbitrary. *(Promoted out of P1 by decision — resolves what was open priority call #1.)* Comments attach to the **post**, not the karya page, per [content-model.md](reference/content-model.md) — one comment system, not two.
 
 ## P1 — fast-follow (named, not scheduled)
 
@@ -76,7 +76,7 @@ Fast-follow, owned by this roadmap. Named milestones above pull items out of thi
 
 *(The feedback/validation channel + comments call is **resolved: promoted to P0** — see the P0 table and the reasoning beneath it.)*
 
-`TODO(human):` this roadmap has no bucket later than P1, but five capabilities were previously placed beyond it and now have no home: **FR-26** (saved searches / filter refinement), **FR-30** (badge auto-expiry), **FR-37** (magazine), plus **FR-38** (AI-guided build journey) and **FR-41** (subscription tier), which the [vision](vision.md) calls "Horizon" but no roadmap section places. Decide whether a "later / horizon" bucket belongs here.
+**Not scheduled.** No milestone owns these yet, and none is planned: **FR-26** (saved searches / filter refinement), **FR-30** (badge auto-expiry), **FR-37** (magazine), **FR-38** (AI-guided build journey), **FR-41** (subscription tier). A capability with no milestone is simply not scheduled — that's the whole statement, and there is deliberately no third phase bucket to grow tags in. The [vision](vision.md)'s "Horizon" is the aspirational read on these.
 
 ---
 
@@ -92,4 +92,16 @@ Live product questions, unanswered. They live here — one place to look — rat
 - **Multi-community (later)** — if/when to productize the BuildersNetwork engine for other communities.
 - **Hackathon/event-scoped matchmaking (FR-29)** — the open priority call above.
 
-`TODO(human):` three things the dissolved PRD carried that no doc now owns — decide where (if anywhere) they belong, rather than letting them silently vanish: (1) the **explicit out-of-scope list** (problem-bank tiers/governance, dedup/merge tooling, feed ranking/algorithmic picks, near-peer surfacing, organizer analytics dashboard, multi-tenant/multi-community, LLM micro-optimization beyond quota); (2) the **risk register** (LLM cost, AI rewriting user words, program-dependence, ghost-town/attention-trap, inauthentic voice, cold start, per-project-AI hallucination, tag fragmentation — each with a mitigation); (3) the **assumptions/constraints** (community supplies the founding userbase; members accept AI-led onboarding; small team/budget; Indonesian voice authored by community members). Recoverable verbatim from git history — the pre-restructure PRD, §§13–15, in the commit that created `reference/requirements.md`.
+---
+
+## Explicitly out of scope
+
+Not "later" — **not doing**. Named so scope creep has to argue with something:
+
+- Problem-bank tiers / governance.
+- Dedup / merge tooling for interests and tags (user-created rows accumulate `curated:false`; cleaned up by hand if it ever becomes a chore).
+- Feed ranking, algorithmic picks, infinite scroll. Reverse-chron only (FR-22) — this one is a *values* line, not a cost line.
+- Near-peer surfacing; organizer analytics dashboards.
+- Multi-tenant / multi-community. The engine seam is preserved, not productized. (*If* it ever is, is an open question above; that it isn't being built now, is not.)
+- LLM micro-optimization beyond quota (NFR-2/AI-6).
+- RBAC / an admin app / a moderation build-out — `ADMIN_EMAILS` is the whole authority model (see [retro](archive/retro.txt)).
