@@ -63,4 +63,4 @@ One actionable sentence — the highest-leverage move for the reader: promote a 
 - **"how long until `<milestone>`"** → its countdown line + what's left: `gh issue list --milestone "<name>" --state open`.
 - **"are we on track"** → milestones with a `due` in the past, or a countdown tighter than their remaining-issue count warrants; say which are at risk and why.
 - **"what am I on"** → In Progress filtered by `gh api user --jq .login`.
-- **One task's detail** → `gh issue view <n>`. **Proposals** ("what's being discussed") → Proposed items + `gh issue view <n> --comments`.
+- **One task's detail** → `gh issue view <n>`. **Diskusi** ("what's being discussed") → Proposed items + `gh issue view <n> --comments`.
