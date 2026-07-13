@@ -1,6 +1,6 @@
 # Milestone: Launchpad — app shell + home
 
-*Part of the [Roadmap](../roadmap.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](../reference/requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
 **Tasks & status:** on GitHub once groomed. This doc holds only the why, the decisions, and the exit — never the task list.
 
@@ -11,7 +11,7 @@ The app's primary surface and navigation frame. Adopt the **Launchpad** directio
 ## Scope
 
 - **App shell with a persistent left sidebar** (the mockup's `bn-nav` rail), replacing today's standalone route-pages. Nav items: **Launchpad** (home feed), **Jelajahi Karya** (browse), **Cari Kolaborator** (placeholder until the Matchmaking milestone), **Minat Saya**, **Karya Saya**, plus an **AI assistant tab** (see below).
-- **Launchpad home**: elevate the current `CommunityHome` (featured + feed) into the Launchpad-mockup treatment — curated "Top picked" + calm reverse-chron feed. No ranking chrome. Per [content-model.md](../content-model.md) the feed carries **events** (karya update posts) that link back to karya **pages** — it renders update teasers, not pages inline.
+- **Launchpad home**: elevate the current `CommunityHome` (featured + feed) into the Launchpad-mockup treatment — curated "Top picked" + calm reverse-chron feed. No ranking chrome. Per [content-model.md](../reference/content-model.md) the feed carries **events** (karya update posts) that link back to karya **pages** — it renders update teasers, not pages inline.
 - **Onboarding made optional** (see decisions): remove the profile gate; move the AI onboarding chat to its own sidebar tab.
 
 ## Decisions

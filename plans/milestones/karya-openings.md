@@ -1,8 +1,8 @@
 # Milestone: Karya openings — the karya lane (P1 fast-follow)
 
-*Part of the [Roadmap](../roadmap.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](../reference/requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
-**Priority: P1** (PRD §12 Phase 2). Named now because it completes matchmaking; not scheduled until the P0 milestones land. No GitHub milestone yet — groom when it's picked up.
+**Priority: P1** (per the [roadmap](../roadmap.md)). Named now because it completes matchmaking; not scheduled until the P0 milestones land. No GitHub milestone yet — groom when it's picked up.
 
 ## Why
 

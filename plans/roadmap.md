@@ -1,12 +1,12 @@
 # Al-Fath Berkarya — Roadmap
 
-*Ordered milestones toward the P0 (MVP / Phase 1) scope in [the PRD](al-fath-berkarya-prd.md), plus the first named P1 fast-follows. Vision north star: [al-fath-berkarya-vision.md](al-fath-berkarya-vision.md). Like everything in `plans/`, this is non-authoritative working knowledge — trust the code when they diverge.*
+*The ordered milestones that **define** P0 (the ruthless MVP), plus the first named P1 fast-follows. This file is the single source of schedule: what ships when is answered by which milestone cites a capability and where that milestone sits below. Capabilities themselves are defined, schedule-free, in the [requirements catalog](reference/requirements.md); the north star is the [vision](vision.md). Like everything in `plans/`, this is non-authoritative working knowledge — trust the code when they diverge.*
 
 **Open discussion** about vision, ideas, and this sequencing lives in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12) — technical and non-technical alike. This file stays the source of truth; the issue is where changes to it get argued out first.
 
 **How work flows** (docs ↔ issues ↔ board) is defined in [how-to/build-workflow.md](how-to/build-workflow.md). Short version: each milestone has a half-page doc here (the why + exit criteria) and a GitHub Milestone holding its task issues; live status lives on the [project board](https://github.com/users/zakinadhif/projects/8), never in these files.
 
-**How content surfaces relate** (post ↔ feed ↔ karya page ↔ articles) is settled in [content-model.md](content-model.md) — the *feed carries events that point at pages* spine (ratified 2026-07-03). Launchpad, microblog, and articles all inherit it.
+**How content surfaces relate** (post ↔ feed ↔ karya page ↔ articles) is settled in [content-model.md](reference/content-model.md) — the *feed carries events that point at pages* spine (ratified 2026-07-03). Launchpad, microblog, and articles all inherit it.
 
 ---
 
@@ -20,7 +20,10 @@
 | Posts + feed | [archive/sprint-3.md](archive/sprint-3.md) | **dark** — built, unvalidated. The *feed display* is absorbed into Launchpad and polished there; the *microblog posting* concept waits for validation (→ P1) | FR-18/19/22–24 | Done, frozen |
 | Discovery | [archive/sprint-4.md](archive/sprint-4.md) | **dark** — search/filters present but thin; fuller discovery is P1 | FR-25, FR-44 | Done, frozen |
 | **Launchpad** | [milestones/launchpad.md](milestones/launchpad.md) | **hero** — the one surface we finish | FR-22/23/25, FR-6 | **Active** |
+| Feedback loop — the community's response | — <br> `TODO(human): assign owning milestone / surface at grooming (likely the karya page)` | closes the P0 core loop (see below) | FR-42, FR-21 | Not yet groomed |
 | Seed + hardening | [milestones/seed-hardening.md](milestones/seed-hardening.md) | supports the hero — seed content so the feed lands alive | NFR-1/3/4/5/7 | Later |
+
+> **Why the feedback loop is P0.** The P0 core loop is *create karya → post → **community responds** → post again*, and "responds" needs a channel. A post is a whole object only through its first layer of response; comments are that layer, so they're in P0. Likes (FR-20), threading, replies-to-replies, and notifications are richness *above* the first layer and stay P1. This is what keeps the P0/P1 line from being re-cut later as if it were arbitrary. *(Promoted out of P1 by decision — resolves what was open priority call #1.)*
 
 ## P1 — fast-follow (named, not scheduled)
 
@@ -31,13 +34,13 @@ Pulled out of P0 by the ruthless shrink, plus the previously-named follow-ons. N
 | Matchmaking — people lane | [milestones/matchmaking.md](milestones/matchmaking.md) | "Looking for…" intent badge + seeker board | FR-5/27/28 | Planned |
 | Messaging | [milestones/messaging.md](milestones/messaging.md) | 1:1 DMs, connect actions | FR-31/32 | Planned |
 | Karya openings | [milestones/karya-openings.md](milestones/karya-openings.md) | "Open to contributors" — completes two-sided matchmaking | FR-34 | Planned |
-| Microblog | — | Twitter-like progress stream — the validated evolution of posts + feed; where `posts.karyaId` may go nullable (personal posts) per [content-model.md](content-model.md) | FR-35 | Planned |
+| Microblog | — | Twitter-like progress stream — the validated evolution of posts + feed; where `posts.karyaId` may go nullable (personal posts) per [content-model.md](reference/content-model.md) | FR-35 | Planned |
 
 Remaining P1 scope stays in the deferred list below until it earns a milestone doc.
 
-> **Sequencing (current intent) — shrink P0 ruthlessly.** Ship **Launchpad as the single hero**, get it in front of real users, and let their behavior decide what earns polish next. Matchmaking and messaging are demoted from P0 to **P1** — deliberately, so we don't fine-tune concepts before the community confirms they hold. (This is a change from the earlier "Launchpad → Matchmaking → later" order and from the PRD, which lists messaging as P0; the PRD gets amended to match once this settles.) Posts + feed and discovery are already built, so rather than extend them we hold them as **walking skeletons** and revisit under P1 once tested. Blog/articles (FR-36) remain P1, unchanged.
+> **Sequencing (current intent) — shrink P0 ruthlessly.** Ship **Launchpad as the single hero**, get it in front of real users, and let their behavior decide what earns polish next. Matchmaking and messaging are demoted from P0 to **P1** — deliberately, so we don't fine-tune concepts before the community confirms they hold. (This is a change from the earlier "Launchpad → Matchmaking → later" order.) Posts + feed and discovery are already built, so rather than extend them we hold them as **walking skeletons** and revisit under P1 once tested. Blog/articles (FR-36) remain P1, unchanged.
 
-> **Why matchmaking is still split.** The [Cari Kolaborator mockups](../apps/mockups/src/) explored a *two-sided* surface — people seeking teams **and** karya seeking contributors — in one board. Those two sides sit on different PRD priorities and stay separate milestones: the **people lane** ("looking for…" badge + seeker board, FR-5/27/28) comes first, and the **karya lane** ("open to contributors", FR-34, PRD §12 Phase 2) follows to make the surface two-sided. Both are now **P1** — the ruthless shrink moved the people lane out of P0 too — but the people lane leads. The mockups (A/B/C/E) remain the design input for the combined surface — see [karya-openings.md](milestones/karya-openings.md).
+> **Why matchmaking is still split.** The [Cari Kolaborator mockups](../apps/mockups/src/) explored a *two-sided* surface — people seeking teams **and** karya seeking contributors — in one board. Those two sides stay separate milestones: the **people lane** ("looking for…" badge + seeker board, FR-5/27/28) comes first, and the **karya lane** ("open to contributors", FR-34 — placed in P1 by this roadmap) follows to make the surface two-sided. Both are now **P1** — the ruthless shrink moved the people lane out of P0 too — but the people lane leads. The mockups (A/B/C/E) remain the design input for the combined surface — see [karya-openings.md](milestones/karya-openings.md).
 
 ---
 
@@ -45,14 +48,14 @@ Remaining P1 scope stays in the deferred list below until it earns a milestone d
 
 A grounding pass over the repo (React SPA + Hono API on Cloudflare Workers + Drizzle/Postgres + Better Auth) found this already built:
 
-| Area | State | PRD mapping |
+| Area | State | Capabilities |
 |---|---|---|
 | Auth gated to `@student.telkomuniversity.ac.id` + OTP email verification | **Done** | FR-1, FR-2 |
 | `profiles`, interests, karya spine, posts + feed, discovery | **Done** (milestones 0–4) | FR-3, FR-10–15, FR-18–25, FR-44 |
 | Onboarding AI agent (`/api/ai/complete` + `/stream`), Onboarding + Review pages | **Partial** — flow exists; grounding done, not yet quota'd (quota is FR-40, P1). Currently an **obligatory gate** (`App.tsx` redirects profile-less users to `/onboarding`); the [Launchpad](milestones/launchpad.md) milestone makes it optional (sidebar tab) | FR-6, FR-7, FR-8 |
-| AI-generated `matches` (table + page) | **Divergent** — AI-suggested matches, *not* the PRD's explicit intent model. Left untouched through P0; its keep/replace fate is decided in the [Karya openings](milestones/karya-openings.md) milestone, alongside the richer matchmaking surface | cf. FR-27/28 |
+| AI-generated `matches` (table + page) | **Divergent** — AI-suggested matches, *not* the explicit intent model of FR-27/28. Left untouched through P0; its keep/replace fate is decided in the [Karya openings](milestones/karya-openings.md) milestone, alongside the richer matchmaking surface | cf. FR-27/28 |
 
-> **Stack note.** The PRD "suggests" Next.js + Supabase. The actual stack is React/Vite SPA + Hono + Drizzle + Better Auth on Cloudflare. This plan targets the real stack.
+> **Stack note.** The actual stack is React/Vite SPA + Hono + Drizzle + Better Auth on Cloudflare — not the Next.js + Supabase that early planning drafts suggested. This plan targets the real stack.
 
 ---
 
@@ -66,8 +69,27 @@ A grounding pass over the repo (React SPA + Hono API on Cloudflare Workers + Dri
 
 ## P0 → P1 boundary (explicitly deferred)
 
-Fast-follow per PRD §12. Named milestones above pull items out of this list as they're scheduled; still deferred: per-project AI (FR-33), feedback/validation channel (FR-42), validation-seeking surfacing on discovery (FR-43), microblog (FR-35), blog (FR-36), problem bank (FR-16), events + event-scoped matchmaking (FR-17/29), embeddable badge (FR-39), AI quota (FR-40), likes (FR-20), profile-update-via-chat (FR-9).
+Fast-follow, owned by this roadmap. Named milestones above pull items out of this list as they're scheduled; still deferred: per-project AI (FR-33), validation-seeking surfacing on discovery (FR-43), microblog (FR-35), blog (FR-36), problem bank (FR-16), events + event-scoped matchmaking (FR-17/29), embeddable badge (FR-39), AI quota (FR-40), likes (FR-20), profile-update-via-chat (FR-9).
 
-**Two open priority calls** (PRD §16) that could pull work *into* P0 if decided now:
-1. **Feedback/validation channel (FR-42) + comments (FR-21)** — central to the value prop; candidate for early promotion.
-2. **Hackathon/event-scoped matchmaking (FR-29)** — possible launch wedge. *(Per prior discussion: staying P1 — the generic "event team" badge in the [people lane](milestones/matchmaking.md) covers the launch need.)*
+**One open priority call** that could pull work *into* P0 if decided now:
+1. **Hackathon/event-scoped matchmaking (FR-29)** — possible launch wedge. *(Per prior discussion: staying P1 — the generic "event team" badge in the [people lane](milestones/matchmaking.md) covers the launch need.)*
+
+*(The feedback/validation channel + comments call is **resolved: promoted to P0** — see the P0 table and the reasoning beneath it.)*
+
+`TODO(human):` this roadmap has no bucket later than P1, but five capabilities were previously placed beyond it and now have no home: **FR-26** (saved searches / filter refinement), **FR-30** (badge auto-expiry), **FR-37** (magazine), plus **FR-38** (AI-guided build journey) and **FR-41** (subscription tier), which the [vision](vision.md) calls "Horizon" but no roadmap section places. Decide whether a "later / horizon" bucket belongs here.
+
+---
+
+## Open questions
+
+Live product questions, unanswered. They live here — one place to look — rather than scattered across milestone docs. A milestone that one of these blocks may point back at its entry.
+
+- **Quota sizing & free/paid boundary** — how much AI is free; which features are premium? (FR-40/41)
+- **Microblog vs. karya feed** — one unified feed or two surfaces? The data-shape half of this (must a post always belong to a karya? `posts.karyaId` nullable) is tracked in [content-model.md](reference/content-model.md); discussion in [#15](https://github.com/zakinadhif/buildersnetwork/issues/15).
+- **Interest vocabulary** — how curated vs. free-text? (FR-15)
+- **Profile draft schema** — final fields (skills granularity, "potential," portfolio links)? (FR-3/4)
+- **Access model** — invite-only, allowlist, or open community sign-up? (FR-2) *Note: the code already gates on `@student.telkomuniversity.ac.id` + OTP; confirm whether that settles this or an invite layer is still wanted.*
+- **Multi-community (later)** — if/when to productize the BuildersNetwork engine for other communities.
+- **Hackathon/event-scoped matchmaking (FR-29)** — the open priority call above.
+
+`TODO(human):` three things the dissolved PRD carried that no doc now owns — decide where (if anywhere) they belong, rather than letting them silently vanish: (1) the **explicit out-of-scope list** (problem-bank tiers/governance, dedup/merge tooling, feed ranking/algorithmic picks, near-peer surfacing, organizer analytics dashboard, multi-tenant/multi-community, LLM micro-optimization beyond quota); (2) the **risk register** (LLM cost, AI rewriting user words, program-dependence, ghost-town/attention-trap, inauthentic voice, cold start, per-project-AI hallucination, tag fragmentation — each with a mitigation); (3) the **assumptions/constraints** (community supplies the founding userbase; members accept AI-led onboarding; small team/budget; Indonesian voice authored by community members). Recoverable verbatim from git history — the pre-restructure PRD, §§13–15, in the commit that created `reference/requirements.md`.

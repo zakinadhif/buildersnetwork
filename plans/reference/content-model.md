@@ -1,6 +1,6 @@
 # Content model — post, feed, karya page & articles
 
-*Part of the [Roadmap](roadmap.md). PRD: [al-fath-berkarya-prd.md](al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
 **Status: ratified 2026-07-03** via proposal [#13](https://github.com/zakinadhif/buildersnetwork/issues/13). This is the architectural spine for how content surfaces relate; the milestone docs that touch content (Launchpad, karya pages, microblog, articles) inherit it.
 
@@ -20,7 +20,7 @@ Chosen over B (*everything is a post; a page is a filtered feed* — kills the r
 
 ## What this means concretely
 
-- **The karya page is a crafted destination** — the eventual creative canvas (rich text → images → polls). Today it's only metadata + a plain-text update stream; the canvas is a later *invested* layer (it stays a walking skeleton until then — see [scope treatments](how-to/build-workflow.md#scope-treatments--how-much-a-feature-gets-right-now)).
+- **The karya page is a crafted destination** — the eventual creative canvas (rich text → images → polls). Today it's only metadata + a plain-text update stream; the canvas is a later *invested* layer (it stays a walking skeleton until then — see [scope treatments](../how-to/build-workflow.md#scope-treatments--how-much-a-feature-gets-right-now)).
 - **A `post` is the event unit that bridges the two.** It's authored on a karya, shows on that karya page's timeline, **and** surfaces in the home feed as a teaser linking back. This is already what the schema does: `posts.karyaId` + the dual read (karya stream / global feed) in `libs/db/src/schema/app.ts` (DECISION-D).
 - **The home feed** = curated destinations (`featured` karya) + the event river (posts). Unchanged in shape; what changes is that we stop conflating "page" and "feed item".
 - **Articles** = another kind of page whose *publish* is a feed event. No separate feed machinery.

@@ -1,12 +1,12 @@
 # Milestone: Phase 0 seed + launch hardening
 
-*Part of the [Roadmap](../roadmap.md). PRD: [al-fath-berkarya-prd.md](../al-fath-berkarya-prd.md) · Vision: [al-fath-berkarya-vision.md](../al-fath-berkarya-vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
+*Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](../reference/requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
 **Tasks & status:** on GitHub once groomed (no GitHub milestone yet). Mostly community work, not code — grooming will split code tasks (NFR pass) from community tasks (seeding).
 
 ## Why
 
-Content density on day one — cold-start mitigation (PRD §12 Phase 0). Launch with a populated feed, not a ghost town.
+Content density on day one — cold-start mitigation. Launch with a populated feed, not a ghost town.
 
 ## Scope sketch
 

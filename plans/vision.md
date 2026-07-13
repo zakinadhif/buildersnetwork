@@ -1,6 +1,6 @@
 # Al-Fath Berkarya — Product Vision ("What I Want")
 
-*The full vision, articulated comprehensively — the dream in its complete form, broader than what gets built first. For the buildable, prioritized subset, see the PRD; this document is the north star it serves. (Codename: BuildersNetwork = the engine · Al-Fath Berkarya = the programme.)*
+*The full vision, articulated comprehensively — the dream in its complete form, broader than what gets built first. For what gets built and in what order, see the [roadmap](roadmap.md); for what each capability is, the [requirements catalog](reference/requirements.md). This document is the north star they serve. (Codename: BuildersNetwork = the engine · Al-Fath Berkarya = the programme.)*
 
 ---
 
@@ -99,4 +99,4 @@ A rough sense of sequence, so the vision reads as priorities rather than a fireh
 - **Next:** the per-project AI assistant, the blog, the Al-Fath Berkarya badge.
 - **Horizon:** the full AI-guided build journey, the magazine, subscription tiers and premium AI features.
 
-*(The PRD's P0/P1/P2 is the engineering-grade version of this sequencing; this is the vision-grade one.)*
+*(The [roadmap](roadmap.md)'s ordered milestones are the engineering-grade version of this sequencing; this is the vision-grade one.)*

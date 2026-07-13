@@ -46,7 +46,7 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 - **Non-strategic** (`[Bug]`, `[Security]`, chores, docs) → file directly, skip the gate. These fix or harden what exists; they don't change what we build.
 - **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear the gates below: Gate A grounds all three, Gate B is `[Fitur]`-only (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
 
-**Gate A — grounding.** Does the [Vision](../al-fath-berkarya-vision.md), [PRD](../al-fath-berkarya-prd.md), or an active [milestone doc](../milestones/) actually call for this?
+**Gate A — grounding.** Does the [Vision](../vision.md), the [requirements catalog](../reference/requirements.md), or an active [milestone doc](../milestones/) actually call for this?
 
 - **Grounded** → cite *where* (the citation goes in `## Kenapa`), continue to Gate B.
 - **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the proposal gate](#the-proposal-gate-vision--prd-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
@@ -59,7 +59,7 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 
 ## Scope treatments — how much a feature gets *right now*
 
-Priority (**P0 / P1**, set in the [PRD](../al-fath-berkarya-prd.md) and [roadmap](../roadmap.md)) says how much a feature *matters*. It does **not** say how finished it should be in the build we're shipping this week. That's a second, independent axis — the **treatment** — and naming it lets us shrink scope ruthlessly without lying about a feature's importance.
+Priority (**P0 / P1**, set in the [roadmap](../roadmap.md)) says how much a feature *matters*. It does **not** say how finished it should be in the build we're shipping this week. That's a second, independent axis — the **treatment** — and naming it lets us shrink scope ruthlessly without lying about a feature's importance.
 
 | Treatment | Real-world name | What it means | Polish budget? |
 |---|---|---|---|
@@ -139,4 +139,4 @@ Groom one milestone at a time, straight into issues — the doc never carries a 
 3. Anything contentious becomes a **Proposed** issue instead of a task.
 4. Unblocked + uncontentious tasks start **Ready** (keep it to ~6) — the rest start **Backlog** (still claimable, just uncurated); dependent ones start **Blocked**.
 
-When the milestone's exit criterion passes: close the GitHub Milestone, distill anything worth keeping into `plans/milestones/retro.txt`.
+When the milestone's exit criterion passes: close the GitHub Milestone, distill anything worth keeping into `plans/archive/retro.txt`.
