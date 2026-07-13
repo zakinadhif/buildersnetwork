@@ -10,7 +10,7 @@ Ratify a **Proposed** item per the [build workflow](../../../plans/how-to/build-
 ## 1. Confirm the proposal is actually decided
 
 - Identify the `[Diskusi]` issue (it's in **Proposed**) from the argument or ask. Read the whole thread: `gh issue view <n> --comments`.
-- Ratify **only** if it has crystallized into a **concrete change to what we build** — a PRD amendment, a milestone scope change, a design divergence with a chosen direction. If the thread is still open-ended debate, it stays Proposed — don't ratify. If it's broad vision/sequencing talk with no concrete decision yet, it belongs in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12), not a ratification.
+- Ratify **only** if it has crystallized into a **concrete change to what we build** — a new or amended requirement, a roadmap re-ordering, a milestone scope change, a design divergence with a chosen direction. If the thread is still open-ended debate, it stays Proposed — don't ratify. If it's broad vision/sequencing talk with no concrete decision yet, it belongs in the pinned [🧭 Visi & Roadmap issue (#12)](https://github.com/zakinadhif/buildersnetwork/issues/12), not a ratification.
 
 ## 2. Write the decision down — docs are code
 

@@ -30,7 +30,7 @@ Then read `plans/roadmap.md` for what GitHub doesn't carry: each milestone's **p
 ## Render — top-down
 
 ### 1. Phase & bet
-One or two lines from the roadmap's P0 header: the PRD phase we're in and the current bet (e.g. *"P0 — the ruthless MVP: one hero surface, Launchpad, finished to the edges. Matchmaking + messaging demoted to P1 until real users validate the hero."*). Name the **active** milestone — the one thing in flight.
+One or two lines from the roadmap's P0 header: the phase we're in and the current bet (e.g. *"P0 — the ruthless MVP: one hero surface, Launchpad, finished to the edges. Matchmaking + messaging demoted to P1 until real users validate the hero."*). Name the **active** milestone — the one thing in flight.
 
 ### 2. Milestone ladder
 In roadmap order, one line each:
