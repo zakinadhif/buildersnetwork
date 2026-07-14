@@ -20,10 +20,15 @@ interface AuthConfig {
  */
 function createAuth(config?: AuthConfig) {
   return betterAuth({
+    // `||`, not `??`: a blank env var (`BETTER_AUTH_URL=`) is unset, and `??`
+    // would pass "" straight through as the base URL. Falls back to APP_URL, the
+    // origin the browser actually talks to — in dev that's the Vite server, which
+    // proxies /api through to the API port.
     baseURL:
-      config?.BETTER_AUTH_URL ??
-      process.env.BETTER_AUTH_URL ??
-      "http://localhost:3000",
+      config?.BETTER_AUTH_URL ||
+      process.env.BETTER_AUTH_URL ||
+      process.env.APP_URL ||
+      "http://localhost:5173",
     secret: config?.BETTER_AUTH_SECRET ?? process.env.BETTER_AUTH_SECRET,
     // biome-ignore lint/suspicious/noExplicitAny: empty object is a CLI-only placeholder; real db is always passed at runtime
     database: drizzleAdapter(config?.db ?? ({} as any), {

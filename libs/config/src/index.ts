@@ -86,6 +86,23 @@ const schema = z.object({
 
 export type Config = z.infer<typeof schema>;
 
+/**
+ * Drops keys whose value is the empty string, so a blank line in a `.env`
+ * (`BETTER_AUTH_URL=`) reads as *unset* rather than as an empty value.
+ *
+ * Without this, every optional var with a shape — `.url()` here — rejects "" and
+ * the app refuses to boot on a config that is, semantically, simply not set.
+ * Blank-not-absent is the norm, not the exception: `.env.example` ships optional
+ * vars as blank lines, `--env-file` forwards them verbatim, and secret managers
+ * commonly inject "" for an unset secret.
+ *
+ * Vars with defaults fall back to the default, and required vars still fail —
+ * with "Required" rather than a misleading shape error.
+ */
+function withoutEmptyValues(env: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
+  return Object.fromEntries(Object.entries(env).filter(([, v]) => v !== ""));
+}
+
 let cached: Config | undefined;
 
 /**
@@ -94,7 +111,7 @@ let cached: Config | undefined;
  */
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   if (cached) return cached;
-  const result = schema.safeParse(env);
+  const result = schema.safeParse(withoutEmptyValues(env));
   if (!result.success) {
     const issues = result.error.issues
       .map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`)
