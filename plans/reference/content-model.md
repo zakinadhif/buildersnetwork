@@ -2,7 +2,7 @@
 
 *Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
-**Status: ratified 2026-07-03** via proposal [#13](https://github.com/zakinadhif/buildersnetwork/issues/13). This is the architectural spine for how content surfaces relate; the milestone docs that touch content (Launchpad, karya pages, microblog, articles) inherit it.
+**Status: ratified 2026-07-03** via `[Diskusi]` [#13](https://github.com/zakinadhif/buildersnetwork/issues/13). This is the architectural spine for how content surfaces relate; the milestone docs that touch content (Launchpad, karya pages, microblog, articles) inherit it.
 
 ## The decision: A — page is the destination, feed is activity *about* it
 

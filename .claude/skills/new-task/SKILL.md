@@ -17,7 +17,7 @@ The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-crea
    - **Non-strategic** (`[Bug]`, `[Security]`, chore, docs) → skip to §1 and file directly. No grounding, no mockup check.
    - **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear the gates before filing: **Gate A grounds all three**; **Gate B is `[Fitur]`-only** (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
 2. **Gate A — grounding.** Read the [Vision](../../../plans/vision.md) / [requirements catalog](../../../plans/reference/requirements.md) / active [milestone doc](../../../plans/milestones/) and confirm they actually call for this. If yes, note *where* — it becomes the `## Kenapa` citation. If it falls outside all three, **stop**: recommend a `[Diskusi]` in **Proposed** instead of a `[Fitur]`. File build work only if the maintainer insists, and record the ungrounded exception in the body.
-3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a `[Desain]` mockup of this surface. If one exists, cite it in `## Kenapa` — it grounds the feature, so scope and schema follow from what the UI needs to serve. If none exists, **don't file a groomed `[Fitur]`** — recommend a `[Desain]` exploration first (or point at the one that should be built); the feature's contract is written only *after* the design lands. (One exception: during a ratification a feature may be filed now as an ungroomed **Backlog stub** under the proposal — see [`/ratify-proposal`](../ratify-proposal/SKILL.md) §3 — then groomed from the mockup when the design merges.) Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B.
+3. **Gate B — mockup** (only for a non-trivial user-facing surface). Check `apps/mockups/` for a `[Desain]` mockup of this surface. If one exists, cite it in `## Kenapa` — it grounds the feature, so scope and schema follow from what the UI needs to serve. If none exists, **don't file a groomed `[Fitur]`** — recommend a `[Desain]` exploration first (or point at the one that should be built); the feature's contract is written only *after* the design lands. (One exception: during a ratification a feature may be filed now as an ungroomed **Backlog stub** under the `[Diskusi]` — see [`/ratify`](../ratify/SKILL.md) §3 — then groomed from the mockup when the design merges.) Trivial surfaces (a toggle, a copy tweak) and pure backend/infra skip Gate B.
 
 For a batch (`open issues for X`, `groom this into tasks`), run this gate for **each** proposed issue — the four-`[Fitur]`-with-no-mockup dump is the exact failure this step prevents.
 
@@ -28,7 +28,7 @@ For a batch (`open issues for X`, `groom this into tasks`), run this gate for **
 | Tag | For | Initial Status |
 |---|---|---|
 | `[Fitur]` | A shippable deliverable — one session, one PR, built **vertically** (migration + API + wired UI as the feature needs). The default. Strategic — clears the gate. | Ready / Backlog / Blocked |
-| `[Diskusi]` | A question to decide *before* building — proposal, vision/requirements/roadmap/milestone change. Strategic. | Proposed |
+| `[Diskusi]` | A question to decide *before* building — a decision to make; a vision/requirements/roadmap/milestone change. Strategic. | Proposed |
 | `[Desain]` | A design *approach* built to be reviewed before it's locked in (see [parallel-ui-exploration](../../../plans/how-to/parallel-ui-exploration.md)). Grounds a later `[Fitur]`; it doesn't become one. Strategic. | Ready (or Backlog) |
 | `[Bug]` | A reproducible defect to fix — the reactive lane. Non-strategic; skips the gate. A security *bug* goes here (add a `security` label if sensitive), not `[Security]`. | Ready (Backlog if not urgent) |
 | `[Security]` | A security *hardening* task with no specific defect — audit, add guards, tighten config. Non-strategic; skips the gate. | Backlog (Ready if urgent) |
@@ -96,7 +96,7 @@ gh project item-edit --id "$ITEM" --project-id PVT_kwHOA14JB84BcRLr --field-id P
 
 (Full status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
 
-> Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification (the maintainer later runs [`/ratify-proposal`](../ratify-proposal/SKILL.md) to turn it into Ready tasks). Don't self-serve into Ready.
+> Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification (the maintainer later runs [`/ratify`](../ratify/SKILL.md) to turn it into Ready tasks). Don't self-serve into Ready.
 
 ## 5. For a batch
 
