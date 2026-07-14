@@ -16,7 +16,7 @@ The app's primary surface and navigation frame. Adopt the **Launchpad** directio
 
 ## Decisions
 
-- **Onboarding stops being obligatory.** Today `App.tsx` redirects every profile-less user to `/onboarding` — a wall. Instead, a new user enters straight into the shell with a **minimal profile** (mechanism — auto-stub vs. quick manual form — settled at grooming) and enriches it later. The **AI chat becomes an always-available sidebar tab**, a tool not a gate. FR-6 keeps the agent; this only changes that it's opt-in. This is an intentional deviation from the current gated flow.
+- **Onboarding stops being obligatory.** *(Landed.)* `App.tsx` used to redirect every profile-less user to `/onboarding` — a wall. Instead, a new user enters straight into the shell with a **minimal profile** and enriches it later; the mechanism, left open at grooming, settled as a **quick manual form** — `/mulai`, a one-field start. The **AI chat became an always-available sidebar tab** (`/assistant`), a tool not a gate. FR-6 keeps the agent; this only changed that it's opt-in. Current screens and routes: [user-flow.md](../reference/user-flow.md).
 - **Launchpad direction is settled** (the `apps/mockups` Launchpad screen) — not an open exploration. The calm-curated-feed bet is chosen; ranking/leaderboards stay out.
 - **Matchmaking content is the *next* milestone.** The "Cari Kolaborator" nav item can ship as a placeholder/disabled tab here and light up in [Matchmaking](matchmaking.md).
 
