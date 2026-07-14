@@ -32,10 +32,6 @@ overrides:
 importers:
 
   .:
-    dependencies:
-      '@myapp/ui':
-        specifier: workspace:*
-        version: link:libs/ui
     devDependencies:
       '@biomejs/biome':
         specifier: 2.4.15
