@@ -103,26 +103,26 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         <hr className="hr" style={{ margin: "0 0 32px" }} />
 
         <div className="pf">
-          <p className="label">Nama</p>
+          <p className="eyebrow mb6">Nama</p>
           <EditField value={p.name} onChange={(v) => set("name", v)} />
         </div>
         <div className="pf">
-          <p className="label">Handle</p>
+          <p className="eyebrow mb6">Handle</p>
           <EditField
             value={p.handle ?? ""}
             onChange={(v) => set("handle", v)}
           />
         </div>
         <div className="pf">
-          <p className="label">Angkatan</p>
+          <p className="eyebrow mb6">Angkatan</p>
           <EditField value={p.year} onChange={(v) => set("year", v)} />
         </div>
         <div className="pf">
-          <p className="label">Jurusan</p>
+          <p className="eyebrow mb6">Jurusan</p>
           <EditField value={p.major} onChange={(v) => set("major", v)} />
         </div>
         <div className="pf">
-          <p className="label">Bio</p>
+          <p className="eyebrow mb6">Bio</p>
           <EditField
             value={p.bio ?? ""}
             onChange={(v) => set("bio", v)}
@@ -130,11 +130,11 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
           />
         </div>
         <div className="pf">
-          <p className="label">Skills</p>
+          <p className="eyebrow mb6">Skills</p>
           <SkillsEditor skills={p.skills} onChange={(v) => set("skills", v)} />
         </div>
         <div className="pf">
-          <p className="label">Minat</p>
+          <p className="eyebrow mb6">Minat</p>
           <InterestsEditor
             interests={p.interests}
             onChange={(v) => set("interests", v)}

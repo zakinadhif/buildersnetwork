@@ -45,14 +45,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           ← balik
         </button>
 
-        <h1
-          style={{
-            fontSize: 28,
-            fontWeight: 300,
-            letterSpacing: "-0.025em",
-            marginBottom: 4,
-          }}
-        >
+        <h1 className="h1" style={{ marginBottom: 4 }}>
           {member.name}
         </h1>
         <p className="sub" style={{ marginBottom: 40 }}>
@@ -63,12 +56,12 @@ export default function MemberProfilePage({ id }: { id: string }) {
 
         {member.bio && (
           <div className="pf">
-            <p className="label">Bio</p>
-            <p style={{ fontSize: 15, lineHeight: 1.65 }}>{member.bio}</p>
+            <p className="eyebrow mb6">Bio</p>
+            <p>{member.bio}</p>
           </div>
         )}
         <div className="pf">
-          <p className="label">Skills</p>
+          <p className="eyebrow mb6">Skills</p>
           <div className="skills-wrap">
             {(member.skills ?? []).map((s) => (
               <span key={s} className="chip" style={{ cursor: "default" }}>
@@ -78,7 +71,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           </div>
         </div>
         <div className="pf">
-          <p className="label">Minat</p>
+          <p className="eyebrow mb6">Minat</p>
           <div className="skills-wrap">
             {(member.interests ?? []).map((s) => (
               <span key={s} className="chip" style={{ cursor: "default" }}>

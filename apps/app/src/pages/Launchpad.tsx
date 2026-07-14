@@ -91,7 +91,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="sec-head">Pilihan inspiratif</p>
+      <p className="eyebrow sec-rule">Pilihan inspiratif</p>
       {featuredShown.length === 0 ? (
         <p className="empty-state">belum ada pilihan.</p>
       ) : (
@@ -106,9 +106,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="bn-feed-eyebrow" style={{ marginTop: 40 }}>
-        Kabar terbaru
-      </p>
+      <p className="eyebrow mt40 mb4">Kabar terbaru</p>
       {feedShown.length === 0 ? (
         <p className="empty-state">belum ada aktivitas.</p>
       ) : (

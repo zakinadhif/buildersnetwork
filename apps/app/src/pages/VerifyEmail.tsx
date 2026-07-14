@@ -1,4 +1,5 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
+import { T } from "@myapp/design-tokens";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
 
@@ -88,8 +89,10 @@ export default function VerifyEmail() {
                 width: "100%",
                 padding: "10px 14px",
                 resize: "none",
+                // Not a tracking role: the digits are spread far apart so a
+                // six-digit code reads as six separate characters.
                 letterSpacing: "0.3em",
-                fontSize: 22,
+                fontSize: T.size.feature,
               }}
             />
           </div>
