@@ -100,6 +100,16 @@ Schema still arrives the production way, `wrangler d1 migrations apply`, so prev
 
 **On a second push, seed data is reset and reloaded**, not merged. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
 
+## Operating it — what a PR actually gets
+
+Every pull request **from a branch in this repo** gets a full ephemeral environment at `https://buildersnetwork-pr-<n>.<subdomain>.workers.dev`: its own D1 database (created, migrated, seeded), its own R2 bucket (`buildersnetwork-pr-<n>-uploads`), and its own Worker. A sticky comment posts the URL and the seed credentials.
+
+**The concurrency cap is counted live, not tracked.** `preview.yml` counts the D1 databases that actually exist and stops at **7** (a knob in the workflow) — the free tier allows 10, prod takes one, and the margin keeps provisioning clear of D1's hard limit. A PR that *already has* a preview is never blocked by the cap; a PR that hits it gets a sticky comment telling it to close another preview, then push or re-run.
+
+**Preview deploys from `wrangler.preview.toml`, rendered in CI from `wrangler.preview.template.toml`** — a separate file rather than an `[env.preview]` block, for the inheritable-`routes` reason above. Bindings are non-inheritable, so *omitting* `RESEND_API_KEY`, `GOOGLE_CLIENT_ID` and `[[send_email]]` is what disables email and Google sign-in in previews: absence is the flag.
+
+The auth-signing secret is **generated fresh per run, not stored**.
+
 ## How preview login works
 
 Worth stating plainly, because it is easy to get backwards.
