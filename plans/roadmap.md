@@ -52,7 +52,7 @@ A grounding pass over the repo (React SPA + Hono API on Cloudflare Workers + Dri
 |---|---|---|
 | Auth gated to `@student.telkomuniversity.ac.id` + OTP email verification | **Done** | FR-1, FR-2 |
 | `profiles`, interests, karya spine, posts + feed, discovery | **Done** (milestones 0–4) | FR-3, FR-10–15, FR-18–25, FR-44 |
-| Onboarding AI agent (`/api/ai/complete` + `/stream`), Onboarding + Review pages | **Partial** — flow exists; grounding done, not yet quota'd (quota is FR-40, P1). Currently an **obligatory gate** (`App.tsx` redirects profile-less users to `/onboarding`); the [Launchpad](milestones/launchpad.md) milestone makes it optional (sidebar tab) | FR-6, FR-7, FR-8 |
+| Onboarding AI agent (`/api/ai/complete` + `/stream`), Onboarding + Review pages | **Partial** — flow exists; grounding done, not yet quota'd (quota is FR-40, P1). **Opt-in, not a gate:** profile-less users are redirected to `/mulai`, a one-field start, and the AI chat lives on as an always-available `/assistant` tab. (The [Launchpad](milestones/launchpad.md) milestone's "onboarding made optional" call — landed.) Screens and routes: [user-flow.md](reference/user-flow.md) | FR-6, FR-7, FR-8 |
 | AI-generated `matches` (table + page) | **Divergent** — AI-suggested matches, *not* the explicit intent model of FR-27/28. Left untouched through P0; its keep/replace fate is decided in the [Karya openings](milestones/karya-openings.md) milestone, alongside the richer matchmaking surface | cf. FR-27/28 |
 
 > **Stack note.** The actual stack is React/Vite SPA + Hono + Drizzle + Better Auth on Cloudflare — not the Next.js + Supabase that early planning drafts suggested. This plan targets the real stack.
