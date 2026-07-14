@@ -48,7 +48,7 @@ In roadmap order, one line each:
 A milestone's **target date is an aim, not a gate** — it still closes when its **exit criterion** passes, per the [workflow](../../../plans/how-to/build-workflow.md). A blown date is a planning signal (surface it), never an auto-close.
 
 ### 3. Today's board — active-milestone detail *(supporting)*
-The live columns, scoped to what's workable now. For each item: `#N title — @assignee`. Apply the judgment a kanban page can't:
+The live columns ([what each one means](../../../plans/how-to/build-workflow.md#board-statuses)), scoped to what's workable now. For each item: `#N title — @assignee`. Apply the judgment a kanban page can't:
 
 - **Stale-blocked** (the headline catch) — a **Blocked** item whose every `Depends on #N` is now **Done/merged**. Read each blocked issue's body for its `Depends on`; if all deps are closed, flag **`→ unblockable — promote to Ready`**. The website leaves these rotting in Blocked; this view frees them.
 - **Board lying** — In Progress with **no assignee**; **In Review** status with **no linked PR**; a **Proposed** item that already has a branch/PR (being built despite "don't pick").
