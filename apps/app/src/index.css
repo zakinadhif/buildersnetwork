@@ -572,8 +572,14 @@ body {
   color: var(--color-bg);
   cursor: pointer;
 }
+/* The same chip, but *interactive* (the Launchpad's interest filter). Its mockup
+   counterpart is not the read-only Tag above — it's NavFilterList's buttons,
+   which sit at the `ui` control step. A control is not a label: at `micro` this
+   chip measured 23.5px tall, below the 44px touch target the rail already
+   guarantees for its own nav items. */
 .stage-pick {
   cursor: pointer;
+  font-size: var(--text-ui);
 }
 
 /* Pending join request row (owner approve/decline) */
@@ -632,9 +638,11 @@ body {
   border-color: oklch(50% 0.08 145 / 0.5);
   color: oklch(44% 0.09 150);
 }
-/* Composer kind picker — same chips, but tappable + a selected state. */
+/* Composer kind picker — same chips, but tappable + a selected state. A control,
+   so it takes the `ui` step, not the tag's `micro` (see `.stage-pick`). */
 .kind-pick {
   cursor: pointer;
+  font-size: var(--text-ui);
   opacity: 0.55;
   transition: opacity 0.12s;
 }
@@ -1300,6 +1308,13 @@ button.post-author:hover .post-author-name {
 }
 @media (pointer: coarse) {
   .bn-nav-item {
+    min-height: 44px;
+  }
+  /* Chip-shaped controls are small by design; on touch they still have to be
+     hittable. Display chips (`.stage-chip`, `.kind-chip` on their own) are not
+     targets and are left alone. */
+  .stage-pick,
+  .kind-pick {
     min-height: 44px;
   }
 }
