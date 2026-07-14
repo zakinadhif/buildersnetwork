@@ -60,10 +60,10 @@ const schema = z.object({
    */
   ADMIN_EMAILS: z.string().optional(),
 
-  /** Anthropic API key — required when AI_PROVIDER=anthropic. */
+  /** Anthropic API key — only used if index.ts is switched to createAnthropicAI. */
   ANTHROPIC_API_KEY: z.string().optional(),
 
-  /** Google Gemini API key — required when AI_PROVIDER=gemini. */
+  /** Google Gemini API key — used by the Node/Docker entrypoint (createGeminiAI). */
   GEMINI_API_KEY: z.string().optional(),
 
   // --- Email (Node.js / non-CF runtimes) ---
@@ -80,12 +80,7 @@ const schema = z.object({
   CF_EMAIL_ACCOUNT_ID: z.string().optional(),
   CF_EMAIL_API_TOKEN: z.string().optional(),
 
-  /** Which AI backend to use. Defaults to "anthropic". */
-  AI_PROVIDER: z
-    .enum(["anthropic", "gemini", "workers-ai"])
-    .default("anthropic"),
-
-  /** Workers AI model override (only used when AI_PROVIDER=workers-ai). */
+  /** Workers AI model override — only used by the Cloudflare Workers entrypoint (worker.ts). */
   AI_WORKERS_MODEL: z.string().optional(),
 });
 

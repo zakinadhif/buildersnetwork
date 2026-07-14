@@ -59,8 +59,6 @@ gemini_api_key: "your_gemini_api_key"
 
 To edit later: `ansible-vault edit deploy/ansible/group_vars/all/vault.yml`
 
-> If using Anthropic instead of Gemini, add `anthropic_api_key` here and set `ai_provider: anthropic` in `group_vars/api.yml`.
-
 ## 4. Build and push Docker images
 
 Build context is the **repo root** for both images.
@@ -129,9 +127,7 @@ Non-secret vars live in `group_vars/api.yml` and `group_vars/all/vars.yml`. Secr
 | `DATABASE_URL` | `api.yml` | `file:/data/app.db` — a SQLite file on the API host, mounted into the API and migrate containers at `/data` |
 | `BETTER_AUTH_SECRET` | vault | Min 32 chars random string |
 | `BETTER_AUTH_URL` | `-e app_url=...` | Frontend public URL — used in auth email links |
-| `AI_PROVIDER` | `api.yml` | `gemini` or `anthropic` |
-| `GEMINI_API_KEY` | vault | Required when `ai_provider: gemini` |
-| `ANTHROPIC_API_KEY` | vault | Required when `ai_provider: anthropic` |
+| `GEMINI_API_KEY` | vault | Gemini API key — the Node entrypoint always uses `createGeminiAI` |
 | `SERVE_STATIC` | `api.yml` | Must be `false` in 2-tier (nginx handles static files) |
 
 ## Redeploying after changes
