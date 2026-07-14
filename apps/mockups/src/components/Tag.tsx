@@ -13,6 +13,8 @@ export function Tag({ label, accent }: { label: string; accent?: boolean }) {
       color:           accent ? T.accent : T.ink2,
       backgroundColor: accent ? T.accentTint : "transparent",
       whiteSpace:      "nowrap" as const,
+      // A tag is a single-line UI label: compact, not body (#93).
+      lineHeight:      T.lh.compact,
     }}>{label}</span>
   );
 }
