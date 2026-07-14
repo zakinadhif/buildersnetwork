@@ -172,25 +172,9 @@ pnpm dev:app   # React SPA on :5173
 
 **`libs/api-spec/openapi.yaml` is the source of truth for JSON endpoints.** Add the path there, run `pnpm codegen`, and you get typed TanStack Query hooks (`@myapp/api-client-react`) plus Zod validators (`@myapp/api-zod`) to parse the request with in your Hono route. The spec isn't documentation *of* the API — it *is* the API.
 
-Two kinds of endpoint sit outside that contract on purpose, both because the generated client only speaks JSON: **AI streaming** (`POST /api/ai/stream`, chunked text, use `useStream`) and **binary upload/serve** (the karya cover and screenshot routes, hand-written, called via `apps/app/src/lib/upload.ts`).
+Two kinds of endpoint sit outside that contract on purpose, both because the generated client only speaks JSON: **AI streaming** (`POST /api/ai/stream` returns chunked plain text — read it with `useStream`, never the generated `aiStream`) and **binary upload/serve** (the karya cover and screenshot routes, hand-written, called via `apps/app/src/lib/upload.ts`). Everything else on `/api/ai`, including `POST /api/ai/complete`, is a normal generated JSON endpoint.
 
 🔧 **The full workflow, and what to do for each of the three kinds: [plans/how-to/adding-an-endpoint.md](plans/how-to/adding-an-endpoint.md).**
-
----
-
-## 🤖 AI endpoints
-
-The `@myapp/ai` lib exposes one `AIProvider` interface (`complete`, `stream`, `agentComplete`) implemented by three adapters — Anthropic, Gemini, Workers AI. Which one serves a request is decided by the **runtime entrypoint, not an env var**: `createGeminiAI` on Node/Docker (needs `GEMINI_API_KEY`), `createWorkersAI` on Cloudflare (uses the `AI` binding, no key).
-
-Two endpoints hang off `/api/ai`:
-
-| Endpoint | Protocol | Use case | Frontend |
-|---|---|---|---|
-| `POST /api/ai/complete` | JSON request → `{ text: string }` | One-shot completions, agent runs | Generated hook `aiComplete` / `useAiComplete` |
-| `POST /api/ai/stream` | JSON request → `text/plain` chunked body | Live typing effect in onboarding chat | `useStream` hook from `@myapp/ai/react` |
-
-> [!IMPORTANT]
-> **The stream endpoint is not a regular JSON API.** It returns a plain-text chunked body read straight off `Response.body`. The orval-generated client cannot consume it incrementally — always use `useStream`.
 
 ---
 
