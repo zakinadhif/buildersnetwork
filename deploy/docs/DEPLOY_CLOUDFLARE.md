@@ -90,7 +90,7 @@ the dashboard, enable Workers Logs by adding an `[observability]` block to
 
 - Workers Assets binding serves `/` (landing) and `/app/*` (SPA) directly from Cloudflare's CDN.
 - The Worker's `fetch` handler only runs for `/api/*` and `/healthz`.
-- `AI_PROVIDER` defaults to `workers-ai` via the `AI` binding configured in `wrangler.toml`.
+- AI is always served via Workers AI (`createWorkersAI` in `worker.ts`), using the `AI` binding configured in `wrangler.toml`.
 - The database is a **D1** binding (`env.DB`) — SQLite at the edge, no TCP sockets, no connection string. `apps/api/src/worker.ts` hands the binding to `drizzle-orm/d1`.
 
 ## Run database migrations
