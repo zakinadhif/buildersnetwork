@@ -95,7 +95,13 @@ export default function VerifyEmail() {
           </div>
 
           {error && (
-            <p style={{ fontSize: 13, color: "var(--ink2)", marginBottom: 12 }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--color-ink2)",
+                marginBottom: 12,
+              }}
+            >
               {error}
             </p>
           )}
@@ -110,7 +116,7 @@ export default function VerifyEmail() {
           </button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 20 }}>
+        <p style={{ fontSize: 13, color: "var(--color-ink2)", marginTop: 20 }}>
           Tidak menerima kode?{" "}
           <button
             type="button"
@@ -121,7 +127,7 @@ export default function VerifyEmail() {
               border: "none",
               cursor: cooldown > 0 ? "default" : "pointer",
               fontSize: 13,
-              color: "var(--ink1)",
+              color: "var(--color-ink)",
               textDecoration: cooldown > 0 ? "none" : "underline",
               padding: 0,
             }}

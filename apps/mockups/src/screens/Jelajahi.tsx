@@ -10,7 +10,7 @@ import { Shell } from "../components/Shell";
 import { Tag } from "../components/Tag";
 import { ALL_INTERESTS, ALL_SKILLS, KARYA, MEMBERS, type Karya, type Member } from "../data/karya";
 import { coverFor } from "../lib/images";
-import { T, eyebrow } from "../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 // ─── Search list row (karya) ───────────────────────────────────────────────────
 function KaryaRow({ karya }: { karya: Karya }) {
@@ -39,7 +39,7 @@ function KaryaRow({ karya }: { karya: Karya }) {
         />
       </div>
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 6, minWidth: 0 }}>
-        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, lineHeight: T.lh.tight, color: T.ink }}>
+        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, lineHeight: T.lh.heading, color: T.ink }}>
           {karya.title}
         </h3>
         <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
@@ -184,7 +184,7 @@ export default function JelajahiScreen() {
         {/* Heading */}
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
-            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.tight, color: T.ink }}>Jelajahi Karya</h1>
+            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Jelajahi Karya</h1>
             <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Cari karya & kolaborator</span>
           </div>
           <input
@@ -296,7 +296,7 @@ export default function JelajahiScreen() {
               fontSize: T.size.micro,
               color: T.ink2,
               padding: "6px 10px",
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               letterSpacing: T.track.tag,
               alignSelf: "flex-start",
             }}

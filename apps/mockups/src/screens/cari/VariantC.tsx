@@ -20,7 +20,7 @@ import {
   type PersonMatch,
 } from "../../data/matches";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "../../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -77,7 +77,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
       marginBottom: 22,
       background: T.accentTint,
       border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
     }}>
       <div aria-hidden="true" style={{
         fontFamily: T.fontDisplay,
@@ -93,7 +93,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
           fontSize: T.size.title,
           fontWeight: T.weight.regular,
           color: T.ink,
-          lineHeight: T.lh.tight,
+          lineHeight: T.lh.heading,
           marginBottom: 4,
         }}>
           Kamu di GEMASTIK 2026? Lagi cari tim.
@@ -113,7 +113,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
             backgroundColor: T.accent,
             color: T.accentFg,
             border: "none",
-            borderRadius: T.radius,
+            borderRadius: T.radiusCard,
             padding: "7px 14px",
             fontFamily: T.fontBody,
             fontSize: T.size.ui,
@@ -129,7 +129,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
               background: "transparent",
               color: T.ink3,
               border: `1px solid ${T.lineDark}`,
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               padding: "7px 14px",
               fontFamily: T.fontBody,
               fontSize: T.size.ui,
@@ -183,7 +183,7 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
               fontSize: T.size.title,
               fontWeight: T.weight.regular,
               color: T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>{karya.title}</h3>
             <LookingForBadge type={karya.lookingFor} />
           </div>
@@ -208,7 +208,7 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
         alignItems: "center",
         gap: 6,
         padding: "7px 11px",
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
         marginBottom: 10,
@@ -254,7 +254,7 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
             onClick={onDm}
             style={{
               padding: "6px 12px",
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               border: `1px solid ${T.lineDark}`,
               backgroundColor: "transparent",
               color: dmed ? T.ink3 : T.ink2,
@@ -271,7 +271,7 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
             onClick={onRequest}
             style={{
               padding: "6px 14px",
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               border: `1px solid ${requested ? T.accentLine : "transparent"}`,
               backgroundColor: requested ? T.accentTint : T.accent,
               color: requested ? T.accent : T.accentFg,
@@ -368,7 +368,7 @@ function PersonMatchCard({ person, invited, onInvite, dmed, onDm }: {
           onClick={onDm}
           style={{
             padding: "6px 12px",
-            borderRadius: T.radius,
+            borderRadius: T.radiusCard,
             border: `1px solid ${T.lineDark}`,
             backgroundColor: "transparent",
             color: dmed ? T.ink3 : T.ink2,
@@ -385,7 +385,7 @@ function PersonMatchCard({ person, invited, onInvite, dmed, onDm }: {
           onClick={onInvite}
           style={{
             padding: "6px 14px",
-            borderRadius: T.radius,
+            borderRadius: T.radiusCard,
             border: `1px solid ${invited ? T.accentLine : "transparent"}`,
             backgroundColor: invited ? T.accentTint : T.accent,
             color: invited ? T.accent : T.accentFg,
@@ -438,7 +438,7 @@ function CariCenter({
             fontFamily: T.fontDisplay,
             fontSize: T.size.display,
             fontWeight: T.weight.regular,
-            letterSpacing: T.track.tight,
+            letterSpacing: T.track.heading,
             color: T.ink,
           }}>Cari Kolaborator</h1>
         </div>
@@ -466,7 +466,7 @@ function CariCenter({
               fontSize: T.size.feature,
               fontWeight: T.weight.regular,
               color: T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>Karya yang cocok buat kamu</h2>
             <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3, flexShrink: 0 }}>
               {KARYA_MATCHES.length} karya
@@ -499,7 +499,7 @@ function CariCenter({
               fontSize: T.size.feature,
               fontWeight: T.weight.regular,
               color: T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>Orang yang cocok buat karyamu</h2>
             <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3, flexShrink: 0 }}>
               {PERSON_MATCHES.length} orang
@@ -551,7 +551,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "14px 16px",
         display: "flex",
         flexDirection: "column" as const,
@@ -614,7 +614,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
             <div key={k.id} style={{
               backgroundColor: T.surface,
               border: `1px solid ${T.line}`,
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               padding: "10px 12px",
             }}>
               {/* Cover + title */}
@@ -656,7 +656,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
       <button style={{
         background: "none",
         border: `1px solid ${T.line}`,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "8px 14px",
         fontFamily: T.fontBody,
         fontSize: T.size.ui,

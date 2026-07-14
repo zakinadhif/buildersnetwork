@@ -1,4 +1,4 @@
-import { T } from "../lib/tokens";
+import { T } from "@myapp/design-tokens";
 
 /**
  * The one global stylesheet for every mockup screen: typographic niceties,
@@ -20,7 +20,7 @@ export function GlobalStyles() {
       button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
         outline: 2px solid ${T.accent};
         outline-offset: 2px;
-        border-radius: ${T.radius};
+        border-radius: ${T.radiusCard};
       }
 
       /* Placeholder held to the body-text contrast bar, not the UA grey. */

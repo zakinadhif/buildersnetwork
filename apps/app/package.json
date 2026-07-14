@@ -16,6 +16,7 @@
   "dependencies": {
     "@myapp/ai": "workspace:^",
     "@myapp/api-client-react": "workspace:*",
+    "@myapp/design-tokens": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",
     "better-auth": "^1.5.5",

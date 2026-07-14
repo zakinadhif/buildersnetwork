@@ -1,4 +1,4 @@
-import { T } from "../lib/tokens";
+import { T } from "@myapp/design-tokens";
 
 export function Tag({ label, accent }: { label: string; accent?: boolean }) {
   return (

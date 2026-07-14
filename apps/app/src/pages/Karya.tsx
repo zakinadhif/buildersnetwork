@@ -90,7 +90,7 @@ export default function Karya({ id }: { id: string }) {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "var(--ink2)",
+            color: "var(--color-ink2)",
             fontSize: 13,
             padding: 0,
             marginBottom: 40,

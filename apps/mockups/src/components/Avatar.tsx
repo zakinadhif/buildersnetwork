@@ -1,5 +1,5 @@
 import { avatarColor, initials } from "../lib/format";
-import { T } from "../lib/tokens";
+import { T } from "@myapp/design-tokens";
 
 export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
   return (

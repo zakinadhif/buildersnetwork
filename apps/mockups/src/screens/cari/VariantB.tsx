@@ -19,7 +19,7 @@ import {
 } from "../../data/intent";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "../../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -100,7 +100,7 @@ function HackathonBanner() {
     <div style={{
       background: T.accentTint,
       border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
       padding: "14px 18px",
       marginBottom: 16,
       display: "flex",
@@ -121,11 +121,11 @@ function HackathonBanner() {
             fontSize: T.size.title,
             fontWeight: T.weight.regular,
             color: T.ink,
-            lineHeight: T.lh.tight,
+            lineHeight: T.lh.heading,
           }}>{HACKATHON_EVENT.name}</span>
           <span style={{ ...eyebrow, color: T.accentMid }}>lagi bentuk tim</span>
         </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.snug }}>
+        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.compact }}>
           {HACKATHON_EVENT.theme} ·{" "}
           <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>
             {HACKATHON_EVENT.teamsForming} tim
@@ -141,7 +141,7 @@ function HackathonBanner() {
         background: T.accent,
         color: T.accentFg,
         border: "none",
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "7px 14px",
         fontFamily: T.fontBody,
         fontSize: T.size.ui,
@@ -161,7 +161,7 @@ function PersonSeekerCard({ person }: { person: PersonSeeker }) {
     <article style={{
       background: T.surface,
       border: `1px solid ${T.line}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
       padding: "14px 16px",
       display: "flex",
       flexDirection: "column" as const,
@@ -205,7 +205,7 @@ function PersonSeekerCard({ person }: { person: PersonSeeker }) {
       <div style={{
         background: T.accentTint,
         border: `1px solid ${T.accentLine}`,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "8px 12px",
         fontFamily: T.fontBody,
         fontSize: T.size.ui,
@@ -258,7 +258,7 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
     <article style={{
       background: T.surface,
       border: `1px solid ${T.line}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
       padding: "14px 16px",
       display: "flex",
       flexDirection: "column" as const,
@@ -288,7 +288,7 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
             fontSize: T.size.title,
             fontWeight: T.weight.regular,
             color: T.ink,
-            lineHeight: T.lh.tight,
+            lineHeight: T.lh.heading,
           }}>{karya.title}</h3>
           <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" as const }}>
             <BadgePill badge={karya.badge} />
@@ -311,7 +311,7 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
       <div style={{
         background: T.accentTint,
         border: `1px solid ${T.accentLine}`,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "8px 12px",
         display: "flex",
         alignItems: "baseline",
@@ -466,7 +466,7 @@ function CenterBoard({ activeSection, onSection }: {
           fontFamily: T.fontDisplay,
           fontSize: T.size.display,
           fontWeight: T.weight.regular,
-          letterSpacing: T.track.tight,
+          letterSpacing: T.track.heading,
           color: T.ink,
         }}>
           Cari Kolaborator
@@ -538,7 +538,7 @@ function CenterBoard({ activeSection, onSection }: {
       <div style={{
         marginTop: 4,
         padding: "16px 20px",
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         border: `1.5px dashed ${T.lineDark}`,
         display: "flex",
         alignItems: "center",
@@ -557,7 +557,7 @@ function CenterBoard({ activeSection, onSection }: {
           backgroundColor: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "8px 16px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -600,7 +600,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Status kamu</div>
@@ -629,7 +629,7 @@ function RightRail() {
                 fontSize: T.size.micro,
                 color: T.ink2,
                 padding: "5px 10px",
-                borderRadius: T.radius,
+                borderRadius: T.radiusCard,
                 width: "100%",
                 letterSpacing: T.track.tag,
               }}
@@ -657,7 +657,7 @@ function RightRail() {
                     textAlign: "left" as const,
                     background: T.bg,
                     border: `1px solid ${T.line}`,
-                    borderRadius: T.radius,
+                    borderRadius: T.radiusCard,
                     padding: "7px 10px",
                     fontFamily: T.fontBody,
                     fontSize: T.size.ui,
@@ -682,7 +682,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "12px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Papan sekarang</div>
@@ -691,7 +691,7 @@ function RightRail() {
           fontSize: T.size.stat,
           fontWeight: T.weight.medium,
           color: T.ink,
-          lineHeight: T.lh.tight,
+          lineHeight: T.lh.heading,
           marginBottom: 2,
         }}>
           {totalSeeking}
@@ -717,7 +717,7 @@ function RightRail() {
 
       {/* ── Open-a-role CTA ───────────────────────────────────────────── */}
       <div style={{
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         border: `1.5px dashed ${T.lineDark}`,
         padding: "14px",
       }}>
@@ -743,7 +743,7 @@ function RightRail() {
           background: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "6px 14px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -759,7 +759,7 @@ function RightRail() {
       <div style={{
         background: T.accentTint,
         border: `1px solid ${T.accentLine}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "12px 14px",
         display: "flex",
         alignItems: "center",

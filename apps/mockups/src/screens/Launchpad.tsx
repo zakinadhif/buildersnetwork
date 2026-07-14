@@ -12,7 +12,7 @@ import { Tag } from "../components/Tag";
 import { KARYA, MEMBERS, type Karya } from "../data/karya";
 import { relativeTime } from "../lib/format";
 import { coverFor, screenshots } from "../lib/images";
-import { T, eyebrow } from "../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"] as const;
 type Interest = (typeof INTEREST_FILTERS)[number];
@@ -60,7 +60,7 @@ function LandscapeCarousel({ images, title }: { images: string[]; title: string 
         overflowX: "auto" as const,
         scrollSnapType: "x mandatory",
         scrollPaddingLeft: 0,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
       }}
     >
       {images.map((src, i) => (
@@ -74,7 +74,7 @@ function LandscapeCarousel({ images, title }: { images: string[]; title: string 
             height: 135,
             flexShrink: 0,
             objectFit: "cover",
-            borderRadius: T.radius,
+            borderRadius: T.radiusCard,
             border: `1.5px solid ${T.line}`,
             scrollSnapAlign: "start",
             display: "block",
@@ -136,7 +136,7 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
               fontSize: T.size.title,
               fontWeight: T.weight.regular,
               color: T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>{karya.title}</h3>
             {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
           </div>
@@ -193,7 +193,7 @@ function SpotlightMetric({ value, label, accent }: { value: string; label: strin
         fontSize: T.size.stat,
         fontWeight: T.weight.medium,
         color: accent ? T.accent : T.ink,
-        lineHeight: T.lh.tight,
+        lineHeight: T.lh.heading,
         marginBottom: 3,
       }}>{value}</div>
       <div style={eyebrow}>{label}</div>
@@ -210,7 +210,7 @@ function Spotlight({ karya }: { karya: Karya }) {
       marginBottom: 18,
       background: T.surface,
       border: `1px solid ${T.accent}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
       overflow: "hidden",
       boxShadow: `0 0 0 1px ${T.accent}22, 0 4px 16px #0f0e0b10`,
     }}>
@@ -245,7 +245,7 @@ function Spotlight({ karya }: { karya: Karya }) {
           {karya.title.charAt(0)}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, lineHeight: T.lh.tight, color: T.ink }}>{karya.title}</h2>
+          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, lineHeight: T.lh.heading, color: T.ink }}>{karya.title}</h2>
           <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accentMid, fontWeight: T.weight.medium, marginBottom: 5 }}>
             oleh {builders}
           </div>
@@ -257,7 +257,7 @@ function Spotlight({ karya }: { karya: Karya }) {
           backgroundColor: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "9px 20px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -347,11 +347,11 @@ function SeekerRamp() {
       marginBottom: 18,
       background: T.accentTint,
       border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
     }}>
       <div aria-hidden="true" style={{ fontFamily: T.fontDisplay, fontSize: 28, color: T.accent, lineHeight: 1, flexShrink: 0 }}>✦</div>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.tight, marginBottom: 2 }}>
+        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading, marginBottom: 2 }}>
           Belum tahu mau bikin apa?
         </div>
         <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
@@ -363,7 +363,7 @@ function SeekerRamp() {
         background: "transparent",
         color: T.accent,
         border: `1px solid ${T.accent}`,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "8px 16px",
         fontFamily: T.fontBody,
         fontSize: T.size.ui,
@@ -392,7 +392,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
       {/* Header */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.tight, color: T.ink }}>Launchpad</h1>
+          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Launchpad</h1>
           <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Apa yang lagi dikerjakan komunitas</span>
         </div>
       </div>
@@ -423,7 +423,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
       <div style={{
         marginTop: 20,
         padding: "16px 20px",
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         border: `1.5px dashed ${T.lineDark}`,
         display: "flex",
         alignItems: "center",
@@ -438,7 +438,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
           backgroundColor: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "8px 16px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -478,7 +478,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "12px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut minggu ini</div>
@@ -518,7 +518,7 @@ function RightRail() {
             color: T.ink,
             backgroundColor: T.surface,
             border: `1px solid ${T.line}`,
-            borderRadius: T.radius,
+            borderRadius: T.radiusCard,
             padding: "6px 10px",
             marginBottom: 10,
           }}
@@ -570,17 +570,17 @@ function RightRail() {
       {/* Call to join */}
       <div style={{
         backgroundColor: T.accent,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "14px 16px",
       }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.light, color: T.accentFg, lineHeight: T.lh.snug, marginBottom: 10 }}>
+        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.light, color: T.accentFg, lineHeight: T.lh.compact, marginBottom: 10 }}>
           Bergabung sebagai builder Telkom University.
         </div>
         <button style={{
           backgroundColor: T.accentFg,
           color: T.accent,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "6px 14px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,

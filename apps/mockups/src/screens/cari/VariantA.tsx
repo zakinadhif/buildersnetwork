@@ -13,7 +13,7 @@ import { KARYA_SLOTS, SEEKERS, type KaryaSlot, type Seeker } from "../../data/se
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "../../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -33,7 +33,7 @@ function BadgeChip({ type }: { type: LookingFor }) {
       display:         "inline-block",
       fontFamily:      T.fontBody,
       fontSize:        T.size.micro,
-      letterSpacing:   T.track.wide,
+      letterSpacing:   T.track.eyebrow,
       textTransform:   "uppercase" as const,
       padding:         "2px 8px",
       borderRadius:    "3px",
@@ -74,7 +74,7 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
               fontSize:   T.size.title,
               fontWeight: T.weight.regular,
               color:      T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>{seeker.name}</span>
             <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{seeker.handle}</span>
             <BadgeChip type={seeker.badge} />
@@ -86,7 +86,7 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
             fontSize:     T.size.micro,
             color:        T.ink3,
             marginBottom: 8,
-            lineHeight:   T.lh.snug,
+            lineHeight:   T.lh.compact,
           }}>
             {seeker.tingkat} · {seeker.jurusan} · diposting {relativeTime(seeker.postedHoursAgo)}
           </div>
@@ -136,7 +136,7 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
               backgroundColor: T.accent,
               color:           T.accentFg,
               border:          "none",
-              borderRadius:    T.radius,
+              borderRadius:    T.radiusCard,
               padding:         "7px 15px",
               fontFamily:      T.fontBody,
               fontSize:        T.size.ui,
@@ -150,7 +150,7 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
               background:   "transparent",
               color:        T.ink2,
               border:       `1px solid ${T.line}`,
-              borderRadius: T.radius,
+              borderRadius: T.radiusCard,
               padding:      "7px 15px",
               fontFamily:   T.fontBody,
               fontSize:     T.size.ui,
@@ -210,7 +210,7 @@ function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
               fontSize:   T.size.title,
               fontWeight: T.weight.regular,
               color:      T.ink,
-              lineHeight: T.lh.tight,
+              lineHeight: T.lh.heading,
             }}>{slot.title}</h3>
             <Tag label={slot.stage} accent={slot.stage === "GEMASTIK 2026" || slot.stage === "Hackathon"} />
             <BadgeChip type={slot.badge} />
@@ -288,7 +288,7 @@ function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
                 backgroundColor: T.accent,
                 color:           T.accentFg,
                 border:          "none",
-                borderRadius:    T.radius,
+                borderRadius:    T.radiusCard,
                 padding:         "6px 13px",
                 fontFamily:      T.fontBody,
                 fontSize:        T.size.ui,
@@ -302,7 +302,7 @@ function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
                 background:   "transparent",
                 color:        T.ink2,
                 border:       `1px solid ${T.line}`,
-                borderRadius: T.radius,
+                borderRadius: T.radiusCard,
                 padding:      "6px 13px",
                 fontFamily:   T.fontBody,
                 fontSize:     T.size.ui,
@@ -365,9 +365,9 @@ function CenterBoard() {
           fontFamily:    T.fontDisplay,
           fontSize:      T.size.display,
           fontWeight:    T.weight.regular,
-          letterSpacing: T.track.tight,
+          letterSpacing: T.track.heading,
           color:         T.ink,
-          lineHeight:    T.lh.tight,
+          lineHeight:    T.lh.heading,
         }}>
           Cari Kolaborator
         </h1>
@@ -390,7 +390,7 @@ function CenterBoard() {
         marginBottom:    16,
         backgroundColor: T.bg,
         border:          `1px solid ${T.lineDark}`,
-        borderRadius:    T.radiusLg,
+        borderRadius:    T.radiusPanel,
         padding:         4,
       }}>
         {([
@@ -515,7 +515,7 @@ function CenterBoard() {
       <div style={{
         marginTop:      24,
         padding:        "16px 20px",
-        borderRadius:   T.radiusLg,
+        borderRadius:   T.radiusPanel,
         border:         `1.5px dashed ${T.lineDark}`,
         display:        "flex",
         alignItems:     "center",
@@ -544,7 +544,7 @@ function CenterBoard() {
           backgroundColor: T.accent,
           color:           T.accentFg,
           border:          "none",
-          borderRadius:    T.radius,
+          borderRadius:    T.radiusCard,
           padding:         "8px 16px",
           fontFamily:      T.fontBody,
           fontSize:        T.size.ui,
@@ -580,7 +580,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.accentTint,
         border:          `1px solid ${T.accentLine}`,
-        borderRadius:    T.radiusLg,
+        borderRadius:    T.radiusPanel,
         padding:         "14px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Status kamu</div>
@@ -592,7 +592,7 @@ function RightRail() {
               fontFamily:   T.fontBody,
               fontSize:     T.size.body,
               color:        T.ink,
-              lineHeight:   T.lh.snug,
+              lineHeight:   T.lh.compact,
               marginBottom: 10,
             }}>
               Kamu lagi cari:{" "}
@@ -606,7 +606,7 @@ function RightRail() {
               style={{
                 background:   "transparent",
                 border:       `1px solid ${T.accent}`,
-                borderRadius: T.radius,
+                borderRadius: T.radiusCard,
                 padding:      "5px 12px",
                 fontFamily:   T.fontBody,
                 fontSize:     T.size.ui,
@@ -624,7 +624,7 @@ function RightRail() {
               fontFamily:   T.fontBody,
               fontSize:     T.size.body,
               color:        T.ink,
-              lineHeight:   T.lh.snug,
+              lineHeight:   T.lh.compact,
               marginBottom: 12,
             }}>
               Kasih tahu komunitas kamu lagi nyari apa.
@@ -638,7 +638,7 @@ function RightRail() {
                     textAlign:    "left" as const,
                     background:   T.surface,
                     border:       `1px solid ${T.line}`,
-                    borderRadius: T.radius,
+                    borderRadius: T.radiusCard,
                     padding:      "7px 10px",
                     fontFamily:   T.fontBody,
                     fontSize:     T.size.ui,
@@ -665,7 +665,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.surface,
         border:          `1px solid ${T.line}`,
-        borderRadius:    T.radiusLg,
+        borderRadius:    T.radiusPanel,
         padding:         "12px 14px",
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
@@ -677,7 +677,7 @@ function RightRail() {
           fontFamily: T.fontBody,
           fontSize:   T.size.body,
           color:      T.ink,
-          lineHeight: T.lh.snug,
+          lineHeight: T.lh.compact,
         }}>
           6 orang lagi bentuk tim untuk kompetisi ini.
         </p>
@@ -701,7 +701,7 @@ function RightRail() {
           background:   "transparent",
           border:       `1px solid ${T.accent}`,
           color:        T.accent,
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding:      "6px 12px",
           fontFamily:   T.fontBody,
           fontSize:     T.size.ui,
@@ -717,7 +717,7 @@ function RightRail() {
       <div style={{
         backgroundColor: T.surface,
         border:          `1px solid ${T.line}`,
-        borderRadius:    T.radiusLg,
+        borderRadius:    T.radiusPanel,
         padding:         "12px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut sekarang</div>

@@ -156,7 +156,7 @@ Obrolan:\n${transcript}`;
       <div
         style={{
           padding: "18px 28px",
-          borderBottom: "1px solid var(--line)",
+          borderBottom: "1px solid var(--color-line)",
           flexShrink: 0,
           display: "flex",
           justifyContent: "space-between",
@@ -171,7 +171,7 @@ Obrolan:\n${transcript}`;
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "var(--ink2)",
+            color: "var(--color-ink2)",
             fontSize: 13,
             padding: 0,
           }}
