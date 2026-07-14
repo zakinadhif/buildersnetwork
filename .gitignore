@@ -53,3 +53,8 @@ deploy/ansible/group_vars/all/vault.yml
 # Per-PR preview config, rendered in CI from wrangler.preview.template.toml.
 # It carries a live database_id and the preview auth secret.
 wrangler.preview.toml
+
+# Built developer guides. The scripts in docs/ are the source — rebuild with
+# `python docs/build-guide-en.py` (needs python-docx).
+docs/*.docx
+__pycache__/
