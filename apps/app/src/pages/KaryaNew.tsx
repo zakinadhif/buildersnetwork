@@ -330,7 +330,7 @@ export default function KaryaNew() {
         <hr className="hr" style={{ margin: "28px 0 32px" }} />
 
         <div className="pf">
-          <p className="label">Cover (opsional)</p>
+          <p className="eyebrow mb6">Cover (opsional)</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -390,7 +390,7 @@ export default function KaryaNew() {
           </div>
         </div>
         <div className="pf">
-          <p className="label">Tangkapan layar (opsional)</p>
+          <p className="eyebrow mb6">Tangkapan layar (opsional)</p>
           <ScreenshotGroup
             label="Landscape"
             hint="muncul di baris feed"
@@ -411,11 +411,11 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf">
-          <p className="label">Judul</p>
+          <p className="eyebrow mb6">Judul</p>
           <EditField value={draft.title} onChange={(v) => set("title", v)} />
         </div>
         <div className="pf">
-          <p className="label">Deskripsi</p>
+          <p className="eyebrow mb6">Deskripsi</p>
           <EditField
             value={draft.description}
             onChange={(v) => set("description", v)}
@@ -423,14 +423,14 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf">
-          <p className="label">Tahap</p>
+          <p className="eyebrow mb6">Tahap</p>
           <StageMultiSelect
             stages={draft.stages}
             onChange={(v) => set("stages", v)}
           />
         </div>
         <div className="pf">
-          <p className="label">Minat / tag</p>
+          <p className="eyebrow mb6">Minat / tag</p>
           <InterestsEditor
             interests={draft.interests}
             onChange={(v) => set("interests", v)}

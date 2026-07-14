@@ -101,14 +101,7 @@ export default function Karya({ id }: { id: string }) {
 
         <KaryaCover url={karya.coverUrl} size={72} className="karya-cover-lg" />
 
-        <h1
-          style={{
-            fontSize: 28,
-            fontWeight: 300,
-            letterSpacing: "-0.025em",
-            marginBottom: 12,
-          }}
-        >
+        <h1 className="h1" style={{ marginBottom: 12 }}>
           {karya.title}
         </h1>
 
@@ -120,9 +113,7 @@ export default function Karya({ id }: { id: string }) {
           ))}
         </div>
 
-        <p style={{ fontSize: 15, lineHeight: 1.65, marginBottom: 32 }}>
-          {karya.description}
-        </p>
+        <p style={{ marginBottom: 32 }}>{karya.description}</p>
 
         {/* Portrait screenshot gallery (issue #19) — no screenshots, no
             gallery, never an empty slot. */}
@@ -186,7 +177,7 @@ export default function Karya({ id }: { id: string }) {
 
         {karya.interests.length > 0 && (
           <div className="pf">
-            <p className="label">Minat / tag</p>
+            <p className="eyebrow mb6">Minat / tag</p>
             <div className="skills-wrap">
               {karya.interests.map((s) => (
                 <span key={s} className="chip" style={{ cursor: "default" }}>
@@ -198,7 +189,7 @@ export default function Karya({ id }: { id: string }) {
         )}
 
         <div className="pf">
-          <p className="label">Kontributor ({karya.roster.length})</p>
+          <p className="eyebrow mb6">Kontributor ({karya.roster.length})</p>
           <div className="roster">
             {karya.roster.map((m) => (
               <Avatar
@@ -214,7 +205,7 @@ export default function Karya({ id }: { id: string }) {
         {/* Owner-only: pending join requests */}
         {isOwner && karya.pendingRequests.length > 0 && (
           <div className="pf">
-            <p className="label">Permintaan gabung</p>
+            <p className="eyebrow mb6">Permintaan gabung</p>
             {karya.pendingRequests.map((m) => (
               <div key={m.id} className="pending-row">
                 <div className="pending-id">
@@ -224,7 +215,7 @@ export default function Karya({ id }: { id: string }) {
                     image={m.image}
                     size={28}
                   />
-                  <span style={{ fontSize: 14 }}>{m.name}</span>
+                  <span>{m.name}</span>
                 </div>
                 <div className="pending-actions">
                   <button
@@ -253,7 +244,7 @@ export default function Karya({ id }: { id: string }) {
 
         {/* Post stream — Sprint 3 (FR-18/19). Members compose; everyone reads. */}
         <div className="pf">
-          <p className="label">Update</p>
+          <p className="eyebrow mb6">Update</p>
 
           {isMember && (
             <div className="composer">

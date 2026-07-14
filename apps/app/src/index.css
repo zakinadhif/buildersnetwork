@@ -6,8 +6,18 @@
    scale (plans/milestones/launchpad.md, "Mockup fidelity is enforced by one
    token source"). Add or change a token there, never here.
 
-   The classes below still carry sizes that are off that scale; snapping them
-   onto it is issue #87, deliberately kept out of this file's token swap. */
+   TYPE (issue #87). Every font-size and line-height below is a `var(--text-*)`
+   / `var(--leading-*)` chosen by ROLE, never a literal picked by eye — that is
+   what let the app drift to 18 sizes and 10 line-heights against the mockup's 8
+   and 3. Two rules settle any case:
+     1. Where an element has a counterpart in the mockups, it takes that
+        counterpart's role (the mockup wins every disagreement — it is the north
+        star, not a suggestion).
+     2. Where it has none (the pre-shell auth/chat/profile screens), it takes the
+        role that describes it, which is also the nearest step.
+   If nothing in the scale fits, promote a step in @myapp/design-tokens rather
+   than writing a one-off size here. The only literals left are the glyph sizes
+   flagged below, each with its reason. */
 @import "@myapp/design-tokens/theme.css";
 
 *,
@@ -18,14 +28,21 @@
   padding: 0;
 }
 
+/* The inherited default is the body ROLE, decided rather than inherited (#87).
+   It used to be 15px/1.6 — a size the scale doesn't have, silently inflating
+   every element that forgot to declare one; the mockups have no such fallback,
+   so anything relying on it landed a notch above its mockup counterpart. Rather
+   than delete the base (which would leave unstyled text at the browser's 16px,
+   further still from the scale), it now *is* the scale's body step: forget a
+   size and you land on the design system, not off it. */
 html,
 body {
   height: 100%;
   background: var(--color-bg);
   color: var(--color-ink);
   font-family: var(--font-body);
-  font-size: 15px;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -59,31 +76,33 @@ body {
 }
 
 /* Typography */
+
+/* The one eyebrow. There used to be four — `.eyebrow`, `.sec-head`,
+   `.bn-feed-eyebrow` and `.label` — at 11px and four different trackings, none
+   of them the mockup's. This is the mockup's `eyebrow` (@myapp/design-tokens),
+   and every uppercase label in the app is now this class; carry spacing with a
+   margin utility rather than forking the type. */
 .eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.09em;
+  font-size: var(--text-micro);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-ink3);
 }
+/* Page heading for the pre-shell column (welcome, login, review). Deliberately
+   the feature step, not display: `--text-display` is the 30px *serif* heading
+   the shell's `.bn-title` uses, and this is a light sans in a 580px column —
+   one role each, so the two never compete. */
 .h1 {
-  font-size: 26px;
-  font-weight: 300;
-  letter-spacing: -0.025em;
-  line-height: 1.2;
+  font-size: var(--text-feature);
+  font-weight: var(--font-weight-light);
+  letter-spacing: var(--tracking-heading);
+  line-height: var(--leading-heading);
 }
 .sub {
-  font-size: 14px;
+  font-size: var(--text-body);
   color: var(--color-ink2);
-  line-height: 1.55;
-}
-.label {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--color-ink3);
-  margin-bottom: 6px;
+  line-height: var(--leading-body);
 }
 
 /* Chat messages */
@@ -95,16 +114,16 @@ body {
 
 .msg-ai {
   font-family: var(--font-mono);
-  font-size: 13.5px;
-  line-height: 1.75;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   color: var(--color-ink);
   animation: up 0.22s ease;
   white-space: pre-wrap;
 }
 .msg-user {
   align-self: flex-end;
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   animation: up 0.18s ease;
   max-width: 72%;
@@ -131,12 +150,12 @@ body {
   border: none;
   border-bottom: 1px solid var(--color-line);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--text-body);
   color: var(--color-ink);
   outline: none;
   resize: none;
   padding: 3px 0;
-  line-height: 1.5;
+  line-height: var(--leading-body);
   max-height: 100px;
   overflow-y: auto;
   transition: border-color 0.15s;
@@ -147,6 +166,12 @@ body {
 .chat-textarea:focus {
   border-bottom-color: var(--color-accent);
 }
+/* GLYPH SIZES — off the type scale on purpose (#87). The scale sizes *text*; a
+   lone mark (the ↑ here, the ••• below, the ✦ on the ramp) is a drawing sized by
+   eye against the control it sits in, and snapping it to a text step would move
+   it for no reason a reader could name. The mockups do exactly this — see the
+   literal `fontSize: 28` on the ✦ in Launchpad's SeekerRamp. `line-height: 1` on
+   these is the same idea: a single glyph has no leading to set. */
 .send-btn {
   background: none;
   border: none;
@@ -194,11 +219,11 @@ body {
   display: inline-block;
   padding: 9px 18px;
   font-family: var(--font-body);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-ui);
+  font-weight: var(--font-weight-medium);
   cursor: pointer;
   border: none;
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-heading);
   transition: opacity 0.15s;
 }
 .btn-dark {
@@ -224,13 +249,16 @@ body {
   gap: 6px;
   align-items: center;
 }
+/* Editor chips (the skills/interests editors) take the `ui` control step, not
+   the `micro` step the read-only tags below use: these are things you click and
+   type into, and 10px is a label size, not a target size. */
 .chip {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
   border: 1px solid var(--color-line);
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
 }
 .chip-rm {
@@ -238,7 +266,7 @@ body {
   border: none;
   cursor: pointer;
   color: var(--color-ink3);
-  font-size: 15px;
+  font-size: var(--text-body);
   line-height: 1;
   padding: 0;
   transition: color 0.12s;
@@ -250,7 +278,7 @@ body {
   background: transparent;
   border: none;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-ink3);
   outline: none;
   padding: 3px 4px;
@@ -279,7 +307,7 @@ body {
   padding: 3px 10px;
   border: 1px dashed var(--color-line);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-ink3);
   transition:
     color 0.12s,
@@ -292,8 +320,8 @@ body {
 
 /* Editable fields */
 .field-val {
-  font-size: 15px;
-  line-height: 1.65;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   cursor: pointer;
   border-bottom: 1px solid transparent;
   transition: border-color 0.15s;
@@ -308,12 +336,12 @@ body {
   border: none;
   border-bottom: 1px solid var(--color-accent);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--text-body);
   color: var(--color-ink);
   outline: none;
   resize: none;
   padding: 2px 0;
-  line-height: 1.65;
+  line-height: var(--leading-body);
 }
 .field-in {
   width: 100%;
@@ -321,7 +349,7 @@ body {
   border: none;
   border-bottom: 1px solid var(--color-accent);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: var(--text-body);
   color: var(--color-ink);
   outline: none;
   padding: 2px 0;
@@ -341,20 +369,20 @@ body {
   border-top: 1px solid var(--color-line);
 }
 .match-name {
-  font-size: 17px;
-  font-weight: 500;
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-medium);
   margin-bottom: 2px;
 }
 .match-meta {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--color-ink2);
   margin-bottom: 12px;
 }
 .match-reason {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
-  line-height: 1.7;
+  line-height: var(--leading-body);
   margin-bottom: 14px;
 }
 
@@ -374,16 +402,19 @@ body {
   align-items: baseline;
   gap: 12px;
 }
+/* The row's three lines all sit low on the scale and lean on colour and weight
+   to separate — which is what the bottom steps are for (see the type-scale note
+   in @myapp/design-tokens). */
 .member-name {
-  font-size: 15px;
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
 }
 .member-year {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
 }
 .member-skills {
-  font-size: 12.5px;
+  font-size: var(--text-ui);
   color: var(--color-ink3);
   margin-top: 2px;
 }
@@ -404,7 +435,7 @@ body {
   overflow: hidden;
   object-fit: cover;
   color: var(--color-bg);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   user-select: none;
 }
 .avatar-mono {
@@ -497,12 +528,22 @@ body {
 .karya-card:hover {
   opacity: 0.6;
 }
+/* The mockup's feed row sets its karya title at the `title` step (18px Lora).
+   The size follows it here; the serif family does not — swapping the family
+   changes every karya list at once and belongs with the feed-row rebuild (#21),
+   not with a type-scale pass.
+
+   `block` because it is a <span>: the card lives inside a click target, whose
+   content model is phrasing content, so the markup cannot use a heading or a
+   <div> here. Without a box of its own the title ran onto the same line as the
+   "karya baru" tag beside it. */
 .karya-card-title {
-  font-size: 15px;
-  font-weight: 500;
+  display: block;
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-medium);
 }
 .karya-card-desc {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--color-ink2);
   margin-top: 3px;
   display: -webkit-box;
@@ -518,13 +559,15 @@ body {
   margin-top: 10px;
 }
 
-/* Stage chips — a karya lifecycle signal */
+/* Stage chips — a karya lifecycle signal. `micro` + the tag tracking is the
+   mockup's Tag (apps/mockups/src/components/Tag.tsx), which these are the app's
+   copy of; the padding keeps the tap target while the type comes down to it. */
 .stage-chip {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-tag);
   border: 1px solid var(--color-line);
   color: var(--color-ink2);
   cursor: default;
@@ -535,8 +578,14 @@ body {
   color: var(--color-bg);
   cursor: pointer;
 }
+/* The same chip, but *interactive* (the Launchpad's interest filter). Its mockup
+   counterpart is not the read-only Tag above — it's NavFilterList's buttons,
+   which sit at the `ui` control step. A control is not a label: at `micro` this
+   chip measured 23.5px tall, below the 44px touch target the rail already
+   guarantees for its own nav items. */
 .stage-pick {
   cursor: pointer;
+  font-size: var(--text-ui);
 }
 
 /* Pending join request row (owner approve/decline) */
@@ -563,7 +612,7 @@ body {
 /* Empty-state (post stream placeholder) */
 .empty-state {
   font-family: var(--font-mono);
-  font-size: 12.5px;
+  font-size: var(--text-ui);
   color: var(--color-ink3);
   padding: 20px 0;
 }
@@ -576,8 +625,8 @@ body {
   display: inline-flex;
   align-items: center;
   padding: 3px 10px;
-  font-size: 12px;
-  letter-spacing: 0.02em;
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-tag);
   border: 1px solid var(--color-line);
   color: var(--color-ink2);
   background: transparent;
@@ -595,15 +644,17 @@ body {
   border-color: oklch(50% 0.08 145 / 0.5);
   color: oklch(44% 0.09 150);
 }
-/* Composer kind picker — same chips, but tappable + a selected state. */
+/* Composer kind picker — same chips, but tappable + a selected state. A control,
+   so it takes the `ui` step, not the tag's `micro` (see `.stage-pick`). */
 .kind-pick {
   cursor: pointer;
+  font-size: var(--text-ui);
   opacity: 0.55;
   transition: opacity 0.12s;
 }
 .kind-pick.on {
   opacity: 1;
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 /* Post compose box (members only) */
@@ -625,8 +676,8 @@ body {
   border: 1px solid var(--color-line);
   padding: 10px 12px;
   font-family: var(--font-body);
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   color: var(--color-ink);
   outline: none;
   transition: border-color 0.15s;
@@ -669,16 +720,16 @@ body {
   text-align: left;
 }
 .post-author-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
 }
 button.post-author:hover .post-author-name {
   color: var(--color-accent);
 }
 .post-body {
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: var(--text-body);
+  line-height: var(--leading-body);
   color: var(--color-ink);
   margin-top: 10px;
   white-space: pre-wrap;
@@ -695,26 +746,28 @@ button.post-author:hover .post-author-name {
   border: none;
   padding: 0;
   cursor: pointer;
-  font-size: 12.5px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
   transition: color 0.12s;
 }
 .post-karya-link:hover {
   color: var(--color-accent);
 }
+/* Timestamps are dense inline meta — the `micro` step, as in the mockup's
+   activity line ("3 jam lalu"). */
 .post-time {
   font-family: var(--font-mono);
-  font-size: 11.5px;
+  font-size: var(--text-micro);
   color: var(--color-ink3);
   flex-shrink: 0;
 }
 
 /* Feed: a "karya baru" tag distinguishes a new-karya item from a post card */
 .feed-new-tag {
-  display: inline-block;
+  display: block; /* its own line above the title — see .karya-card-title */
   font-family: var(--font-mono);
-  font-size: 10.5px;
-  letter-spacing: 0.06em;
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-eyebrow);
   text-transform: uppercase;
   color: var(--color-ink3);
   margin-bottom: 6px;
@@ -755,16 +808,12 @@ button.post-author:hover .post-author-name {
   align-items: center;
 }
 
-/* Section header */
-.sec-head {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-ink3);
+/* Section header — the hairline under a section label, and nothing else. It used
+   to restate the eyebrow's type alongside the rule, which is how the two fell
+   out of step; it now composes with `.eyebrow` (`class="eyebrow sec-rule"`). */
+.sec-rule {
   padding-bottom: 10px;
   border-bottom: 1px solid var(--color-line);
-  margin-bottom: 0;
 }
 
 /* Divider */
@@ -792,6 +841,12 @@ button.post-author:hover .post-author-name {
 }
 .mt56 {
   margin-top: 56px;
+}
+.mb4 {
+  margin-bottom: 4px;
+}
+.mb6 {
+  margin-bottom: 6px;
 }
 .mb8 {
   margin-bottom: 8px;
@@ -852,10 +907,10 @@ button.post-author:hover .post-author-name {
 }
 .bn-nav-wordmark {
   font-family: var(--font-display);
-  font-size: 23px;
-  font-weight: 400;
+  font-size: var(--text-feature);
+  font-weight: var(--font-weight-regular);
   color: var(--color-ink);
-  line-height: 1;
+  line-height: 1; /* single-line wordmark — no leading to set (as in the mockup) */
 }
 .bn-nav-items {
   display: flex;
@@ -874,7 +929,7 @@ button.post-author:hover .post-author-name {
   border-radius: var(--radius-card);
   color: var(--color-ink2);
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-body);
   cursor: pointer;
   margin-bottom: 1px;
   transition:
@@ -887,19 +942,19 @@ button.post-author:hover .post-author-name {
 .bn-nav-item[aria-current="page"] {
   background: var(--color-accent-tint);
   color: var(--color-accent);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .bn-nav-item:disabled {
   color: var(--color-ink3);
   cursor: default;
 }
 .bn-nav-item .bn-nav-icon {
-  font-size: 12px;
+  font-size: var(--text-ui);
 }
 .bn-nav-item .bn-nav-soon {
   margin-left: auto;
-  font-size: 10px;
-  letter-spacing: 0.04em;
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-tag);
   color: var(--color-ink3);
 }
 .bn-nav-filters {
@@ -914,7 +969,7 @@ button.post-author:hover .post-author-name {
   padding: 4px 8px;
   border-radius: 4px;
   font-family: var(--font-body);
-  font-size: 12px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
   cursor: pointer;
   transition:
@@ -924,7 +979,7 @@ button.post-author:hover .post-author-name {
 .bn-nav-filter[aria-pressed="true"] {
   color: var(--color-accent);
   background: var(--color-accent-tint);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 .bn-nav-user {
   margin-top: auto;
@@ -936,13 +991,13 @@ button.post-author:hover .post-author-name {
 }
 .bn-nav-user-name {
   font-family: var(--font-body);
-  font-size: 12px;
-  font-weight: 500;
+  font-size: var(--text-ui);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
 }
 .bn-nav-user-handle {
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: var(--text-micro);
   color: var(--color-ink3);
 }
 
@@ -964,14 +1019,14 @@ button.post-author:hover .post-author-name {
 .bn-title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: 30px;
-  font-weight: 400;
-  letter-spacing: -0.01em;
+  font-size: var(--text-display);
+  font-weight: var(--font-weight-regular);
+  letter-spacing: var(--tracking-heading);
   color: var(--color-ink);
 }
 .bn-title-sub {
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--text-caption);
   color: var(--color-ink3);
 }
 
@@ -993,6 +1048,8 @@ button.post-author:hover .post-author-name {
 .bn-ramp:hover {
   opacity: 0.85;
 }
+/* The ✦ is a glyph, not text — 28px by eye, exactly as the mockup's SeekerRamp
+   sets it. See the GLYPH SIZES note above. */
 .bn-ramp-mark {
   font-family: var(--font-display);
   font-size: 28px;
@@ -1000,24 +1057,29 @@ button.post-author:hover .post-author-name {
   line-height: 1;
   flex-shrink: 0;
 }
+/* Both are <span>s inside the ramp <button> (phrasing content only — no <div>
+   allowed), so they need boxes of their own: without these the greeting and the
+   sub ran together as one paragraph, where the mockup stacks them. */
 .bn-ramp-title {
+  display: block;
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: var(--text-title);
   color: var(--color-ink);
-  line-height: 1.15;
+  line-height: var(--leading-heading);
   margin-bottom: 2px;
 }
 .bn-ramp-sub {
+  display: block;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--color-ink2);
-  line-height: 1.55;
+  line-height: var(--leading-body);
 }
 .bn-ramp-cue {
   flex-shrink: 0;
   color: var(--color-accent);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: var(--text-ui);
+  font-weight: var(--font-weight-semibold);
 }
 
 /* Placeholder page for rail destinations that light up in a later milestone —
@@ -1025,9 +1087,9 @@ button.post-author:hover .post-author-name {
 .bn-soon {
   padding: 48px 0;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--color-ink3);
-  line-height: 1.8;
+  line-height: var(--leading-body);
 }
 
 /* Minimal-profile one-field start form (new verified users) */
@@ -1042,26 +1104,16 @@ button.post-author:hover .post-author-name {
   border: none;
   border-bottom: 2px solid var(--color-ink);
   font-family: var(--font-body);
-  font-size: 22px;
-  font-weight: 300;
+  font-size: var(--text-feature);
+  font-weight: var(--font-weight-light);
   color: var(--color-ink);
   outline: none;
   padding: 6px 0;
-  letter-spacing: -0.02em;
+  letter-spacing: var(--tracking-heading);
   margin: 20px 0 8px;
 }
 .bn-start-field::placeholder {
   color: var(--color-ink3);
-}
-
-/* Section eyebrow above the reverse-chron feed */
-.bn-feed-eyebrow {
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--color-ink3);
-  margin: 8px 0 4px;
 }
 
 /* ── Right rail (issue #20) ─────────────────────────────────────────────────
@@ -1099,12 +1151,12 @@ button.post-author:hover .post-author-name {
   gap: 12px;
 }
 .bn-pulse-label {
-  font-size: 13px;
+  font-size: var(--text-ui);
   color: var(--color-ink2);
 }
 .bn-pulse-value {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: var(--text-body);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   font-variant-numeric: tabular-nums;
 }
@@ -1127,7 +1179,7 @@ button.post-author:hover .post-author-name {
   padding: 0;
   cursor: pointer;
   font-family: var(--font-body);
-  font-size: 11px;
+  font-size: var(--text-micro);
   color: var(--color-accent-mid);
   transition: color 0.12s;
 }
@@ -1166,8 +1218,8 @@ button.post-author:hover .post-author-name {
   gap: 3px;
 }
 .bn-builder-name {
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--text-ui);
+  font-weight: var(--font-weight-medium);
   color: var(--color-ink);
   transition: color 0.12s;
 }
@@ -1175,7 +1227,7 @@ button.post-author:hover .post-author-name {
   color: var(--color-accent);
 }
 .bn-builder-meta {
-  font-size: 11px;
+  font-size: var(--text-micro);
   color: var(--color-ink3);
 }
 .bn-builder-skills {
@@ -1185,7 +1237,7 @@ button.post-author:hover .post-author-name {
   margin-top: 2px;
 }
 .bn-builder-skill {
-  font-size: 10.5px;
+  font-size: var(--text-micro);
   color: var(--color-ink2);
   background: var(--color-bg);
   border: 1px solid var(--color-line);
@@ -1200,9 +1252,9 @@ button.post-author:hover .post-author-name {
   padding: 16px;
 }
 .bn-rail-cta-copy {
-  font-size: 13px;
+  font-size: var(--text-body);
   color: var(--color-accent-fg);
-  line-height: 1.5;
+  line-height: var(--leading-compact);
   margin-bottom: 12px;
 }
 .bn-rail-cta-btn {
@@ -1212,8 +1264,8 @@ button.post-author:hover .post-author-name {
   border-radius: var(--radius-card);
   padding: 7px 14px;
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--text-ui);
+  font-weight: var(--font-weight-semibold);
   cursor: pointer;
   width: 100%;
   transition: opacity 0.15s;
@@ -1267,6 +1319,13 @@ button.post-author:hover .post-author-name {
 }
 @media (pointer: coarse) {
   .bn-nav-item {
+    min-height: 44px;
+  }
+  /* Chip-shaped controls are small by design; on touch they still have to be
+     hittable. Display chips (`.stage-chip`, `.kind-chip` on their own) are not
+     targets and are left alone. */
+  .stage-pick,
+  .kind-pick {
     min-height: 44px;
   }
 }

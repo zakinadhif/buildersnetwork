@@ -308,9 +308,11 @@ One SQLite dialect (`sqlite-core`) runs on all backends: **D1** on Cloudflare Wo
 
 ## 🎨 Design system
 
-**The mockups are the north star.** Don't read the design system here — *look* at it, in the [mockup gallery](https://mockups.buildersnetwork.web.id) (`pnpm dev:mockups`). Its single source is **`apps/mockups/src/lib/tokens.ts`** (`T` — palette, type scale, spacing) with the shared chrome beside it in `apps/mockups/src/components/` (`Shell`, `Avatar`, `Tag`). **`apps/app/src/index.css` is the *port*** of those tokens into the shipping app as CSS custom properties.
+**The mockups are the north star.** Don't read the design system here — *look* at it, in the [mockup gallery](https://mockups.buildersnetwork.web.id) (`pnpm dev:mockups`), with the shared chrome in `apps/mockups/src/components/` (`Shell`, `Avatar`, `Tag`). The scale itself — palette, type, spacing — is declared once in **`libs/design-tokens`** (`theme.css`, plus the `T` object for inline styles), and the app and the mockups both consume it; neither keeps a copy.
 
-Change a value in one of those two files, nowhere else — no doc restates them, so no doc can go stale against them. All UI copy is Bahasa Indonesia kasual.
+So the app's `index.css` reaches for a **role**, never a number: `var(--text-body)`, not `13px`. Sizes off the scale are allowed only with a comment saying why (a lone glyph sized by eye), or by promoting a new step in `libs/design-tokens`. Picking a number that "looks right" at the call site is how the app drifted to 18 font sizes against the mockups' 8.
+
+Change a value in `libs/design-tokens`, nowhere else — no doc restates the scale, so no doc can go stale against it. All UI copy is Bahasa Indonesia kasual.
 
 ---
 
