@@ -73,9 +73,11 @@ function TypeChip({ type }: { type: LookingFor }) {
 // ─── Karya Cover — small square thumbnail for karya-sourced asks ──────────────
 function KaryaCover({ interests, size = 34 }: { interests: string[]; size?: number }) {
   return (
+    // `size` is the art; the box carries the 1px ring, which the border-box base
+    // otherwise absorbs inward and shrinks the tile by 2px (#91).
     <div style={{
-      width: size,
-      height: size,
+      width: size + 2,
+      height: size + 2,
       borderRadius: 9,
       overflow: "hidden",
       border: `1px solid ${T.line}`,
@@ -510,10 +512,11 @@ function FilterRail({ filterType, onFilter }: {
               <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, flex: 1, minWidth: 0 }}>
                 {skill}
               </span>
-              {/* Proportional bar */}
+              {/* Proportional bar. The 1px outline is part of the bar's drawn
+                  size, so the box carries it — 4px of fill reads as 6px (#91). */}
               <div style={{
-                height: 4,
-                width: `${Math.max(8, Math.round((count / ASKS.length) * 64))}px`,
+                height: 6,
+                width: `${Math.max(8, Math.round((count / ASKS.length) * 64)) + 2}px`,
                 backgroundColor: T.accentTint,
                 border: `1px solid ${T.accentLine}`,
                 borderRadius: 2,

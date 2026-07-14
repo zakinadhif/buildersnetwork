@@ -23,10 +23,13 @@ export function Shell({ active, navFilters, children }: {
     }}>
       <GlobalStyles />
       {/* Three-column layout (collapses to one column below ~900px) */}
+      {/* `shellOuter`, not `shellMax`: under the border-box base the padding
+          lives inside `max-width`, so the columns need the gutters added back
+          or they come out 48px short — which is exactly what the app did (#91). */}
       <div className="bn-shell" style={{
-        maxWidth:   T.shellMax,
+        maxWidth:   T.shellOuter,
         margin:     "0 auto",
-        padding:    "24px 24px 48px",
+        padding:    `24px ${T.shellPadX} 48px`,
         display:    "flex",
         gap:        24,
         alignItems: "flex-start",

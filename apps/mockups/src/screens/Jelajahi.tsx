@@ -23,9 +23,10 @@ function KaryaRow({ karya }: { karya: Karya }) {
       borderBottom: `1px solid ${T.line}`,
       alignItems: "start",
     }}>
+      {/* 56px of art + a 1px ring, now inside the box (#91). */}
       <div style={{
-        width: 56,
-        height: 56,
+        width: 58,
+        height: 58,
         flexShrink: 0,
         borderRadius: 14,
         overflow: "hidden",
