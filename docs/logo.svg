@@ -1,13 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128" role="img" aria-label="Al-Fath Berkarya">
   <title>Al-Fath Berkarya</title>
   <!-- Palette is the live design system (apps/app/src/index.css): gallery white,
-       terracotta accent, terracotta-tinted hairlines. Four-petal rosette on a
-       hash grid; the diamond echoes the tessellation it tiles into. -->
+       terracotta accent, terracotta-tinted hairlines. -->
   <rect width="128" height="128" rx="28" fill="#f8f8f8"/>
   <path d="M44 8V120M84 8V120M8 44H120M8 84H120" stroke="#e7d4c4" stroke-width="1"/>
-  <path d="M64 14 L114 64 L64 114 L14 64 Z" fill="none" stroke="#e7d4c4" stroke-width="1"/>
-  <path d="M42 42 A22 22 0 0 1 86 42 A22 22 0 0 1 86 86 A22 22 0 0 1 42 86 A22 22 0 0 1 42 42 Z"
+  <path d="M64 22 A42 42 0 0 1 106 64 A42 42 0 0 1 64 106 A42 42 0 0 1 22 64 A42 42 0 0 1 64 22 Z"
+        fill="none" stroke="#95663a" stroke-width="1.25"/>
+  <path d="M64 38 A26 26 0 0 1 90 64 A26 26 0 0 1 64 90 A26 26 0 0 1 38 64 A26 26 0 0 1 64 38 Z"
         fill="#653907"/>
-  <circle cx="64" cy="64" r="7" fill="#f8f8f8"/>
   <rect x="0.5" y="0.5" width="127" height="127" rx="27.5" fill="none" stroke="#e7d4c4"/>
 </svg>
