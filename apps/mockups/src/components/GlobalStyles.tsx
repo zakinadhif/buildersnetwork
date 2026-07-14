@@ -16,6 +16,20 @@ export function GlobalStyles() {
       h1, h2, h3 { text-wrap: balance; overflow-wrap: break-word; }
       p { text-wrap: pretty; overflow-wrap: break-word; }
 
+      /* ── Leading, by role (#93) ──────────────────────────────────────────
+         The document defaults to the BODY role in the shared base. These two
+         rules say where that is the wrong role, once, instead of leaving it to
+         every author to remember at every element — which is how 1106 elements
+         ended up with no leading at all, inheriting \`normal\` from the browser
+         and letting font metrics decide the reference's height.
+
+         A heading leads tight. A control's label — button, tab, chip, nav item
+         — is interface text, not prose, and body leading sits it loose in its
+         box. Screens may still override either inline where they mean to; this
+         is the floor, not a ceiling. */
+      h1, h2, h3, h4 { line-height: ${T.lh.heading}; }
+      button, input, select, textarea { line-height: ${T.lh.compact}; }
+
       /* Visible keyboard focus on every interactive control. */
       button:focus-visible, a:focus-visible, input:focus-visible, [tabindex]:focus-visible {
         outline: 2px solid ${T.accent};

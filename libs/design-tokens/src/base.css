@@ -24,19 +24,9 @@
    exactly what it rendered before. What changed is where its geometry comes
    from — decided here, rather than inherited from the reader's browser.
 
-   NOT here, on purpose: `line-height`. It is the one reset rule that cannot be
-   adopted for free — 221 elements in the gallery have never had a leading at
-   all, they inherit `line-height: normal`, which is not a number but a value
-   derived from font metrics (so it shifts with the font, the OS's fallback
-   font, and the engine's rounding). Pinning it changes heights by 2–9px. That
-   is a design decision with a visible result, so it gets its own issue and a
-   maintainer's eyes on the before/after: #93. Until it lands, leading comes
-   from the type scale's roles (#87), element by element.
-
    A note that keeps getting mislearned: `box-sizing: content-box` is the CSS
    spec's *initial* value and every browser agrees on it, so the old base was
-   never a cross-browser risk. `line-height: normal` is. Fixing the first does
-   not fix the second. */
+   never a cross-browser risk. `line-height: normal` was — see below. */
 
 *,
 *::before,
@@ -48,6 +38,29 @@
   margin: 0;
   padding: 0;
   border: 0 solid;
+}
+
+/* The document's default leading (#93).
+   ─────────────────────────────────────────────────────────────────────────────
+   Before this, 1106 text elements in the gallery had no leading at all: nobody
+   up their cascade ever set one, so they landed on `line-height: normal`. And
+   `normal` is not a number — it is derived from the font's own metrics, so it
+   moves with the font, with the OS's fallback font when that font is missing,
+   and with the engine's rounding. The height of most of the design reference was
+   being decided by the reader's browser rather than by us. THAT was the real
+   cross-browser exposure in the mockups, not the box model.
+
+   So the document starts at the BODY role and everything inherits a number.
+   Anything whose role is not body says so, at the element that owns the role —
+   reach for the role, never the ratio (#87).
+
+   Only the DEFAULT is shared here, not the per-role rules. The two apps still
+   state roles their own way: the app in `index.css` (#87), the gallery in its
+   `GlobalStyles`. Hoisting those up here would change the app — its `.btn`, for
+   one, has never declared a leading and would tighten — and that is a decision
+   for whoever unifies the components (#92), not a side effect of this file. */
+body {
+  line-height: var(--leading-body);
 }
 
 /* Form controls opt out of inheriting type by default — the one place browsers

@@ -29,6 +29,10 @@ export function Avatar({ name, size = 28 }: { name: string; size?: number }) {
       flexShrink:      0,
       border:          `${RING}px solid ${T.line}`,
       userSelect:      "none" as const,
+      // Deliberately 1, not a text role: this is a monogram — one line of two
+      // glyphs, optically centred by the flexbox. Leading has nothing to space
+      // here, and any ratio above 1 just fights the centring (#93).
+      lineHeight:      1,
     }}>
       {initials(name)}
     </span>

@@ -84,4 +84,7 @@ export const eyebrow = {
   letterSpacing: T.track.eyebrow,
   textTransform: "uppercase" as const,
   color: T.ink3,
+  // A section label is UI text, not prose — body leading would sit it loose in
+  // its box. It used to inherit `normal`, i.e. whatever the font decided (#93).
+  lineHeight: T.lh.compact,
 };
