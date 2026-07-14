@@ -11,7 +11,7 @@ This is normally a **maintainer grooming** activity. Issue title + body are writ
 
 ## 0. Clear the issue-creation gate — do this *before* shaping anything
 
-The [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-creation-gate) exists to stop two real failures: a `[Fitur]` no vision/requirements/milestone asked for, and a `[Fitur]` for a screen nobody has drawn. **Warn and recommend — never self-override.** Only the maintainer overrides, on their explicit say-so.
+Run the [issue-creation gate](../../../plans/how-to/build-workflow.md#the-issue-creation-gate) — what it's for and where its edges lie are written there. Executing it: **warn and recommend, never self-override.** Only the maintainer overrides, on their explicit say-so.
 
 1. **Strategic or non-strategic?**
    - **Non-strategic** (`[Bug]`, `[Security]`, chore, docs) → skip to §1 and file directly. No grounding, no mockup check.
@@ -84,19 +84,20 @@ ITEM=$(gh project item-add 8 --owner zakinadhif --url <issue-url> --format json 
 
 ## 4. Set its Status
 
-Choose the option id by the table in step 1 and the board rules:
-- **Ready** `177864ee` — a `[Fitur]`/`[Desain]`/`[Bug]`/`[Security]` that's unblocked, uncontentious, and wanted *now*. Keep Ready short (**~6**, a soft cap); if it already looks long, use Backlog instead.
-- **Backlog** `d9a7d606` — the holding pool: groomed-but-unprioritized work (Ready overflow), not-yet-groomed items (including ratification `[Fitur]` stubs awaiting their `[Desain]`), plus non-urgent `[Bug]`/`[Security]` and parked tasks. Claimable only once groomed and unblocked — not pre-vetted like Ready.
-- **Blocked** `0b102e6a` — not workable now: a `Depends on #N` whose blocker is still open. (Flips to Ready — or Backlog if Ready is already long — when the blocker merges; `/ship-task` handles that.) Contributors also move a card here mid-task when they hit a blocker.
-- **Proposed** `e1ac50ba` — every `[Diskusi]`, and anything contentious.
+Decide which column it lands in — what each column *means* is in [board statuses](../../../plans/how-to/build-workflow.md#board-statuses):
+
+- an open `Depends on #N` → **Blocked**;
+- a `[Diskusi]`, or anything contentious → **Proposed**;
+- unblocked, uncontentious, and wanted *now* → **Ready** (keep it short, ~6 — if Ready already looks long, use Backlog);
+- everything else → **Backlog**.
+
+Look the option id up in the [Board reference](../../../plans/how-to/build-workflow.md#board-reference):
 
 ```bash
 gh project item-edit --id "$ITEM" --project-id PVT_kwHOA14JB84BcRLr --field-id PVTSSF_lAHOA14JB84BcRLrzhW7QCc --single-select-option-id <option-id>
 ```
 
-(Full status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
-
-> Only the maintainer (@zakinadhif) curates **Ready** (the short ~6 shortlist). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification (the maintainer later runs [`/ratify`](../ratify/SKILL.md) to turn it into Ready tasks). Don't self-serve into Ready.
+> Only the maintainer (@zakinadhif) flips anything into **Ready** — see [who curates](../../../plans/how-to/build-workflow.md#who-curates--the-one-authority-rule). If you're not the maintainer: land non-strategic work (`[Bug]`/`[Security]`) in **Backlog** — it's claimable, so it needs no Ready flip — and put strategic work in **Proposed** for ratification (the maintainer later runs [`/ratify`](../ratify/SKILL.md)). Don't self-serve into Ready.
 
 ## 5. For a batch
 

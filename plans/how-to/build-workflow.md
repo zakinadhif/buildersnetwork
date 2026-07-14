@@ -93,6 +93,41 @@ Proposed┘                                          ⇅
 - **In Review** — PR open, linked with `Closes #N`.
 - **Done** — merged.
 
+## Board reference
+
+The board's ids live **here and nowhere else**. Skills link to this section instead of restating the table; an id is copied into a skill **only** when it sits inside a runnable command block, which has to be self-contained for the agent that pastes it.
+
+| What | Value |
+|---|---|
+| Project | number `8`, owner `zakinadhif` |
+| Project id | `PVT_kwHOA14JB84BcRLr` |
+| Status field id | `PVTSSF_lAHOA14JB84BcRLrzhW7QCc` |
+
+| Status | Option id |
+|---|---|
+| Backlog | `d9a7d606` |
+| Proposed | `e1ac50ba` |
+| Ready | `177864ee` |
+| Blocked | `0b102e6a` |
+| In Progress | `2f8ef994` |
+| In Review | `5ec27823` |
+| Done | `0f0738c1` |
+
+**Add** an issue to the board, capturing the item id:
+
+```bash
+ITEM=$(gh project item-add 8 --owner zakinadhif --url <issue-url> --format json --jq '.id')
+```
+
+**Set** an item's Status — the item id comes from the add above, or from a lookup by issue number:
+
+```bash
+ITEM=$(gh project item-list 8 --owner zakinadhif --format json --jq '.items[] | select(.content.number==<n>) | .id')
+gh project item-edit --id "$ITEM" --project-id PVT_kwHOA14JB84BcRLr --field-id PVTSSF_lAHOA14JB84BcRLrzhW7QCc --single-select-option-id <option-id>
+```
+
+Board access needs the project scope once: `gh auth refresh -s project,read:project`.
+
 ## Who curates — the one authority rule
 
 **Creation is open; curation is gated.** The Queue is continuous pull (you claim, nobody assigns), and the same openness applies to filing work — but not to prioritizing it.

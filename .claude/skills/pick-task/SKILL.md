@@ -17,7 +17,7 @@ gh project item-list 8 --owner zakinadhif --format json --jq '.items[] | select(
 
 - If the user named an issue, verify it's Ready or Backlog — if not, say why (Proposed = still under discussion; Blocked = name what's stuck from its `Depends on` line or its blocker comment) and stop.
 - If they didn't, show the list — **Ready first (the curated shortlist), then Backlog**; if exactly one, propose it.
-- **Backlog isn't pre-vetted like Ready.** Before claiming a Backlog item, read the issue: is it groomed enough to build cold, and free of any open `Depends on #N`? If it's under-specced or actually blocked, don't claim it — say so, and if it's blocked move it to Blocked (`0b102e6a`).
+- **Backlog isn't pre-vetted like Ready.** Before claiming a Backlog item, read the issue: is it groomed enough to build cold, and free of any open `Depends on #N`? If it's under-specced or actually blocked, don't claim it — say so, and if it's blocked move it to **Blocked**.
 - If the user already has an In Progress item (assignee = `gh api user --jq .login`), point at it and ask before claiming a second (one task per person — a Blocked task of theirs doesn't count).
 
 ## 2. Claim
@@ -33,10 +33,10 @@ Move the board item to **In Progress**: find the item id via `gh project item-li
 gh project item-edit --id <item-id> --project-id PVT_kwHOA14JB84BcRLr --field-id PVTSSF_lAHOA14JB84BcRLrzhW7QCc --single-select-option-id 2f8ef994
 ```
 
-(Status option ids: Backlog `d9a7d606` · Proposed `e1ac50ba` · Ready `177864ee` · Blocked `0b102e6a` · In Progress `2f8ef994` · In Review `5ec27823` · Done `0f0738c1`.)
+(The other status option ids are in the [Board reference](../../../plans/how-to/build-workflow.md#board-reference).)
 
 ## 3. Load context, then build
 
 Read, in order: the issue body (`gh issue view <n>`) — the contract; the milestone doc it links in `plans/milestones/` — the why; `plans/archive/retro.txt` — repo principles; plus README sections the boundary touches (OpenAPI-first workflow for API tasks, Design system for UI tasks).
 
-Then restate the acceptance criteria and boundary in one short summary and start. Stay inside **Boundary — Touch**. If you hit a blocker you can't clear in-session, or the task can't fit one session, **move the card to Blocked (`0b102e6a`), comment what's stuck**, and stop rather than sprawl.
+Then restate the acceptance criteria and boundary in one short summary and start. Stay inside **Boundary — Touch**. If you hit a blocker you can't clear in-session, or the task can't fit one session, **move the card to Blocked** (the item-edit call and its option id are in the [Board reference](../../../plans/how-to/build-workflow.md#board-reference)), **comment what's stuck**, and stop rather than sprawl.
