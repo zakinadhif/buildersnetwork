@@ -57,3 +57,4 @@ wrangler.preview.toml
 # Built developer guides. The scripts in docs/ are the source — rebuild with
 # `python docs/build-guide-en.py` (needs python-docx).
 docs/*.docx
+__pycache__/
