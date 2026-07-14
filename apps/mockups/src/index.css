@@ -6,13 +6,41 @@
    utilities it generates.
 
    Tailwind is imported in pieces rather than as `@import "tailwindcss"`, and
-   preflight is the piece left out — on purpose. The gallery has never had a CSS
-   reset: every screen is inline styles over the browser's default box model.
-   Pulling in preflight re-bases all of it (border-box sizing, line-height 1.5),
-   which measurably moved 320 of 335 elements when tried. The mockups are the
-   fidelity reference the app conforms *to*, so they are exactly what must not
-   move. If the gallery ever wants a reset, that is a design decision to make on
-   purpose — not a side effect of importing tokens. */
+   preflight is the piece left out. The gallery has never had a CSS reset: every
+   screen is inline styles over the browser's default box model. The mockups are
+   the fidelity reference the app conforms *to*, so they are what must not move,
+   and pulling in preflight re-bases all of it.
+
+   This comment used to claim preflight "moved 320 of 335 elements when tried",
+   and that number scared off an architectural decision for months. It was wrong
+   — an artefact of diffing each element's ABSOLUTE x/y, where resizing one
+   container makes every descendant under it "move". One cause, hundreds of
+   phantom symptoms. Measuring what actually matters — whether an element's OWN
+   box (w/h) changes — and taking preflight apart rule by rule (Launchpad, 359
+   elements, 1440px viewport):
+
+     margin/padding: 0            0 elements   — free
+     border: 0 solid              0 elements   — free
+     form controls font: inherit  0 elements   — free
+     box-sizing: border-box     169 elements
+     html { line-height: 1.5 }  221 elements
+
+   Three of the five rules cost nothing: the screens already pin margin, border
+   and control fonts explicitly. Of box-sizing's 169, 111 are knock-on reflow
+   (no padding or border of their own — they come right for free once the cause
+   does); the 58 that do carry padding/border collapse to 18 signatures, and
+   those are repeated components — 16 avatars sharing one ring, 11 covers, 6
+   cards, the shell. Roughly 10-18 component-level fixes, not 320.
+
+   line-height is the real one, and it is not a fix but a decision: those 221
+   elements have no leading at all, inheriting `normal` — which is derived from
+   font metrics, so it varies with the font, the OS fallback font, and engine
+   rounding. Their height is currently decided by the reader's browser, not by
+   us. Pinning it necessarily changes the reference.
+
+   So: adopting a reset here IS a design decision to make on purpose — but make
+   it on these numbers, not on the old one. See #91 (shared base) and #93
+   (leading). Don't re-measure with absolute positions. */
 @import "tailwindcss/theme.css";
 @import "tailwindcss/utilities.css";
 @import "@myapp/design-tokens/theme.css";
