@@ -44,21 +44,6 @@ Remaining P1 scope stays in the deferred list below until it earns a milestone d
 
 ---
 
-## Where the code actually is today
-
-A grounding pass over the repo (React SPA + Hono API on Cloudflare Workers + Drizzle/Postgres + Better Auth) found this already built:
-
-| Area | State | Capabilities |
-|---|---|---|
-| Auth gated to `@student.telkomuniversity.ac.id` + OTP email verification | **Done** | FR-1, FR-2 |
-| `profiles`, interests, karya spine, posts + feed, discovery | **Done** (milestones 0–4) | FR-3, FR-10–15, FR-18–25, FR-44 |
-| Onboarding AI agent (`/api/ai/complete` + `/stream`), Onboarding + Review pages | **Partial** — flow exists; grounding done, not yet quota'd (quota is FR-40, P1). **Opt-in, not a gate:** profile-less users are redirected to `/mulai`, a one-field start, and the AI chat lives on as an always-available `/assistant` tab. (The [Launchpad](milestones/launchpad.md) milestone's "onboarding made optional" call — landed.) Screens and routes: [user-flow.md](reference/user-flow.md) | FR-6, FR-7, FR-8 |
-| AI-generated `matches` (table + page) | **Divergent** — AI-suggested matches, *not* the explicit intent model of FR-27/28. Left untouched through P0; its keep/replace fate is decided in the [Karya openings](milestones/karya-openings.md) milestone, alongside the richer matchmaking surface | cf. FR-27/28 |
-
-> **Stack note.** The actual stack is React/Vite SPA + Hono + Drizzle + Better Auth on Cloudflare — not the Next.js + Supabase that early planning drafts suggested. This plan targets the real stack.
-
----
-
 ## Conventions
 
 - **A milestone ends shippable:** migration + API route + wired UI + a test (vitest API / Playwright e2e), no half-landed entities. It closes when its **Exit** criterion demonstrably passes. A milestone carries a **target date** (its GitHub `due_on`, shown as a countdown in `/project-status`) as a planning aim — but closure stays exit-driven; a blown date is a signal to surface, not a gate that closes or forces the work.
