@@ -5,9 +5,9 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "../components/Avatar";
+import { Avatar } from "@myapp/ui";
 import { Shell } from "../components/Shell";
-import { Tag } from "../components/Tag";
+import { Tag } from "@myapp/ui";
 import { ALL_INTERESTS, ALL_SKILLS, KARYA, MEMBERS, type Karya, type Member } from "../data/karya";
 import { coverFor } from "../lib/images";
 import { T, eyebrow } from "@myapp/design-tokens";

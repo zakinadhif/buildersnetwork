@@ -6,9 +6,9 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "../../components/Avatar";
+import { Avatar } from "@myapp/ui";
 import { Shell } from "../../components/Shell";
-import { Tag } from "../../components/Tag";
+import { Tag } from "@myapp/ui";
 import { KARYA_SLOTS, SEEKERS, type KaryaSlot, type Seeker } from "../../data/seekers";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";

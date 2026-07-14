@@ -5,6 +5,14 @@ import {
 } from "@myapp/api-client-react";
 import { useState } from "react";
 
+/**
+ * The avatar, the cover tile and the tag are @myapp/ui's now (#92) — one
+ * implementation, rendered by this app and the mockup gallery alike. The app used
+ * to declare its own of each, which is how they drifted into different designs.
+ * Re-exported here so call sites keep importing atoms from one place.
+ */
+export { Avatar, KaryaCover, Tag } from "@myapp/ui";
+
 // Lifecycle stages in canonical order, with Indonesian labels for the UI.
 export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStage[];
 export const STAGE_LABELS: Record<KaryaStage, string> = {
@@ -44,43 +52,6 @@ export function timeAgo(input: string | Date): string {
   return `${Math.floor(days / 365)}th lalu`;
 }
 
-/**
- * A karya's cover image tile (issue #18). Renders nothing when there's no
- * uploaded cover — never a broken/placeholder box. The interest-derived
- * illustration fallback lands with issue #17; until then, no cover = no tile.
- */
-/** The hairline ring an avatar or a cover wears. Under the shared border-box
- *  base it sits inside the box, so the box has to carry it — mirrors
- *  apps/mockups/src/components/Avatar.tsx (#91). */
-const RING = 1;
-
-export function KaryaCover({
-  url,
-  size = 44,
-  className = "karya-cover",
-}: {
-  url: string | null | undefined;
-  size?: number;
-  className?: string;
-}) {
-  if (!url) return null;
-  // Same rule as Avatar: `size` is the art, the box carries the 1px ring, which
-  // border-box otherwise absorbs inward and shrinks the tile by 2px (#91).
-  const box = size + RING * 2;
-  return (
-    <img
-      className={className}
-      src={url}
-      alt=""
-      aria-hidden="true"
-      loading="lazy"
-      width={box}
-      height={box}
-      style={{ width: box, height: box }}
-    />
-  );
-}
-
 export function Dots() {
   return (
     <span className="dots">
@@ -112,82 +83,6 @@ export function Loading({ label = "loading" }: { label?: string }) {
         <Dots />
       </span>
     </div>
-  );
-}
-
-// Muted, dark palette (white-text-legible) in the warm design-system family.
-// A name/handle hashes deterministically to one of these so a member's face is
-// stable across sessions.
-const AVATAR_COLORS = [
-  "oklch(45% 0.09 30)",
-  "oklch(45% 0.07 62)",
-  "oklch(44% 0.06 145)",
-  "oklch(45% 0.07 230)",
-  "oklch(42% 0.08 300)",
-  "oklch(45% 0.08 10)",
-];
-
-function avatarInitials(name: string): string {
-  const parts = (name || "").trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
-
-function avatarColor(key: string): string {
-  let h = 0;
-  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) | 0;
-  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
-}
-
-/**
- * A contributor face (FR-11, DECISION-E). Renders `image` when present, else a
- * deterministic monogram — initials over a name/handle-hashed color. No real
- * profile pictures exist yet (`image` is always null this sprint); the prop is
- * here so a future upload feature lights up the same component unchanged.
- */
-export function Avatar({
-  name,
-  handle,
-  image,
-  size = 32,
-}: {
-  name: string;
-  handle?: string | null;
-  image?: string | null;
-  size?: number;
-}) {
-  // `size` is the face inside the ring, and the box carries the ring — exactly
-  // as apps/mockups/src/components/Avatar.tsx does it, so a size={28} avatar is
-  // the same 30px disc on both sides (#91). The ring itself is in `.avatar`.
-  const box = size + RING * 2;
-  if (image) {
-    return (
-      <img
-        className="avatar"
-        src={image}
-        alt={name}
-        style={{ width: box, height: box }}
-      />
-    );
-  }
-  return (
-    <span
-      className="avatar avatar-mono"
-      role="img"
-      title={name}
-      aria-label={name}
-      style={{
-        width: box,
-        height: box,
-        background: avatarColor(handle || name || "?"),
-        // 0.36, not the 0.4 this used to carry — the mockup is the north star
-        // and it scales the monogram by 0.36 of the face.
-        fontSize: Math.round(size * 0.36),
-      }}
-    >
-      {avatarInitials(name)}
-    </span>
   );
 }
 

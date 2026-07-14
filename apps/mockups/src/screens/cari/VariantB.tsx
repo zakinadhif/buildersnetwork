@@ -6,10 +6,10 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "../../components/Avatar";
+import { Avatar } from "@myapp/ui";
 import { NavFilterList } from "../../components/LeftNav";
 import { Shell } from "../../components/Shell";
-import { Tag } from "../../components/Tag";
+import { Tag } from "@myapp/ui";
 import {
   HACKATHON_EVENT,
   KARYA_SEEKERS,

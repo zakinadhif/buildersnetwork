@@ -8,7 +8,7 @@ import {
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import { Avatar, KaryaCover, STAGE_LABELS } from "@/components/ui-atoms";
+import { Avatar, KaryaCover, STAGE_LABELS, Tag } from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
 
 /**
@@ -135,27 +135,19 @@ function FeaturedCard({
       onKeyDown={(e) => e.key === "Enter" && onOpen()}
     >
       <div className="karya-card-row">
-        <KaryaCover url={karya.coverUrl} size={48} />
+        <KaryaCover src={karya.coverUrl} size={48} />
         <div className="karya-card-body">
           <span className="karya-card-title">{karya.title}</span>
           <p className="karya-card-desc">{karya.description}</p>
           <div className="karya-card-foot">
             <div className="skills-wrap">
               {karya.stages.map((s) => (
-                <span key={s} className="stage-chip">
-                  {STAGE_LABELS[s]}
-                </span>
+                <Tag key={s} label={STAGE_LABELS[s]} />
               ))}
             </div>
             <div className="roster">
               {karya.roster.map((m) => (
-                <Avatar
-                  key={m.id}
-                  name={m.name}
-                  handle={m.handle}
-                  image={m.image}
-                  size={26}
-                />
+                <Avatar key={m.id} name={m.name} image={m.image} size={26} />
               ))}
             </div>
           </div>
@@ -228,7 +220,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
                   className="bn-builder"
                   onClick={() => navigate(`/member/${m.id}`)}
                 >
-                  <Avatar name={m.name} handle={m.handle} size={34} />
+                  <Avatar name={m.name} size={34} />
                   <span className="bn-builder-body">
                     <span className="bn-builder-name">{m.name}</span>
                     <span className="bn-builder-meta">

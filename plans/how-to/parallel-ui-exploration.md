@@ -12,7 +12,7 @@ Run several agents **in parallel, each in its own git worktree** so they never c
 
 - One `Agent` call per direction, `subagent_type: "claude"`, `isolation: "worktree"`, each using the **`frontend-design` skill**.
 - Launch them in a **single message** so they run concurrently.
-- Keep each direction **self-contained in its own file**, but **import the shared chrome rather than copying it**: `lib/tokens` (`T`, `eyebrow`), `components/Shell` (background + global stylesheet + left nav), `components/{Avatar,Tag}`, `lib/format`, and `lib/images` (`coverFor`). That way every direction renders under identical font/palette rules without any of them re-declaring tokens. Do **not** re-emit a `<style>` block or re-implement the left nav — `Shell` owns both.
+- Keep each direction **self-contained in its own file**, but **import the shared chrome rather than copying it**: `@myapp/design-tokens` (`T`, `eyebrow`), `@myapp/ui` (`Avatar`, `Tag`, `KaryaCover`, `LeftNav`, `ShellColumns`), `components/Shell` (background + global stylesheet + left nav), `lib/format`, and `lib/images` (`coverFor`). That way every direction renders under identical font/palette rules without any of them re-declaring tokens. Do **not** re-emit a `<style>` block or re-implement the left nav — `Shell` owns both.
 - Put sample data in `apps/mockups/src/data/`, not inline in the render file. Reuse the canonical domain types there (e.g. `LookingFor` from `data/looking-for.ts`) instead of inventing a per-variant string union; a variant expresses its own vocabulary with a local `Record<LookingFor, string>` label map.
 - Land the results as `apps/mockups/src/screens/<Screen>.tsx` and register each in `main.tsx`'s `SCREENS` map. When several directions explore the *same* screen, give it a folder — `screens/cari/{index.tsx,VariantA.tsx,…}` — where `index.tsx` holds the variant registry + per-screen picker and each variant is its own file. (See `screens/cari/` for the Cari Kolaborator A/B/C/E explorations.)
 
@@ -22,7 +22,7 @@ Adapt the specifics, but keep the four blocks — identity, shared chrome, data 
 
 > You are designing UI for **Al-Fath Berkarya**, a builder-community web app for Telkom University students who make side projects ("karya") and want to find collaborators. The app is in **Indonesian**. Tone: warm, humble, student-made.
 >
-> **Shared chrome (import it; never re-declare it):** the design system lives in code, not in this brief. Read `apps/mockups/src/lib/tokens.ts` and use `T` (+ `eyebrow`) for every colour, size, and font — do not hard-code a value or invent a token. Wrap the page in `components/Shell` (it owns the background, the global stylesheet, and the left nav — don't re-emit a `<style>` block or rebuild the nav), and reuse `components/{Avatar,Tag}`, `lib/format`, and `lib/images` (`coverFor`). Every direction must render under identical font and palette rules; your divergence is in *layout and idea*, not in the tokens.
+> **Shared chrome (import it; never re-declare it):** the design system lives in code, not in this brief. Use `T` (+ `eyebrow`) from `@myapp/design-tokens` for every colour, size, and font — do not hard-code a value or invent a token. Take `Avatar`, `Tag`, `KaryaCover`, `LeftNav` and `ShellColumns` from `@myapp/ui`. Wrap the page in `components/Shell` (it owns the background, the global stylesheet, and the left nav — don't re-emit a `<style>` block or rebuild the nav), and reuse `lib/format` and `lib/images` (`coverFor`). Every direction must render under identical font and palette rules; your divergence is in *layout and idea*, not in the tokens.
 >
 > **Data shapes (from `@myapp/api-client-react`):** `Karya`/`KaryaListItem`, `Member`, and the hooks available today. Mock any endpoint that doesn't exist yet.
 >
@@ -41,3 +41,27 @@ Write 5–6 candidate directions that genuinely diverge (calm/wide vs. dense das
 ## After the round
 
 Review the mockups side by side in the gallery, decide, and pull the winning ideas into the real app. The mockups are throwaway exploration — once a direction ships for real, the mockup can be deleted or kept as a reference in `apps/mockups/src/`. If the direction reshapes a milestone's scope, that's a **Proposed** issue (see [build-workflow.md](build-workflow.md)), not a silent pivot.
+
+## Graduation: when a mockup's chrome moves into `libs/ui`
+
+The gallery's inline-style idiom is a **feature**, not debt. A screen you can rewrite in one file, with no CSS to name and no component to keep in sync, is what makes five directions in a day possible. Exploration keeps it.
+
+But two implementations of one design **always** drift, and the record is unambiguous: #26 gave the app and the gallery one set of token *values*; #87 still found the type had drifted; #91 found the box model had too, and the app's centre column had been 48px narrow for months. Tokens pin the leaves. They cannot pin the tree.
+
+So chrome **graduates** out of the gallery and into [`libs/ui`](../../libs/ui) — one implementation, imported by both apps — the moment it is:
+
+1. **Ratified** — the design is settled, not a bet still being tested, and
+2. **Ported** — the app renders it too, so a second implementation now exists.
+
+Both conditions, not either. Something only the gallery renders has nothing to drift against; something still moving isn't ready to be pinned.
+
+**What has graduated:** `ShellColumns` (the three-column frame), `LeftNav`, `Avatar`, `Tag`, `KaryaCover` (#92).
+
+**What has not, and why:**
+
+- **The variant screens** (`screens/cari/Variant*`) — still exploration. They keep their inline styles and their freedom, which is the whole point. Never force a variant into `libs/ui`.
+- **The karya card** — ratified and ported, so it *is* due. It didn't move in #92 because the two versions aren't the same layout yet: unifying them is a design merge, not a lift-and-shift, and it deserves its own look rather than being smuggled into a refactor. It is the next thing to graduate.
+
+**When you graduate something**, the bar is that neither app moves a pixel: take the mockup's values (the mockup is the north star and wins every disagreement), then measure both sides before and after. #91 and #92 each shipped with a `0 of 2162 elements moved` diff. If your refactor changes how something *looks*, that is a design change wearing a refactor's clothes — split it out and let it be reviewed as one, the way #93 was.
+
+**And the rule that follows from all of it:** if a component lives in `libs/ui`, do not re-declare it in an app. Not "prefer not to" — the reason `libs/ui` exists is that a component which exists once cannot drift. Re-declaring it hands the problem back.

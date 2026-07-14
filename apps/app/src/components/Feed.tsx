@@ -5,6 +5,7 @@ import {
   KaryaCover,
   POST_KIND_LABELS,
   STAGE_LABELS,
+  Tag,
   timeAgo,
 } from "@/components/ui-atoms";
 
@@ -62,7 +63,6 @@ export default function Feed({ items }: { items: FeedItem[] }) {
               >
                 <Avatar
                   name={it.author.name}
-                  handle={it.author.handle}
                   image={it.author.image}
                   size={28}
                 />
@@ -101,7 +101,7 @@ export default function Feed({ items }: { items: FeedItem[] }) {
               title={it.title}
             />
             <div className="karya-card-row">
-              <KaryaCover url={it.coverUrl} size={48} />
+              <KaryaCover src={it.coverUrl} size={48} />
               <div className="karya-card-body">
                 <span className="feed-new-tag">karya baru</span>
                 <span className="karya-card-title">{it.title}</span>
@@ -109,9 +109,7 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                 <div className="karya-card-foot">
                   <div className="skills-wrap">
                     {it.stages.map((s) => (
-                      <span key={s} className="stage-chip">
-                        {STAGE_LABELS[s]}
-                      </span>
+                      <Tag key={s} label={STAGE_LABELS[s]} />
                     ))}
                   </div>
                   <div className="roster">
@@ -119,7 +117,6 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                       <Avatar
                         key={m.id}
                         name={m.name}
-                        handle={m.handle}
                         image={m.image}
                         size={26}
                       />

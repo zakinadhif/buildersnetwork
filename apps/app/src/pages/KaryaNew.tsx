@@ -340,7 +340,7 @@ export default function KaryaNew() {
           />
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             {coverPreview ? (
-              <KaryaCover url={coverPreview} size={72} />
+              <KaryaCover src={coverPreview} size={72} />
             ) : (
               <div
                 aria-hidden="true"

@@ -60,7 +60,7 @@ export function GlobalStyles() {
          single column led by the main column (mobile = the consumption view),
          and fold the left rail into a compact top nav bar. */
       @media (max-width: 900px) {
-        .bn-shell { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
+        .bn-shell-inner { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
         .bn-nav, .bn-main, .bn-rail { width: 100% !important; }
         .bn-rail { position: static !important; top: auto !important; }
         .bn-nav {

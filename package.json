@@ -44,5 +44,8 @@
     "@biomejs/biome": "^2.4.7",
     "typescript": "~5.9.3",
     "wrangler": "^4.94.0"
+  },
+  "dependencies": {
+    "@myapp/ui": "workspace:*"
   }
 }
