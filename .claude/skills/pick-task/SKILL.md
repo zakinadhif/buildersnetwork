@@ -37,6 +37,8 @@ gh project item-edit --id <item-id> --project-id PVT_kwHOA14JB84BcRLr --field-id
 
 ## 3. Load context, then build
 
-Read, in order: the issue body (`gh issue view <n>`) — the contract; the milestone doc it links in `plans/milestones/` — the why; `plans/archive/retro.txt` — repo principles; plus the docs the boundary touches ([adding-an-endpoint.md](../../../plans/how-to/adding-an-endpoint.md) for API tasks, the README's Design system section for UI tasks).
+Read, in order: the issue body (`gh issue view <n>`) — the contract; the milestone doc it links in `plans/milestones/` — the why; `plans/archive/retro.txt` — repo principles; plus the docs the boundary touches ([adding-an-endpoint.md](../../../plans/how-to/adding-an-endpoint.md) for API tasks).
+
+For **UI tasks, the mockups are the north star** — read them, not a prose description of them: `apps/mockups/src/lib/tokens.ts` (`T`) is the single source for the design system, `apps/mockups/src/components/` holds the shared chrome (`Shell`, `Avatar`, `Tag`), and `apps/app/src/index.css` is their port into the app. No doc restates those values; don't go looking for one.
 
 Then restate the acceptance criteria and boundary in one short summary and start. Stay inside **Boundary — Touch**. If you hit a blocker you can't clear in-session, or the task can't fit one session, **move the card to Blocked** (the item-edit call and its option id are in the [Board reference](../../../plans/how-to/build-workflow.md#board-reference)), **comment what's stuck**, and stop rather than sprawl.

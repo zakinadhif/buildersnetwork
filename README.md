@@ -296,7 +296,9 @@ One SQLite dialect (`sqlite-core`) runs on all backends: **D1** on Cloudflare Wo
 
 ## 🎨 Design system
 
-Hyper-minimalist. Neutral gallery-white background, Lora (serif) for display/headings + Plus Jakarta Sans for UI, IBM Plex Mono for AI voice, a single terracotta accent, hairline dividers, heavy whitespace. All UI copy is Bahasa Indonesia kasual. Tokens live as CSS custom properties in `apps/app/src/index.css` (`--bg`, `--ink`, `--accent`, `--font`, `--font-display`, `--mono`), adopted from the Launchpad mockup (`apps/mockups/src/screens/Launchpad.tsx`).
+**The mockups are the north star.** Don't read the design system here — *look* at it, in the [mockup gallery](https://mockups.buildersnetwork.web.id) (`pnpm dev:mockups`). Its single source is **`apps/mockups/src/lib/tokens.ts`** (`T` — palette, type scale, spacing) with the shared chrome beside it in `apps/mockups/src/components/` (`Shell`, `Avatar`, `Tag`). **`apps/app/src/index.css` is the *port*** of those tokens into the shipping app as CSS custom properties.
+
+Change a value in one of those two files, nowhere else — no doc restates them, so no doc can go stale against them. All UI copy is Bahasa Indonesia kasual.
 
 ---
 
