@@ -146,7 +146,9 @@ buildersnetwork/
 
 ## 🤖 AI endpoints
 
-The `@myapp/ai` lib exposes a common `AIProvider` interface (`complete`, `stream`, `agentComplete`) implemented by three adapters. Two HTTP endpoints hang off `/api/ai`:
+The `@myapp/ai` lib exposes one `AIProvider` interface (`complete`, `stream`, `agentComplete`) implemented by three adapters — Anthropic, Gemini, Workers AI. Which one serves a request is decided by the **runtime entrypoint, not an env var**: `createGeminiAI` on Node/Docker (needs `GEMINI_API_KEY`), `createWorkersAI` on Cloudflare (uses the `AI` binding, no key).
+
+Two endpoints hang off `/api/ai`:
 
 | Endpoint | Protocol | Use case | Frontend |
 |---|---|---|---|
@@ -154,12 +156,7 @@ The `@myapp/ai` lib exposes a common `AIProvider` interface (`complete`, `stream
 | `POST /api/ai/stream` | JSON request → `text/plain` chunked body | Live typing effect in onboarding chat | `useStream` hook from `@myapp/ai/react` |
 
 > [!IMPORTANT]
-> **The stream endpoint is not a regular JSON API.** It returns a plain-text chunked response consumed by reading `Response.body` directly. The orval-generated client cannot handle it — always use `useStream` for streaming.
-
-The AI provider is selected per runtime entrypoint, not via env var:
-
-- **Node.js / Docker** (`src/index.ts`) — `createGeminiAI`, requires `GEMINI_API_KEY`
-- **Cloudflare Workers** (`src/worker.ts`) — `createWorkersAI`, uses CF `AI` binding, no API key
+> **The stream endpoint is not a regular JSON API.** It returns a plain-text chunked body read straight off `Response.body`. The orval-generated client cannot consume it incrementally — always use `useStream`.
 
 ---
 
@@ -187,83 +184,13 @@ pnpm dev:app   # React SPA on :5173
 
 ---
 
-## 🔁 OpenAPI-first workflow (CRUD / JSON endpoints)
+## 🔁 Adding an endpoint
 
-`libs/api-spec/openapi.yaml` is the single source of truth for standard JSON endpoints. This workflow applies to CRUD-style routes that take a JSON body and return a JSON response.
+**`libs/api-spec/openapi.yaml` is the source of truth for JSON endpoints.** Add the path there, run `pnpm codegen`, and you get typed TanStack Query hooks (`@myapp/api-client-react`) plus Zod validators (`@myapp/api-zod`) to parse the request with in your Hono route. The spec isn't documentation *of* the API — it *is* the API.
 
-> [!NOTE]
-> **This workflow does not apply to the AI stream endpoint** (`POST /api/ai/stream`). That endpoint returns chunked plain text and is consumed with `useStream` — see [Streaming AI](#streaming-ai) below.
->
-> **Nor to binary upload/serve routes.** The karya cover routes (`POST`/`DELETE`/`GET /api/karya/:id/cover`) and screenshot routes (`POST /api/karya/:id/screenshots`, `DELETE`/`GET /api/karya/:id/screenshots/:screenshotId`, `POST /api/karya/:id/screenshots/reorder`) carry `multipart/form-data` or raw image bytes, not JSON, so they're hand-written in `routes/karya.ts` and called via `apps/app/src/lib/upload.ts` — outside the generated client. Only their read-side effect (a nullable `coverUrl` and a `screenshots[]` array on `Karya`) lives in the spec.
+Two kinds of endpoint sit outside that contract on purpose, both because the generated client only speaks JSON: **AI streaming** (`POST /api/ai/stream`, chunked text, use `useStream`) and **binary upload/serve** (the karya cover and screenshot routes, hand-written, called via `apps/app/src/lib/upload.ts`).
 
-### 1. Update the spec
-
-Add your path and schemas to `libs/api-spec/openapi.yaml`.
-
-### 2. Run codegen
-
-```bash
-pnpm codegen
-```
-
-This generates two outputs:
-
-- **`libs/api-client-react/src/generated/`** — typed TanStack Query hooks (e.g. `useListMembers`, `listMembers`) backed by `customFetch`
-- **`libs/api-zod/src/generated/`** — Zod validators for every request/response schema (e.g. `ProfileInput`)
-
-### 3. Implement the Hono route
-
-Use the generated Zod validator for request parsing:
-
-```ts
-import { ProfileInput } from "@myapp/api-zod";
-
-app.post("/profile", async (c) => {
-  const parsed = ProfileInput.safeParse(await c.req.json());
-  if (!parsed.success) return c.json({ error: "invalid request" }, 400);
-  // ...
-});
-```
-
-Register the route in `apps/api/src/app.ts`.
-
-### 4. Call from the frontend
-
-Use the generated imperative function or hook:
-
-```ts
-// Imperative (in async handlers)
-import { saveProfile } from "@myapp/api-client-react";
-await saveProfile(profileData);
-
-// Hook (in React components)
-import { useSaveProfile } from "@myapp/api-client-react";
-const { mutateAsync } = useSaveProfile();
-```
-
----
-
-<a id="streaming-ai"></a>
-
-## 📡 Streaming AI (frontend)
-
-The onboarding chat and any other live-text features use `useStream` from `@myapp/ai/react`, which reads `POST /api/ai/stream` as a chunked plain-text body.
-
-```ts
-import { useStream } from "@myapp/ai/react";
-
-function OnboardingChat() {
-  const { streamingText, stream } = useStream();
-  // streamingText is null when idle, "" at start, accumulates chunks while streaming
-
-  async function sendMessage(messages: Message[]) {
-    const fullText = await stream(messages);
-    // fullText is the complete response once done
-  }
-}
-```
-
-Do not use the orval-generated `aiStream` function for this — it does not consume the chunked body incrementally.
+🔧 **The full workflow, and what to do for each of the three kinds: [plans/how-to/adding-an-endpoint.md](plans/how-to/adding-an-endpoint.md).**
 
 ---
 
