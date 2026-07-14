@@ -97,7 +97,13 @@ export default function Welcome() {
           </div>
 
           {error && (
-            <p style={{ fontSize: 13, color: "var(--ink2)", marginBottom: 12 }}>
+            <p
+              style={{
+                fontSize: 13,
+                color: "var(--color-ink2)",
+                marginBottom: 12,
+              }}
+            >
               {error}
             </p>
           )}
@@ -112,7 +118,7 @@ export default function Welcome() {
           </button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--ink2)", marginTop: 20 }}>
+        <p style={{ fontSize: 13, color: "var(--color-ink2)", marginTop: 20 }}>
           {isSignup ? "sudah anggota? " : "belum anggota? "}
           <button
             type="button"
@@ -125,7 +131,7 @@ export default function Welcome() {
               border: "none",
               cursor: "pointer",
               fontSize: 13,
-              color: "var(--ink1)",
+              color: "var(--color-ink)",
               textDecoration: "underline",
               padding: 0,
             }}

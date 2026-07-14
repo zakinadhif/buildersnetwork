@@ -1,0 +1,18 @@
+/* The mockup gallery's only stylesheet: it exists to pull in the shared design
+   tokens. Screens still style themselves with React inline styles reading the
+   `T` object — deliberately, since fast, self-contained iteration is what the
+   gallery is *for* (see plans/how-to/parallel-ui-exploration.md). Tailwind is
+   here so the `@theme` block resolves; nothing obliges a screen to use the
+   utilities it generates.
+
+   Tailwind is imported in pieces rather than as `@import "tailwindcss"`, and
+   preflight is the piece left out — on purpose. The gallery has never had a CSS
+   reset: every screen is inline styles over the browser's default box model.
+   Pulling in preflight re-bases all of it (border-box sizing, line-height 1.5),
+   which measurably moved 320 of 335 elements when tried. The mockups are the
+   fidelity reference the app conforms *to*, so they are exactly what must not
+   move. If the gallery ever wants a reset, that is a design decision to make on
+   purpose — not a side effect of importing tokens. */
+@import "tailwindcss/theme.css";
+@import "tailwindcss/utilities.css";
+@import "@myapp/design-tokens/theme.css";

@@ -1,29 +1,14 @@
 @import "tailwindcss";
 
-:root {
-  /* Design tokens ported from the Launchpad mockup (MockupB): a neutral gallery-
-     white palette with a Lora serif display face, adopted as the live system
-     (see plans/milestones/launchpad.md, issue #8 grooming decision 1). */
-  --bg: oklch(98% 0 0); /* gallery white */
-  --ink: oklch(18% 0 0); /* soft neutral near-black */
-  --ink2: oklch(46% 0 0); /* muted body — AA on white */
-  --ink3: oklch(53% 0 0); /* meta text — AA on bg */
-  --accent: oklch(39% 0.085 62); /* terracotta */
-  --accent-mid: oklch(55% 0.085 62); /* terracotta mid — AA on bg */
-  --accent-fg: oklch(99% 0 0); /* text on accent */
-  --accent-tint: oklch(95% 0.015 62); /* light terracotta wash */
-  --accent-line: oklch(88% 0.03 62); /* terracotta-tinted hairline */
-  --line: oklch(91% 0 0); /* neutral hairline */
-  --line-dark: oklch(85% 0 0);
-  --surface: oklch(100% 0 0); /* pure white lifted card */
-  --font: "Plus Jakarta Sans", sans-serif; /* body, labels, meta */
-  --font-display: "Lora", serif; /* brand / display copy */
-  --mono: "IBM Plex Mono", monospace; /* AI voice */
-  --radius: 8px;
-  --radius-lg: 16px;
-  --max: 580px;
-  --shell-max: 1100px;
-}
+/* The design tokens live in @myapp/design-tokens and are shared with
+   apps/mockups — this app declares none of its own. The two used to hold
+   separate copies, which is how the app's type quietly drifted off the mockup's
+   scale (plans/milestones/launchpad.md, "Mockup fidelity is enforced by one
+   token source"). Add or change a token there, never here.
+
+   The classes below still carry sizes that are off that scale; snapping them
+   onto it is issue #87, deliberately kept out of this file's token swap. */
+@import "@myapp/design-tokens/theme.css";
 
 *,
 *::before,
@@ -36,9 +21,9 @@
 html,
 body {
   height: 100%;
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font);
+  background: var(--color-bg);
+  color: var(--color-ink);
+  font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
@@ -68,7 +53,7 @@ body {
 
 /* Layout */
 .wrap {
-  max-width: var(--max);
+  max-width: var(--container-page);
   margin: 0 auto;
   padding: 0 28px;
 }
@@ -79,7 +64,7 @@ body {
   font-weight: 500;
   letter-spacing: 0.09em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 .h1 {
   font-size: 26px;
@@ -89,7 +74,7 @@ body {
 }
 .sub {
   font-size: 14px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   line-height: 1.55;
 }
 .label {
@@ -97,7 +82,7 @@ body {
   font-weight: 500;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--color-ink3);
   margin-bottom: 6px;
 }
 
@@ -109,10 +94,10 @@ body {
 }
 
 .msg-ai {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 13.5px;
   line-height: 1.75;
-  color: var(--ink);
+  color: var(--color-ink);
   animation: up 0.22s ease;
   white-space: pre-wrap;
 }
@@ -120,7 +105,7 @@ body {
   align-self: flex-end;
   font-size: 15px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-ink);
   animation: up 0.18s ease;
   max-width: 72%;
   text-align: right;
@@ -128,13 +113,13 @@ body {
 
 /* Input bar */
 .input-bar {
-  background: var(--bg);
-  border-top: 1px solid var(--line);
+  background: var(--color-bg);
+  border-top: 1px solid var(--color-line);
   padding: 14px 28px 20px;
   flex-shrink: 0;
 }
 .input-inner {
-  max-width: var(--max);
+  max-width: var(--container-page);
   margin: 0 auto;
   display: flex;
   gap: 10px;
@@ -144,10 +129,10 @@ body {
   flex: 1;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--line);
-  font-family: var(--font);
+  border-bottom: 1px solid var(--color-line);
+  font-family: var(--font-body);
   font-size: 15px;
-  color: var(--ink);
+  color: var(--color-ink);
   outline: none;
   resize: none;
   padding: 3px 0;
@@ -157,16 +142,16 @@ body {
   transition: border-color 0.15s;
 }
 .chat-textarea::placeholder {
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 .chat-textarea:focus {
-  border-bottom-color: var(--accent);
+  border-bottom-color: var(--color-accent);
 }
 .send-btn {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--accent);
+  color: var(--color-accent);
   font-size: 17px;
   padding: 3px;
   line-height: 1;
@@ -192,9 +177,9 @@ body {
   }
 }
 .dots span {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 16px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   animation: blink 1.3s ease-in-out infinite;
 }
 .dots span:nth-child(2) {
@@ -208,7 +193,7 @@ body {
 .btn {
   display: inline-block;
   padding: 9px 18px;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
@@ -217,19 +202,19 @@ body {
   transition: opacity 0.15s;
 }
 .btn-dark {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--color-ink);
+  color: var(--color-bg);
 }
 .btn-dark:hover {
   opacity: 0.75;
 }
 .btn-outline {
   background: transparent;
-  border: 1px solid var(--line);
-  color: var(--ink);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink);
 }
 .btn-outline:hover {
-  border-color: var(--ink2);
+  border-color: var(--color-ink2);
 }
 
 /* Skills */
@@ -244,29 +229,29 @@ body {
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
 }
 .chip-rm {
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--ink3);
+  color: var(--color-ink3);
   font-size: 15px;
   line-height: 1;
   padding: 0;
   transition: color 0.12s;
 }
 .chip-rm:hover {
-  color: var(--ink);
+  color: var(--color-ink);
 }
 .chip-add {
   background: transparent;
   border: none;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 13px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   outline: none;
   padding: 3px 4px;
   min-width: 60px;
@@ -274,11 +259,11 @@ body {
   transition: border-color 0.15s;
 }
 .chip-add:focus {
-  border-bottom-color: var(--accent);
-  color: var(--ink);
+  border-bottom-color: var(--color-accent);
+  color: var(--color-ink);
 }
 .chip-add::placeholder {
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 
 /* Tappable catalog suggestions (interests editor) */
@@ -292,17 +277,17 @@ body {
   background: none;
   cursor: pointer;
   padding: 3px 10px;
-  border: 1px dashed var(--line);
-  font-family: var(--font);
+  border: 1px dashed var(--color-line);
+  font-family: var(--font-body);
   font-size: 13px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   transition:
     color 0.12s,
     border-color 0.12s;
 }
 .chip-suggest:hover {
-  color: var(--ink);
-  border-color: var(--ink2);
+  color: var(--color-ink);
+  border-color: var(--color-ink2);
 }
 
 /* Editable fields */
@@ -315,16 +300,16 @@ body {
   display: block;
 }
 .field-val:hover {
-  border-bottom-color: var(--line);
+  border-bottom-color: var(--color-line);
 }
 .field-ta {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--accent);
-  font-family: var(--font);
+  border-bottom: 1px solid var(--color-accent);
+  font-family: var(--font-body);
   font-size: 15px;
-  color: var(--ink);
+  color: var(--color-ink);
   outline: none;
   resize: none;
   padding: 2px 0;
@@ -334,10 +319,10 @@ body {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 1px solid var(--accent);
-  font-family: var(--font);
+  border-bottom: 1px solid var(--color-accent);
+  font-family: var(--font-body);
   font-size: 15px;
-  color: var(--ink);
+  color: var(--color-ink);
   outline: none;
   padding: 2px 0;
 }
@@ -350,10 +335,10 @@ body {
 /* Match cards */
 .match {
   padding: 24px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
 }
 .match:first-child {
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--color-line);
 }
 .match-name {
   font-size: 17px;
@@ -362,13 +347,13 @@ body {
 }
 .match-meta {
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   margin-bottom: 12px;
 }
 .match-reason {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 12.5px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   line-height: 1.7;
   margin-bottom: 14px;
 }
@@ -376,7 +361,7 @@ body {
 /* Member list rows */
 .member-row {
   padding: 15px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -395,11 +380,11 @@ body {
 }
 .member-year {
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
 }
 .member-skills {
   font-size: 12.5px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   margin-top: 2px;
 }
 
@@ -418,7 +403,7 @@ body {
   border-radius: 50%;
   overflow: hidden;
   object-fit: cover;
-  color: var(--bg);
+  color: var(--color-bg);
   font-weight: 500;
   user-select: none;
 }
@@ -430,8 +415,8 @@ body {
 .karya-cover {
   border-radius: 12px;
   object-fit: cover;
-  border: 1px solid var(--line);
-  background: var(--line);
+  border: 1px solid var(--color-line);
+  background: var(--color-line);
   flex-shrink: 0;
   display: block;
 }
@@ -440,8 +425,8 @@ body {
   height: 72px;
   border-radius: 16px;
   object-fit: cover;
-  border: 1px solid var(--line);
-  background: var(--line);
+  border: 1px solid var(--color-line);
+  background: var(--color-line);
   display: block;
   margin-bottom: 20px;
 }
@@ -467,7 +452,7 @@ body {
   flex-shrink: 0;
   object-fit: cover;
   border-radius: 12px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   scroll-snap-align: start;
   display: block;
 }
@@ -480,7 +465,7 @@ body {
   width: auto;
   flex-shrink: 0;
   border-radius: 14px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   scroll-snap-align: start;
   display: block;
 }
@@ -505,7 +490,7 @@ body {
 /* Karya list cards */
 .karya-card {
   padding: 18px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -518,7 +503,7 @@ body {
 }
 .karya-card-desc {
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   margin-top: 3px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -540,14 +525,14 @@ body {
   padding: 3px 10px;
   font-size: 12px;
   letter-spacing: 0.02em;
-  border: 1px solid var(--line);
-  color: var(--ink2);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink2);
   cursor: default;
 }
 .stage-chip.on {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
+  background: var(--color-ink);
+  border-color: var(--color-ink);
+  color: var(--color-bg);
   cursor: pointer;
 }
 .stage-pick {
@@ -561,7 +546,7 @@ body {
   justify-content: space-between;
   gap: 12px;
   padding: 12px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
 }
 .pending-id {
   display: flex;
@@ -577,9 +562,9 @@ body {
 
 /* Empty-state (post stream placeholder) */
 .empty-state {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 12.5px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   padding: 20px 0;
 }
 
@@ -593,8 +578,8 @@ body {
   padding: 3px 10px;
   font-size: 12px;
   letter-spacing: 0.02em;
-  border: 1px solid var(--line);
-  color: var(--ink2);
+  border: 1px solid var(--color-line);
+  color: var(--color-ink2);
   background: transparent;
   cursor: default;
 }
@@ -637,20 +622,20 @@ body {
   width: 100%;
   resize: vertical;
   background: transparent;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   padding: 10px 12px;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 14px;
   line-height: 1.6;
-  color: var(--ink);
+  color: var(--color-ink);
   outline: none;
   transition: border-color 0.15s;
 }
 .composer-input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 .composer-input::placeholder {
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 .composer .btn {
   align-self: flex-start;
@@ -664,7 +649,7 @@ body {
 }
 .post-card {
   padding: 16px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
 }
 .post-card-head {
   display: flex;
@@ -686,15 +671,15 @@ body {
 .post-author-name {
   font-size: 14px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-ink);
 }
 button.post-author:hover .post-author-name {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 .post-body {
   font-size: 14px;
   line-height: 1.6;
-  color: var(--ink);
+  color: var(--color-ink);
   margin-top: 10px;
   white-space: pre-wrap;
 }
@@ -711,27 +696,27 @@ button.post-author:hover .post-author-name {
   padding: 0;
   cursor: pointer;
   font-size: 12.5px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   transition: color 0.12s;
 }
 .post-karya-link:hover {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 .post-time {
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 11.5px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   flex-shrink: 0;
 }
 
 /* Feed: a "karya baru" tag distinguishes a new-karya item from a post card */
 .feed-new-tag {
   display: inline-block;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 10.5px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--color-ink3);
   margin-bottom: 6px;
 }
 
@@ -744,13 +729,13 @@ button.post-author:hover .post-author-name {
 /* Admin feature toggle on the karya page */
 .feature-toggle {
   margin-left: 10px;
-  border: 1px solid var(--line);
+  border: 1px solid var(--color-line);
   background: transparent;
-  color: var(--ink2);
+  color: var(--color-ink2);
 }
 .feature-toggle.on {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--color-accent);
+  color: var(--color-accent);
 }
 
 /* Nav */
@@ -758,12 +743,12 @@ button.post-author:hover .post-author-name {
   position: sticky;
   top: 0;
   z-index: 20;
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-line);
   padding: 14px 28px;
 }
 .nav-inner {
-  max-width: var(--max);
+  max-width: var(--container-page);
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
@@ -776,16 +761,16 @@ button.post-author:hover .post-author-name {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--color-ink3);
   padding-bottom: 10px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
   margin-bottom: 0;
 }
 
 /* Divider */
 .hr {
   border: none;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
   margin: 32px 0;
 }
 
@@ -839,7 +824,7 @@ button.post-author:hover .post-author-name {
   animation: up 0.28s ease;
 }
 .bn-shell-inner {
-  max-width: var(--shell-max);
+  max-width: var(--container-shell);
   margin: 0 auto;
   padding: 24px 24px 48px;
   display: flex;
@@ -859,7 +844,7 @@ button.post-author:hover .post-author-name {
 }
 .bn-nav-logo {
   padding: 0 12px 20px;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
   margin-bottom: 16px;
 }
 .bn-nav-logo .eyebrow {
@@ -869,7 +854,7 @@ button.post-author:hover .post-author-name {
   font-family: var(--font-display);
   font-size: 23px;
   font-weight: 400;
-  color: var(--ink);
+  color: var(--color-ink);
   line-height: 1;
 }
 .bn-nav-items {
@@ -886,9 +871,9 @@ button.post-author:hover .post-author-name {
   border: none;
   background: transparent;
   padding: 7px 12px;
-  border-radius: var(--radius);
-  color: var(--ink2);
-  font-family: var(--font);
+  border-radius: var(--radius-card);
+  color: var(--color-ink2);
+  font-family: var(--font-body);
   font-size: 13px;
   cursor: pointer;
   margin-bottom: 1px;
@@ -897,15 +882,15 @@ button.post-author:hover .post-author-name {
     color 0.12s;
 }
 .bn-nav-item:hover:not(:disabled):not([aria-current="page"]) {
-  color: var(--ink);
+  color: var(--color-ink);
 }
 .bn-nav-item[aria-current="page"] {
-  background: var(--accent-tint);
-  color: var(--accent);
+  background: var(--color-accent-tint);
+  color: var(--color-accent);
   font-weight: 500;
 }
 .bn-nav-item:disabled {
-  color: var(--ink3);
+  color: var(--color-ink3);
   cursor: default;
 }
 .bn-nav-item .bn-nav-icon {
@@ -915,7 +900,7 @@ button.post-author:hover .post-author-name {
   margin-left: auto;
   font-size: 10px;
   letter-spacing: 0.04em;
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 .bn-nav-filters {
   padding: 0 12px;
@@ -928,37 +913,37 @@ button.post-author:hover .post-author-name {
   border: none;
   padding: 4px 8px;
   border-radius: 4px;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 12px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   cursor: pointer;
   transition:
     background 0.12s,
     color 0.12s;
 }
 .bn-nav-filter[aria-pressed="true"] {
-  color: var(--accent);
-  background: var(--accent-tint);
+  color: var(--color-accent);
+  background: var(--color-accent-tint);
   font-weight: 500;
 }
 .bn-nav-user {
   margin-top: auto;
   padding: 16px 12px 0;
-  border-top: 1px solid var(--line);
+  border-top: 1px solid var(--color-line);
   display: flex;
   align-items: center;
   gap: 8px;
 }
 .bn-nav-user-name {
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-ink);
 }
 .bn-nav-user-handle {
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 10px;
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 
 /* Center content column */
@@ -982,12 +967,12 @@ button.post-author:hover .post-author-name {
   font-size: 30px;
   font-weight: 400;
   letter-spacing: -0.01em;
-  color: var(--ink);
+  color: var(--color-ink);
 }
 .bn-title-sub {
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 
 /* Calm on-ramp card to the AI assistant (replaces MockupB SeekerRamp) */
@@ -997,9 +982,9 @@ button.post-author:hover .post-author-name {
   gap: 14px;
   padding: 14px 18px;
   margin-bottom: 24px;
-  background: var(--accent-tint);
-  border: 1px solid var(--accent-line);
-  border-radius: var(--radius-lg);
+  background: var(--color-accent-tint);
+  border: 1px solid var(--color-accent-line);
+  border-radius: var(--radius-panel);
   text-align: left;
   cursor: pointer;
   width: 100%;
@@ -1011,26 +996,26 @@ button.post-author:hover .post-author-name {
 .bn-ramp-mark {
   font-family: var(--font-display);
   font-size: 28px;
-  color: var(--accent);
+  color: var(--color-accent);
   line-height: 1;
   flex-shrink: 0;
 }
 .bn-ramp-title {
   font-family: var(--font-display);
   font-size: 18px;
-  color: var(--ink);
+  color: var(--color-ink);
   line-height: 1.15;
   margin-bottom: 2px;
 }
 .bn-ramp-sub {
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
   line-height: 1.55;
 }
 .bn-ramp-cue {
   flex-shrink: 0;
-  color: var(--accent);
+  color: var(--color-accent);
   font-size: 12px;
   font-weight: 600;
 }
@@ -1039,9 +1024,9 @@ button.post-author:hover .post-author-name {
    honestly signposted "segera hadir", never present-but-hollow. */
 .bn-soon {
   padding: 48px 0;
-  font-family: var(--mono);
+  font-family: var(--font-mono);
   font-size: 13px;
-  color: var(--ink3);
+  color: var(--color-ink3);
   line-height: 1.8;
 }
 
@@ -1055,18 +1040,18 @@ button.post-author:hover .post-author-name {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 2px solid var(--ink);
-  font-family: var(--font);
+  border-bottom: 2px solid var(--color-ink);
+  font-family: var(--font-body);
   font-size: 22px;
   font-weight: 300;
-  color: var(--ink);
+  color: var(--color-ink);
   outline: none;
   padding: 6px 0;
   letter-spacing: -0.02em;
   margin: 20px 0 8px;
 }
 .bn-start-field::placeholder {
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 
 /* Section eyebrow above the reverse-chron feed */
@@ -1075,7 +1060,7 @@ button.post-author:hover .post-author-name {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink3);
+  color: var(--color-ink3);
   margin: 8px 0 4px;
 }
 
@@ -1094,9 +1079,9 @@ button.post-author:hover .post-author-name {
 
 /* Community pulse strip — live counts from GET /api/stats */
 .bn-pulse {
-  background: var(--surface);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-panel);
   padding: 14px 16px;
 }
 .bn-pulse-head {
@@ -1115,12 +1100,12 @@ button.post-author:hover .post-author-name {
 }
 .bn-pulse-label {
   font-size: 13px;
-  color: var(--ink2);
+  color: var(--color-ink2);
 }
 .bn-pulse-value {
   font-size: 14px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-ink);
   font-variant-numeric: tabular-nums;
 }
 
@@ -1141,13 +1126,13 @@ button.post-author:hover .post-author-name {
   border: none;
   padding: 0;
   cursor: pointer;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 11px;
-  color: var(--accent-mid);
+  color: var(--color-accent-mid);
   transition: color 0.12s;
 }
 .bn-rail-link:hover {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 /* Builders to meet — a plain list (search deferred to Matchmaking) */
@@ -1157,7 +1142,7 @@ button.post-author:hover .post-author-name {
   flex-direction: column;
 }
 .bn-builders li {
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--color-line);
 }
 .bn-builders li:last-child {
   border-bottom: none;
@@ -1183,15 +1168,15 @@ button.post-author:hover .post-author-name {
 .bn-builder-name {
   font-size: 13px;
   font-weight: 500;
-  color: var(--ink);
+  color: var(--color-ink);
   transition: color 0.12s;
 }
 .bn-builder:hover .bn-builder-name {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 .bn-builder-meta {
   font-size: 11px;
-  color: var(--ink3);
+  color: var(--color-ink3);
 }
 .bn-builder-skills {
   display: flex;
@@ -1201,32 +1186,32 @@ button.post-author:hover .post-author-name {
 }
 .bn-builder-skill {
   font-size: 10.5px;
-  color: var(--ink2);
-  background: var(--bg);
-  border: 1px solid var(--line);
+  color: var(--color-ink2);
+  background: var(--color-bg);
+  border: 1px solid var(--color-line);
   padding: 1px 6px;
   border-radius: 3px;
 }
 
 /* Call-to-action card — accent, points at creating a karya */
 .bn-rail-cta {
-  background: var(--accent);
-  border-radius: var(--radius-lg);
+  background: var(--color-accent);
+  border-radius: var(--radius-panel);
   padding: 16px;
 }
 .bn-rail-cta-copy {
   font-size: 13px;
-  color: var(--accent-fg);
+  color: var(--color-accent-fg);
   line-height: 1.5;
   margin-bottom: 12px;
 }
 .bn-rail-cta-btn {
-  background: var(--accent-fg);
-  color: var(--accent);
+  background: var(--color-accent-fg);
+  color: var(--color-accent);
   border: none;
-  border-radius: var(--radius);
+  border-radius: var(--radius-card);
   padding: 7px 14px;
-  font-family: var(--font);
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -1260,7 +1245,7 @@ button.post-author:hover .post-author-name {
     gap: 6px 16px;
     padding-top: 0;
     padding-bottom: 14px;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--color-line);
   }
   .bn-nav-logo {
     margin: 0 auto 0 0;

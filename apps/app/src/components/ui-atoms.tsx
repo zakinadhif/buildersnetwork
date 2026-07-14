@@ -95,9 +95,9 @@ export function Loading({ label = "loading" }: { label?: string }) {
     >
       <span
         style={{
-          fontFamily: "var(--mono)",
+          fontFamily: "var(--font-mono)",
           fontSize: 13,
-          color: "var(--ink2)",
+          color: "var(--color-ink2)",
         }}
       >
         {label}
@@ -352,7 +352,9 @@ export function EditField({
         className="field-val"
         onClick={() => setEditing(true)}
       >
-        {value || <span style={{ color: "var(--ink3)" }}>ketuk buat edit</span>}
+        {value || (
+          <span style={{ color: "var(--color-ink3)" }}>ketuk buat edit</span>
+        )}
       </button>
     );
   return multiline ? (

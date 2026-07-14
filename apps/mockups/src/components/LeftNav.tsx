@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
-import { T, eyebrow } from "../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 import { Avatar } from "./Avatar";
 
 /** The five product surfaces. Only the first three route anywhere. */
@@ -64,7 +64,7 @@ export function LeftNav({ active, children }: { active: Screen; children?: React
                 textAlign:       "left" as const,
                 border:          "none",
                 padding:         "7px 12px",
-                borderRadius:    T.radius,
+                borderRadius:    T.radiusCard,
                 backgroundColor: itemActive ? T.accentTint : "transparent",
                 color:           itemActive ? T.accent : T.ink2,
                 fontFamily:      T.fontBody,

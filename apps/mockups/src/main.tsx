@@ -1,5 +1,6 @@
 import { StrictMode, useState, type ComponentType } from "react";
 import { createRoot } from "react-dom/client";
+import "./index.css";
 import {
   BODY_FONTS,
   DISPLAY_FONTS,

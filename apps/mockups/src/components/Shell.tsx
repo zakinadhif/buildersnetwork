@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import type { Screen } from "../gallery";
-import { T } from "../lib/tokens";
+import { T } from "@myapp/design-tokens";
 import { GlobalStyles } from "./GlobalStyles";
 import { LeftNav } from "./LeftNav";
 
@@ -24,7 +24,7 @@ export function Shell({ active, navFilters, children }: {
       <GlobalStyles />
       {/* Three-column layout (collapses to one column below ~900px) */}
       <div className="bn-shell" style={{
-        maxWidth:   1100,
+        maxWidth:   T.shellMax,
         margin:     "0 auto",
         padding:    "24px 24px 48px",
         display:    "flex",

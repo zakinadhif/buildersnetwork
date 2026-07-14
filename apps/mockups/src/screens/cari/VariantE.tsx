@@ -13,7 +13,7 @@ import { ASKS, TOP_SKILLS, type Ask } from "../../data/asks";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "../../lib/tokens";
+import { T, eyebrow } from "@myapp/design-tokens";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -103,7 +103,7 @@ function HackathonBanner() {
       marginBottom: 16,
       background: T.accentTint,
       border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
     }}>
       <span aria-hidden="true" style={{ fontSize: 20, flexShrink: 0, lineHeight: 1 }}>⚡</span>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -121,7 +121,7 @@ function HackathonBanner() {
         background: "transparent",
         color: T.accent,
         border: `1px solid ${T.accent}`,
-        borderRadius: T.radius,
+        borderRadius: T.radiusCard,
         padding: "6px 14px",
         fontFamily: T.fontBody,
         fontSize: T.size.ui,
@@ -144,7 +144,7 @@ function Composer() {
     <div style={{
       backgroundColor: T.surface,
       border: `1.5px solid ${T.lineDark}`,
-      borderRadius: T.radiusLg,
+      borderRadius: T.radiusPanel,
       padding: "14px 16px",
       marginBottom: 20,
     }}>
@@ -158,10 +158,10 @@ function Composer() {
           color: T.ink3,
           backgroundColor: T.bg,
           border: `1px solid ${T.line}`,
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "9px 12px",
           cursor: "text",
-          lineHeight: T.lh.tight,
+          lineHeight: T.lh.heading,
         }}>
           Tulis ajakan kamu — siapa atau apa yang lagi kamu cari?
         </div>
@@ -204,7 +204,7 @@ function Composer() {
           backgroundColor: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "6px 18px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -261,7 +261,7 @@ function AskCard({ ask }: { ask: Ask }) {
               </div>
             ) : (
               <>
-                <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.body, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.tight }}>
+                <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.body, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading }}>
                   {ask.karyaTitle}
                 </div>
                 <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
@@ -315,7 +315,7 @@ function AskCard({ ask }: { ask: Ask }) {
           backgroundColor: T.accent,
           color: T.accentFg,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "7px 18px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -329,7 +329,7 @@ function AskCard({ ask }: { ask: Ask }) {
           backgroundColor: "transparent",
           color: T.ink2,
           border: `1px solid ${T.line}`,
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "7px 16px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,
@@ -365,7 +365,7 @@ function BulletinBoard({ filterType }: { filterType: Filter }) {
             fontFamily: T.fontDisplay,
             fontSize: T.size.display,
             fontWeight: T.weight.regular,
-            letterSpacing: T.track.tight,
+            letterSpacing: T.track.heading,
             color: T.ink,
           }}>
             Cari Kolaborator
@@ -435,7 +435,7 @@ function FilterRail({ filterType, onFilter }: {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "12px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Filter Ajakan</div>
@@ -481,7 +481,7 @@ function FilterRail({ filterType, onFilter }: {
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "12px 14px",
       }}>
         <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut Papan</div>
@@ -530,7 +530,7 @@ function FilterRail({ filterType, onFilter }: {
       {/* CTA — mirrors Launchpad's right rail accent block */}
       <div style={{
         backgroundColor: T.accent,
-        borderRadius: T.radiusLg,
+        borderRadius: T.radiusPanel,
         padding: "14px 16px",
       }}>
         <div style={{
@@ -538,7 +538,7 @@ function FilterRail({ filterType, onFilter }: {
           fontSize: T.size.body,
           fontWeight: T.weight.light,
           color: T.accentFg,
-          lineHeight: T.lh.snug,
+          lineHeight: T.lh.compact,
           marginBottom: 10,
         }}>
           Punya ajakan? Tulis di papan — komunitas siap merespons.
@@ -547,7 +547,7 @@ function FilterRail({ filterType, onFilter }: {
           backgroundColor: T.accentFg,
           color: T.accent,
           border: "none",
-          borderRadius: T.radius,
+          borderRadius: T.radiusCard,
           padding: "6px 14px",
           fontFamily: T.fontBody,
           fontSize: T.size.ui,

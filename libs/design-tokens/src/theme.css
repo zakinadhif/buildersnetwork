@@ -1,0 +1,121 @@
+/* Design tokens — the single declaration of the design scale for this repo.
+ *
+ * Both `apps/app` and `apps/mockups` import this file and NEITHER declares
+ * tokens of its own. That is the whole point: the two used to hold separate
+ * copies (a `:root` block in the app, a `T` object in the mockups), so they
+ * drifted apart silently and the mockup -> app port stopped being faithful.
+ * See plans/milestones/launchpad.md, "Mockup fidelity is enforced by one token
+ * source, not by discipline."
+ *
+ * Consumed two ways:
+ *   - CSS       — `var(--color-ink)`, plus the Tailwind utilities these generate
+ *                 (`text-body`, `bg-surface`, `rounded-card`, ...).
+ *   - TypeScript — the `T` object in ./index.ts, whose values are `var(--...)`
+ *                 references to the names below, not copies of them.
+ *
+ * `static` is load-bearing. Tailwind only emits the theme variables whose
+ * utilities it finds in the source scan; both consumers above reach for these
+ * through hand-written `var()` — in plain CSS classes and in React inline
+ * styles — which the scanner cannot see. Without `static` those variables would
+ * be tree-shaken away and every such reference would silently resolve to
+ * nothing. Do not drop it.
+ *
+ * These names are additive to Tailwind's built-ins, never redefinitions: the app
+ * already uses `text-sm`, `rounded-lg` and `leading-*`, so shadowing a stock
+ * scale here would quietly move existing UI. Where a role collides with a
+ * built-in of a *different* value it is named for its role instead
+ * (`--leading-heading`, not `--leading-tight`).
+ */
+
+@theme static {
+  /* ── Color ────────────────────────────────────────────────────────────────
+     A neutral gallery-white palette with a terracotta accent. Contrast ratios
+     are AA against the surface each colour is used on; keep them that way. */
+  --color-bg: oklch(98% 0 0); /* gallery white */
+  --color-ink: oklch(18% 0 0); /* soft neutral near-black */
+  --color-ink2: oklch(46% 0 0); /* muted body — ~4.7:1 on white (AA) */
+  --color-ink3: oklch(53% 0 0); /* meta text — ~5:1 on bg (AA) */
+
+  --color-accent: oklch(39% 0.085 62); /* terracotta */
+  --color-accent-mid: oklch(55% 0.085 62); /* mid — ~4.7:1 on bg (AA) */
+  --color-accent-fg: oklch(99% 0 0); /* text on accent */
+  --color-accent-tint: oklch(95% 0.015 62); /* light terracotta wash */
+  --color-accent-line: oklch(88% 0.03 62); /* terracotta-tinted hairline */
+
+  --color-line: oklch(91% 0 0); /* neutral hairline */
+  --color-line-dark: oklch(85% 0 0);
+  --color-surface: oklch(100% 0 0); /* pure white lifted card */
+
+  /* Error text. Off-palette and undesigned: it has no counterpart in the
+     mockups and arrived as a bare `var(--danger, #c0392b)` fallback in the app.
+     Promoted here rather than left hiding in a fallback, but it still owes the
+     palette a real oklch value — the hex is preserved exactly so promoting it
+     changed nothing on screen. */
+  --color-danger: #c0392b;
+
+  /* ── Fonts ────────────────────────────────────────────────────────────────
+     Families only. Loading them stays in each app's index.html: a <link> with
+     preconnect fetches in parallel with the stylesheet, where a nested CSS
+     @import here would serialise behind it and block render. The mockup gallery
+     also overrides --font-display/--font-body at runtime from its font switcher
+     (see gallery/fonts.tsx) — an unlayered :root rule, so it beats these. */
+  --font-display: "Lora", serif; /* brand / display copy */
+  --font-body: "Plus Jakarta Sans", sans-serif; /* body, labels, meta */
+  --font-mono: "IBM Plex Mono", monospace; /* AI voice */
+
+  /* ── Type scale ───────────────────────────────────────────────────────────
+     Eight steps, and they are roles rather than arbitrary sizes. The bottom four
+     sit 1px apart *by design*: dense meta separated further by case, weight and
+     colour. Reach for the role, not the number — and if nothing fits, promote a
+     new step here rather than writing a one-off size at the call site. That is
+     precisely how the app drifted to eighteen sizes. */
+  --text-micro: 10px; /* eyebrow labels, tags, chips, dense inline meta */
+  --text-caption: 11px; /* subtitles, standalone secondary text, small counts */
+  --text-ui: 12px; /* nav, filters, controls, buttons, secondary body */
+  --text-body: 13px; /* primary body: descriptions, bios */
+  --text-stat: 15px; /* featured metric values */
+  --text-title: 18px; /* serif list-item titles + callout heading */
+  --text-feature: 23px; /* serif wordmark + featured title */
+  --text-display: 30px; /* serif page heading */
+
+  /* ── Weight ───────────────────────────────────────────────────────────────
+     light/medium/semibold hold the same values as Tailwind's built-ins, so the
+     stock `font-medium` and friends stay truthful. */
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+
+  /* ── Tracking ─────────────────────────────────────────────────────────────
+     Named per role: Tailwind ships `tracking-wide`/`tracking-tight` at other
+     values, and shadowing those would move UI that already uses them. */
+  --tracking-eyebrow: 0.08em; /* uppercase eyebrows and section labels */
+  --tracking-tag: 0.02em; /* chips, tags, stage pills */
+  --tracking-heading: -0.01em; /* display type, which sets loose by default */
+
+  /* ── Leading ──────────────────────────────────────────────────────────────
+     Three roles, same naming caution as tracking. */
+  --leading-heading: 1.15; /* display + titles */
+  --leading-compact: 1.3; /* tight multi-line UI text */
+  --leading-body: 1.55; /* prose */
+
+  /* ── Radius ───────────────────────────────────────────────────────────────
+     `card`/`panel` rather than `md`/`lg`: the app already uses stock
+     `rounded-md` and `rounded-lg`, and those must keep meaning what they mean. */
+  --radius-card: 8px; /* buttons, nav items, inputs */
+  --radius-panel: 16px; /* lifted cards, rails, the CTA block */
+
+  /* ── Spacing ──────────────────────────────────────────────────────────────
+     A 4px grid, stated rather than inherited — neither app tokenised spacing
+     before, which left it free to drift the way type did. This is Tailwind's
+     default step, so `gap-4`, `px-3` and friends are unchanged; it is written
+     down here so the grid is a decision instead of an accident. Half-steps are
+     legal for the 6/10/14px values already in use (`gap-1.5`, `p-2.5`). */
+  --spacing: 0.25rem;
+
+  /* ── Layout ───────────────────────────────────────────────────────────────
+     Shared measures. The shell width in particular was duplicated — a `1100`
+     literal in the mockups' Shell and a `--shell-max` in the app. */
+  --container-shell: 1100px; /* three-column app shell */
+  --container-page: 580px; /* single reading column: auth, welcome, chat */
+}

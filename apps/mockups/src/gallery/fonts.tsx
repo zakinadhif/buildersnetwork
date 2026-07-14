@@ -15,7 +15,8 @@ export const BODY_FONTS = [
   { font: "'Outfit', sans-serif",            label: "Outfit" },
 ] as const;
 
-/** Publishes the chosen fonts as the CSS vars that lib/tokens.ts points at. */
+/** Publishes the chosen fonts as the CSS vars that @myapp/design-tokens points
+ *  at. Unlayered, so it overrides the defaults the `@theme` block emits. */
 export function FontVars({ displayFont, bodyFont }: { displayFont: string; bodyFont: string }) {
   return (
     <style>{`:root { --font-display: ${displayFont}; --font-body: ${bodyFont}; }`}</style>

@@ -21,7 +21,7 @@ export default function Onboarding() {
       <div
         style={{
           padding: "18px 28px",
-          borderBottom: "1px solid var(--line)",
+          borderBottom: "1px solid var(--color-line)",
           flexShrink: 0,
         }}
       >

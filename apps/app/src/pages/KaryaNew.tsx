@@ -55,10 +55,12 @@ function ScreenshotGroup({
           marginBottom: 8,
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--ink)" }}>
+        <span
+          style={{ fontSize: 13, fontWeight: 600, color: "var(--color-ink)" }}
+        >
           {label}
         </span>
-        <span style={{ fontSize: 12, color: "var(--ink3)" }}>{hint}</span>
+        <span style={{ fontSize: 12, color: "var(--color-ink3)" }}>{hint}</span>
       </div>
       <input
         ref={inputRef}
@@ -85,7 +87,7 @@ function ScreenshotGroup({
                 height: 72,
                 objectFit: "cover",
                 borderRadius: 10,
-                border: "1px solid var(--line)",
+                border: "1px solid var(--color-line)",
                 display: "block",
               }}
             />
@@ -133,7 +135,7 @@ function ScreenshotGroup({
           style={{
             margin: "6px 0 0",
             fontSize: 12,
-            color: "var(--danger, #c0392b)",
+            color: "var(--color-danger)",
           }}
         >
           {error}
@@ -304,7 +306,7 @@ export default function KaryaNew() {
             background: "none",
             border: "none",
             cursor: "pointer",
-            color: "var(--ink2)",
+            color: "var(--color-ink2)",
             fontSize: 13,
             padding: 0,
             marginBottom: 32,
@@ -346,7 +348,7 @@ export default function KaryaNew() {
                   width: 72,
                   height: 72,
                   borderRadius: 16,
-                  border: "1px dashed var(--line)",
+                  border: "1px dashed var(--color-line)",
                   flexShrink: 0,
                 }}
               />
@@ -378,7 +380,7 @@ export default function KaryaNew() {
                   style={{
                     margin: 0,
                     fontSize: 12,
-                    color: "var(--danger, #c0392b)",
+                    color: "var(--color-danger)",
                   }}
                 >
                   {coverError}

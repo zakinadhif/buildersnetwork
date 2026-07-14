@@ -60,6 +60,7 @@ flowchart TD
   subgraph clients [" "]
     APP["apps/app · React 19 SPA — served at /app/*"]
     LANDING["apps/landing · Astro — served at /"]
+    MOCKUPS["apps/mockups · React — [Desain] gallery"]
   end
 
   APP --> HONO
@@ -79,14 +80,18 @@ flowchart TD
     CONFIG["config — Zod env loader"]
     DB["db — Drizzle, SQLite dialect"]
     STORAGE["storage — S3 · R2 · GCS"]
+    TOKENS["design-tokens — the one @theme scale"]
   end
 
   HONO --> AI & AUTH & CONFIG & DB & STORAGE
+  APP & MOCKUPS --> TOKENS
   DB --> D1[("D1 — Workers")]
   DB --> LIBSQL[("libSQL — Node · file: or Turso")]
 ```
 
 The same codebase runs on both targets. The runtime entry — **not** an env var — picks the AI provider and the database client.
+
+**The app and the mockups share one design scale.** `libs/design-tokens` holds the only `@theme` block in the repo — colour, type, spacing — and both frontends consume it; neither declares tokens of its own. They used to keep separate copies, which is how the app's typography quietly drifted off the mockups' scale. Where the two disagree, the mockup wins and the app conforms.
 
 ### Stack
 
@@ -129,6 +134,7 @@ buildersnetwork/
 │   ├── auth/              # Better Auth config
 │   ├── config/            # Zod-validated env loader
 │   ├── db/                # Drizzle schema (SQLite) + libSQL (Node) / D1 (Workers) clients
+│   ├── design-tokens/     # the ONE @theme scale — colour, type, spacing; app + mockups both consume it
 │   ├── email/             # Resend / Cloudflare email senders
 │   └── storage/           # S3-compatible / GCS storage adapters
 └── deploy/
