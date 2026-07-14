@@ -18,17 +18,17 @@ Run several agents **in parallel, each in its own git worktree** so they never c
 
 ## Shared context preamble (paste into every agent)
 
-Adapt the specifics, but keep the four blocks — identity, design system, data shapes, deliverable:
+Adapt the specifics, but keep the four blocks — identity, shared chrome, data shapes, deliverable:
 
 > You are designing UI for **Al-Fath Berkarya**, a builder-community web app for Telkom University students who make side projects ("karya") and want to find collaborators. The app is in **Indonesian**. Tone: warm, humble, student-made.
 >
-> **Design system (reuse these tokens/classes; defined in `apps/app/src/index.css`):** warm-paper palette (`--bg #f1efe9`, `--ink`, muted greys, a single terracotta `--accent`, hairlines `--line`); Plus Jakarta Sans (`--font`) + IBM Plex Mono (`--mono`); light (300) headings; calm editorial layout. Existing classes: `.screen .nav .wrap .sec-head .empty-state .featured .karya-card .stage-chip .roster`. Atoms: `Avatar`, `STAGE_LABELS` from `@/components/ui-atoms`. *(Confirm against the current `index.css` before pasting — tokens drift.)*
+> **Shared chrome (import it; never re-declare it):** the design system lives in code, not in this brief. Read `apps/mockups/src/lib/tokens.ts` and use `T` (+ `eyebrow`) for every colour, size, and font — do not hard-code a value or invent a token. Wrap the page in `components/Shell` (it owns the background, the global stylesheet, and the left nav — don't re-emit a `<style>` block or rebuild the nav), and reuse `components/{Avatar,Tag}`, `lib/format`, and `lib/images` (`coverFor`). Every direction must render under identical font and palette rules; your divergence is in *layout and idea*, not in the tokens.
 >
 > **Data shapes (from `@myapp/api-client-react`):** `Karya`/`KaryaListItem`, `Member`, and the hooks available today. Mock any endpoint that doesn't exist yet.
 >
 > **What to build:** <the target surface + the FRs it satisfies>. Keep it distinct from existing screens, not duplicative. Mobile-friendly. Indonesian copy.
 >
-> **Deliverable:** working React + TSX page(s) using the tokens above, plus 3–4 sentences on the direction's bet and trade-offs.
+> **Deliverable:** working React + TSX page(s) built on the shared chrome above, plus 3–4 sentences on the direction's bet and trade-offs.
 
 Then append one direction line per agent:
 
