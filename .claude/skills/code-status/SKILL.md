@@ -9,7 +9,7 @@ The mirror of [`/project-status`](../project-status/SKILL.md). That skill report
 
 It exists because every doc in `plans/` carries the same disclaimer — *"non-authoritative working knowledge — trust the code when they diverge"* — and until now nothing ever went and checked. Issue counts measure board hygiene, not code reality: a milestone can read 90% done while its exit criterion is unmet. This skill is the third vertex — **docs/board ↔ code** — and the way divergence gets detected at all.
 
-**Boundary — read this first.** This skill is **read-only**. It **proposes, never files**: no `gh issue create`, no board mutation, no edit to `plans/`. It **measures distance to written scope, never invents scope** — the milestone doc is the target, and code doing something the doc doesn't sanction is a *finding*, not a feature. The one sanctioned write-adjacent act is §7's opt-in offer, and only on the user's explicit yes.
+**Boundary — read this first.** This skill is **read-only, with no exceptions**. It **proposes, never files**: no `gh issue create`, no board mutation, no edit to `plans/` — not even to the docs it just contradicted. An auditor that can write to its own reference is an auditor that can launder a wrong conclusion into the record; when the code and a doc disagree, the output is a *finding*, and correcting the doc is someone else's task. It **measures distance to written scope, never invents scope** — the milestone doc is the target, and code doing something the doc doesn't sanction is a *finding*, not a feature.
 
 **Scope is one milestone**, not the whole roadmap — that's what keeps the audit session-sized and precise. "Where's the whole phase?" = run this down the roadmap order, one milestone at a time.
 
@@ -18,7 +18,7 @@ It exists because every doc in `plans/` carries the same disclaimer — *"non-au
 Take the milestone from the argument; if none was given, ask which (offer the **active** one from [`plans/roadmap.md`](../../../plans/roadmap.md)). Then read, in this order:
 
 - **`plans/milestones/<name>.md`** — its **Scope** bullets, **Decisions**, and **Exit** criterion. **This is the target.** Everything downstream is measured against it and nothing else.
-- **`plans/roadmap.md`** — the milestone's row (treatment, FR mapping) and the *"Where the code actually is today"* table: the last recorded grounding pass, and your baseline for what's changed since.
+- **`plans/roadmap.md`** — the milestone's row: its **treatment** and **FR mapping**. That row, and nothing else here; the roadmap records *schedule*, not code reality. There is no written baseline of "what's already built" to diff against, by design — you derive it from the code, every run.
 - The milestone's issues, open and closed — closed ones tell you what *should* already be in the code:
 
 ```bash
@@ -30,7 +30,7 @@ The doc's **treatment** ([hero / dark / deferred](../../../plans/how-to/build-wo
 
 ## 2. Audit the repo against each scope item
 
-For every **Scope** bullet and every **Decision with a code consequence**, go read the actual code. Classify with the vocabulary the roadmap table already uses:
+For every **Scope** bullet and every **Decision with a code consequence**, go read the actual code. Classify with this vocabulary:
 
 | Class | Means |
 |---|---|
@@ -84,6 +84,4 @@ A milestone closes when its **exit** passes, never when its issue count hits zer
 
 One actionable sentence, same convention as `/project-status`: *"file the 2 proposed tasks"*, *"close stale #N — the code already does it"*, *"exit met — close the milestone"*, or *"divergence found — raise a `[Diskusi]` before building over it"*.
 
-## 7. The one write, and it's opt-in
-
-The roadmap's *"Where the code actually is today"* table is a hand-written grounding pass that rots with every merged PR — and this audit has just re-derived it. If the audit contradicts that table, **offer** to refresh it **as a PR** (docs are code here — decisions merge via diff), and only on the user's explicit yes. Never edit it silently, never edit anything else in `plans/`, and never treat this offer as licence to fix up the milestone doc: if the *doc* is wrong rather than the code, that's a **`[Diskusi]`**, not a cleanup commit.
+If the audit found a **doc** that's wrong rather than code that's wrong, that's the finding — say so, and let it become a `[Chore]` (a stale description) or a `[Diskusi]` (a decision that drifted). Don't fix it here; see the boundary above.
