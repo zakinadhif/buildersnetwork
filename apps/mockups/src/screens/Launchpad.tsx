@@ -70,12 +70,14 @@ function LandscapeCarousel({ images, title }: { images: string[]; title: string 
           alt={`${title} — layar ${i + 1}`}
           loading="lazy"
           style={{
-            width: 240,
-            height: 135,
+            // 240x135 of image + a 1px ring, which the border-box base puts
+            // inside the declared size (#91). Same pixels as before.
+            width: 242,
+            height: 137,
             flexShrink: 0,
             objectFit: "cover",
             borderRadius: T.radiusCard,
-            border: `1.5px solid ${T.line}`,
+            border: `1px solid ${T.line}`,
             scrollSnapAlign: "start",
             display: "block",
           }}
@@ -102,10 +104,10 @@ function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appr
 
       {/* Thumbnail + content row */}
       <div style={{ display: "flex", gap: 14 }}>
-        {/* App icon */}
+        {/* App icon — 56px of art + a 1px ring, now inside the box (#91). */}
         <div style={{
-          width: 56,
-          height: 56,
+          width: 58,
+          height: 58,
           flexShrink: 0,
           borderRadius: 14,
           overflow: "hidden",
@@ -320,7 +322,9 @@ function Spotlight({ karya }: { karya: Karya }) {
             src={src}
             alt={`${karya.title} — tangkapan layar ${i + 1}`}
             style={{
-              height: 360,
+              // 360px of screenshot + a 2px ring, inside the box (#91). Width
+              // stays auto, so it tracks the aspect ratio as it always did.
+              height: 364,
               width: "auto",
               flexShrink: 0,
               borderRadius: 18,

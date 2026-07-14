@@ -66,7 +66,13 @@ export const T = {
   radiusCard: "var(--radius-card)",
   radiusPanel: "var(--radius-panel)",
 
+  /** The content the shell's three columns divide up (1100px). */
   shellMax: "var(--container-shell)",
+  /** What the shell's `max-width` should actually be: the columns plus the
+   *  gutters. Under the border-box base, `max-width` is the outer box — reach
+   *  for this, not `shellMax`, or the columns come out a gutter short (#91). */
+  shellOuter: "var(--container-shell-outer)",
+  shellPadX: "var(--shell-pad-x)",
   pageMax: "var(--container-page)",
 } as const;
 

@@ -266,9 +266,10 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
     }}>
       {/* Header: cover + title + badge */}
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+        {/* 48px of art + a 1px ring, now inside the box (#91). */}
         <div style={{
-          width: 48,
-          height: 48,
+          width: 50,
+          height: 50,
           flexShrink: 0,
           borderRadius: 12,
           overflow: "hidden",

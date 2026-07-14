@@ -115,7 +115,28 @@
 
   /* ── Layout ───────────────────────────────────────────────────────────────
      Shared measures. The shell width in particular was duplicated — a `1100`
-     literal in the mockups' Shell and a `--shell-max` in the app. */
-  --container-shell: 1100px; /* three-column app shell */
+     literal in the mockups' Shell and a `--shell-max` in the app.
+
+     `--container-shell` measures the CONTENT the three columns divide up — not
+     the shell's outer box. Saying which one it is, is the whole point: it used
+     to mean content in the mockups (no preflight, so `max-width` excluded the
+     padding) and outer width in the app (border-box, so it included it). Same
+     declaration, two meanings, and the app's centre column silently came out
+     48px short (#91).
+
+         --container-shell        1100  = 200 nav + 24 + 620 main + 24 + 232 rail
+         --container-shell-outer  1148  = that, plus 24px of padding each side
+
+     Under the shared border-box base, `max-width` sets the OUTER box, so a
+     shell wanting 1100px of content must ask for `--container-shell-outer`.
+     Both apps do. Derive it rather than writing 1148 down, so the two can
+     never drift apart again. */
+  --container-shell: 1100px; /* three-column app shell: the columns' content */
+  --shell-pad-x: 24px; /* gutter each side of the shell */
+  --container-shell-outer: calc(
+    var(--container-shell) +
+    2 *
+    var(--shell-pad-x)
+  );
   --container-page: 580px; /* single reading column: auth, welcome, chat */
 }

@@ -49,6 +49,11 @@ export function timeAgo(input: string | Date): string {
  * uploaded cover — never a broken/placeholder box. The interest-derived
  * illustration fallback lands with issue #17; until then, no cover = no tile.
  */
+/** The hairline ring an avatar or a cover wears. Under the shared border-box
+ *  base it sits inside the box, so the box has to carry it — mirrors
+ *  apps/mockups/src/components/Avatar.tsx (#91). */
+const RING = 1;
+
 export function KaryaCover({
   url,
   size = 44,
@@ -59,6 +64,9 @@ export function KaryaCover({
   className?: string;
 }) {
   if (!url) return null;
+  // Same rule as Avatar: `size` is the art, the box carries the 1px ring, which
+  // border-box otherwise absorbs inward and shrinks the tile by 2px (#91).
+  const box = size + RING * 2;
   return (
     <img
       className={className}
@@ -66,9 +74,9 @@ export function KaryaCover({
       alt=""
       aria-hidden="true"
       loading="lazy"
-      width={size}
-      height={size}
-      style={{ width: size, height: size }}
+      width={box}
+      height={box}
+      style={{ width: box, height: box }}
     />
   );
 }
@@ -149,13 +157,17 @@ export function Avatar({
   image?: string | null;
   size?: number;
 }) {
+  // `size` is the face inside the ring, and the box carries the ring — exactly
+  // as apps/mockups/src/components/Avatar.tsx does it, so a size={28} avatar is
+  // the same 30px disc on both sides (#91). The ring itself is in `.avatar`.
+  const box = size + RING * 2;
   if (image) {
     return (
       <img
         className="avatar"
         src={image}
         alt={name}
-        style={{ width: size, height: size }}
+        style={{ width: box, height: box }}
       />
     );
   }
@@ -166,10 +178,12 @@ export function Avatar({
       title={name}
       aria-label={name}
       style={{
-        width: size,
-        height: size,
+        width: box,
+        height: box,
         background: avatarColor(handle || name || "?"),
-        fontSize: Math.round(size * 0.4),
+        // 0.36, not the 0.4 this used to carry — the mockup is the north star
+        // and it scales the monogram by 0.36 of the face.
+        fontSize: Math.round(size * 0.36),
       }}
     >
       {avatarInitials(name)}

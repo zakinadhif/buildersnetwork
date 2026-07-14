@@ -160,9 +160,10 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
     }}>
       {/* Header: cover + title + badge */}
       <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
+        {/* 52px of art + a 1px ring, now inside the box (#91). */}
         <div style={{
-          width: 52,
-          height: 52,
+          width: 54,
+          height: 54,
           flexShrink: 0,
           borderRadius: 13,
           overflow: "hidden",
@@ -619,9 +620,10 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
             }}>
               {/* Cover + title */}
               <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
+                {/* 28px of art + a 1px ring, now inside the box (#91). */}
                 <div style={{
-                  width: 28,
-                  height: 28,
+                  width: 30,
+                  height: 30,
                   borderRadius: 7,
                   overflow: "hidden",
                   flexShrink: 0,

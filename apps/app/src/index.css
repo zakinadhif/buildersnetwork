@@ -17,16 +17,15 @@
         role that describes it, which is also the nearest step.
    If nothing in the scale fits, promote a step in @myapp/design-tokens rather
    than writing a one-off size here. The only literals left are the glyph sizes
-   flagged below, each with its reason. */
-@import "@myapp/design-tokens/theme.css";
+   flagged below, each with its reason.
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+   BOX MODEL (issue #91). The reset that used to sit right here — a hand-rolled
+   `box-sizing`/`margin`/`padding` rule owned by this app alone — now lives in
+   @myapp/design-tokens/base.css, which apps/mockups imports too. That is the
+   point: the app and the reference no longer stand on different ground. Don't
+   reintroduce a reset here. */
+@import "@myapp/design-tokens/base.css";
+@import "@myapp/design-tokens/theme.css";
 
 /* The inherited default is the body ROLE, decided rather than inherited (#87).
    It used to be 15px/1.6 — a size the scale doesn't have, silently inflating
@@ -426,12 +425,15 @@ body {
   gap: 6px;
   flex-wrap: wrap;
 }
+/* The ring was simply missed when the mockup's Avatar was ported (#91) — every
+   avatar in the reference wears one. Not a box-model artefact; an omission. */
 .avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   border-radius: 50%;
+  border: 1px solid var(--color-line);
   overflow: hidden;
   object-fit: cover;
   color: var(--color-bg);
@@ -452,8 +454,10 @@ body {
   display: block;
 }
 .karya-cover-lg {
-  width: 72px;
-  height: 72px;
+  /* 72px of art + the 1px ring the box now carries (#91) — the inline `size`
+     KaryaCover computes says the same thing; these agree on purpose. */
+  width: 74px;
+  height: 74px;
   border-radius: 16px;
   object-fit: cover;
   border: 1px solid var(--color-line);
@@ -878,10 +882,14 @@ button.post-author:hover .post-author-name {
   overflow-y: auto;
   animation: up 0.28s ease;
 }
+/* THE 48px BUG (#91). This said `max-width: var(--container-shell)` — 1100px —
+   which under border-box is the OUTER box, so the padding ate into the columns
+   and the centre column rendered 572px against the mockup's 620px. The token
+   measures the columns' content; the shell needs the gutters added back. */
 .bn-shell-inner {
-  max-width: var(--container-shell);
+  max-width: var(--container-shell-outer);
   margin: 0 auto;
-  padding: 24px 24px 48px;
+  padding: 24px var(--shell-pad-x) 48px;
   display: flex;
   gap: 24px;
   align-items: flex-start;
