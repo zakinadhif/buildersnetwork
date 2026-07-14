@@ -531,8 +531,14 @@ body {
 /* The mockup's feed row sets its karya title at the `title` step (18px Lora).
    The size follows it here; the serif family does not — swapping the family
    changes every karya list at once and belongs with the feed-row rebuild (#21),
-   not with a type-scale pass. */
+   not with a type-scale pass.
+
+   `block` because it is a <span>: the card lives inside a click target, whose
+   content model is phrasing content, so the markup cannot use a heading or a
+   <div> here. Without a box of its own the title ran onto the same line as the
+   "karya baru" tag beside it. */
 .karya-card-title {
+  display: block;
   font-size: var(--text-title);
   font-weight: var(--font-weight-medium);
 }
@@ -758,7 +764,7 @@ button.post-author:hover .post-author-name {
 
 /* Feed: a "karya baru" tag distinguishes a new-karya item from a post card */
 .feed-new-tag {
-  display: inline-block;
+  display: block; /* its own line above the title — see .karya-card-title */
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-eyebrow);
@@ -1051,7 +1057,11 @@ button.post-author:hover .post-author-name {
   line-height: 1;
   flex-shrink: 0;
 }
+/* Both are <span>s inside the ramp <button> (phrasing content only — no <div>
+   allowed), so they need boxes of their own: without these the greeting and the
+   sub ran together as one paragraph, where the mockup stacks them. */
 .bn-ramp-title {
+  display: block;
   font-family: var(--font-display);
   font-size: var(--text-title);
   color: var(--color-ink);
@@ -1059,6 +1069,7 @@ button.post-author:hover .post-author-name {
   margin-bottom: 2px;
 }
 .bn-ramp-sub {
+  display: block;
   font-family: var(--font-body);
   font-size: var(--text-body);
   color: var(--color-ink2);
