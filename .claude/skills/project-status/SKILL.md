@@ -59,6 +59,8 @@ Skip Done unless asked.
 ### 4. Next line
 One actionable sentence — the highest-leverage move for the reader: promote a stale-blocked item, review a waiting PR, set a missing target date, close a finished milestone, or `/pick-task <N>`.
 
+When a milestone reads finished — all its issues closed, or progress high with exit-critical scope untouched — the next line is **`run /code-status <milestone> to verify the exit before closing`**: issue counts measure board hygiene, not code reality, and only [`/code-status`](../code-status/SKILL.md) checks the exit criterion against the repo.
+
 ## Extra asks
 - **"how long until `<milestone>`"** → its countdown line + what's left: `gh issue list --milestone "<name>" --state open`.
 - **"are we on track"** → milestones with a `due` in the past, or a countdown tighter than their remaining-issue count warrants; say which are at risk and why.

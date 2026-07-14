@@ -163,6 +163,8 @@ Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth r
 4. **`/ship-task`** — push, open a PR with `Closes #N`, board moves to In Review.
 5. Maintainer reviews (with `/code-review` as second reviewer) and merges → Done; dependents unblock → Ready (or Backlog if Ready is already long).
 
+**The two status views.** `/project-status` reads the **plan** side — the board and the GitHub milestones, i.e. what we *believe* is true. **`/code-status <milestone>`** reads the **code** side: it takes one milestone doc's Scope, Decisions, and Exit as the target and audits the repo against them, classifying each item Done / Partial / Missing / **Divergent** with file-path evidence. Since every doc in `plans/` is non-authoritative — *trust the code when they diverge* — this is how a divergence gets **detected** rather than assumed away, and it's the honest read on whether a milestone's exit actually passes (an issue count says only that the board is tidy). It's read-only: it proposes tasks for the gaps and hands them to `/new-task` on your say-so, but files nothing itself.
+
 **Limits.** Keep **Ready short — around 6** — a curated shortlist, not a dumping ground; park the rest in **Backlog**. It's a **soft cap**: set it as the Ready column's limit in the board view (**UI only** — GitHub has no API for it), where it just shows a warning when exceeded — nothing blocks. Separately, **review is the bottleneck**: if 3+ PRs are already In Review, prefer helping review over claiming another task.
 
 ## Grooming (maintainer)
