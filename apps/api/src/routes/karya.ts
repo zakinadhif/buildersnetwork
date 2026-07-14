@@ -376,7 +376,7 @@ app.delete("/:id/feature", async (c) => {
 
 // ── Karya cover image (issue #18) ──────────────────────────────────────────
 // Hand-written (not OpenAPI-first): these carry binary bodies, not JSON, so
-// they sit outside the codegen contract (see README "OpenAPI-first workflow").
+// they sit outside the codegen contract (plans/how-to/adding-an-endpoint.md).
 // The uploaded cover overrides the client's interest-derived fallback (#17).
 
 // Upload / replace a karya's cover (owner-only). Multipart `file`; the accepted
