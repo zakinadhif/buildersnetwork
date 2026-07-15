@@ -14,6 +14,7 @@ import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import JelajahiScreen from "./screens/Jelajahi";
 import LaunchpadScreen from "./screens/Launchpad";
+import MulaiScreen from "./screens/Mulai";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
 // Two ways to move between screens: the sidebar surfaces (Launchpad / Jelajahi /
@@ -26,6 +27,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   jelajahi:  JelajahiScreen,
   cari:      CariScreen,
   auth:      AuthScreen,
+  mulai:     MulaiScreen,
 };
 
 function Gallery() {

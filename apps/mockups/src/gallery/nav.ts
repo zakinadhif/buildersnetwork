@@ -8,7 +8,8 @@ export type Screen =
   | "launchpad"
   | "jelajahi"
   | "cari"
-  | "auth";
+  | "auth"
+  | "mulai";
 
 /** Which gallery screen (if any) a left-nav label routes to. Items that have no
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
@@ -25,6 +26,7 @@ export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur
   { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
   { key: "cari", label: "Cari Kolaborator", group: "Surface" },
   { key: "auth", label: "Masuk / Daftar", group: "Alur" },
+  { key: "mulai", label: "Mulai (profil minimal)", group: "Alur" },
 ];
 
 const NavContext = createContext<(screen: Screen) => void>(() => {});
