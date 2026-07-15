@@ -7,22 +7,25 @@ import {
   FontControls,
   FontVars,
   NavProvider,
+  ScreenSwitcher,
   type Screen,
 } from "./gallery";
+import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import JelajahiScreen from "./screens/Jelajahi";
 import LaunchpadScreen from "./screens/Launchpad";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
-// No chrome of its own — navigation lives in each screen's left sidebar. Clicking
-// a routed label ("Launchpad" / "Jelajahi Karya" / "Cari Kolaborator") there calls
-// the navigate fn provided below. Font choice and switcher live here (shared
-// chrome), so a font persists across navigation; each screen owns only its own
-// controls (Cari's A/B/C/E variant picker).
+// Two ways to move between screens: the sidebar surfaces (Launchpad / Jelajahi /
+// Cari) route from each screen's own left nav, and the bottom-left screen switcher
+// reaches everything — including the flow mockups (auth, entry, detail, creation)
+// that carry no product sidebar. Font choice lives bottom-right (shared chrome),
+// so a font persists across navigation.
 const SCREENS: Record<Screen, ComponentType> = {
   launchpad: LaunchpadScreen,
   jelajahi:  JelajahiScreen,
   cari:      CariScreen,
+  auth:      AuthScreen,
 };
 
 function Gallery() {
@@ -39,6 +42,7 @@ function Gallery() {
         bodyFont={BODY_FONTS[bodyIdx].font}
       />
       <ActiveScreen />
+      <ScreenSwitcher active={screen} onChange={setScreen} />
       <FontControls
         displayIdx={displayIdx} onDisplay={setDisplayIdx}
         bodyIdx={bodyIdx}       onBody={setBodyIdx}
