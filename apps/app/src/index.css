@@ -770,7 +770,7 @@ button.post-author:hover .post-author-name {
 /* ── Launchpad app shell (issue #8) ────────────────────────────────────────
    Persistent left-sidebar rail + center content, ported from MockupB's
    three-column `bn-*` layout. Logged-in routes render inside `.bn-shell`;
-   auth/welcome/login stay outside it. Collapses to one column below 900px. */
+   auth/welcome stay outside it. Collapses to one column below 900px. */
 .bn-shell {
   position: fixed;
   inset: 0;

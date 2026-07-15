@@ -13,7 +13,6 @@ import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaNew from "@/pages/KaryaNew";
 import Launchpad, { LaunchpadRail } from "@/pages/Launchpad";
-import Login from "@/pages/Login";
 import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
@@ -70,9 +69,6 @@ function AppRoutes() {
       </Route>
       <Route path="/welcome">
         <Welcome />
-      </Route>
-      <Route path="/login">
-        <Login />
       </Route>
       <Route path="/mulai">
         {!loggedIn ? (

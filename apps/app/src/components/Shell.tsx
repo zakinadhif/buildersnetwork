@@ -5,7 +5,7 @@ import type { Member } from "@/lib/members";
 /**
  * The persistent Launchpad app shell (issue #8): a left-sidebar rail + a content
  * slot, and an optional right rail (issue #20) a page can fill. Every logged-in
- * route renders *inside* this shell; auth/welcome/login stay outside it (see
+ * route renders *inside* this shell; auth/welcome stay outside it (see
  * App.tsx).
  *
  * The rail and the column frame come from @myapp/ui (#92) — the very same ones
