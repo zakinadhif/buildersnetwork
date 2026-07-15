@@ -40,15 +40,14 @@ export function GlobalStyles() {
       /* Placeholder held to the body-text contrast bar, not the UA grey. */
       input::placeholder { color: ${T.ink3}; opacity: 1; }
 
-      /* Launchpad spotlight + landscape screenshot carousels. */
+      /* Launchpad spotlight carousel. The karya card's own proof-shot carousel
+         hides its scrollbar in @myapp/ui now (.karya-card-shots, #92). */
       .spotlight-carousel::-webkit-scrollbar { height: 8px; }
       .spotlight-carousel::-webkit-scrollbar-thumb {
         background: ${T.lineDark};
         border-radius: 99px;
       }
       .spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
-      .landscape-carousel { scrollbar-width: none; }
-      .landscape-carousel::-webkit-scrollbar { display: none; }
 
       /* Honour reduced-motion: collapse the 0.15s state transitions. */
       @media (prefers-reduced-motion: reduce) {
@@ -60,7 +59,7 @@ export function GlobalStyles() {
          single column led by the main column (mobile = the consumption view),
          and fold the left rail into a compact top nav bar. */
       @media (max-width: 900px) {
-        .bn-shell { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
+        .bn-shell-inner { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
         .bn-nav, .bn-main, .bn-rail { width: 100% !important; }
         .bn-rail { position: static !important; top: auto !important; }
         .bn-nav {

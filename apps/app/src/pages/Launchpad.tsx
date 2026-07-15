@@ -8,7 +8,7 @@ import {
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import { Avatar, KaryaCover, STAGE_LABELS } from "@/components/ui-atoms";
+import { Avatar, KaryaCard, STAGE_LABELS } from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
 
 /**
@@ -116,8 +116,8 @@ export default function Launchpad({ user }: { user: Member }) {
   );
 }
 
-/** A curated karya card — reuses the karya-card visual language (FR-22: no
- * scores). Identical shape to the feed's new-karya card for consistency. */
+/** A curated karya card — the shared `KaryaCard` (#92), no activity line (a
+ * featured pick is not a chronological event) and no scores (FR-22). */
 function FeaturedCard({
   karya,
   onOpen,
@@ -126,42 +126,20 @@ function FeaturedCard({
   onOpen: () => void;
 }) {
   return (
-    // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
-    <div
-      className="karya-card"
-      role="button"
-      tabIndex={0}
-      onClick={onOpen}
-      onKeyDown={(e) => e.key === "Enter" && onOpen()}
-    >
-      <div className="karya-card-row">
-        <KaryaCover url={karya.coverUrl} size={48} />
-        <div className="karya-card-body">
-          <span className="karya-card-title">{karya.title}</span>
-          <p className="karya-card-desc">{karya.description}</p>
-          <div className="karya-card-foot">
-            <div className="skills-wrap">
-              {karya.stages.map((s) => (
-                <span key={s} className="stage-chip">
-                  {STAGE_LABELS[s]}
-                </span>
-              ))}
-            </div>
-            <div className="roster">
-              {karya.roster.map((m) => (
-                <Avatar
-                  key={m.id}
-                  name={m.name}
-                  handle={m.handle}
-                  image={m.image}
-                  size={26}
-                />
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+    <KaryaCard
+      cover={karya.coverUrl}
+      title={karya.title}
+      description={karya.description}
+      stages={karya.stages.map((s) => ({ label: STAGE_LABELS[s] }))}
+      interests={karya.interests}
+      roster={karya.roster.map((m) => ({
+        key: m.id,
+        name: m.name,
+        image: m.image,
+      }))}
+      memberCount={karya.memberCount}
+      onOpen={onOpen}
+    />
   );
 }
 
@@ -228,7 +206,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
                   className="bn-builder"
                   onClick={() => navigate(`/member/${m.id}`)}
                 >
-                  <Avatar name={m.name} handle={m.handle} size={34} />
+                  <Avatar name={m.name} size={34} />
                   <span className="bn-builder-body">
                     <span className="bn-builder-name">{m.name}</span>
                     <span className="bn-builder-meta">

@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
 import { T, eyebrow } from "@myapp/design-tokens";
-import { Avatar } from "./Avatar";
+import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 
 /** The five product surfaces. Only the first three route anywhere. */
 const NAV_ITEMS: { label: string; icon: string }[] = [
@@ -13,97 +13,35 @@ const NAV_ITEMS: { label: string; icon: string }[] = [
 ];
 
 /**
- * The left rail, identical on every screen. `active` marks the current surface;
+ * The gallery's left rail. The rail itself lives in @myapp/ui (#92) — the app
+ * renders the very same one. What stays here is the only part that is genuinely
+ * the gallery's: *which* items exist and what clicking one does (switch screens,
+ * where the app routes).
+ *
  * `children` fills the optional filter slot between the nav items and the user
  * stub (Launchpad puts interest filters there, Cari variant B puts intent
  * filters there, everything else leaves it empty).
  */
 export function LeftNav({ active, children }: { active: Screen; children?: ReactNode }) {
   const navigate = useNavigate();
+
+  const items: NavItem[] = NAV_ITEMS.map((item) => {
+    const target = NAV_SCREEN[item.label];
+    return {
+      label:    item.label,
+      icon:     item.icon,
+      active:   target !== undefined && target === active,
+      disabled: target === undefined,
+      onClick:  target ? () => navigate(target) : undefined,
+    };
+  });
+
   return (
-    <aside className="bn-nav" style={{
-      width:         200,
-      flexShrink:    0,
-      display:       "flex",
-      flexDirection: "column" as const,
-      gap:           0,
-      paddingTop:    8,
-    }}>
-      {/* Logo */}
-      <div className="bn-nav-logo" style={{
-        padding:      "0 12px 20px",
-        borderBottom: `1px solid ${T.line}`,
-        marginBottom: 16,
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 4 }}>Al-Fath</div>
-        <div style={{
-          fontFamily: T.fontDisplay,
-          fontSize:   T.size.feature,
-          fontWeight: T.weight.regular,
-          color:      T.ink,
-          lineHeight: 1,
-        }}>Berkarya</div>
-      </div>
-
-      {/* Nav items */}
-      <nav className="bn-nav-items" style={{ marginBottom: 24 }}>
-        {NAV_ITEMS.map((item) => {
-          const target = NAV_SCREEN[item.label];
-          const itemActive = target !== undefined && target === active;
-          return (
-            <button
-              key={item.label}
-              type="button"
-              onClick={target ? () => navigate(target) : undefined}
-              aria-current={itemActive ? "page" : undefined}
-              style={{
-                display:         "flex",
-                alignItems:      "center",
-                gap:             10,
-                width:           "100%",
-                textAlign:       "left" as const,
-                border:          "none",
-                padding:         "7px 12px",
-                borderRadius:    T.radiusCard,
-                backgroundColor: itemActive ? T.accentTint : "transparent",
-                color:           itemActive ? T.accent : T.ink2,
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.body,
-                fontWeight:      itemActive ? T.weight.medium : T.weight.regular,
-                cursor:          target ? "pointer" : "default",
-                marginBottom:    1,
-              }}
-            >
-              <span aria-hidden="true" style={{ fontFamily: T.fontBody, fontSize: T.size.ui }}>{item.icon}</span>
-              {item.label}
-            </button>
-          );
-        })}
-      </nav>
-
-      {/* Per-screen filter slot */}
-      {children && (
-        <div className="bn-nav-filters" style={{ padding: "0 12px" }}>
-          {children}
-        </div>
-      )}
-
-      {/* User stub at bottom */}
-      <div className="bn-nav-user" style={{
-        marginTop:  "auto",
-        borderTop:  `1px solid ${T.line}`,
-        padding:    "16px 12px 0",
-        display:    "flex",
-        alignItems: "center",
-        gap:        8,
-      }}>
-        <Avatar name="Zaki Nadhif" size={28} />
-        <div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>Zaki Nadhif</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>@zaki_n</div>
-        </div>
-      </div>
-    </aside>
+    <UiLeftNav
+      items={items}
+      user={{ name: "Zaki Nadhif", handle: "zaki_n" }}
+      filters={children}
+    />
   );
 }
 

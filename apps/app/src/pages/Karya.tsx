@@ -17,6 +17,7 @@ import {
   POST_KIND_LABELS,
   POST_KIND_ORDER,
   STAGE_LABELS,
+  Tag,
   timeAgo,
 } from "@/components/ui-atoms";
 
@@ -99,7 +100,12 @@ export default function Karya({ id }: { id: string }) {
           ← balik
         </button>
 
-        <KaryaCover url={karya.coverUrl} size={72} className="karya-cover-lg" />
+        <KaryaCover
+          src={karya.coverUrl}
+          size={72}
+          radius={16}
+          className="karya-cover-lg"
+        />
 
         <h1 className="h1" style={{ marginBottom: 12 }}>
           {karya.title}
@@ -107,9 +113,7 @@ export default function Karya({ id }: { id: string }) {
 
         <div className="skills-wrap" style={{ marginBottom: 24 }}>
           {karya.stages.map((s) => (
-            <span key={s} className="stage-chip">
-              {STAGE_LABELS[s]}
-            </span>
+            <Tag key={s} label={STAGE_LABELS[s]} />
           ))}
         </div>
 
@@ -180,9 +184,7 @@ export default function Karya({ id }: { id: string }) {
             <p className="eyebrow mb6">Minat / tag</p>
             <div className="skills-wrap">
               {karya.interests.map((s) => (
-                <span key={s} className="chip" style={{ cursor: "default" }}>
-                  {s}
-                </span>
+                <Tag key={s} label={s} />
               ))}
             </div>
           </div>
@@ -192,12 +194,7 @@ export default function Karya({ id }: { id: string }) {
           <p className="eyebrow mb6">Kontributor ({karya.roster.length})</p>
           <div className="roster">
             {karya.roster.map((m) => (
-              <Avatar
-                key={m.id}
-                name={m.name}
-                handle={m.handle}
-                image={m.image}
-              />
+              <Avatar key={m.id} name={m.name} image={m.image} />
             ))}
           </div>
         </div>
@@ -209,12 +206,7 @@ export default function Karya({ id }: { id: string }) {
             {karya.pendingRequests.map((m) => (
               <div key={m.id} className="pending-row">
                 <div className="pending-id">
-                  <Avatar
-                    name={m.name}
-                    handle={m.handle}
-                    image={m.image}
-                    size={28}
-                  />
+                  <Avatar name={m.name} image={m.image} size={28} />
                   <span>{m.name}</span>
                 </div>
                 <div className="pending-actions">
@@ -291,7 +283,6 @@ export default function Karya({ id }: { id: string }) {
                     <div className="post-author">
                       <Avatar
                         name={p.author.name}
-                        handle={p.author.handle}
                         image={p.author.image}
                         size={28}
                       />

@@ -26,6 +26,7 @@
    reintroduce a reset here. */
 @import "@myapp/design-tokens/base.css";
 @import "@myapp/design-tokens/theme.css";
+@import "@myapp/ui/ui.css";
 
 /* The inherited default is the body ROLE, decided rather than inherited (#87).
    It used to be 15px/1.6 — a size the scale doesn't have, silently inflating
@@ -425,73 +426,23 @@ body {
   gap: 6px;
   flex-wrap: wrap;
 }
-/* The ring was simply missed when the mockup's Avatar was ported (#91) — every
-   avatar in the reference wears one. Not a box-model artefact; an omission. */
-.avatar {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 50%;
-  border: 1px solid var(--color-line);
-  overflow: hidden;
-  object-fit: cover;
-  color: var(--color-bg);
-  font-weight: var(--font-weight-medium);
-  user-select: none;
-}
-.avatar-mono {
-  text-transform: uppercase;
-}
-
-/* Karya cover image tile (issue #18) — app-icon style, used on cards + detail */
-.karya-cover {
-  border-radius: 12px;
-  object-fit: cover;
-  border: 1px solid var(--color-line);
-  background: var(--color-line);
-  flex-shrink: 0;
-  display: block;
-}
+/* `.avatar` and `.karya-cover` live in @myapp/ui now (#92). The app used to
+   declare its own — a dark disc with light initials, hashed off the handle —
+   which was a second design of the same thing, not a port of it. It renders the
+   mockup's now: a pastel disc with dark initials. Only the detail page's larger
+   tile keeps a rule here, and only for the margin under it. */
 .karya-cover-lg {
-  /* 72px of art + the 1px ring the box now carries (#91) — the inline `size`
-     KaryaCover computes says the same thing; these agree on purpose. */
-  width: 74px;
-  height: 74px;
-  border-radius: 16px;
-  object-fit: cover;
-  border: 1px solid var(--color-line);
-  background: var(--color-line);
-  display: block;
   margin-bottom: 20px;
 }
-/* Screenshot gallery (issue #19) — Play Store-style proof shots, separate from
-   the app-icon cover. Landscape feeds the feed-row carousel above the
-   metadata row; portrait feeds the detail-page gallery. */
-.landscape-carousel,
+/* Detail-page screenshot gallery (issue #19) — Play Store-style portrait proof
+   shots. The feed row's landscape carousel is @myapp/ui's now (`.karya-card-shots`,
+   #92); this stays because the detail page is app-only, not shared chrome. */
 .screenshot-gallery {
   display: flex;
   overflow-x: auto;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
-}
-.landscape-carousel {
-  gap: 10px;
-  border-radius: 12px;
-  margin-bottom: 12px;
-}
-.landscape-carousel-img {
-  width: 240px;
-  height: 135px;
-  flex-shrink: 0;
-  object-fit: cover;
-  border-radius: 12px;
-  border: 1px solid var(--color-line);
-  scroll-snap-align: start;
-  display: block;
-}
-.screenshot-gallery {
   gap: 12px;
   margin-bottom: 32px;
 }
@@ -505,63 +456,15 @@ body {
   display: block;
 }
 @media (prefers-reduced-motion: reduce) {
-  .landscape-carousel,
   .screenshot-gallery {
     scroll-behavior: auto;
   }
 }
 
-/* Icon-left row inside a karya card when a cover is present */
-.karya-card-row {
-  display: flex;
-  gap: 14px;
-  align-items: flex-start;
-}
-.karya-card-row > .karya-card-body {
-  flex: 1;
-  min-width: 0;
-}
-
-/* Karya list cards */
-.karya-card {
-  padding: 18px 0;
-  border-bottom: 1px solid var(--color-line);
-  cursor: pointer;
-  transition: opacity 0.15s;
-}
-.karya-card:hover {
-  opacity: 0.6;
-}
-/* The mockup's feed row sets its karya title at the `title` step (18px Lora).
-   The size follows it here; the serif family does not — swapping the family
-   changes every karya list at once and belongs with the feed-row rebuild (#21),
-   not with a type-scale pass.
-
-   `block` because it is a <span>: the card lives inside a click target, whose
-   content model is phrasing content, so the markup cannot use a heading or a
-   <div> here. Without a box of its own the title ran onto the same line as the
-   "karya baru" tag beside it. */
-.karya-card-title {
-  display: block;
-  font-size: var(--text-title);
-  font-weight: var(--font-weight-medium);
-}
-.karya-card-desc {
-  font-size: var(--text-body);
-  color: var(--color-ink2);
-  margin-top: 3px;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-.karya-card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 10px;
-}
+/* The karya card — its frame, cover, activity line, title, description, footer
+   and landscape carousel — is @myapp/ui's `KaryaCard` now (#92). The app used to
+   declare a plainer second design of it here; that whole block is gone, and both
+   the feed's new-karya item and the featured strip render the shared card. */
 
 /* Stage chips — a karya lifecycle signal. `micro` + the tag tracking is the
    mockup's Tag (apps/mockups/src/components/Tag.tsx), which these are the app's
@@ -766,16 +669,8 @@ button.post-author:hover .post-author-name {
   flex-shrink: 0;
 }
 
-/* Feed: a "karya baru" tag distinguishes a new-karya item from a post card */
-.feed-new-tag {
-  display: block; /* its own line above the title — see .karya-card-title */
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--color-ink3);
-  margin-bottom: 6px;
-}
+/* "karya baru" is the shared card's accent activity line now (#92), not a
+   separate eyebrow tag; the class it used is gone with the app's old card. */
 
 /* Featured ("Top picked") section reuses the karya-card cards directly. */
 .featured {
@@ -882,91 +777,14 @@ button.post-author:hover .post-author-name {
   overflow-y: auto;
   animation: up 0.28s ease;
 }
-/* THE 48px BUG (#91). This said `max-width: var(--container-shell)` — 1100px —
-   which under border-box is the OUTER box, so the padding ate into the columns
-   and the centre column rendered 572px against the mockup's 620px. The token
-   measures the columns' content; the shell needs the gutters added back. */
-.bn-shell-inner {
-  max-width: var(--container-shell-outer);
-  margin: 0 auto;
-  padding: 24px var(--shell-pad-x) 48px;
-  display: flex;
-  gap: 24px;
-  align-items: flex-start;
-}
-
-/* Left rail */
+/* The three columns, the left rail, the avatar, the tag and the cover tile all
+   live in @myapp/ui now (#92) — one implementation, rendered by the gallery and
+   this app alike. An `Avatar` that exists once cannot drift. What's left below is
+   only what is genuinely the app's: this shell is a fixed pane that scrolls
+   inside itself and animates in, where the gallery is a document that scrolls. */
 .bn-nav {
-  width: 200px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  padding-top: 8px;
   position: sticky;
   top: 24px;
-}
-.bn-nav-logo {
-  padding: 0 12px 20px;
-  border-bottom: 1px solid var(--color-line);
-  margin-bottom: 16px;
-}
-.bn-nav-logo .eyebrow {
-  margin-bottom: 4px;
-}
-.bn-nav-wordmark {
-  font-family: var(--font-display);
-  font-size: var(--text-feature);
-  font-weight: var(--font-weight-regular);
-  color: var(--color-ink);
-  line-height: 1; /* single-line wordmark — no leading to set (as in the mockup) */
-}
-.bn-nav-items {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 24px;
-}
-.bn-nav-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  text-align: left;
-  border: none;
-  background: transparent;
-  padding: 7px 12px;
-  border-radius: var(--radius-card);
-  color: var(--color-ink2);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  cursor: pointer;
-  margin-bottom: 1px;
-  transition:
-    background 0.12s,
-    color 0.12s;
-}
-.bn-nav-item:hover:not(:disabled):not([aria-current="page"]) {
-  color: var(--color-ink);
-}
-.bn-nav-item[aria-current="page"] {
-  background: var(--color-accent-tint);
-  color: var(--color-accent);
-  font-weight: var(--font-weight-medium);
-}
-.bn-nav-item:disabled {
-  color: var(--color-ink3);
-  cursor: default;
-}
-.bn-nav-item .bn-nav-icon {
-  font-size: var(--text-ui);
-}
-.bn-nav-item .bn-nav-soon {
-  margin-left: auto;
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-tag);
-  color: var(--color-ink3);
-}
-.bn-nav-filters {
-  padding: 0 12px;
 }
 .bn-nav-filter {
   display: block;
@@ -989,30 +807,8 @@ button.post-author:hover .post-author-name {
   background: var(--color-accent-tint);
   font-weight: var(--font-weight-medium);
 }
-.bn-nav-user {
-  margin-top: auto;
-  padding: 16px 12px 0;
-  border-top: 1px solid var(--color-line);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.bn-nav-user-name {
-  font-family: var(--font-body);
-  font-size: var(--text-ui);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-ink);
-}
-.bn-nav-user-handle {
-  font-family: var(--font-body);
-  font-size: var(--text-micro);
-  color: var(--color-ink3);
-}
-
-/* Center content column */
+/* Center content column — `flex: 1; min-width: 0` comes from @myapp/ui. */
 .bn-main {
-  flex: 1;
-  min-width: 0;
   display: flex;
   flex-direction: column;
 }
@@ -1127,9 +923,8 @@ button.post-author:hover .post-author-name {
 /* ── Right rail (issue #20) ─────────────────────────────────────────────────
    The third shell column: community pulse + builders to meet + a CTA. Sticky
    on desktop; folds below the feed on mobile (see the 900px block). */
+/* `width: 232px; flex-shrink: 0` comes from @myapp/ui (#92). */
 .bn-rail {
-  width: 232px;
-  flex-shrink: 0;
   display: flex;
   flex-direction: column;
   gap: 24px;

@@ -1,5 +1,5 @@
 import { useGetMember } from "@myapp/api-client-react";
-import { Loading } from "@/components/ui-atoms";
+import { Loading, Tag } from "@/components/ui-atoms";
 
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);
@@ -64,9 +64,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           <p className="eyebrow mb6">Skills</p>
           <div className="skills-wrap">
             {(member.skills ?? []).map((s) => (
-              <span key={s} className="chip" style={{ cursor: "default" }}>
-                {s}
-              </span>
+              <Tag key={s} label={s} />
             ))}
           </div>
         </div>
@@ -74,9 +72,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           <p className="eyebrow mb6">Minat</p>
           <div className="skills-wrap">
             {(member.interests ?? []).map((s) => (
-              <span key={s} className="chip" style={{ cursor: "default" }}>
-                {s}
-              </span>
+              <Tag key={s} label={s} />
             ))}
           </div>
         </div>
