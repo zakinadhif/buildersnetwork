@@ -17,6 +17,7 @@ import LaunchpadScreen from "./screens/Launchpad";
 import KaryaDetailScreen from "./screens/KaryaDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
 import MulaiScreen from "./screens/Mulai";
+import ProfilScreen from "./screens/Profil";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
 // Two ways to move between screens: the sidebar surfaces (Launchpad / Jelajahi /
@@ -32,6 +33,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   mulai:     MulaiScreen,
   "karya-detail": KaryaDetailScreen,
   "karya-new": KaryaNewScreen,
+  profil:    ProfilScreen,
 };
 
 function Gallery() {
