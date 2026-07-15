@@ -5,10 +5,9 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "@myapp/ui";
+import { Avatar, KaryaCard, Tag } from "@myapp/ui";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
-import { Tag } from "@myapp/ui";
 import { KARYA, MEMBERS, type Karya } from "../data/karya";
 import { relativeTime } from "../lib/format";
 import { coverFor, screenshots } from "../lib/images";
@@ -47,142 +46,33 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
   );
 }
 
-// ─── Landscape Screenshot Carousel (Play Store-style) ────────────────────────
-function LandscapeCarousel({ images, title }: { images: string[]; title: string }) {
-  return (
-    <div
-      className="landscape-carousel"
-      role="region"
-      aria-label={`Tangkapan layar ${title}`}
-      style={{
-        display: "flex",
-        gap: 10,
-        overflowX: "auto" as const,
-        scrollSnapType: "x mandatory",
-        scrollPaddingLeft: 0,
-        borderRadius: T.radiusCard,
-      }}
-    >
-      {images.map((src, i) => (
-        <img
-          key={src}
-          src={src}
-          alt={`${title} — layar ${i + 1}`}
-          loading="lazy"
-          style={{
-            // 240x135 of image + a 1px ring, which the border-box base puts
-            // inside the declared size (#91). Same pixels as before.
-            width: 242,
-            height: 137,
-            flexShrink: 0,
-            objectFit: "cover",
-            borderRadius: T.radiusCard,
-            border: `1px solid ${T.line}`,
-            scrollSnapAlign: "start",
-            display: "block",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
 // ─── Karya Feed Row (reverse-chronological activity) ───────────────────────────
+// The card frame is @myapp/ui's KaryaCard now (#92) — the same one the app
+// renders. What stays here is the gallery's own data shaping and the appreciation
+// toggle, which is real interactive state the app has no backend for yet.
 function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appreciated: boolean; onAppreciate: (id: number) => void }) {
   return (
-    <article style={{
-      display: "flex",
-      flexDirection: "column" as const,
-      padding: "16px 2px",
-      borderBottom: `1px solid ${T.line}`,
-      gap: 12,
-    }}>
-      {/* Landscape screenshot carousel — Play Store style, full-width above metadata */}
-      {karya.landscapeScreenshots && (
-        <LandscapeCarousel images={karya.landscapeScreenshots} title={karya.title} />
-      )}
-
-      {/* Thumbnail + content row */}
-      <div style={{ display: "flex", gap: 14 }}>
-        {/* App icon — 56px of art + a 1px ring, now inside the box (#91). */}
-        <div style={{
-          width: 58,
-          height: 58,
-          flexShrink: 0,
-          borderRadius: 14,
-          overflow: "hidden",
-          border: `1px solid ${T.line}`,
-          background: T.bg,
-        }}>
-          <img
-            src={coverFor(karya.interests)}
-            alt={karya.title}
-            loading="lazy"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-          />
-        </div>
-
-        {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          {/* Activity line — what's new, and when */}
-          <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 4, fontFamily: T.fontBody, fontSize: T.size.micro, letterSpacing: T.track.tag }}>
-            <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{karya.lastActivity.text}</span>
-            <span style={{ color: T.ink3 }}>·</span>
-            <span style={{ color: T.ink3 }}>{relativeTime(karya.lastActivity.hoursAgo)}</span>
-          </div>
-
-          <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 4, flexWrap: "wrap" as const }}>
-            <h3 style={{
-              margin: 0,
-              fontFamily: T.fontDisplay,
-              fontSize: T.size.title,
-              fontWeight: T.weight.regular,
-              color: T.ink,
-              lineHeight: T.lh.heading,
-            }}>{karya.title}</h3>
-            {karya.stages.map((s) => <Tag key={s} label={s} accent={s === "Cari Kolaborator"} />)}
-          </div>
-
-          <p style={{
-            margin: "0 0 10px",
-            fontFamily: T.fontBody,
-            fontSize: T.size.body,
-            color: T.ink2,
-            lineHeight: T.lh.body,
-          }}>{karya.description}</p>
-
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap" as const, gap: 10 }}>
-            {/* Interests */}
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
-              {karya.interests.map((i) => <Tag key={i} label={i} />)}
-            </div>
-
-            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-              {/* Roster avatars */}
-              <div style={{ display: "flex", alignItems: "center" }}>
-                {karya.roster.slice(0, 4).map((r, idx) => (
-                  <span key={r.handle} style={{ marginLeft: idx === 0 ? 0 : -8, zIndex: karya.roster.length - idx }}>
-                    <Avatar name={r.name} size={22} />
-                  </span>
-                ))}
-                {karya.roster.length > 4 && (
-                  <span style={{ marginLeft: -8, zIndex: 0, width: 22, height: 22, borderRadius: "50%", backgroundColor: T.line, display: "inline-flex", alignItems: "center", justifyContent: "center", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink2 }}>
-                    +{karya.roster.length - 4}
-                  </span>
-                )}
-              </div>
-
-              {/* Quiet appreciation */}
-              <AppreciateButton
-                count={karya.appreciations + (appreciated ? 1 : 0)}
-                active={appreciated}
-                onClick={() => onAppreciate(karya.id)}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
+    <KaryaCard
+      cover={coverFor(karya.interests)}
+      title={karya.title}
+      description={karya.description}
+      activity={{ text: karya.lastActivity.text, time: relativeTime(karya.lastActivity.hoursAgo) }}
+      stages={karya.stages.map((s) => ({ label: s, accent: s === "Cari Kolaborator" }))}
+      interests={karya.interests}
+      roster={karya.roster.map((r) => ({ key: r.handle, name: r.name }))}
+      screenshots={karya.landscapeScreenshots?.map((src, i) => ({
+        key: src,
+        src,
+        alt: `${karya.title} — layar ${i + 1}`,
+      }))}
+      appreciate={
+        <AppreciateButton
+          count={karya.appreciations + (appreciated ? 1 : 0)}
+          active={appreciated}
+          onClick={() => onAppreciate(karya.id)}
+        />
+      }
+    />
   );
 }
 

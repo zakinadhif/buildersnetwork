@@ -55,13 +55,14 @@ So chrome **graduates** out of the gallery and into [`libs/ui`](../../libs/ui) �
 
 Both conditions, not either. Something only the gallery renders has nothing to drift against; something still moving isn't ready to be pinned.
 
-**What has graduated:** `ShellColumns` (the three-column frame), `LeftNav`, `Avatar`, `Tag`, `KaryaCover` (#92).
+**What has graduated:** `ShellColumns` (the three-column frame), `LeftNav`, `Avatar`, `Tag`, `KaryaCover` (#92), and `KaryaCard` — the feed-row karya card, cover through footer (#97 follow-up).
 
 **What has not, and why:**
 
 - **The variant screens** (`screens/cari/Variant*`) — still exploration. They keep their inline styles and their freedom, which is the whole point. Never force a variant into `libs/ui`.
-- **The karya card** — ratified and ported, so it *is* due. It didn't move in #92 because the two versions aren't the same layout yet: unifying them is a design merge, not a lift-and-shift, and it deserves its own look rather than being smuggled into a refactor. It is the next thing to graduate.
 
-**When you graduate something**, the bar is that neither app moves a pixel: take the mockup's values (the mockup is the north star and wins every disagreement), then measure both sides before and after. #91 and #92 each shipped with a `0 of 2162 elements moved` diff. If your refactor changes how something *looks*, that is a design change wearing a refactor's clothes — split it out and let it be reviewed as one, the way #93 was.
+**When you graduate something**, the usual bar is that neither app moves a pixel: take the mockup's values (the mockup is the north star and wins every disagreement), then measure both sides before and after. #91 and #92 each shipped with a `0 of 2162 elements moved` diff. If your refactor changes how something *looks*, that is a design change wearing a refactor's clothes — split it out and let it be reviewed as one, the way #93 was.
+
+The karya card was that split-out change. It was ratified and ported, so it was due — but the two sides had never been one layout, so unifying them was a *design merge*, not a pixel-preserving lift. It graduated as its own reviewed change: the **mockup did not move**, and the **app conformed to it** (a serif title, the accent activity line, overlapping roster, the interests footer). That is the shape of a design-merge graduation — the mockup holds still, one app changes on purpose, and it is reviewed as the design change it is rather than hidden inside a refactor.
 
 **And the rule that follows from all of it:** if a component lives in `libs/ui`, do not re-declare it in an app. Not "prefer not to" — the reason `libs/ui` exists is that a component which exists once cannot drift. Re-declaring it hands the problem back.

@@ -11,7 +11,7 @@ import { useState } from "react";
  * to declare its own of each, which is how they drifted into different designs.
  * Re-exported here so call sites keep importing atoms from one place.
  */
-export { Avatar, KaryaCover, Tag } from "@myapp/ui";
+export { Avatar, KaryaCard, KaryaCover, Tag } from "@myapp/ui";
 
 // Lifecycle stages in canonical order, with Indonesian labels for the UI.
 export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStage[];

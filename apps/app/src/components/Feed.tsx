@@ -1,51 +1,19 @@
-import type { FeedItem, KaryaScreenshot } from "@myapp/api-client-react";
+import type { FeedItem } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import {
   Avatar,
-  KaryaCover,
+  KaryaCard,
   POST_KIND_LABELS,
   STAGE_LABELS,
-  Tag,
   timeAgo,
 } from "@/components/ui-atoms";
-
-/**
- * Play Store-style landscape screenshot carousel (issue #19), shown above a
- * feed karya card's metadata row. Renders nothing when there are no landscape
- * screenshots — never an empty slot.
- */
-function LandscapeCarousel({
-  screenshots,
-  title,
-}: {
-  screenshots: KaryaScreenshot[];
-  title: string;
-}) {
-  if (screenshots.length === 0) return null;
-  return (
-    <section
-      className="landscape-carousel"
-      aria-label={`Tangkapan layar ${title}`}
-    >
-      {screenshots.map((s, i) => (
-        <img
-          key={s.id}
-          src={s.url}
-          alt={`${title} — layar ${i + 1}`}
-          loading="lazy"
-          className="landscape-carousel-img"
-        />
-      ))}
-    </section>
-  );
-}
 
 /**
  * The reverse-chron global feed (FR-22). Renders a `FeedItem[]` union as
  * delivered by the API (no client re-sort): a **post** item as a card (author
  * face → member, kind chip, body, parent-karya title → karya, relative time);
- * a **new-karya** item reusing the existing `karya-card` visual. Faces/titles
- * link out so people-browsing survives the Sprint-3 home regression (DECISION-F).
+ * a **new-karya** item as the shared `KaryaCard` (#92), where "karya baru" is the
+ * activity line and the whole card links into the karya.
  */
 export default function Feed({ items }: { items: FeedItem[] }) {
   const [, navigate] = useLocation();
@@ -85,47 +53,29 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             </div>
           </article>
         ) : (
-          // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
-          <div
+          <KaryaCard
             key={`karya-${it.id}`}
-            className="karya-card"
-            role="button"
-            tabIndex={0}
-            onClick={() => navigate(`/karya/${it.id}`)}
-            onKeyDown={(e) => e.key === "Enter" && navigate(`/karya/${it.id}`)}
-          >
-            <LandscapeCarousel
-              screenshots={(it.screenshots ?? []).filter(
-                (s) => s.orientation === "landscape",
-              )}
-              title={it.title}
-            />
-            <div className="karya-card-row">
-              <KaryaCover src={it.coverUrl} size={48} />
-              <div className="karya-card-body">
-                <span className="feed-new-tag">karya baru</span>
-                <span className="karya-card-title">{it.title}</span>
-                <p className="karya-card-desc">{it.description}</p>
-                <div className="karya-card-foot">
-                  <div className="skills-wrap">
-                    {it.stages.map((s) => (
-                      <Tag key={s} label={STAGE_LABELS[s]} />
-                    ))}
-                  </div>
-                  <div className="roster">
-                    {it.roster.map((m) => (
-                      <Avatar
-                        key={m.id}
-                        name={m.name}
-                        image={m.image}
-                        size={26}
-                      />
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+            cover={it.coverUrl}
+            title={it.title}
+            description={it.description}
+            activity={{ text: "karya baru", time: timeAgo(it.createdAt) }}
+            stages={it.stages.map((s) => ({ label: STAGE_LABELS[s] }))}
+            interests={it.interests}
+            roster={it.roster.map((m) => ({
+              key: m.id,
+              name: m.name,
+              image: m.image,
+            }))}
+            memberCount={it.memberCount}
+            screenshots={(it.screenshots ?? [])
+              .filter((s) => s.orientation === "landscape")
+              .map((s, i) => ({
+                key: s.id,
+                src: s.url,
+                alt: `${it.title} — layar ${i + 1}`,
+              }))}
+            onOpen={() => navigate(`/karya/${it.id}`)}
+          />
         ),
       )}
     </div>

@@ -197,3 +197,148 @@
   object-fit: cover;
   display: block;
 }
+
+/* ── Karya card ──────────────────────────────────────────────────────────────
+   A karya as a feed row: an optional proof-shot carousel, the app-icon cover,
+   and a column of activity line → title + stages → description → a footer of
+   interests set against the roster. The mockup's KaryaFeedRow, now the one
+   implementation (#92); the app used to render a plainer second design of it.
+
+   Unlike the earlier graduations, this one moved the app on purpose: the two
+   sides were never one layout, so unifying them was a design merge, and the app
+   conforms to the mockup (the north star) rather than the reverse. */
+.karya-card {
+  display: flex;
+  flex-direction: column;
+  padding: 16px 2px;
+  border-bottom: 1px solid var(--color-line);
+  gap: 12px;
+}
+/* A card that is a link into its karya (the app's feed + featured cards). The
+   gallery's rows have no target, so they stay plain articles with neither. */
+.karya-card[role="button"] {
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.karya-card[role="button"]:hover {
+  opacity: 0.6;
+}
+.karya-card[role="button"]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* Landscape proof-shot carousel — Play Store-style, above the metadata row.
+   240x135 of image + a 1px ring, inside the box under the border-box base (#91);
+   the card's own 12px gap sets it off the row, so it needs no margin. */
+.karya-card-shots {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  border-radius: var(--radius-card);
+  scrollbar-width: none;
+}
+.karya-card-shots::-webkit-scrollbar {
+  display: none;
+}
+.karya-card-shot {
+  width: 242px;
+  height: 137px;
+  flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--color-line);
+  scroll-snap-align: start;
+  display: block;
+}
+
+.karya-card-row {
+  display: flex;
+  gap: 14px;
+}
+.karya-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Activity line — the accent-lit "what's new", then when, in dense meta type. */
+.karya-card-activity {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-tag);
+}
+.karya-card-activity-what {
+  color: var(--color-accent-mid);
+  font-weight: var(--font-weight-medium);
+}
+.karya-card-activity-when {
+  color: var(--color-ink3);
+}
+
+/* Title + its stage tags, baseline-aligned so the serif title sets the line. */
+.karya-card-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+  flex-wrap: wrap;
+}
+.karya-card-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-ink);
+  line-height: var(--leading-heading);
+}
+.karya-card-desc {
+  margin: 0 0 10px;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  color: var(--color-ink2);
+  line-height: var(--leading-body);
+}
+.karya-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.karya-card-interests {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.karya-card-side {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+/* Overlapping roster: each face laps the previous by 8px. The faces are static,
+   so paint order is DOM order — later faces sit on top, no z-index needed. */
+.karya-card-roster {
+  display: flex;
+  align-items: center;
+}
+.karya-card-roster > * + * {
+  margin-left: -8px;
+}
+.karya-card-more {
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--color-line);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  color: var(--color-ink2);
+}

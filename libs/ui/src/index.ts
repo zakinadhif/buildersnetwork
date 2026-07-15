@@ -15,6 +15,13 @@
  * Consumers must import `@myapp/ui/ui.css` once, alongside the design tokens.
  */
 export { Avatar, avatarColor, initials, RING } from "./Avatar";
+export {
+  KaryaCard,
+  type KaryaCardActivity,
+  type KaryaCardFace,
+  type KaryaCardShot,
+  type KaryaCardStage,
+} from "./KaryaCard";
 export { KaryaCover } from "./KaryaCover";
 export { LeftNav, type NavItem, ShellColumns } from "./Shell";
 export { Tag } from "./Tag";
