@@ -18,6 +18,7 @@ import KaryaDetailScreen from "./screens/KaryaDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
 import MinatSayaScreen from "./screens/MinatSaya";
 import MulaiScreen from "./screens/Mulai";
+import OnboardingScreen from "./screens/Onboarding";
 import ProfilScreen from "./screens/Profil";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
@@ -36,6 +37,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   "karya-new": KaryaNewScreen,
   profil:    ProfilScreen,
   minat:     MinatSayaScreen,
+  onboarding: OnboardingScreen,
 };
 
 function Gallery() {
