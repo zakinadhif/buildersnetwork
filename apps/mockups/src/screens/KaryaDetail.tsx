@@ -1,20 +1,16 @@
 /**
  * Al-Fath Berkarya — Detail Karya  ·  issue #103
  *
- * The page every feed & featured card funnels into (`/karya/:id`). Now it lives
- * *inside* the shared shell — same left rail as the surfaces it's reached from —
- * rather than as a standalone page, so drilling into a karya keeps the product
- * frame. The center column is the reading surface (cover, roster, stages,
- * screenshot gallery, update stream); the sticky right rail carries the actions.
- *
- * A role toggle previews the owner affordances (feature, kelola tim, composer)
- * vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
+ * The page every feed & featured card funnels into (`/karya/:id`). A calm reading
+ * surface on the shared token scale: cover, roster, stages, screenshot gallery,
+ * and the update stream (events that point back at this karya, per the content
+ * model). A role toggle previews the owner affordances (feature, kelola tim,
+ * composer) vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
  */
 
 import { useState } from "react";
 import { Avatar, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
-import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
 import { coverFor, screenshots } from "../lib/images";
 import { relativeTime } from "../lib/format";
@@ -57,15 +53,12 @@ function KindChip({ kind }: { kind: Kind }) {
 }
 
 // ─── Action bar ──────────────────────────────────────────────────────────────
-// The affordances the header hero carries: owner controls (feature, kelola tim,
-// sunting) or the visitor's (gabung, apresiasi).
 function ActionBar({ owner, featured, onToggleFeatured }: {
   owner: boolean;
   featured: boolean;
   onToggleFeatured: () => void;
 }) {
   const btn = (primary: boolean): React.CSSProperties => ({
-    boxSizing: "border-box" as const,
     fontFamily: T.fontBody,
     fontSize: T.size.ui,
     fontWeight: T.weight.medium,
@@ -77,7 +70,7 @@ function ActionBar({ owner, featured, onToggleFeatured }: {
     color: primary ? T.bg : T.ink,
   });
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const }}>
+    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 22 }}>
       {owner ? (
         <>
           <button
@@ -99,42 +92,9 @@ function ActionBar({ owner, featured, onToggleFeatured }: {
       ) : (
         <>
           <button type="button" style={btn(true)}>Gabung karya →</button>
-          <button type="button" style={btn(false)}>♡ Apresiasi · {KARYA_ITEM.appreciations}</button>
+          <button type="button" style={btn(false)}>♡ {KARYA_ITEM.appreciations}</button>
         </>
       )}
-    </div>
-  );
-}
-
-// ─── Role toggle (gallery affordance) ────────────────────────────────────────
-function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boolean) => void }) {
-  return (
-    <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
-      {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
-        const on = (val === "owner") === owner;
-        return (
-          <button
-            key={val}
-            type="button"
-            onClick={() => onChange(val === "owner")}
-            aria-pressed={on}
-            style={{
-              flex: 1,
-              border: "none",
-              borderRadius: 99,
-              padding: "5px 12px",
-              background: on ? T.ink : "transparent",
-              color: on ? T.bg : T.ink2,
-              fontFamily: T.fontBody,
-              fontSize: T.size.micro,
-              fontWeight: on ? T.weight.medium : T.weight.regular,
-              cursor: "pointer",
-            }}
-          >
-            {label}
-          </button>
-        );
-      })}
     </div>
   );
 }
@@ -224,66 +184,84 @@ export default function KaryaDetailScreen() {
   const k = KARYA_ITEM;
 
   return (
-    <Shell active="karya-detail">
-      {/* One wide surface spanning the centre + right columns — no separate rail.
-          `bn-main` is the only flex child beside the nav, so it fills the rest. */}
-      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
-        {/* Header: back to the feed the card funnelled from + role preview */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 20 }}>
+    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.fontBody }}>
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "28px 24px 80px" }}>
+        {/* Top bar */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
             ← Balik
           </button>
           {/* Role toggle — gallery affordance to preview both viewer states */}
-          <RoleToggle owner={owner} onChange={setOwner} />
-        </div>
-
-        {/* Hero — cover beside the title/roster/actions, using the full width */}
-        <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1.05fr) minmax(0, 1fr)", gap: 32, alignItems: "stretch", marginBottom: 40 }}>
-          <img
-            src={coverFor(k.interests)}
-            alt={k.title}
-            style={{ width: "100%", height: "100%", minHeight: 260, objectFit: "cover", borderRadius: T.radiusPanel, display: "block", border: `1px solid ${T.line}` }}
-          />
-
-          <div style={{ display: "flex", flexDirection: "column" as const, minWidth: 0 }}>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const, alignItems: "center", marginBottom: 10 }}>
-              {featured && <KindChip kind="launch" />}
-              {k.stages.map((s) => <span key={s} style={eyebrow}>{s}</span>)}
-            </div>
-            <h1 style={{ margin: "0 0 12px", fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>
-              {k.title}
-            </h1>
-
-            {/* Roster */}
-            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-              <div style={{ display: "flex" }}>
-                {k.roster.map((r, i) => (
-                  <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: k.roster.length - i }}>
-                    <Avatar name={r.name} size={30} />
-                  </span>
-                ))}
-              </div>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
-                {k.roster.map((r) => r.name).join(" · ")}
-              </span>
-            </div>
-
-            <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
-              {k.description}
-            </p>
-
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginTop: 14 }}>
-              {k.interests.map((i) => <Tag key={i} label={i} />)}
-            </div>
-
-            <div style={{ marginTop: "auto", paddingTop: 22 }}>
-              <ActionBar owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
-            </div>
+          <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
+            {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
+              const on = (val === "owner") === owner;
+              return (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => setOwner(val === "owner")}
+                  aria-pressed={on}
+                  style={{
+                    border: "none",
+                    borderRadius: 99,
+                    padding: "5px 12px",
+                    background: on ? T.ink : "transparent",
+                    color: on ? T.bg : T.ink2,
+                    fontFamily: T.fontBody,
+                    fontSize: T.size.micro,
+                    fontWeight: on ? T.weight.medium : T.weight.regular,
+                    cursor: "pointer",
+                  }}
+                >
+                  {label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Screenshots — full width */}
-        <p style={{ ...eyebrow, margin: "0 0 12px" }}>Tangkapan layar</p>
+        {/* Cover */}
+        <img
+          src={coverFor(k.interests)}
+          alt={k.title}
+          style={{ width: "100%", height: 220, objectFit: "cover", borderRadius: T.radiusPanel, display: "block", border: `1px solid ${T.line}` }}
+        />
+
+        {/* Title block */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const, alignItems: "center", margin: "22px 0 10px" }}>
+          {featured && <KindChip kind="launch" />}
+          {k.stages.map((s) => <span key={s} style={eyebrow}>{s}</span>)}
+        </div>
+        <h1 style={{ margin: "0 0 12px", fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>
+          {k.title}
+        </h1>
+
+        {/* Roster */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
+          <div style={{ display: "flex" }}>
+            {k.roster.map((r, i) => (
+              <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: k.roster.length - i }}>
+                <Avatar name={r.name} size={30} />
+              </span>
+            ))}
+          </div>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
+            {k.roster.map((r) => r.name).join(" · ")}
+          </span>
+        </div>
+
+        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
+          {k.description}
+        </p>
+
+        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginTop: 14 }}>
+          {k.interests.map((i) => <Tag key={i} label={i} />)}
+        </div>
+
+        <ActionBar owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
+
+        {/* Screenshots */}
+        <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Tangkapan layar</p>
         <div style={{ display: "flex", gap: 12, overflowX: "auto" as const, paddingBottom: 6, scrollSnapType: "x mandatory" }}>
           {screenshots.map((src, i) => (
             <img
@@ -295,25 +273,23 @@ export default function KaryaDetailScreen() {
           ))}
         </div>
 
-        {/* Update stream — held to a readable measure within the wide surface */}
-        <div style={{ maxWidth: 720, marginTop: 40 }}>
-          <p style={{ ...eyebrow, margin: "0 0 12px" }}>Update terbaru</p>
-          {owner && <Composer />}
-          <div style={{ display: "flex", flexDirection: "column" as const }}>
-            {POSTS.map((p) => (
-              <article key={p.id} style={{ padding: "16px 0", borderTop: `1px solid ${T.line}` }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-                  <Avatar name={p.author} size={28} />
-                  <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{p.author}</span>
-                  <KindChip kind={p.kind} />
-                  <span style={{ marginLeft: "auto", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{relativeTime(p.hoursAgo)}</span>
-                </div>
-                <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>{p.body}</p>
-              </article>
-            ))}
-          </div>
+        {/* Update stream */}
+        <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Update terbaru</p>
+        {owner && <Composer />}
+        <div style={{ display: "flex", flexDirection: "column" as const }}>
+          {POSTS.map((p) => (
+            <article key={p.id} style={{ padding: "16px 0", borderTop: `1px solid ${T.line}` }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+                <Avatar name={p.author} size={28} />
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{p.author}</span>
+                <KindChip kind={p.kind} />
+                <span style={{ marginLeft: "auto", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{relativeTime(p.hoursAgo)}</span>
+              </div>
+              <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>{p.body}</p>
+            </article>
+          ))}
         </div>
-      </main>
-    </Shell>
+      </div>
+    </div>
   );
 }
