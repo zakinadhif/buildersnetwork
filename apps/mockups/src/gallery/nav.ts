@@ -13,7 +13,8 @@ export type Screen =
   | "karya-detail"
   | "karya-new"
   | "profil"
-  | "minat";
+  | "minat"
+  | "onboarding";
 
 /** Which gallery screen (if any) a left-nav label routes to. Items that have no
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
@@ -33,6 +34,7 @@ export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur
   { key: "minat", label: "Minat Saya", group: "Surface" },
   { key: "auth", label: "Masuk / Daftar", group: "Alur" },
   { key: "mulai", label: "Mulai (profil minimal)", group: "Alur" },
+  { key: "onboarding", label: "Onboarding AI", group: "Alur" },
   { key: "karya-detail", label: "Detail Karya", group: "Funnel" },
   { key: "karya-new", label: "Bikin Karya", group: "Funnel" },
   { key: "profil", label: "Profil Member", group: "Funnel" },
