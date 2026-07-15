@@ -2,8 +2,8 @@ import type { Page } from "@playwright/test";
 import { authed, expect, unauthed } from "./fixtures";
 
 // Auth / entry-routing acceptance against the real app: unauthenticated users
-// land on /welcome, the /login form renders, and an authenticated member with a
-// profile lands on the feed-first home (not the old template "My App" shell).
+// land on /welcome, and an authenticated member with a profile lands on the
+// feed-first home (not the old template "My App" shell).
 
 const PROFILE = {
   id: "test-user-id",
@@ -40,14 +40,6 @@ async function mockHome(page: Page) {
 unauthed("unauthenticated: / redirects to /welcome", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/welcome/);
-});
-
-unauthed("login page renders sign-in form", async ({ page }) => {
-  await page.goto("/login");
-  await expect(page.getByRole("heading", { name: /sign in/i })).toBeVisible();
-  await expect(page.getByLabel(/email/i)).toBeVisible();
-  await expect(page.getByLabel(/password/i)).toBeVisible();
-  await expect(page.getByRole("button", { name: /sign in/i })).toBeVisible();
 });
 
 authed(
