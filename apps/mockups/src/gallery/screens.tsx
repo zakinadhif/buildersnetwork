@@ -13,7 +13,7 @@ const C = {
   body: "'Plus Jakarta Sans', sans-serif",
 };
 
-const GROUP_ORDER = ["Surface", "Alur"] as const;
+const GROUP_ORDER = ["Surface", "Alur", "Funnel"] as const;
 
 export function ScreenSwitcher({ active, onChange }: {
   active: Screen;
