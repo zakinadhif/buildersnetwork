@@ -1,15 +1,23 @@
 /**
  * Al-Fath Berkarya — Bikin Karya  ·  issue #104
  *
- * The hero's primary CTA target (`/karya/new`, `/karya/new/ai`). Two modes on the
- * shared token scale: fill the draft by hand, or let the assistant draft it from a
- * chat — both landing in the same publish path. Replaces the rapid-dev form whose
- * inline off-scale literals broke the fidelity invariant.
+ * The hero's primary CTA target (`/karya/new`, `/karya/new/ai`). Now inside the
+ * shared shell — same left rail as the surfaces it's launched from — so creating
+ * a karya keeps the product frame. Two modes on the shared token scale: fill the
+ * draft by hand, or let the assistant draft it from a chat — both landing in the
+ * same publish path. The center column carries the form; the rail carries tips.
  */
 
 import { useState } from "react";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { Avatar } from "@myapp/ui";
+import { Shell } from "../components/Shell";
+
+const TIPS = [
+  "Cover & tangkapan layar bikin karyamu lebih hidup di feed.",
+  "Pilih tahap yang jujur — orang paham kamu lagi di mana.",
+  "Tandai tahap “Cari Kolaborator” kalau lagi butuh tim.",
+];
 
 const STAGES = ["Ide", "Prototype", "MVP", "Beta", "Rilis", "Cari Kolaborator"];
 const SUGGESTED = ["Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"];
@@ -222,15 +230,28 @@ export default function KaryaNewScreen() {
   const [mode, setMode] = useState<"manual" | "ai">("manual");
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.fontBody }}>
-      <div style={{ maxWidth: 600, margin: "0 auto", padding: "40px 24px 80px" }}>
-        <div style={{ ...eyebrow, marginBottom: 12 }}>Al-Fath Berkarya</div>
+    <Shell active="karya-new">
+      {/* Form column */}
+      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
         <h1 style={{ margin: "0 0 26px", fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>
           Bikin karya baru.
         </h1>
 
         {mode === "manual" ? <ManualForm onAi={() => setMode("ai")} /> : <AiMode onManual={() => setMode("manual")} />}
-      </div>
-    </div>
+      </main>
+
+      {/* Tips rail */}
+      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, position: "sticky" as const, top: 68 }}>
+        <p style={{ ...eyebrow, marginBottom: 12 }}>Biar makin dilirik</p>
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+          {TIPS.map((tip) => (
+            <div key={tip} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
+              <span aria-hidden="true" style={{ color: T.accent, lineHeight: T.lh.body }}>◆</span>
+              <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, lineHeight: T.lh.body }}>{tip}</p>
+            </div>
+          ))}
+        </div>
+      </aside>
+    </Shell>
   );
 }

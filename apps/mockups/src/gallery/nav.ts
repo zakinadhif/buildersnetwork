@@ -1,10 +1,11 @@
 import { createContext, useContext } from "react";
 
 /** Every screen the gallery can show. The first three are the product's sidebar
- *  surfaces, reachable from any mockup's own left nav. Detail Karya is a drill-in
- *  that also sits inside the shell (reached from a card, not the nav). The entry
- *  flows (auth, mulai, onboarding) and the remaining funnel targets carry no
- *  product nav — the screen switcher (bottom-left gallery chrome) reaches all. */
+ *  surfaces, reachable from any mockup's own left nav. The funnel targets (Detail
+ *  Karya, Bikin Karya, Profil Member) are drill-ins that also sit inside the shell
+ *  — reached from a card or CTA, not the nav. The entry flows (auth, mulai,
+ *  onboarding) carry no product nav; the screen switcher (bottom-left gallery
+ *  chrome) reaches all of them. */
 export type Screen =
   | "launchpad"
   | "jelajahi"
