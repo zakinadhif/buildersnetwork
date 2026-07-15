@@ -304,12 +304,9 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
             Belum ada karya untuk minat ini — coba minat lain, atau jadilah yang pertama.
           </div>
         ) : (
-          <>
-            <div style={{ ...eyebrow, margin: "4px 0 2px" }}>Kabar terbaru</div>
-            {feed.map((k) => (
-              <KaryaFeedRow key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
-            ))}
-          </>
+          feed.map((k) => (
+            <KaryaFeedRow key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
+          ))
         )}
       </div>
 
