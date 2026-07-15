@@ -1,16 +1,20 @@
 /**
  * Al-Fath Berkarya — Detail Karya  ·  issue #103
  *
- * The page every feed & featured card funnels into (`/karya/:id`). A calm reading
- * surface on the shared token scale: cover, roster, stages, screenshot gallery,
- * and the update stream (events that point back at this karya, per the content
- * model). A role toggle previews the owner affordances (feature, kelola tim,
- * composer) vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
+ * The page every feed & featured card funnels into (`/karya/:id`). Now it lives
+ * *inside* the shared shell — same left rail as the surfaces it's reached from —
+ * rather than as a standalone page, so drilling into a karya keeps the product
+ * frame. The center column is the reading surface (cover, roster, stages,
+ * screenshot gallery, update stream); the sticky right rail carries the actions.
+ *
+ * A role toggle previews the owner affordances (feature, kelola tim, composer)
+ * vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
  */
 
 import { useState } from "react";
 import { Avatar, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
+import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
 import { coverFor, screenshots } from "../lib/images";
 import { relativeTime } from "../lib/format";
@@ -52,13 +56,18 @@ function KindChip({ kind }: { kind: Kind }) {
   );
 }
 
-// ─── Action bar ──────────────────────────────────────────────────────────────
-function ActionBar({ owner, featured, onToggleFeatured }: {
+// ─── Rail actions ────────────────────────────────────────────────────────────
+// Full-width, stacked to fit the 232px rail — the same affordances the old
+// standalone action bar carried, now sticky beside the reading column.
+function RailActions({ owner, featured, onToggleFeatured }: {
   owner: boolean;
   featured: boolean;
   onToggleFeatured: () => void;
 }) {
   const btn = (primary: boolean): React.CSSProperties => ({
+    width: "100%",
+    boxSizing: "border-box" as const,
+    textAlign: "center" as const,
     fontFamily: T.fontBody,
     fontSize: T.size.ui,
     fontWeight: T.weight.medium,
@@ -70,7 +79,7 @@ function ActionBar({ owner, featured, onToggleFeatured }: {
     color: primary ? T.bg : T.ink,
   });
   return (
-    <div style={{ display: "flex", gap: 10, flexWrap: "wrap" as const, marginTop: 22 }}>
+    <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
       {owner ? (
         <>
           <button
@@ -92,9 +101,42 @@ function ActionBar({ owner, featured, onToggleFeatured }: {
       ) : (
         <>
           <button type="button" style={btn(true)}>Gabung karya →</button>
-          <button type="button" style={btn(false)}>♡ {KARYA_ITEM.appreciations}</button>
+          <button type="button" style={btn(false)}>♡ Apresiasi · {KARYA_ITEM.appreciations}</button>
         </>
       )}
+    </div>
+  );
+}
+
+// ─── Role toggle (gallery affordance) ────────────────────────────────────────
+function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boolean) => void }) {
+  return (
+    <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
+      {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
+        const on = (val === "owner") === owner;
+        return (
+          <button
+            key={val}
+            type="button"
+            onClick={() => onChange(val === "owner")}
+            aria-pressed={on}
+            style={{
+              flex: 1,
+              border: "none",
+              borderRadius: 99,
+              padding: "5px 12px",
+              background: on ? T.ink : "transparent",
+              color: on ? T.bg : T.ink2,
+              fontFamily: T.fontBody,
+              fontSize: T.size.micro,
+              fontWeight: on ? T.weight.medium : T.weight.regular,
+              cursor: "pointer",
+            }}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -184,41 +226,13 @@ export default function KaryaDetailScreen() {
   const k = KARYA_ITEM;
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.fontBody }}>
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "28px 24px 80px" }}>
-        {/* Top bar */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
-          <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
-            ← Balik
-          </button>
-          {/* Role toggle — gallery affordance to preview both viewer states */}
-          <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
-            {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
-              const on = (val === "owner") === owner;
-              return (
-                <button
-                  key={val}
-                  type="button"
-                  onClick={() => setOwner(val === "owner")}
-                  aria-pressed={on}
-                  style={{
-                    border: "none",
-                    borderRadius: 99,
-                    padding: "5px 12px",
-                    background: on ? T.ink : "transparent",
-                    color: on ? T.bg : T.ink2,
-                    fontFamily: T.fontBody,
-                    fontSize: T.size.micro,
-                    fontWeight: on ? T.weight.medium : T.weight.regular,
-                    cursor: "pointer",
-                  }}
-                >
-                  {label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+    <Shell active="karya-detail">
+      {/* Reading column */}
+      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
+        {/* Back to the feed the card funnelled from */}
+        <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, marginBottom: 20 }}>
+          ← Balik
+        </button>
 
         {/* Cover */}
         <img
@@ -258,8 +272,6 @@ export default function KaryaDetailScreen() {
           {k.interests.map((i) => <Tag key={i} label={i} />)}
         </div>
 
-        <ActionBar owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
-
         {/* Screenshots */}
         <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Tangkapan layar</p>
         <div style={{ display: "flex", gap: 12, overflowX: "auto" as const, paddingBottom: 6, scrollSnapType: "x mandatory" }}>
@@ -289,7 +301,31 @@ export default function KaryaDetailScreen() {
             </article>
           ))}
         </div>
-      </div>
-    </div>
+      </main>
+
+      {/* Action rail */}
+      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20, position: "sticky" as const, top: 68 }}>
+        {/* Role toggle — gallery affordance to preview both viewer states */}
+        <RoleToggle owner={owner} onChange={setOwner} />
+
+        <RailActions owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
+
+        {/* Meta */}
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, paddingTop: 4, borderTop: `1px solid ${T.line}` }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: 12 }}>
+            <span style={{ ...eyebrow }}>Tahap</span>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{k.stages[k.stages.length - 1]}</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ ...eyebrow }}>Tim</span>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{k.roster.length} orang</span>
+          </div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+            <span style={{ ...eyebrow }}>Apresiasi</span>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accentMid }}>♥ {k.appreciations}</span>
+          </div>
+        </div>
+      </aside>
+    </Shell>
   );
 }
