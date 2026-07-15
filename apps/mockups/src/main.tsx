@@ -16,6 +16,7 @@ import JelajahiScreen from "./screens/Jelajahi";
 import LaunchpadScreen from "./screens/Launchpad";
 import KaryaDetailScreen from "./screens/KaryaDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
+import MinatSayaScreen from "./screens/MinatSaya";
 import MulaiScreen from "./screens/Mulai";
 import ProfilScreen from "./screens/Profil";
 
@@ -34,6 +35,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   "karya-detail": KaryaDetailScreen,
   "karya-new": KaryaNewScreen,
   profil:    ProfilScreen,
+  minat:     MinatSayaScreen,
 };
 
 function Gallery() {
