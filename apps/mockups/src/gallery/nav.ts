@@ -8,7 +8,7 @@ import { createContext, useContext } from "react";
  *  chrome) reaches all of them. */
 export type Screen =
   | "scroll"
-  | "launchpad"
+  | "karya"
   | "jelajahi"
   | "cari"
   | "auth"
@@ -23,7 +23,7 @@ export type Screen =
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
-  Launchpad: "launchpad",
+  Karya: "karya",
   "Jelajahi Karya": "jelajahi",
   "Cari Kolaborator": "cari",
   "Minat Saya": "minat",
@@ -33,7 +33,7 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
  *  the standalone flows under "Alur". Grows as flow mockups land. */
 export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" | "Funnel" }[] = [
   { key: "scroll", label: "Scroll", group: "Surface" },
-  { key: "launchpad", label: "Launchpad", group: "Surface" },
+  { key: "karya", label: "Karya", group: "Surface" },
   { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
   { key: "cari", label: "Cari Kolaborator", group: "Surface" },
   { key: "minat", label: "Minat Saya", group: "Surface" },

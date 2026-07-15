@@ -1,7 +1,14 @@
 /**
- * Al-Fath Berkarya — Launchpad
- * Direction: calm, curated + reverse-chronological discovery feed
- *   (no ranking, no leaderboard — the karya leads, nothing is "winning")
+ * Al-Fath Berkarya — Karya
+ * The project surface, repurposed in place from the old Launchpad once its feed
+ * role moved to Scroll (#collapse 4→3). This is a transitional state: the screen
+ * is renamed and the directory search now lives in the right pane, but the old
+ * feed-only pieces are kept for now, each tagged `FEED-ONLY` so they are easy to
+ * find and strip when the directory is finalised and People lands:
+ *   - the seeker on-ramp (belongs to Scroll/home),
+ *   - the per-card activity line (Scroll owns "what's new"),
+ *   - the recency ordering (a feed trait; a directory would order neutrally),
+ *   - the "builders to meet" rail (belongs to People).
  */
 
 import { useState } from "react";
@@ -16,8 +23,7 @@ import { T, eyebrow } from "@myapp/design-tokens";
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"] as const;
 type Interest = (typeof INTEREST_FILTERS)[number];
 
-// ─── Micro components ─────────────────────────────────────────────────────────
-// Quiet appreciation toggle — a warm signal, never a ranking input.
+// ─── Quiet appreciation toggle — a warm signal, never a ranking input ───────────
 function AppreciateButton({ count, active, onClick }: { count: number; active: boolean; onClick: () => void }) {
   return (
     <button
@@ -46,16 +52,15 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
   );
 }
 
-// ─── Karya Feed Row (reverse-chronological activity) ───────────────────────────
-// The card frame is @myapp/ui's KaryaCard now (#92) — the same one the app
-// renders. What stays here is the gallery's own data shaping and the appreciation
-// toggle, which is real interactive state the app has no backend for yet.
-function KaryaFeedRow({ karya, appreciated, onAppreciate }: { karya: Karya; appreciated: boolean; onAppreciate: (id: number) => void }) {
+// ─── Catalog card — a karya as a directory entry ────────────────────────────────
+function CatalogCard({ karya, appreciated, onAppreciate }: { karya: Karya; appreciated: boolean; onAppreciate: (id: number) => void }) {
   return (
     <KaryaCard
       cover={coverFor(karya.interests)}
       title={karya.title}
       description={karya.description}
+      // FEED-ONLY: the activity line is Scroll's job; a directory entry states what
+      // a karya *is*, not what's newest about it. Drop when the directory finalises.
       activity={{ text: karya.lastActivity.text, time: relativeTime(karya.lastActivity.hoursAgo) }}
       stages={karya.stages.map((s) => ({ label: s, accent: s === "Cari Kolaborator" }))}
       interests={karya.interests}
@@ -212,8 +217,6 @@ function Spotlight({ karya }: { karya: Karya }) {
             src={src}
             alt={`${karya.title} — tangkapan layar ${i + 1}`}
             style={{
-              // 360px of screenshot + a 2px ring, inside the box (#91). Width
-              // stays auto, so it tracks the aspect ratio as it always did.
               height: 364,
               width: "auto",
               flexShrink: 0,
@@ -230,7 +233,9 @@ function Spotlight({ karya }: { karya: Karya }) {
   );
 }
 
-// ─── Seeker on-ramp — calm entry to the onboarding agent ───────────────────────
+// ─── FEED-ONLY: Seeker on-ramp — calm entry to the onboarding agent ─────────────
+// Belongs to Scroll/home, not the project directory. Kept here for now; lift out
+// when the surfaces settle.
 function SeekerRamp() {
   return (
     <section style={{
@@ -271,46 +276,65 @@ function SeekerRamp() {
   );
 }
 
-// ─── Center Feed ──────────────────────────────────────────────────────────────
-function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; appreciated: Set<number>; onAppreciate: (id: number) => void }) {
-  const filtered = KARYA.filter((k) =>
-    filter === "Semua" ? true : k.interests.some((i) => i === filter)
-  );
-  const spotlight = filtered.find((k) => k.featured);
-  const feed = filtered
+// ─── Center — the catalog ───────────────────────────────────────────────────────
+function Catalog({ filter, query, appreciated, onAppreciate }: {
+  filter: Interest;
+  query: string;
+  appreciated: Set<number>;
+  onAppreciate: (id: number) => void;
+}) {
+  const q = query.trim().toLowerCase();
+  const matched = KARYA.filter((k) => {
+    const matchInterest = filter === "Semua" ? true : k.interests.some((i) => i === filter);
+    const matchQuery =
+      !q ||
+      k.title.toLowerCase().includes(q) ||
+      k.description.toLowerCase().includes(q) ||
+      k.interests.some((i) => i.toLowerCase().includes(q));
+    return matchInterest && matchQuery;
+  });
+
+  const spotlight = matched.find((k) => k.featured);
+  // FEED-ONLY: recency ordering is a feed trait; a finalised directory would order
+  // neutrally (e.g. alphabetical). Reverted to newest-first for now.
+  const rest = matched
     .filter((k) => k.id !== spotlight?.id)
-    .sort((a, b) => a.lastActivity.hoursAgo - b.lastActivity.hoursAgo); // newest first
+    .sort((a, b) => a.lastActivity.hoursAgo - b.lastActivity.hoursAgo);
 
   return (
     <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 0 }}>
       {/* Header */}
       <div style={{ marginBottom: 18 }}>
         <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Launchpad</h1>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Apa yang lagi dikerjakan komunitas</span>
+          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Karya</h1>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Katalog karya komunitas — temukan yang menarik buat kamu</span>
         </div>
       </div>
 
-      {/* Seeker on-ramp */}
+      {/* FEED-ONLY: seeker on-ramp */}
       <SeekerRamp />
 
-      {/* Curated feature — Pilihan Minggu Ini */}
+      {/* Featured pick */}
       {spotlight && <Spotlight karya={spotlight} />}
 
-      {/* Reverse-chronological feed */}
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-        {filtered.length === 0 ? (
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
-            Belum ada karya untuk minat ini — coba minat lain, atau jadilah yang pertama.
+      {/* Full catalog */}
+      {matched.length === 0 ? (
+        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+          Tidak ada karya yang cocok — coba minat lain atau kata kunci berbeda.
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", margin: "4px 0 2px" }}>
+            <span style={eyebrow}>Semua karya</span>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, fontVariantNumeric: "tabular-nums" }}>{matched.length} karya</span>
           </div>
-        ) : (
-          feed.map((k) => (
-            <KaryaFeedRow key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
-          ))
-        )}
-      </div>
+          {rest.map((k) => (
+            <CatalogCard key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
+          ))}
+        </div>
+      )}
 
-      {/* Submit CTA */}
+      {/* Submit CTA — making a karya belongs on the karya surface */}
       <div style={{
         marginTop: 20,
         padding: "16px 20px",
@@ -323,7 +347,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
       }}>
         <div>
           <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink, marginBottom: 2 }}>Punya karya baru?</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>Bagikan kapan saja — komunitas senang lihat progresmu, sekecil apa pun.</div>
+          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>Tambahkan ke katalog — komunitas senang lihat progresmu, sekecil apa pun.</div>
         </div>
         <button style={{
           backgroundColor: T.accent,
@@ -337,7 +361,7 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
           cursor: "pointer",
           whiteSpace: "nowrap" as const,
         }}>
-          Submit Karya
+          Bikin Karya
         </button>
       </div>
     </main>
@@ -345,15 +369,15 @@ function CenterFeed({ filter, appreciated, onAppreciate }: { filter: Interest; a
 }
 
 // ─── Right Rail ───────────────────────────────────────────────────────────────
-function RightRail() {
-  const [searchQuery, setSearchQuery] = useState("");
+function RightRail({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
+  const [skillQuery, setSkillQuery] = useState("");
   const seekingCollab = KARYA.filter((k) => k.stages.includes("Cari Kolaborator")).length;
 
   const filteredMembers = MEMBERS.filter((m) =>
-    searchQuery === "" ? true :
-      m.skills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      m.interests.some((i) => i.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      m.name.toLowerCase().includes(searchQuery.toLowerCase())
+    skillQuery === "" ? true :
+      m.skills.some((s) => s.toLowerCase().includes(skillQuery.toLowerCase())) ||
+      m.interests.some((i) => i.toLowerCase().includes(skillQuery.toLowerCase())) ||
+      m.name.toLowerCase().includes(skillQuery.toLowerCase())
   );
 
   return (
@@ -365,14 +389,37 @@ function RightRail() {
       gap: 20,
       paddingTop: 0,
     }}>
-      {/* Community pulse strip */}
+      {/* Directory search — the catalog's own search, moved out of the reading column */}
+      <div>
+        <div style={{ ...eyebrow, marginBottom: 8 }}>Cari karya</div>
+        <input
+          type="text"
+          value={query}
+          onChange={(e) => onQuery(e.target.value)}
+          placeholder="Nama, deskripsi, minat…"
+          aria-label="Cari karya"
+          style={{
+            width: "100%",
+            boxSizing: "border-box" as const,
+            fontFamily: T.fontBody,
+            fontSize: T.size.ui,
+            color: T.ink,
+            backgroundColor: T.surface,
+            border: `1px solid ${T.line}`,
+            borderRadius: T.radiusCard,
+            padding: "7px 11px",
+          }}
+        />
+      </div>
+
+      {/* Community pulse */}
       <div style={{
         backgroundColor: T.surface,
         border: `1px solid ${T.line}`,
         borderRadius: T.radiusPanel,
         padding: "12px 14px",
       }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut minggu ini</div>
+        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut komunitas</div>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
           {[
             { label: "Karya aktif", value: KARYA.length },
@@ -387,20 +434,19 @@ function RightRail() {
         </div>
       </div>
 
-      {/* Builders to meet */}
+      {/* FEED-ONLY: builders-to-meet — belongs to People; kept here for now */}
       <div>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <div style={eyebrow}>Kenalan dengan builder</div>
           <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
         </div>
 
-        {/* Search by skill */}
         <input
           type="text"
           placeholder="Cari skill / minat…"
           aria-label="Cari builder berdasarkan skill atau minat"
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          value={skillQuery}
+          onChange={(e) => setSkillQuery(e.target.value)}
           style={{
             width: "100%",
             boxSizing: "border-box" as const,
@@ -487,8 +533,9 @@ function RightRail() {
 }
 
 // ─── Screen ───────────────────────────────────────────────────────────────────
-export default function LaunchpadScreen() {
+export default function KaryaScreen() {
   const [filter, setFilter] = useState<Interest>("Semua");
+  const [query, setQuery] = useState("");
   const [appreciated, setAppreciated] = useState<Set<number>>(new Set());
 
   function toggleAppreciate(id: number) {
@@ -501,7 +548,7 @@ export default function LaunchpadScreen() {
 
   return (
     <Shell
-      active="launchpad"
+      active="karya"
       navFilters={
         <NavFilterList
           label="Filter Minat"
@@ -511,8 +558,8 @@ export default function LaunchpadScreen() {
         />
       }
     >
-      <CenterFeed filter={filter} appreciated={appreciated} onAppreciate={toggleAppreciate} />
-      <RightRail />
+      <Catalog filter={filter} query={query} appreciated={appreciated} onAppreciate={toggleAppreciate} />
+      <RightRail query={query} onQuery={setQuery} />
     </Shell>
   );
 }

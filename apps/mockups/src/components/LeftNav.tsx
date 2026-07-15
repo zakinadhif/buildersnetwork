@@ -6,7 +6,7 @@ import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 /** The five product surfaces. Only the first three route anywhere. */
 const NAV_ITEMS: { label: string; icon: string }[] = [
   { label: "Scroll",           icon: "◈" },
-  { label: "Launchpad",        icon: "◈" },
+  { label: "Karya",            icon: "▦" },
   { label: "Jelajahi Karya",   icon: "◉" },
   { label: "Cari Kolaborator", icon: "◎" },
   { label: "Minat Saya",       icon: "◇" },

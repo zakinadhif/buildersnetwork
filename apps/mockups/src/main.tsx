@@ -14,7 +14,7 @@ import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import ScrollScreen from "./screens/Scroll";
 import JelajahiScreen from "./screens/Jelajahi";
-import LaunchpadScreen from "./screens/Launchpad";
+import KaryaScreen from "./screens/Karya";
 import KaryaDetailScreen from "./screens/KaryaDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
 import MinatSayaScreen from "./screens/MinatSaya";
@@ -23,14 +23,14 @@ import OnboardingScreen from "./screens/Onboarding";
 import ProfilScreen from "./screens/Profil";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
-// Two ways to move between screens: the sidebar surfaces (Launchpad / Jelajahi /
-// Cari) route from each screen's own left nav, and the bottom-left screen switcher
+// Two ways to move between screens: the sidebar surfaces (Scroll / Karya /
+// Jelajahi / Cari) route from each screen's own left nav, and the bottom-left screen switcher
 // reaches everything — including the flow mockups (auth, entry, detail, creation)
 // that carry no product sidebar. Font choice lives bottom-right (shared chrome),
 // so a font persists across navigation.
 const SCREENS: Record<Screen, ComponentType> = {
   scroll:    ScrollScreen,
-  launchpad: LaunchpadScreen,
+  karya:     KaryaScreen,
   jelajahi:  JelajahiScreen,
   cari:      CariScreen,
   auth:      AuthScreen,
@@ -43,7 +43,7 @@ const SCREENS: Record<Screen, ComponentType> = {
 };
 
 function Gallery() {
-  const [screen,     setScreen]     = useState<Screen>("launchpad");
+  const [screen,     setScreen]     = useState<Screen>("scroll");
   const [displayIdx, setDisplayIdx] = useState(0);
   const [bodyIdx,    setBodyIdx]    = useState(0);
 
