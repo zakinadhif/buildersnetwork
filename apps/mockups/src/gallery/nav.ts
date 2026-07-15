@@ -1,7 +1,14 @@
 import { createContext, useContext } from "react";
 
-/** Top-level gallery screens, navigated via each mockup's left sidebar. */
-export type Screen = "launchpad" | "jelajahi" | "cari";
+/** Every screen the gallery can show. The first three are the product's sidebar
+ *  surfaces, reachable from any mockup's own left nav; the rest are flow surfaces
+ *  (entry, detail, creation) that have no product nav — the screen switcher
+ *  (bottom-left gallery chrome) is the only way into them. */
+export type Screen =
+  | "launchpad"
+  | "jelajahi"
+  | "cari"
+  | "auth";
 
 /** Which gallery screen (if any) a left-nav label routes to. Items that have no
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
@@ -10,6 +17,15 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   "Jelajahi Karya": "jelajahi",
   "Cari Kolaborator": "cari",
 };
+
+/** The screen switcher's menu, grouped. Sidebar surfaces sit under "Surface";
+ *  the standalone flows under "Alur". Grows as flow mockups land. */
+export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" }[] = [
+  { key: "launchpad", label: "Launchpad", group: "Surface" },
+  { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
+  { key: "cari", label: "Cari Kolaborator", group: "Surface" },
+  { key: "auth", label: "Masuk / Daftar", group: "Alur" },
+];
 
 const NavContext = createContext<(screen: Screen) => void>(() => {});
 export const NavProvider = NavContext.Provider;
