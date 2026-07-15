@@ -7,6 +7,7 @@ import { createContext, useContext } from "react";
  *  onboarding) carry no product nav; the screen switcher (bottom-left gallery
  *  chrome) reaches all of them. */
 export type Screen =
+  | "scroll"
   | "launchpad"
   | "jelajahi"
   | "cari"
@@ -21,6 +22,7 @@ export type Screen =
 /** Which gallery screen (if any) a left-nav label routes to. Items that have no
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
+  Scroll: "scroll",
   Launchpad: "launchpad",
   "Jelajahi Karya": "jelajahi",
   "Cari Kolaborator": "cari",
@@ -30,6 +32,7 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
 /** The screen switcher's menu, grouped. Sidebar surfaces sit under "Surface";
  *  the standalone flows under "Alur". Grows as flow mockups land. */
 export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" | "Funnel" }[] = [
+  { key: "scroll", label: "Scroll", group: "Surface" },
   { key: "launchpad", label: "Launchpad", group: "Surface" },
   { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
   { key: "cari", label: "Cari Kolaborator", group: "Surface" },

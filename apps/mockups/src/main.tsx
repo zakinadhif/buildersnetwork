@@ -12,6 +12,7 @@ import {
 } from "./gallery";
 import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
+import ScrollScreen from "./screens/Scroll";
 import JelajahiScreen from "./screens/Jelajahi";
 import LaunchpadScreen from "./screens/Launchpad";
 import KaryaDetailScreen from "./screens/KaryaDetail";
@@ -28,6 +29,7 @@ import ProfilScreen from "./screens/Profil";
 // that carry no product sidebar. Font choice lives bottom-right (shared chrome),
 // so a font persists across navigation.
 const SCREENS: Record<Screen, ComponentType> = {
+  scroll:    ScrollScreen,
   launchpad: LaunchpadScreen,
   jelajahi:  JelajahiScreen,
   cari:      CariScreen,
