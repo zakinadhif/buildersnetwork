@@ -9,7 +9,8 @@ export type Screen =
   | "jelajahi"
   | "cari"
   | "auth"
-  | "mulai";
+  | "mulai"
+  | "karya-detail";
 
 /** Which gallery screen (if any) a left-nav label routes to. Items that have no
  *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
@@ -21,12 +22,13 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
 
 /** The screen switcher's menu, grouped. Sidebar surfaces sit under "Surface";
  *  the standalone flows under "Alur". Grows as flow mockups land. */
-export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" }[] = [
+export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" | "Funnel" }[] = [
   { key: "launchpad", label: "Launchpad", group: "Surface" },
   { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
   { key: "cari", label: "Cari Kolaborator", group: "Surface" },
   { key: "auth", label: "Masuk / Daftar", group: "Alur" },
   { key: "mulai", label: "Mulai (profil minimal)", group: "Alur" },
+  { key: "karya-detail", label: "Detail Karya", group: "Funnel" },
 ];
 
 const NavContext = createContext<(screen: Screen) => void>(() => {});

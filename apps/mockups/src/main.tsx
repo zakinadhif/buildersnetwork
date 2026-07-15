@@ -14,6 +14,7 @@ import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import JelajahiScreen from "./screens/Jelajahi";
 import LaunchpadScreen from "./screens/Launchpad";
+import KaryaDetailScreen from "./screens/KaryaDetail";
 import MulaiScreen from "./screens/Mulai";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   cari:      CariScreen,
   auth:      AuthScreen,
   mulai:     MulaiScreen,
+  "karya-detail": KaryaDetailScreen,
 };
 
 function Gallery() {
