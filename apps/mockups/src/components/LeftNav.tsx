@@ -60,7 +60,7 @@ export function NavFilterList<Value extends string>({ label, options, active, on
   onSelect: (v: Value) => void;
 }) {
   return (
-    <>
+    <div>
       <div style={{ ...eyebrow, marginBottom: 10 }}>{label}</div>
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
         {options.map((opt) => {
@@ -90,6 +90,6 @@ export function NavFilterList<Value extends string>({ label, options, active, on
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
