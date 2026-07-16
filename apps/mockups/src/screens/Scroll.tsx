@@ -6,56 +6,37 @@
  * posts — each update's home is its karya's page; this is the aggregated view.
  *
  * Two principles shape it, both visible in the markup:
- *   1. Productive posting only. Every row is a *kind of progress* (rilis, tonggak,
- *      progres, riset, ajakan), never chatter — the feed itself has no reply box.
- *      Conversation is not banned, only kept out of the feed: it hangs off the
- *      update it is about (content-model.md), and the rail's "Diskusi aktif" just
- *      points at the threads busy right now. Day-to-day coordination still lives
- *      in each karya's WhatsApp group, out of band.
+ *   1. Productive posting only. Every *post* is a unit of progress — shipped, hit a
+ *      milestone, opened a slot — never chatter. The `kind` behind that is no longer
+ *      badged (the headline carries the news; five labels only competed with it),
+ *      but it still sorts an "ajakan" into the rail's open slots.
+ *
+ *      The principle governs what may be *posted*, not whether people may talk.
+ *      Conversation hangs off the update it is about (content-model.md), so a post
+ *      shows its thread's newest message and the rail points at the busy threads —
+ *      but neither is a composer. There is nowhere in Scroll to type: every reply
+ *      affordance is a doorway to the thread's home on the karya's page, and
+ *      day-to-day coordination stays in each karya's WhatsApp group, out of band.
  *   2. The karya is the account. A post leads with the karya logo; the contributor
  *      who wrote it is a small avatar dipping into the logo's corner.
  */
 
 import { useMemo, useState } from "react";
-import { Avatar, KaryaCover, Tag } from "@myapp/ui";
+import { MessageCircle } from "lucide-react";
+import { Avatar, KaryaCover } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { Shell } from "../components/Shell";
 import { MEMBERS, type Member } from "../data/karya";
 import {
   ACTIVE_WINDOW_MIN,
-  KIND_META,
   activeDiscussions,
   resolveUpdates,
   type ActiveDiscussion,
+  type LatestMessage,
   type ResolvedUpdate,
 } from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeMinutes, relativeTime } from "../lib/format";
-
-// ─── Kind badge — you post a *kind of progress*, and the feed says which ─────────
-function KindBadge({ kind }: { kind: ResolvedUpdate["update"]["kind"] }) {
-  const meta = KIND_META[kind];
-  return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 5,
-      padding: "2px 9px",
-      borderRadius: 99,
-      fontFamily: T.fontBody,
-      fontSize: T.size.micro,
-      fontWeight: T.weight.medium,
-      letterSpacing: T.track.tag,
-      color: meta.accent ? T.accent : T.ink2,
-      backgroundColor: meta.accent ? T.accentTint : T.bg,
-      border: `1px solid ${meta.accent ? T.accentLine : T.line}`,
-      whiteSpace: "nowrap" as const,
-    }}>
-      <span aria-hidden="true" style={{ fontSize: 9, lineHeight: 1 }}>{meta.glyph}</span>
-      {meta.label}
-    </span>
-  );
-}
 
 // ─── Post identity — the karya leads, the author dips into its corner ────────────
 // This is the platform's signature: the post is authored by the *project*, not the
@@ -76,6 +57,32 @@ function PostIdentity({ cover, karyaTitle, authorName }: { cover: string; karyaT
       }}>
         <Avatar name={authorName} size={17} />
       </span>
+    </div>
+  );
+}
+
+// ─── Facepile — who is talking, in miniature ────────────────────────────────────
+// Shared by the post and the rail. The faces make a thread read as a conversation
+// rather than a counter. Latest speaker leads and they overlap in that order; the
+// ring punches each one out of the page background (T.bg), not the card white.
+function Facepile({ people, max = 3 }: { people: Member[]; max?: number }) {
+  const shown = people.slice(0, max);
+  return (
+    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+      {shown.map((p, i) => (
+        <span
+          key={p.id}
+          style={{
+            marginLeft: i === 0 ? 0 : -5,
+            borderRadius: 99,
+            boxShadow: `0 0 0 1.5px ${T.bg}`,
+            lineHeight: 0,
+            zIndex: shown.length - i,
+          }}
+        >
+          <Avatar name={p.name} size={16} />
+        </span>
+      ))}
     </div>
   );
 }
@@ -109,15 +116,89 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
   );
 }
 
+// ─── Comment count — the thread's size, beside the only reaction ────────────────
+// Appreciation stays the sole *reaction*; this is a doorway, not a second verdict.
+function CommentCount({ count }: { count: number }) {
+  return (
+    <button
+      type="button"
+      aria-label={`${count} komentar`}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "5px 11px",
+        border: `1px solid ${T.line}`,
+        borderRadius: 99,
+        backgroundColor: "transparent",
+        color: T.ink2,
+        cursor: "pointer",
+        fontFamily: T.fontBody,
+        fontSize: T.size.caption,
+        fontWeight: T.weight.medium,
+        transition: "all 0.15s",
+      }}
+    >
+      <MessageCircle size={13} strokeWidth={2} aria-hidden="true" />
+      <span style={{ fontVariantNumeric: "tabular-nums" }}>{count}</span>
+    </button>
+  );
+}
+
+/** "Dian", "Dian & Nadia", "Dian & 3 lainnya" — first names; the faces carry the rest. */
+function voiceSummary(voices: Member[]): string {
+  const [first, ...rest] = voices;
+  const name = first.name.split(" ")[0];
+  if (rest.length === 0) return name;
+  if (rest.length === 1) return `${name} & ${rest[0].name.split(" ")[0]}`;
+  return `${name} & ${rest.length} lainnya`;
+}
+
+// ─── The thread's newest message, shown under the post ──────────────────────────
+// A glimpse, not a composer: the feed still has nowhere to type. "Balas" is a
+// doorway into the thread on the karya's page, where the conversation lives.
+function CommentPreview({ author, latest }: { author: Member; latest: LatestMessage }) {
+  const action = {
+    background: "none",
+    border: "none",
+    padding: 0,
+    fontFamily: T.fontBody,
+    fontSize: T.size.micro,
+    fontWeight: T.weight.medium,
+    color: T.ink3,
+    cursor: "pointer",
+  } as const;
+
+  return (
+    <div style={{ display: "flex", gap: 10, marginTop: 13, paddingTop: 13, borderTop: `1px solid ${T.line}` }}>
+      <Avatar name={author.name} size={28} />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{author.name}</span>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{relativeMinutes(latest.minutesAgo, true)}</span>
+        </div>
+        <p style={{ margin: "2px 0 0", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, lineHeight: T.lh.body }}>
+          {latest.body}
+        </p>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 7 }}>
+          <button type="button" style={action}>Suka · {latest.likes}</button>
+          <button type="button" style={action}>Balas</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── A single surfaced update ───────────────────────────────────────────────────
 function ScrollPost({ resolved, appreciated, onAppreciate }: {
   resolved: ResolvedUpdate;
   appreciated: boolean;
   onAppreciate: (id: number) => void;
 }) {
-  const { update, karya, author } = resolved;
+  const { update, karya, author, voices } = resolved;
   const cover = coverFor(karya.interests);
   const shots = update.shots ? (karya.landscapeScreenshots ?? fallbackShots).slice(0, 2) : [];
+  const discussion = update.discussion;
 
   return (
     <article style={{
@@ -129,22 +210,19 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
       <PostIdentity cover={cover} karyaTitle={karya.title} authorName={author.name} />
 
       <div style={{ flex: 1, minWidth: 0 }}>
-        {/* Header: karya name is the byline; the person is the dip below it */}
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" as const }}>
-          <span style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading }}>
-            {karya.title}
-          </span>
-          <KindBadge kind={update.kind} />
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginLeft: "auto", whiteSpace: "nowrap" as const }}>
-            {relativeTime(update.hoursAgo)}
-          </span>
+        {/* Byline: the karya. Who typed it and when sit quietly underneath. */}
+        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading }}>
+          {karya.title}
         </div>
         <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginTop: 1 }}>
-          diposting {author.name}
+          diposting {author.name} · {relativeTime(update.hoursAgo)}
         </div>
 
-        {/* Body — the substantive update */}
-        <p style={{ margin: "9px 0 0", fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink, lineHeight: T.lh.body }}>
+        {/* The headline carries the news; the body carries the detail */}
+        <h3 style={{ margin: "10px 0 0", fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
+          {update.title}
+        </h3>
+        <p style={{ margin: "4px 0 0", fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
           {update.body}
         </p>
 
@@ -179,16 +257,16 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
           </div>
         )}
 
-        {/* Footer — appreciation + tags + jump to the karya. No reply: chat is on WhatsApp. */}
+        {/* Footer — appreciate, open the thread, jump to the karya. No interest tags:
+            they describe the karya's standing state, which is the karya page's job;
+            a feed carries what just happened. */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14, flexWrap: "wrap" as const }}>
           <AppreciateButton
             count={karya.appreciations + (appreciated ? 1 : 0)}
             active={appreciated}
             onClick={() => onAppreciate(update.id)}
           />
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
-            {karya.interests.slice(0, 3).map((i) => <Tag key={i} label={i} />)}
-          </div>
+          <CommentCount count={discussion?.total ?? 0} />
           <button type="button" style={{
             marginLeft: "auto",
             background: "none",
@@ -204,6 +282,19 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
             Lihat karya →
           </button>
         </div>
+
+        {/* Who's in there, then the newest thing said — the thread, seen through a window */}
+        {discussion && voices.length > 0 && (
+          <>
+            <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 12 }}>
+              <Facepile people={voices} />
+              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+                {voiceSummary(voices)} berkomentar
+              </span>
+            </div>
+            <CommentPreview author={voices[0]} latest={discussion.latest} />
+          </>
+        )}
       </div>
     </article>
   );
@@ -214,30 +305,6 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
 // update it hangs off, and this block just says which ones are hot. Membership is
 // earned, not curated — a burst inside the window (data/updates.ts) puts a thread
 // here and cooling takes it out, so the block turns over on its own.
-// The faces make it read as a conversation rather than a counter. Latest speaker
-// leads, and they overlap in that order — the ring punches each one out of the
-// rail's own background (T.bg), not the lifted-card white.
-function Facepile({ people, max = 3 }: { people: Member[]; max?: number }) {
-  const shown = people.slice(0, max);
-  return (
-    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-      {shown.map((p, i) => (
-        <span
-          key={p.id}
-          style={{
-            marginLeft: i === 0 ? 0 : -5,
-            borderRadius: 99,
-            boxShadow: `0 0 0 1.5px ${T.bg}`,
-            lineHeight: 0,
-            zIndex: shown.length - i,
-          }}
-        >
-          <Avatar name={p.name} size={16} />
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] }) {
   if (discussions.length === 0) return null;
@@ -268,7 +335,7 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-        {discussions.map(({ resolved: { update, karya }, discussion, voices }, idx) => (
+        {discussions.map(({ resolved: { update, karya, voices }, discussion }, idx) => (
           <div
             key={update.id}
             style={{
@@ -302,7 +369,7 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
                   color: T.ink3,
                   fontVariantNumeric: "tabular-nums",
                 }}>
-                  {relativeMinutes(discussion.lastMinutesAgo, true)}
+                  {relativeMinutes(discussion.latest.minutesAgo, true)}
                 </span>
               </div>
 

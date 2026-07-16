@@ -9,10 +9,14 @@
  * The platform holds one posting principle: **productive posting only.** An
  * update is a unit of progress — shipped, hit a milestone, posted research,
  * opened a collaborator slot — never chatter. That is why an update carries a
- * `kind`: you post a *kind of progress*, not a thought, and the feed has no reply
- * box. The principle governs what may become a *post*, not whether people may
- * talk: conversation attaches to the update it is about (see `Discussion`), and
- * day-to-day coordination stays in each karya's WhatsApp group, out of band.
+ * `kind`: you post a *kind of progress*, not a thought, and the feed has no
+ * composer. The principle governs what may become a *post*, not whether people
+ * may talk: conversation attaches to the update it is about (see `Discussion`),
+ * and day-to-day coordination stays in each karya's WhatsApp group, out of band.
+ *
+ * `kind` is no longer badged on the post — the feed reads calmer without five
+ * labels competing with the headline — but it still classifies: it is what makes
+ * an "ajakan" surface as an open slot in Scroll's rail, carrying `role` with it.
  *
  * The post is authored by the *karya*, not the person: it leads with the karya
  * logo; the contributor who posted it is a small avatar dipping into the corner.
@@ -28,26 +32,33 @@ export type UpdateKind =
   | "riset"    // research note, finding, writeup
   | "ajakan";  // opened a collaborator slot
 
-export const KIND_META: Record<UpdateKind, { label: string; glyph: string; accent: boolean }> = {
-  rilis:   { label: "Rilis",           glyph: "◆", accent: true  },
-  tonggak: { label: "Tonggak",         glyph: "◈", accent: false },
-  progres: { label: "Progres",         glyph: "◉", accent: false },
-  riset:   { label: "Riset",           glyph: "◇", accent: false },
-  ajakan:  { label: "Ajak kolaborasi", glyph: "◎", accent: true  },
-};
+/**
+ * The newest message in a thread — the one the post previews.
+ *
+ * It carries no author of its own on purpose: the latest message is by the
+ * latest speaker, so its author *is* `Discussion.voices[0]` by construction.
+ * Storing the handle twice would only invite the two to drift apart.
+ */
+export interface LatestMessage {
+  body: string;
+  minutesAgo: number; // doubles as the thread's recency — nothing is newer
+  likes: number;
+}
 
 /**
  * The discussion thread under an update.
  *
  * Conversation attaches to the *event* — the update — not to the karya page:
  * a thread lands where the news is (plans/reference/content-model.md, FR-21).
- * Only the counts the rail needs to spot a burst live here; the messages
- * themselves belong to the update's own page.
+ * The mock keeps only what the surfaces show — a total, the burst size, who is
+ * speaking, and the newest message — never the whole thread; that belongs to the
+ * update's own page.
  */
 export interface Discussion {
-  recent: number;         // messages inside the last ACTIVE_WINDOW_MIN minutes
-  lastMinutesAgo: number; // when the newest message landed
-  voices: string[];       // handles speaking inside the window, latest first
+  total: number;         // messages all the way down — what the post's counter shows
+  recent: number;        // messages inside the last ACTIVE_WINDOW_MIN minutes
+  voices: string[];      // handles speaking inside the window, latest first
+  latest: LatestMessage; // the newest of them, by voices[0]
 }
 
 /** How wide the activity window is, and how many messages must land inside it. */
@@ -64,7 +75,7 @@ export const ACTIVE_MESSAGE_THRESHOLD = 5;
 export function isDiscussionActive(d: Discussion | undefined): d is Discussion {
   return d !== undefined
     && d.recent > ACTIVE_MESSAGE_THRESHOLD
-    && d.lastMinutesAgo <= ACTIVE_WINDOW_MIN;
+    && d.latest.minutesAgo <= ACTIVE_WINDOW_MIN;
 }
 
 export interface Update {
@@ -72,6 +83,7 @@ export interface Update {
   karyaId: number;      // the karya this update belongs to (its canonical home)
   authorHandle: string; // who on the roster posted it — resolved against the roster
   kind: UpdateKind;
+  title: string;        // the headline — what happened, in one line
   body: string;         // the substantive update (productive posting only)
   hoursAgo: number;     // recency; drives Scroll's reverse-chronological order
   shots?: string[];     // optional landscape screenshots (reuse the karya's)
@@ -83,57 +95,74 @@ export interface Update {
  *  the whole point of an update feed (vs. a directory that lists each karya once). */
 export const UPDATES: Update[] = [
   { id: 1, karyaId: 2, authorHandle: "@dianp",       kind: "progres", hoursAgo: 2,
-    body: "Toko online pertama live — 3 UMKM depan kampus sekarang terima order lewat WhatsApp langsung dari katalog.",
+    title: "Toko online pertama sudah jalan",
+    body: "Tiga UMKM depan kampus sekarang terima order lewat WhatsApp, langsung dari katalog. Yang paling makan waktu ternyata foto produk, bukan setup tokonya.",
     // Fresh, but only a trickle — under the threshold, so the rail leaves it out.
-    discussion: { recent: 3, lastMinutesAgo: 4, voices: ["@dianp"] } },
+    discussion: { total: 9, recent: 3, voices: ["@rizalh"],
+      latest: { body: "Ini nolong banget buat warung yang belum punya katalog. Alurnya boleh dicontek?", minutesAgo: 4, likes: 2 } } },
   { id: 2, karyaId: 1, authorHandle: "@arief_dev",   kind: "rilis",   hoursAgo: 5,
-    body: "Beta terbuka! 40 lowongan magang dari alumni sudah tayang. Coba dan kirim masukan ya.", shots: ["shot"],
-    discussion: { recent: 12, lastMinutesAgo: 2, voices: ["@dianp", "@nadiaku", "@eko_s"] } },
+    title: "Beta terbuka untuk semua",
+    body: "40 lowongan magang dari alumni sudah tayang. Coba dan kirim masukan ya — terutama soal filter dan alur lamarannya.", shots: ["shot"],
+    discussion: { total: 34, recent: 12, voices: ["@dianp", "@nadiaku", "@eko_s"],
+      latest: { body: "Baru coba — filter lokasinya ngebantu. Ada rencana tambah filter remote?", minutesAgo: 2, likes: 3 } } },
   { id: 3, karyaId: 3, authorHandle: "@rizalh",      kind: "riset",   hoursAgo: 9,
-    body: "Catatan riset minggu ini: tokenizer Sunda–Jawa naik ke 92% akurasi segmentasi. Notebook + detailnya sudah di repo.",
-    discussion: { recent: 8, lastMinutesAgo: 6, voices: ["@eko_s", "@rizalh"] } },
+    title: "Tokenizer Sunda–Jawa tembus 92%",
+    body: "Naik dari 87% bulan lalu. Notebook dan catatan lengkapnya sudah di repo, termasuk split datanya.",
+    discussion: { total: 19, recent: 8, voices: ["@eko_s", "@rizalh"],
+      latest: { body: "92% itu lewat baseline yang mana? Penasaran sama split datanya.", minutesAgo: 6, likes: 1 } } },
   { id: 4, karyaId: 1, authorHandle: "@arief_dev",   kind: "tonggak", hoursAgo: 14,
-    body: "Naik dari MVP ke Beta. Terima kasih 30+ builder yang ikut uji coba versi tertutup." },
+    title: "Naik kelas dari MVP ke Beta",
+    body: "Terima kasih 30+ builder yang ikut uji coba versi tertutup — masukan kalian yang bikin naik kelas." },
   { id: 5, karyaId: 4, authorHandle: "@nadiaku",     kind: "progres", hoursAgo: 20,
-    body: "Nambah 12 kartu materi baru untuk Kalkulus & Struktur Data — total 68 kartu sekarang.", shots: ["shot"],
-    // Was busy, has gone quiet — outside the window, so it drops out. Activity is
-    // measured, not accumulated.
-    discussion: { recent: 9, lastMinutesAgo: 140, voices: ["@nadiaku", "@arief_dev"] } },
+    title: "12 kartu materi baru",
+    body: "Kalkulus & Struktur Data dapat tambahan 12 kartu — total 68 sekarang.", shots: ["shot"],
+    // Was busy, has gone quiet — the newest message sits outside the window, so it
+    // drops out of the rail. Activity is measured, not accumulated.
+    discussion: { total: 22, recent: 9, voices: ["@arief_dev", "@eko_s"],
+      latest: { body: "Kartu Struktur Data-nya rapi. Ada rencana ekspor ke Anki?", minutesAgo: 140, likes: 4 } } },
   { id: 6, karyaId: 5, authorHandle: "@farhan_a",    kind: "ajakan",  hoursAgo: 26, role: "Desainer UI",
-    body: "Buka slot: butuh desainer UI untuk rombak halaman detail kost. Sistem desain & komponennya sudah ada.",
+    title: "Butuh desainer UI untuk halaman detail kost",
+    body: "Buka slot buat rombak halaman detail kost. Sistem desain & komponennya sudah ada, tinggal dipakai.",
     // A day old, and only now catching fire — recency of the *post* is irrelevant.
-    discussion: { recent: 7, lastMinutesAgo: 11, voices: ["@nadiaku", "@dianp", "@arief_dev"] } },
+    discussion: { total: 15, recent: 7, voices: ["@nadiaku", "@dianp", "@arief_dev"],
+      latest: { body: "Tertarik! Aku pernah rombak halaman detail yang mirip. Boleh lihat sistem desainnya?", minutesAgo: 11, likes: 5 } } },
   { id: 7, karyaId: 6, authorHandle: "@megaw",       kind: "progres", hoursAgo: 38,
-    body: "Sinkron kalender akademik Telkom jalan otomatis — jadwal ketarik sendiri tanpa input manual lagi." },
+    title: "Kalender akademik sinkron otomatis",
+    body: "Jadwal ketarik sendiri dari kalender akademik Telkom — nggak ada input manual lagi." },
   { id: 8, karyaId: 3, authorHandle: "@rizalh",      kind: "tonggak", hoursAgo: 44,
-    body: "Rilis korpus v0.1 ke Hugging Face — 12k kalimat berlisensi terbuka, siap dipakai eksperimen NLP lokal." },
+    title: "Korpus v0.1 rilis ke Hugging Face",
+    body: "12k kalimat berlisensi terbuka, siap dipakai eksperimen NLP lokal." },
   { id: 9, karyaId: 7, authorHandle: "@aldip_music", kind: "ajakan",  hoursAgo: 52, role: "Backend / Audio",
-    body: "Cari partner backend yang paham streaming audio. Proyek arsip musik indie, lisensi terbuka, santai tapi konsisten." },
+    title: "Cari partner backend untuk streaming audio",
+    body: "Proyek arsip musik indie, lisensi terbuka, santai tapi konsisten. Yang penting paham streaming audio." },
 ];
 
 export interface ResolvedUpdate {
   update: Update;
   karya: Karya;
   author: Roster;
+  voices: Member[]; // the discussion's speakers, latest first; empty without a thread
 }
 
-/** Join an update to its karya and the roster member who posted it. Drops any
- *  update whose karya or author cannot be resolved (keeps the feed honest). */
+/** Join an update to its karya, the roster member who posted it, and the people
+ *  talking under it. Drops any update whose karya or author cannot be resolved,
+ *  and any voice that cannot be put to a name (keeps the feed honest). */
 export function resolveUpdates(updates: Update[] = UPDATES): ResolvedUpdate[] {
   return updates
     .map((update) => {
       const karya = KARYA.find((k) => k.id === update.karyaId);
       const author = karya?.roster.find((r) => r.handle === update.authorHandle);
-      return karya && author ? { update, karya, author } : null;
+      if (!karya || !author) return null;
+      const voices = (update.discussion?.voices ?? []).flatMap((h) => MEMBERS.filter((m) => m.handle === h));
+      return { update, karya, author, voices };
     })
     .filter((x): x is ResolvedUpdate => x !== null)
     .sort((a, b) => a.update.hoursAgo - b.update.hoursAgo); // newest first
 }
 
 export interface ActiveDiscussion {
-  resolved: ResolvedUpdate;
+  resolved: ResolvedUpdate; // its `voices` are the speakers, already resolved
   discussion: Discussion;
-  voices: Member[]; // the speakers, resolved; latest first
 }
 
 /** The threads burning right now, busiest first — the rail's "Diskusi aktif".
@@ -141,13 +170,6 @@ export interface ActiveDiscussion {
  *  and the feed beside it already answers "what is newest". */
 export function activeDiscussions(resolved: ResolvedUpdate[] = resolveUpdates()): ActiveDiscussion[] {
   return resolved
-    .flatMap((r) => {
-      const discussion = r.update.discussion;
-      if (!isDiscussionActive(discussion)) return [];
-      // Same discipline as resolveUpdates: an unknown handle is dropped, never
-      // faked into a nameless face.
-      const voices = discussion.voices.flatMap((h) => MEMBERS.filter((m) => m.handle === h));
-      return [{ resolved: r, discussion, voices }];
-    })
+    .flatMap((r) => isDiscussionActive(r.update.discussion) ? [{ resolved: r, discussion: r.update.discussion }] : [])
     .sort((a, b) => b.discussion.recent - a.discussion.recent);
 }
