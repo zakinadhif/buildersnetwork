@@ -98,6 +98,12 @@
   font-weight: var(--font-weight-medium);
 }
 .bn-nav-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  /* Text glyphs keep the body face; icon elements (SVG, currentColor) inherit
+     the nav item's colour and carry their own size. */
   font-family: var(--font-body);
   font-size: var(--text-ui);
 }

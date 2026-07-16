@@ -1,15 +1,19 @@
 import type { ReactNode } from "react";
+import { LayoutGrid, Newspaper, Users } from "lucide-react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 
 /** The three live product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
  *  were retired from the sidebar — the first two remain reachable via the screen
- *  switcher (SCREEN_META); Karya Saya has no surface of its own yet. */
-const NAV_ITEMS: { label: string; icon: string }[] = [
-  { label: "Scroll", icon: "◈" },
-  { label: "Karya",  icon: "▦" },
-  { label: "People", icon: "◉" },
+ *  switcher (SCREEN_META); Karya Saya has no surface of its own yet.
+ *
+ *  Icons are lucide-react (rounded caps/joins → a friendly line-icon vibe): a
+ *  news feed for Scroll, a catalogue grid for Karya, a group for People. */
+const NAV_ITEMS: { label: string; icon: ReactNode }[] = [
+  { label: "Scroll", icon: <Newspaper size={18} strokeWidth={1.75} /> },
+  { label: "Karya",  icon: <LayoutGrid size={18} strokeWidth={1.75} /> },
+  { label: "People", icon: <Users size={18} strokeWidth={1.75} /> },
 ];
 
 /**

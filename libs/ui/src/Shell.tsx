@@ -21,7 +21,8 @@ export function ShellColumns({ children }: { children: ReactNode }) {
 
 export interface NavItem {
   label: string;
-  icon: string;
+  /** A glyph string or an icon element (e.g. a lucide-react component). */
+  icon: ReactNode;
   /** Marked with `aria-current="page"`. */
   active?: boolean;
   /** No destination yet — rendered, but not clickable. */
