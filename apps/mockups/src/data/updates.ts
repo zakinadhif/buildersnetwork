@@ -18,7 +18,7 @@
  * logo; the contributor who posted it is a small avatar dipping into the corner.
  */
 
-import { KARYA, type Karya, type Roster } from "./karya";
+import { KARYA, MEMBERS, type Karya, type Member, type Roster } from "./karya";
 
 /** The kinds of progress a karya can post. Ordered loosely by weight. */
 export type UpdateKind =
@@ -47,6 +47,7 @@ export const KIND_META: Record<UpdateKind, { label: string; glyph: string; accen
 export interface Discussion {
   recent: number;         // messages inside the last ACTIVE_WINDOW_MIN minutes
   lastMinutesAgo: number; // when the newest message landed
+  voices: string[];       // handles speaking inside the window, latest first
 }
 
 /** How wide the activity window is, and how many messages must land inside it. */
@@ -84,24 +85,24 @@ export const UPDATES: Update[] = [
   { id: 1, karyaId: 2, authorHandle: "@dianp",       kind: "progres", hoursAgo: 2,
     body: "Toko online pertama live — 3 UMKM depan kampus sekarang terima order lewat WhatsApp langsung dari katalog.",
     // Fresh, but only a trickle — under the threshold, so the rail leaves it out.
-    discussion: { recent: 3, lastMinutesAgo: 4 } },
+    discussion: { recent: 3, lastMinutesAgo: 4, voices: ["@dianp"] } },
   { id: 2, karyaId: 1, authorHandle: "@arief_dev",   kind: "rilis",   hoursAgo: 5,
     body: "Beta terbuka! 40 lowongan magang dari alumni sudah tayang. Coba dan kirim masukan ya.", shots: ["shot"],
-    discussion: { recent: 12, lastMinutesAgo: 2 } },
+    discussion: { recent: 12, lastMinutesAgo: 2, voices: ["@dianp", "@nadiaku", "@eko_s"] } },
   { id: 3, karyaId: 3, authorHandle: "@rizalh",      kind: "riset",   hoursAgo: 9,
     body: "Catatan riset minggu ini: tokenizer Sunda–Jawa naik ke 92% akurasi segmentasi. Notebook + detailnya sudah di repo.",
-    discussion: { recent: 8, lastMinutesAgo: 6 } },
+    discussion: { recent: 8, lastMinutesAgo: 6, voices: ["@eko_s", "@rizalh"] } },
   { id: 4, karyaId: 1, authorHandle: "@arief_dev",   kind: "tonggak", hoursAgo: 14,
     body: "Naik dari MVP ke Beta. Terima kasih 30+ builder yang ikut uji coba versi tertutup." },
   { id: 5, karyaId: 4, authorHandle: "@nadiaku",     kind: "progres", hoursAgo: 20,
     body: "Nambah 12 kartu materi baru untuk Kalkulus & Struktur Data — total 68 kartu sekarang.", shots: ["shot"],
     // Was busy, has gone quiet — outside the window, so it drops out. Activity is
     // measured, not accumulated.
-    discussion: { recent: 9, lastMinutesAgo: 140 } },
+    discussion: { recent: 9, lastMinutesAgo: 140, voices: ["@nadiaku", "@arief_dev"] } },
   { id: 6, karyaId: 5, authorHandle: "@farhan_a",    kind: "ajakan",  hoursAgo: 26, role: "Desainer UI",
     body: "Buka slot: butuh desainer UI untuk rombak halaman detail kost. Sistem desain & komponennya sudah ada.",
     // A day old, and only now catching fire — recency of the *post* is irrelevant.
-    discussion: { recent: 7, lastMinutesAgo: 11 } },
+    discussion: { recent: 7, lastMinutesAgo: 11, voices: ["@nadiaku", "@dianp", "@arief_dev"] } },
   { id: 7, karyaId: 6, authorHandle: "@megaw",       kind: "progres", hoursAgo: 38,
     body: "Sinkron kalender akademik Telkom jalan otomatis — jadwal ketarik sendiri tanpa input manual lagi." },
   { id: 8, karyaId: 3, authorHandle: "@rizalh",      kind: "tonggak", hoursAgo: 44,
@@ -132,6 +133,7 @@ export function resolveUpdates(updates: Update[] = UPDATES): ResolvedUpdate[] {
 export interface ActiveDiscussion {
   resolved: ResolvedUpdate;
   discussion: Discussion;
+  voices: Member[]; // the speakers, resolved; latest first
 }
 
 /** The threads burning right now, busiest first — the rail's "Diskusi aktif".
@@ -139,6 +141,13 @@ export interface ActiveDiscussion {
  *  and the feed beside it already answers "what is newest". */
 export function activeDiscussions(resolved: ResolvedUpdate[] = resolveUpdates()): ActiveDiscussion[] {
   return resolved
-    .flatMap((r) => isDiscussionActive(r.update.discussion) ? [{ resolved: r, discussion: r.update.discussion }] : [])
+    .flatMap((r) => {
+      const discussion = r.update.discussion;
+      if (!isDiscussionActive(discussion)) return [];
+      // Same discipline as resolveUpdates: an unknown handle is dropped, never
+      // faked into a nameless face.
+      const voices = discussion.voices.flatMap((h) => MEMBERS.filter((m) => m.handle === h));
+      return [{ resolved: r, discussion, voices }];
+    })
     .sort((a, b) => b.discussion.recent - a.discussion.recent);
 }

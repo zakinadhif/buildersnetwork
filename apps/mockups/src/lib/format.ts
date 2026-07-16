@@ -11,8 +11,11 @@ export function relativeTime(hoursAgo: number): string {
 }
 
 /** Minute-grain recency. A live discussion burst is measured in minutes, where
- *  `relativeTime`'s hour grain would flatten every one of them to "baru saja". */
-export function relativeMinutes(minutesAgo: number): string {
-  if (minutesAgo < 1) return "barusan";
-  return `${minutesAgo} mnt lalu`;
+ *  `relativeTime`'s hour grain would flatten every one of them to "baru saja".
+ *
+ *  `compact` drops the trailing "lalu" for tight slots — a timestamp sitting
+ *  beside a name reads as the past without being told. */
+export function relativeMinutes(minutesAgo: number, compact = false): string {
+  if (minutesAgo < 1) return compact ? "baru" : "barusan";
+  return compact ? `${minutesAgo} mnt` : `${minutesAgo} mnt lalu`;
 }

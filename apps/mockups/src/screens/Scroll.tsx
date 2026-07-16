@@ -20,7 +20,7 @@ import { useMemo, useState } from "react";
 import { Avatar, KaryaCover, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { Shell } from "../components/Shell";
-import { MEMBERS } from "../data/karya";
+import { MEMBERS, type Member } from "../data/karya";
 import {
   ACTIVE_WINDOW_MIN,
   KIND_META,
@@ -214,42 +214,98 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
 // update it hangs off, and this block just says which ones are hot. Membership is
 // earned, not curated — a burst inside the window (data/updates.ts) puts a thread
 // here and cooling takes it out, so the block turns over on its own.
+// The faces make it read as a conversation rather than a counter. Latest speaker
+// leads, and they overlap in that order — the ring punches each one out of the
+// rail's own background (T.bg), not the lifted-card white.
+function Facepile({ people, max = 3 }: { people: Member[]; max?: number }) {
+  const shown = people.slice(0, max);
+  return (
+    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+      {shown.map((p, i) => (
+        <span
+          key={p.id}
+          style={{
+            marginLeft: i === 0 ? 0 : -5,
+            borderRadius: 99,
+            boxShadow: `0 0 0 1.5px ${T.bg}`,
+            lineHeight: 0,
+            zIndex: shown.length - i,
+          }}
+        >
+          <Avatar name={p.name} size={16} />
+        </span>
+      ))}
+    </div>
+  );
+}
+
 function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] }) {
   if (discussions.length === 0) return null;
 
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+      {/* The dot carries the "live" claim for the whole block; the arrow is the way in */}
+      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+        <span className="bn-live-dot" aria-hidden="true" />
         <div style={eyebrow}>Diskusi aktif</div>
-        {/* The window, said once here rather than repeated on every row */}
-        <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
-          {ACTIVE_WINDOW_MIN} mnt terakhir
-        </span>
+        <button
+          type="button"
+          aria-label={`Lihat semua diskusi aktif (${ACTIVE_WINDOW_MIN} menit terakhir)`}
+          style={{
+            marginLeft: "auto",
+            background: "none",
+            border: "none",
+            padding: 0,
+            fontFamily: T.fontBody,
+            fontSize: T.size.ui,
+            color: T.accentMid,
+            cursor: "pointer",
+            lineHeight: 1,
+          }}
+        >
+          →
+        </button>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-        {discussions.map(({ resolved: { update, karya }, discussion }, idx) => (
+        {discussions.map(({ resolved: { update, karya }, discussion, voices }, idx) => (
           <div
             key={update.id}
             style={{
               display: "flex",
               gap: 10,
-              padding: "10px 0",
+              padding: "11px 0",
               borderBottom: idx < discussions.length - 1 ? `1px solid ${T.line}` : "none",
               alignItems: "flex-start",
             }}
           >
-            <KaryaCover src={coverFor(karya.interests)} size={30} radius={9} alt={karya.title} />
+            <KaryaCover src={coverFor(karya.interests)} size={32} radius={9} alt={karya.title} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>
-                {karya.title}
+              {/* The byline is the karya — the people are in the facepile below */}
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{
+                  fontFamily: T.fontBody,
+                  fontSize: T.size.ui,
+                  fontWeight: T.weight.medium,
+                  color: T.ink,
+                  whiteSpace: "nowrap" as const,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}>
+                  {karya.title}
+                </span>
+                <span style={{ marginLeft: "auto", whiteSpace: "nowrap" as const, fontFamily: T.fontBody, fontSize: T.size.micro, fontVariantNumeric: "tabular-nums" }}>
+                  <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{discussion.recent} pesan</span>
+                  <span style={{ color: T.ink3 }}> · {relativeMinutes(discussion.lastMinutesAgo, true)}</span>
+                </span>
               </div>
-              {/* Which post they're arguing under — clamped; the thread is the point, not the post */}
+
+              {/* The post they're talking under — clamped; the thread is the point, not the post */}
               <p style={{
-                margin: "1px 0 0",
+                margin: "3px 0 0",
                 fontFamily: T.fontBody,
                 fontSize: T.size.micro,
-                color: T.ink3,
+                color: T.ink2,
                 lineHeight: T.lh.body,
                 display: "-webkit-box",
                 WebkitBoxOrient: "vertical" as const,
@@ -258,15 +314,23 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
               }}>
                 {update.body}
               </p>
-              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
-                <span className="bn-live-dot" aria-hidden="true" />
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums" }}>
-                  {discussion.recent} pesan baru
-                </span>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
-                  · {relativeMinutes(discussion.lastMinutesAgo)}
-                </span>
-              </div>
+
+              {voices.length > 0 && (
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
+                  <Facepile people={voices} />
+                  <span style={{
+                    fontFamily: T.fontBody,
+                    fontSize: T.size.micro,
+                    color: T.ink3,
+                    whiteSpace: "nowrap" as const,
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                  }}>
+                    {voices[0].name.split(" ")[0]} berkomentar
+                  </span>
+                  <span aria-hidden="true" style={{ marginLeft: "auto", color: T.accentMid, fontSize: T.size.micro }}>→</span>
+                </div>
+              )}
             </div>
           </div>
         ))}
