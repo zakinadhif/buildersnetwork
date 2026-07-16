@@ -369,7 +369,12 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
 }
 
 // ─── Right Rail ───────────────────────────────────────────────────────────────
-function RightRail({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
+function RightRail({ query, onQuery, filter, onFilter }: {
+  query: string;
+  onQuery: (q: string) => void;
+  filter: Interest;
+  onFilter: (f: Interest) => void;
+}) {
   const seekingCollab = KARYA.filter((k) => k.stages.includes("Cari Kolaborator")).length;
 
   return (
@@ -403,6 +408,14 @@ function RightRail({ query, onQuery }: { query: string; onQuery: (q: string) => 
           }}
         />
       </div>
+
+      {/* Interest filter — moved here from the left nav */}
+      <NavFilterList
+        label="Filter Minat"
+        options={INTEREST_FILTERS.map((f) => ({ value: f, label: f }))}
+        active={filter}
+        onSelect={onFilter}
+      />
 
       {/* Community pulse */}
       <div style={{
@@ -469,19 +482,9 @@ export default function KaryaScreen() {
   }
 
   return (
-    <Shell
-      active="karya"
-      navFilters={
-        <NavFilterList
-          label="Filter Minat"
-          options={INTEREST_FILTERS.map((f) => ({ value: f, label: f }))}
-          active={filter}
-          onSelect={setFilter}
-        />
-      }
-    >
+    <Shell active="karya">
       <Catalog filter={filter} query={query} appreciated={appreciated} onAppreciate={toggleAppreciate} />
-      <RightRail query={query} onQuery={setQuery} />
+      <RightRail query={query} onQuery={setQuery} filter={filter} onFilter={setFilter} />
     </Shell>
   );
 }

@@ -16,14 +16,10 @@
 import { useMemo, useState } from "react";
 import { Avatar, KaryaCover, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
-import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
 import { KIND_META, resolveUpdates, type ResolvedUpdate } from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeTime } from "../lib/format";
-
-const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "UMKM", "Edukasi", "Komunitas", "Open Source"] as const;
-type Interest = (typeof INTEREST_FILTERS)[number];
 
 // ─── Kind badge — you post a *kind of progress*, and the feed says which ─────────
 function KindBadge({ kind }: { kind: ResolvedUpdate["update"]["kind"] }) {
@@ -263,13 +259,9 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
 
 // ─── Screen ─────────────────────────────────────────────────────────────────────
 export default function ScrollScreen() {
-  const [filter, setFilter] = useState<Interest>("Semua");
   const [appreciated, setAppreciated] = useState<Set<number>>(new Set());
 
-  const feed = useMemo(() => {
-    const all = resolveUpdates();
-    return filter === "Semua" ? all : all.filter((r) => r.karya.interests.includes(filter));
-  }, [filter]);
+  const feed = useMemo(() => resolveUpdates(), []);
 
   function toggleAppreciate(id: number) {
     setAppreciated((prev) => {
@@ -280,17 +272,7 @@ export default function ScrollScreen() {
   }
 
   return (
-    <Shell
-      active="scroll"
-      navFilters={
-        <NavFilterList
-          label="Minat kamu"
-          options={INTEREST_FILTERS.map((f) => ({ value: f, label: f }))}
-          active={filter}
-          onSelect={setFilter}
-        />
-      }
-    >
+    <Shell active="scroll">
       <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const }}>
         {/* Header */}
         <div style={{ marginBottom: 6 }}>
@@ -305,7 +287,7 @@ export default function ScrollScreen() {
           <div style={{ ...eyebrow, margin: "14px 0 2px" }}>Terbaru</div>
           {feed.length === 0 ? (
             <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
-              Belum ada kabar untuk minat ini — coba minat lain.
+              Belum ada kabar progres.
             </div>
           ) : (
             feed.map((r) => (
