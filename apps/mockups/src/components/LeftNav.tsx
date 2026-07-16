@@ -3,14 +3,13 @@ import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 
-/** The five product surfaces. Only the first three route anywhere. */
+/** The three live product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
+ *  were retired from the sidebar — the first two remain reachable via the screen
+ *  switcher (SCREEN_META); Karya Saya has no surface of its own yet. */
 const NAV_ITEMS: { label: string; icon: string }[] = [
-  { label: "Scroll",           icon: "◈" },
-  { label: "Karya",            icon: "▦" },
-  { label: "People",           icon: "◉" },
-  { label: "Cari Kolaborator", icon: "◎" },
-  { label: "Minat Saya",       icon: "◇" },
-  { label: "Karya Saya",       icon: "◆" },
+  { label: "Scroll", icon: "◈" },
+  { label: "Karya",  icon: "▦" },
+  { label: "People", icon: "◉" },
 ];
 
 /**

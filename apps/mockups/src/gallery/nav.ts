@@ -19,14 +19,13 @@ export type Screen =
   | "minat"
   | "onboarding";
 
-/** Which gallery screen (if any) a left-nav label routes to. Items that have no
- *  screen of their own (Minat Saya, Karya Saya) map to nothing. */
+/** Which gallery screen a left-nav label routes to. The sidebar now pins only the
+ *  three live surfaces; Cari Kolaborator and Minat Saya were retired from it but
+ *  stay reachable through the screen switcher (SCREEN_META). */
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
   Karya: "karya",
   People: "people",
-  "Cari Kolaborator": "cari",
-  "Minat Saya": "minat",
 };
 
 /** The screen switcher's menu, grouped. Sidebar surfaces sit under "Surface";
