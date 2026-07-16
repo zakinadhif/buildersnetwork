@@ -294,9 +294,15 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
                 }}>
                   {karya.title}
                 </span>
-                <span style={{ marginLeft: "auto", whiteSpace: "nowrap" as const, fontFamily: T.fontBody, fontSize: T.size.micro, fontVariantNumeric: "tabular-nums" }}>
-                  <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>{discussion.recent} pesan</span>
-                  <span style={{ color: T.ink3 }}> · {relativeMinutes(discussion.lastMinutesAgo, true)}</span>
+                <span style={{
+                  marginLeft: "auto",
+                  whiteSpace: "nowrap" as const,
+                  fontFamily: T.fontBody,
+                  fontSize: T.size.micro,
+                  color: T.ink3,
+                  fontVariantNumeric: "tabular-nums",
+                }}>
+                  {relativeMinutes(discussion.lastMinutesAgo, true)}
                 </span>
               </div>
 
