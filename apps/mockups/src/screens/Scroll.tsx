@@ -256,14 +256,6 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
 
   return (
     <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
-      {/* Where the chatter goes — the principle, made explicit */}
-      <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: T.radiusPanel, padding: "13px 15px" }}>
-        <div style={{ ...eyebrow, marginBottom: 7 }}>Cuma progres di sini</div>
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, lineHeight: T.lh.body }}>
-          Scroll khusus kabar progres karya. Obrolan, tanya-jawab, dan koordinasi harian ada di grup WhatsApp masing-masing karya.
-        </p>
-      </div>
-
       {/* Open collaborator slots — surfaced from ajakan updates */}
       {openAsks.length > 0 && (
         <div>
