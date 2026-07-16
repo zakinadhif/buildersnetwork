@@ -1,69 +1,17 @@
 /**
- * Al-Fath Berkarya — Jelajahi Karya
- * Search-led discovery across karya and people (ported from the Calm Wide "Cari"
- * surface). The right rail holds multi-select interest/skill facets.
+ * Al-Fath Berkarya — People
+ * The builder directory, renamed and narrowed from the old "Jelajahi Karya":
+ * karya search is gone (Karya owns the project catalog now), so this is
+ * people-only — search a builder by name/skill/interest, narrow with the
+ * Minat/Keahlian facets, or just meet a few via the "Kenalan dengan builder"
+ * rail block relocated here from Karya (its rightful home).
  */
 
 import { useState } from "react";
-import { Avatar } from "@myapp/ui";
+import { Avatar, Tag } from "@myapp/ui";
 import { Shell } from "../components/Shell";
-import { Tag } from "@myapp/ui";
-import { ALL_INTERESTS, ALL_SKILLS, KARYA, MEMBERS, type Karya, type Member } from "../data/karya";
-import { coverFor } from "../lib/images";
+import { ALL_INTERESTS, ALL_SKILLS, MEMBERS, type Member } from "../data/karya";
 import { T, eyebrow } from "@myapp/design-tokens";
-
-// ─── Search list row (karya) ───────────────────────────────────────────────────
-function KaryaRow({ karya }: { karya: Karya }) {
-  return (
-    <div style={{
-      display: "grid",
-      gridTemplateColumns: "56px 1fr auto",
-      gap: "12px 20px",
-      padding: "18px 0",
-      borderBottom: `1px solid ${T.line}`,
-      alignItems: "start",
-    }}>
-      {/* 56px of art + a 1px ring, now inside the box (#91). */}
-      <div style={{
-        width: 58,
-        height: 58,
-        flexShrink: 0,
-        borderRadius: 14,
-        overflow: "hidden",
-        border: `1px solid ${T.line}`,
-        background: T.bg,
-      }}>
-        <img
-          src={coverFor(karya.interests)}
-          alt={karya.title}
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-        />
-      </div>
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 6, minWidth: 0 }}>
-        <h3 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, lineHeight: T.lh.heading, color: T.ink }}>
-          {karya.title}
-        </h3>
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
-          {karya.description}
-        </p>
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4, marginTop: 2 }}>
-          {karya.interests.map((t) => <Tag key={t} label={t} />)}
-        </div>
-      </div>
-      <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "flex-end", gap: 8, paddingTop: 2 }}>
-        <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.accentMid }}>♥ {karya.appreciations}</span>
-        <span style={eyebrow}>{karya.stages[karya.stages.length - 1]}</span>
-        <div style={{ display: "flex" }}>
-          {karya.roster.slice(0, 3).map((r, i) => (
-            <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: karya.roster.length - i }}>
-              <Avatar name={r.name} size={22} />
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 // ─── Search list row (member) ──────────────────────────────────────────────────
 function MemberRow({ member }: { member: Member }) {
@@ -97,7 +45,7 @@ function MemberRow({ member }: { member: Member }) {
   );
 }
 
-// ─── Filter sidebar (right rail) ───────────────────────────────────────────────
+// ─── Filter column (right rail) ────────────────────────────────────────────────
 function FilterColumn({ label, items, active, onToggle }: {
   label: string;
   items: string[];
@@ -138,28 +86,67 @@ function FilterColumn({ label, items, active, onToggle }: {
   );
 }
 
+// ─── Kenalan dengan builder — relocated from Karya's rail ───────────────────────
+// A "who to meet" browse strip alongside the search directory. Its own skill
+// search was dropped in the move: the page's search + facets already filter
+// builders, so a second box would only compete.
+function BuildersToMeet() {
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={eyebrow}>Kenalan dengan builder</div>
+        <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+        {MEMBERS.map((m, idx) => (
+          <div
+            key={m.id}
+            style={{
+              display: "flex",
+              gap: 10,
+              padding: "10px 0",
+              borderBottom: idx < MEMBERS.length - 1 ? `1px solid ${T.line}` : "none",
+              alignItems: "flex-start",
+            }}
+          >
+            <Avatar name={m.name} size={32} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
+              </div>
+              <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+                {m.skills.slice(0, 3).map((s) => (
+                  <span key={s} style={{
+                    fontFamily: T.fontBody,
+                    fontSize: T.size.micro,
+                    color: T.ink2,
+                    backgroundColor: T.bg,
+                    border: `1px solid ${T.line}`,
+                    padding: "1px 5px",
+                    borderRadius: "3px",
+                  }}>{s}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Screen ───────────────────────────────────────────────────────────────────
-export default function JelajahiScreen() {
+export default function PeopleScreen() {
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<"karya" | "orang">("karya");
   const [activeInterests, setActiveInterests] = useState<string[]>([]);
   const [activeSkills, setActiveSkills] = useState<string[]>([]);
 
   function toggle(arr: string[], val: string, set: (v: string[]) => void) {
     set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
   }
-
-  const filteredKarya = KARYA.filter((k) => {
-    const q = query.toLowerCase();
-    const matchQ =
-      !q ||
-      k.title.toLowerCase().includes(q) ||
-      k.description.toLowerCase().includes(q) ||
-      k.interests.some((i) => i.toLowerCase().includes(q));
-    const matchInterests =
-      activeInterests.length === 0 || k.interests.some((i) => activeInterests.includes(i));
-    return matchQ && matchInterests;
-  });
 
   const filteredMembers = MEMBERS.filter((m) => {
     const q = query.toLowerCase();
@@ -179,21 +166,21 @@ export default function JelajahiScreen() {
   const hasFilters = activeInterests.length > 0 || activeSkills.length > 0;
 
   return (
-    <Shell active="jelajahi">
+    <Shell active="people">
       {/* Results column */}
       <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
         {/* Heading */}
         <div>
           <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 12 }}>
-            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Jelajahi Karya</h1>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Cari karya & kolaborator</span>
+            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>People</h1>
+            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Direktori builder — cari lewat skill & minat</span>
           </div>
           <input
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Cari karya, orang, skill…"
-            aria-label="Cari karya, orang, atau skill"
+            placeholder="Cari builder, skill, minat…"
+            aria-label="Cari builder berdasarkan nama, skill, atau minat"
             style={{
               width: "100%",
               boxSizing: "border-box" as const,
@@ -210,67 +197,31 @@ export default function JelajahiScreen() {
           />
         </div>
 
-        {/* Tabs */}
-        <div style={{ display: "flex", borderBottom: `1px solid ${T.line}` }}>
-          {([
-            { id: "karya", label: "Karya", count: filteredKarya.length },
-            { id: "orang", label: "Orang", count: filteredMembers.length },
-          ] as const).map(({ id, label, count }) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              style={{
-                background: "none",
-                border: "none",
-                cursor: "pointer",
-                fontFamily: T.fontBody,
-                fontSize: T.size.body,
-                fontWeight: tab === id ? T.weight.medium : T.weight.regular,
-                padding: "8px 16px 8px 0",
-                color: tab === id ? T.accent : T.ink2,
-                borderBottom: tab === id ? `2px solid ${T.accent}` : "2px solid transparent",
-                marginBottom: -1,
-              }}
-            >
-              {label}{" "}
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{count}</span>
-            </button>
-          ))}
+        {/* Result count */}
+        <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", borderBottom: `1px solid ${T.line}`, paddingBottom: 8 }}>
+          <span style={eyebrow}>Builder</span>
+          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, fontVariantNumeric: "tabular-nums" }}>{filteredMembers.length} orang</span>
         </div>
 
         {/* Results */}
-        {tab === "karya" ? (
-          <div>
-            {filteredKarya.length === 0 ? (
-              <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
-                Tidak ada karya yang cocok.
-              </p>
-            ) : (
-              filteredKarya.map((k) => <KaryaRow key={k.id} karya={k} />)
-            )}
-          </div>
-        ) : (
-          <div>
-            {filteredMembers.length === 0 ? (
-              <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
-                Tidak ada builder yang cocok.
-              </p>
-            ) : (
-              filteredMembers.map((m) => <MemberRow key={m.id} member={m} />)
-            )}
-          </div>
-        )}
+        <div>
+          {filteredMembers.length === 0 ? (
+            <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+              Tidak ada builder yang cocok.
+            </p>
+          ) : (
+            filteredMembers.map((m) => <MemberRow key={m.id} member={m} />)
+          )}
+        </div>
       </main>
 
-      {/* Filter rail */}
+      {/* Filter + meet rail */}
       <aside className="bn-rail" style={{
         width: 232,
         flexShrink: 0,
         display: "flex",
         flexDirection: "column" as const,
         gap: 24,
-        position: "sticky" as const,
-        top: 68,
       }}>
         <FilterColumn
           label="Minat"
@@ -278,14 +229,12 @@ export default function JelajahiScreen() {
           active={activeInterests}
           onToggle={(v) => toggle(activeInterests, v, setActiveInterests)}
         />
-        {tab === "orang" && (
-          <FilterColumn
-            label="Keahlian"
-            items={ALL_SKILLS}
-            active={activeSkills}
-            onToggle={(v) => toggle(activeSkills, v, setActiveSkills)}
-          />
-        )}
+        <FilterColumn
+          label="Keahlian"
+          items={ALL_SKILLS}
+          active={activeSkills}
+          onToggle={(v) => toggle(activeSkills, v, setActiveSkills)}
+        />
         {hasFilters && (
           <button
             onClick={() => { setActiveInterests([]); setActiveSkills([]); }}
@@ -305,6 +254,8 @@ export default function JelajahiScreen() {
             Hapus filter
           </button>
         )}
+
+        <BuildersToMeet />
       </aside>
     </Shell>
   );

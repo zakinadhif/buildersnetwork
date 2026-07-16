@@ -9,7 +9,7 @@ import { createContext, useContext } from "react";
 export type Screen =
   | "scroll"
   | "karya"
-  | "jelajahi"
+  | "people"
   | "cari"
   | "auth"
   | "mulai"
@@ -24,7 +24,7 @@ export type Screen =
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
   Karya: "karya",
-  "Jelajahi Karya": "jelajahi",
+  People: "people",
   "Cari Kolaborator": "cari",
   "Minat Saya": "minat",
 };
@@ -34,7 +34,7 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
 export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" | "Funnel" }[] = [
   { key: "scroll", label: "Scroll", group: "Surface" },
   { key: "karya", label: "Karya", group: "Surface" },
-  { key: "jelajahi", label: "Jelajahi Karya", group: "Surface" },
+  { key: "people", label: "People", group: "Surface" },
   { key: "cari", label: "Cari Kolaborator", group: "Surface" },
   { key: "minat", label: "Minat Saya", group: "Surface" },
   { key: "auth", label: "Masuk / Daftar", group: "Alur" },

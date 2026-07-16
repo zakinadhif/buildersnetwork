@@ -7,7 +7,7 @@ import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 const NAV_ITEMS: { label: string; icon: string }[] = [
   { label: "Scroll",           icon: "◈" },
   { label: "Karya",            icon: "▦" },
-  { label: "Jelajahi Karya",   icon: "◉" },
+  { label: "People",           icon: "◉" },
   { label: "Cari Kolaborator", icon: "◎" },
   { label: "Minat Saya",       icon: "◇" },
   { label: "Karya Saya",       icon: "◆" },

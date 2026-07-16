@@ -4,15 +4,15 @@
  * role moved to Scroll (#collapse 4→3). This is a transitional state: the screen
  * is renamed and the directory search now lives in the right pane, but the old
  * feed-only pieces are kept for now, each tagged `FEED-ONLY` so they are easy to
- * find and strip when the directory is finalised and People lands:
+ * find and strip when the directory is finalised:
  *   - the seeker on-ramp (belongs to Scroll/home),
  *   - the per-card activity line (Scroll owns "what's new"),
- *   - the recency ordering (a feed trait; a directory would order neutrally),
- *   - the "builders to meet" rail (belongs to People).
+ *   - the recency ordering (a feed trait; a directory would order neutrally).
+ * (The "builders to meet" rail has already moved to People, its rightful home.)
  */
 
 import { useState } from "react";
-import { Avatar, KaryaCard, Tag } from "@myapp/ui";
+import { KaryaCard, Tag } from "@myapp/ui";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
 import { KARYA, MEMBERS, type Karya } from "../data/karya";
@@ -370,15 +370,7 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
 
 // ─── Right Rail ───────────────────────────────────────────────────────────────
 function RightRail({ query, onQuery }: { query: string; onQuery: (q: string) => void }) {
-  const [skillQuery, setSkillQuery] = useState("");
   const seekingCollab = KARYA.filter((k) => k.stages.includes("Cari Kolaborator")).length;
-
-  const filteredMembers = MEMBERS.filter((m) =>
-    skillQuery === "" ? true :
-      m.skills.some((s) => s.toLowerCase().includes(skillQuery.toLowerCase())) ||
-      m.interests.some((i) => i.toLowerCase().includes(skillQuery.toLowerCase())) ||
-      m.name.toLowerCase().includes(skillQuery.toLowerCase())
-  );
 
   return (
     <aside className="bn-rail" style={{
@@ -431,76 +423,6 @@ function RightRail({ query, onQuery }: { query: string; onQuery: (q: string) => 
               <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums", color: T.ink }}>{stat.value}</span>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* FEED-ONLY: builders-to-meet — belongs to People; kept here for now */}
-      <div>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-          <div style={eyebrow}>Kenalan dengan builder</div>
-          <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
-        </div>
-
-        <input
-          type="text"
-          placeholder="Cari skill / minat…"
-          aria-label="Cari builder berdasarkan skill atau minat"
-          value={skillQuery}
-          onChange={(e) => setSkillQuery(e.target.value)}
-          style={{
-            width: "100%",
-            boxSizing: "border-box" as const,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            color: T.ink,
-            backgroundColor: T.surface,
-            border: `1px solid ${T.line}`,
-            borderRadius: T.radiusCard,
-            padding: "6px 10px",
-            marginBottom: 10,
-          }}
-        />
-
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-          {filteredMembers.map((m, idx) => (
-            <div
-              key={m.id}
-              style={{
-                display: "flex",
-                gap: 10,
-                padding: "10px 0",
-                borderBottom: idx < filteredMembers.length - 1 ? `1px solid ${T.line}` : "none",
-                alignItems: "flex-start",
-              }}
-            >
-              <Avatar name={m.name} size={32} />
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                  <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
-                  <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
-                </div>
-                <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
-                <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
-                  {m.skills.slice(0, 3).map((s) => (
-                    <span key={s} style={{
-                      fontFamily: T.fontBody,
-                      fontSize: T.size.micro,
-                      color: T.ink2,
-                      backgroundColor: T.bg,
-                      border: `1px solid ${T.line}`,
-                      padding: "1px 5px",
-                      borderRadius: "3px",
-                    }}>{s}</span>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-          {filteredMembers.length === 0 && (
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3, padding: "16px 0", textAlign: "center" as const }}>
-              Tidak ada builder yang cocok.
-            </div>
-          )}
         </div>
       </div>
 

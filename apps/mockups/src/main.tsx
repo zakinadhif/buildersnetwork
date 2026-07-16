@@ -13,8 +13,8 @@ import {
 import AuthScreen from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import ScrollScreen from "./screens/Scroll";
-import JelajahiScreen from "./screens/Jelajahi";
 import KaryaScreen from "./screens/Karya";
+import PeopleScreen from "./screens/People";
 import KaryaDetailScreen from "./screens/KaryaDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
 import MinatSayaScreen from "./screens/MinatSaya";
@@ -24,14 +24,14 @@ import ProfilScreen from "./screens/Profil";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
 // Two ways to move between screens: the sidebar surfaces (Scroll / Karya /
-// Jelajahi / Cari) route from each screen's own left nav, and the bottom-left screen switcher
+// People / Cari) route from each screen's own left nav, and the bottom-left screen switcher
 // reaches everything — including the flow mockups (auth, entry, detail, creation)
 // that carry no product sidebar. Font choice lives bottom-right (shared chrome),
 // so a font persists across navigation.
 const SCREENS: Record<Screen, ComponentType> = {
   scroll:    ScrollScreen,
   karya:     KaryaScreen,
-  jelajahi:  JelajahiScreen,
+  people:    PeopleScreen,
   cari:      CariScreen,
   auth:      AuthScreen,
   mulai:     MulaiScreen,
