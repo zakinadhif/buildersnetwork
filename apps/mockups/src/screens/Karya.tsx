@@ -15,7 +15,7 @@ import { useState } from "react";
 import { KaryaCard, Tag } from "@myapp/ui";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
-import { KARYA, MEMBERS, type Karya } from "../data/karya";
+import { KARYA, type Karya } from "../data/karya";
 import { relativeTime } from "../lib/format";
 import { coverFor, screenshots } from "../lib/images";
 import { T, eyebrow } from "@myapp/design-tokens";
@@ -375,8 +375,6 @@ function RightRail({ query, onQuery, filter, onFilter }: {
   filter: Interest;
   onFilter: (f: Interest) => void;
 }) {
-  const seekingCollab = KARYA.filter((k) => k.stages.includes("Cari Kolaborator")).length;
-
   return (
     <aside className="bn-rail" style={{
       width: 232,
@@ -417,27 +415,8 @@ function RightRail({ query, onQuery, filter, onFilter }: {
         onSelect={onFilter}
       />
 
-      {/* Community pulse */}
-      <div style={{
-        backgroundColor: T.surface,
-        border: `1px solid ${T.line}`,
-        borderRadius: T.radiusPanel,
-        padding: "12px 14px",
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut komunitas</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-          {[
-            { label: "Karya aktif", value: KARYA.length },
-            { label: "Builder aktif", value: MEMBERS.length },
-            { label: "Cari kolaborator", value: seekingCollab },
-          ].map((stat) => (
-            <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{stat.label}</span>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums", color: T.ink }}>{stat.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* A "Denyut komunitas" community-stats panel used to sit here; removed
+          while we rethink what the rail should carry. */}
 
       {/* Call to join */}
       <div style={{

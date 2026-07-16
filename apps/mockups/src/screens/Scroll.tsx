@@ -201,7 +201,6 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
 // ─── Right rail ─────────────────────────────────────────────────────────────────
 function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
   const openAsks = feed.filter((r) => r.update.kind === "ajakan");
-  const postingThisWeek = new Set(feed.map((r) => r.karya.id)).size;
 
   return (
     <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
@@ -237,22 +236,8 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
         </div>
       )}
 
-      {/* Pulse */}
-      <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: T.radiusPanel, padding: "12px 14px" }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut minggu ini</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
-          {[
-            { label: "Kabar progres", value: feed.length },
-            { label: "Karya yang posting", value: postingThisWeek },
-            { label: "Slot kolaborasi", value: openAsks.length },
-          ].map((stat) => (
-            <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{stat.label}</span>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums", color: T.ink }}>{stat.value}</span>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* A "Denyut minggu ini" community-stats panel used to sit here; removed
+          while we rethink what the rail should carry. */}
     </aside>
   );
 }
