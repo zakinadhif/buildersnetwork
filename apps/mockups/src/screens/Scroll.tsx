@@ -7,8 +7,11 @@
  *
  * Two principles shape it, both visible in the markup:
  *   1. Productive posting only. Every row is a *kind of progress* (rilis, tonggak,
- *      progres, riset, ajakan), never chatter — so there is no reply box. Chat
- *      lives in each karya's WhatsApp group, out of band; the rail says so.
+ *      progres, riset, ajakan), never chatter — the feed itself has no reply box.
+ *      Conversation is not banned, only kept out of the feed: it hangs off the
+ *      update it is about (content-model.md), and the rail's "Diskusi aktif" just
+ *      points at the threads busy right now. Day-to-day coordination still lives
+ *      in each karya's WhatsApp group, out of band.
  *   2. The karya is the account. A post leads with the karya logo; the contributor
  *      who wrote it is a small avatar dipping into the logo's corner.
  */
@@ -18,9 +21,16 @@ import { Avatar, KaryaCover, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { Shell } from "../components/Shell";
 import { MEMBERS } from "../data/karya";
-import { KIND_META, resolveUpdates, type ResolvedUpdate } from "../data/updates";
+import {
+  ACTIVE_WINDOW_MIN,
+  KIND_META,
+  activeDiscussions,
+  resolveUpdates,
+  type ActiveDiscussion,
+  type ResolvedUpdate,
+} from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
-import { relativeTime } from "../lib/format";
+import { relativeMinutes, relativeTime } from "../lib/format";
 
 // ─── Kind badge — you post a *kind of progress*, and the feed says which ─────────
 function KindBadge({ kind }: { kind: ResolvedUpdate["update"]["kind"] }) {
@@ -199,6 +209,72 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
   );
 }
 
+// ─── Diskusi aktif — the threads burning right now ──────────────────────────────
+// A pointer to where the talking is, never a place to talk: a thread's home is the
+// update it hangs off, and this block just says which ones are hot. Membership is
+// earned, not curated — a burst inside the window (data/updates.ts) puts a thread
+// here and cooling takes it out, so the block turns over on its own.
+function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] }) {
+  if (discussions.length === 0) return null;
+
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={eyebrow}>Diskusi aktif</div>
+        {/* The window, said once here rather than repeated on every row */}
+        <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+          {ACTIVE_WINDOW_MIN} mnt terakhir
+        </span>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+        {discussions.map(({ resolved: { update, karya }, discussion }, idx) => (
+          <div
+            key={update.id}
+            style={{
+              display: "flex",
+              gap: 10,
+              padding: "10px 0",
+              borderBottom: idx < discussions.length - 1 ? `1px solid ${T.line}` : "none",
+              alignItems: "flex-start",
+            }}
+          >
+            <KaryaCover src={coverFor(karya.interests)} size={30} radius={9} alt={karya.title} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>
+                {karya.title}
+              </div>
+              {/* Which post they're arguing under — clamped; the thread is the point, not the post */}
+              <p style={{
+                margin: "1px 0 0",
+                fontFamily: T.fontBody,
+                fontSize: T.size.micro,
+                color: T.ink3,
+                lineHeight: T.lh.body,
+                display: "-webkit-box",
+                WebkitBoxOrient: "vertical" as const,
+                WebkitLineClamp: 2,
+                overflow: "hidden",
+              }}>
+                {update.body}
+              </p>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 5 }}>
+                <span className="bn-live-dot" aria-hidden="true" />
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, fontWeight: T.weight.medium, fontVariantNumeric: "tabular-nums" }}>
+                  {discussion.recent} pesan baru
+                </span>
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+                  · {relativeMinutes(discussion.lastMinutesAgo)}
+                </span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Kenalan dengan builder — a "who to meet" browse strip ──────────────────────
 // Relocated from People's rail: while Scroll is about karya progress, meeting the
 // builders behind them belongs alongside the feed.
@@ -251,8 +327,10 @@ function BuildersToMeet() {
 }
 
 // ─── Right rail ─────────────────────────────────────────────────────────────────
+// Reads top to bottom as: join a karya → join a conversation → meet a person.
 function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
   const openAsks = feed.filter((r) => r.update.kind === "ajakan");
+  const discussions = useMemo(() => activeDiscussions(feed), [feed]);
 
   return (
     <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
@@ -279,6 +357,9 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
           </div>
         </div>
       )}
+
+      {/* Where the talking is right now */}
+      <ActiveDiscussions discussions={discussions} />
 
       {/* Meet the builders behind the karya — relocated from People's rail */}
       <BuildersToMeet />

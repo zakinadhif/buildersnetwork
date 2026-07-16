@@ -49,6 +49,22 @@ export function GlobalStyles() {
       }
       .spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
 
+      /* Scroll's "Diskusi aktif" dot. The breathing is the signal — it says the
+         thread is live *now*, which a static dot can only assert. Reduced-motion
+         is caught by the blanket rule below, leaving a plain accent dot. */
+      @keyframes bn-live-pulse {
+        0%, 100% { opacity: 1;    transform: scale(1);    }
+        50%      { opacity: 0.35; transform: scale(0.78); }
+      }
+      .bn-live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 99px;
+        background: ${T.accent};
+        flex-shrink: 0;
+        animation: bn-live-pulse 2.4s ease-in-out infinite;
+      }
+
       /* Honour reduced-motion: collapse the 0.15s state transitions. */
       @media (prefers-reduced-motion: reduce) {
         * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }

@@ -9,3 +9,10 @@ export function relativeTime(hoursAgo: number): string {
   const days = Math.round(hoursAgo / 24);
   return days === 1 ? "kemarin" : `${days} hari lalu`;
 }
+
+/** Minute-grain recency. A live discussion burst is measured in minutes, where
+ *  `relativeTime`'s hour grain would flatten every one of them to "baru saja". */
+export function relativeMinutes(minutesAgo: number): string {
+  if (minutesAgo < 1) return "barusan";
+  return `${minutesAgo} mnt lalu`;
+}
