@@ -17,6 +17,7 @@ import { useMemo, useState } from "react";
 import { Avatar, KaryaCover, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
 import { Shell } from "../components/Shell";
+import { MEMBERS } from "../data/karya";
 import { KIND_META, resolveUpdates, type ResolvedUpdate } from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeTime } from "../lib/format";
@@ -198,6 +199,57 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
   );
 }
 
+// ─── Kenalan dengan builder — a "who to meet" browse strip ──────────────────────
+// Relocated from People's rail: while Scroll is about karya progress, meeting the
+// builders behind them belongs alongside the feed.
+function BuildersToMeet() {
+  return (
+    <div>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+        <div style={eyebrow}>Kenalan dengan builder</div>
+        <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+        {MEMBERS.map((m, idx) => (
+          <div
+            key={m.id}
+            style={{
+              display: "flex",
+              gap: 10,
+              padding: "10px 0",
+              borderBottom: idx < MEMBERS.length - 1 ? `1px solid ${T.line}` : "none",
+              alignItems: "flex-start",
+            }}
+          >
+            <Avatar name={m.name} size={32} />
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
+                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
+              </div>
+              <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
+              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+                {m.skills.slice(0, 3).map((s) => (
+                  <span key={s} style={{
+                    fontFamily: T.fontBody,
+                    fontSize: T.size.micro,
+                    color: T.ink2,
+                    backgroundColor: T.bg,
+                    border: `1px solid ${T.line}`,
+                    padding: "1px 5px",
+                    borderRadius: "3px",
+                  }}>{s}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // ─── Right rail ─────────────────────────────────────────────────────────────────
 function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
   const openAsks = feed.filter((r) => r.update.kind === "ajakan");
@@ -236,8 +288,8 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
         </div>
       )}
 
-      {/* A "Denyut minggu ini" community-stats panel used to sit here; removed
-          while we rethink what the rail should carry. */}
+      {/* Meet the builders behind the karya — relocated from People's rail */}
+      <BuildersToMeet />
     </aside>
   );
 }

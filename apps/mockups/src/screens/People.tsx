@@ -2,9 +2,9 @@
  * Al-Fath Berkarya — People
  * The builder directory, renamed and narrowed from the old "Jelajahi Karya":
  * karya search is gone (Karya owns the project catalog now), so this is
- * people-only — search a builder by name/skill/interest, narrow with the
- * Minat/Keahlian facets, or just meet a few via the "Kenalan dengan builder"
- * rail block relocated here from Karya (its rightful home).
+ * people-only — search a builder by name/skill/interest, or narrow with the
+ * Minat/Keahlian facets in the rail. The "Kenalan dengan builder" browse strip
+ * that once sat here now lives in Scroll's rail.
  */
 
 import { useState } from "react";
@@ -81,58 +81,6 @@ function FilterColumn({ label, items, active, onToggle }: {
             </button>
           );
         })}
-      </div>
-    </div>
-  );
-}
-
-// ─── Kenalan dengan builder — relocated from Karya's rail ───────────────────────
-// A "who to meet" browse strip alongside the search directory. Its own skill
-// search was dropped in the move: the page's search + facets already filter
-// builders, so a second box would only compete.
-function BuildersToMeet() {
-  return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <div style={eyebrow}>Kenalan dengan builder</div>
-        <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
-      </div>
-
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-        {MEMBERS.map((m, idx) => (
-          <div
-            key={m.id}
-            style={{
-              display: "flex",
-              gap: 10,
-              padding: "10px 0",
-              borderBottom: idx < MEMBERS.length - 1 ? `1px solid ${T.line}` : "none",
-              alignItems: "flex-start",
-            }}
-          >
-            <Avatar name={m.name} size={32} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
-              </div>
-              <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
-                {m.skills.slice(0, 3).map((s) => (
-                  <span key={s} style={{
-                    fontFamily: T.fontBody,
-                    fontSize: T.size.micro,
-                    color: T.ink2,
-                    backgroundColor: T.bg,
-                    border: `1px solid ${T.line}`,
-                    padding: "1px 5px",
-                    borderRadius: "3px",
-                  }}>{s}</span>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );
@@ -215,7 +163,7 @@ export default function PeopleScreen() {
         </div>
       </main>
 
-      {/* Filter + meet rail */}
+      {/* Filter rail */}
       <aside className="bn-rail" style={{
         width: 232,
         flexShrink: 0,
@@ -254,8 +202,6 @@ export default function PeopleScreen() {
             Hapus filter
           </button>
         )}
-
-        <BuildersToMeet />
       </aside>
     </Shell>
   );
