@@ -30,6 +30,7 @@ export const T = {
   line: "var(--color-line)",
   lineDark: "var(--color-line-dark)",
   surface: "var(--color-surface)",
+  bgHover: "var(--color-bg-hover)",
   danger: "var(--color-danger)",
 
   fontDisplay: "var(--font-display)",

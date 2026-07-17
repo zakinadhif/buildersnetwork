@@ -65,6 +65,29 @@ export function GlobalStyles() {
         animation: bn-live-pulse 2.4s ease-in-out infinite;
       }
 
+      /* A Scroll post is a row into its karya, and the whole row is the target:
+         the explicit "Lihat karya →" link came out of the footer, because the
+         karya was already the post's cover and its byline, so the way in was said
+         three times over. The hover and the pointer are what carry that claim now.
+
+         The row's box is the column's full width rather than the measure's: it
+         pulls out a gutter each way and pads the same amount straight back, so the
+         type still sets to the 620 measure while the box reaches the rules on both
+         sides. The tint and the divider both ride that box, so both span the
+         column — a band of the column, not a box drawn around the text.
+
+         Which is why the bleed lives on the box and not on a pseudo-element behind
+         it: a border only ever spans the box it is set on, so a bleeding ::before
+         could carry the tint out to the rules but left the divider stranded at the
+         measure. */
+      .bn-post {
+        margin-inline: calc(-1 * ${T.shellGutter});
+        padding-inline: ${T.shellGutter};
+        cursor: pointer;
+        transition: background 0.12s;
+      }
+      .bn-post:hover { background: ${T.bgHover}; }
+
       /* Honour reduced-motion: collapse the 0.15s state transitions. */
       @media (prefers-reduced-motion: reduce) {
         * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
@@ -94,6 +117,11 @@ export function GlobalStyles() {
         /* Nav filters + profile stub are desktop-only chrome; the main column
            carries discovery on mobile. */
         .bn-nav-filters, .bn-nav-user { display: none !important; }
+        /* The column gives up its gutter here (@myapp/ui zeroes .bn-main's
+           padding), so a post has none to bleed into — and bleeding anyway would
+           push the row out past the page's own 16px edge and scroll the body
+           sideways. Sit it flush. */
+        .bn-post { margin-inline: 0; padding-inline: 0; }
       }
 
       /* Cari variant B's 2-col card grid collapses on a narrow center column. */

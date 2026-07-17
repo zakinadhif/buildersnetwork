@@ -201,8 +201,10 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
   const discussion = update.discussion;
 
   return (
-    <article style={{
-      padding: "18px 0",
+    <article className="bn-post" style={{
+      // Block only: the inline padding is the class's, and a shorthand here would
+      // reset it — taking the row's bleed out to the column rules with it.
+      paddingBlock: 18,
       borderBottom: `1px solid ${T.line}`,
       display: "flex",
       gap: 14,

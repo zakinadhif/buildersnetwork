@@ -46,6 +46,13 @@
   --color-line-dark: oklch(85% 0 0);
   --color-surface: oklch(100% 0 0); /* pure white lifted card */
 
+  /* A row under the pointer. Sits 2% under --color-bg, which is as far as it can
+     go before it reads as a selected state rather than a hover — it must stay
+     quieter than --color-accent-tint, which means "current" on the nav item.
+     Distinct from the karya card's hover (an opacity fade, see libs/ui): a card
+     is an object you pick up, a feed row is a surface you sweep. */
+  --color-bg-hover: oklch(96% 0 0);
+
   /* Error text. Off-palette and undesigned: it has no counterpart in the
      mockups and arrived as a bare `var(--danger, #c0392b)` fallback in the app.
      Promoted here rather than left hiding in a fallback, but it still owes the
