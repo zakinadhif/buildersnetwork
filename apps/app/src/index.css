@@ -781,11 +781,11 @@ button.post-author:hover .post-author-name {
    live in @myapp/ui now (#92) — one implementation, rendered by the gallery and
    this app alike. An `Avatar` that exists once cannot drift. What's left below is
    only what is genuinely the app's: this shell is a fixed pane that scrolls
-   inside itself and animates in, where the gallery is a document that scrolls. */
-.bn-nav {
-  position: sticky;
-  top: 24px;
-}
+   inside itself and animates in, where the gallery is a document that scrolls.
+
+   The nav used to be pinned here (`sticky; top: 24px`). It is a full-height pane
+   in @myapp/ui now, and `sticky` resolves against whatever scrolls — this pane
+   here, the document there — so both apps get it from the one rule. */
 .bn-nav-filter {
   display: block;
   width: 100%;
@@ -921,15 +921,15 @@ button.post-author:hover .post-author-name {
 }
 
 /* ── Right rail (issue #20) ─────────────────────────────────────────────────
-   The third shell column: community pulse + builders to meet + a CTA. Sticky
-   on desktop; folds below the feed on mobile (see the 900px block). */
-/* `width: 232px; flex-shrink: 0` comes from @myapp/ui (#92). */
+   The third shell column: community pulse + builders to meet + a CTA. A
+   full-height pane that scrolls on its own on desktop; folds below the feed on
+   mobile (see the 900px block). */
+/* The width, the gutters, the rule, and the pane's own scroll all come from
+   @myapp/ui (#92). What stacks inside it is this app's. */
 .bn-rail {
   display: flex;
   flex-direction: column;
   gap: 24px;
-  position: sticky;
-  top: 24px;
 }
 
 /* Community pulse strip — live counts from GET /api/stats */
@@ -1083,22 +1083,14 @@ button.post-author:hover .post-author-name {
     padding: 16px 16px 40px;
     gap: 20px;
   }
-  .bn-nav,
-  .bn-main,
-  .bn-rail {
-    width: 100%;
-  }
-  .bn-rail {
-    position: static;
-    top: auto;
-  }
+  /* The panes' desktop frame — 100vh, sticky, the hairlines, the gutters — is
+     undone in @myapp/ui's own 900px block, next to the rules that set it. What's
+     left here is this app's own collapse. */
   .bn-nav {
-    position: static;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 16px;
-    padding-top: 0;
     padding-bottom: 14px;
     border-bottom: 1px solid var(--color-line);
   }

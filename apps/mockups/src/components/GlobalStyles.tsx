@@ -73,17 +73,18 @@ export function GlobalStyles() {
       /* ── Responsive ──────────────────────────────────────────────────────
          Below ~900px the three columns can't hold their measure. Stack to a
          single column led by the main column (mobile = the consumption view),
-         and fold the left rail into a compact top nav bar. */
+         and fold the left rail into a compact top nav bar.
+
+         The panes' desktop frame — 100vh, sticky, the hairlines, the gutters —
+         is undone in @myapp/ui's own 900px block, next to the rules that set
+         it. What's left here is the gallery's own collapse. */
       @media (max-width: 900px) {
         .bn-shell-inner { flex-direction: column; padding: 16px 16px 40px; gap: 20px; }
-        .bn-nav, .bn-main, .bn-rail { width: 100% !important; }
-        .bn-rail { position: static !important; top: auto !important; }
         .bn-nav {
-          flex-direction: row !important;
+          flex-direction: row;
           flex-wrap: wrap;
           align-items: center;
           gap: 6px 16px;
-          padding-top: 0 !important;
           padding-bottom: 14px;
           border-bottom: 1px solid ${T.line};
         }

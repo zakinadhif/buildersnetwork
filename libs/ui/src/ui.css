@@ -19,31 +19,79 @@
    The OUTER wrapper is each app's own business — the gallery is a document that
    scrolls, the app is a fixed pane that scrolls inside itself — so only the
    columns live here. `--container-shell-outer`, not `--container-shell`: under
-   the border-box base the padding sits inside `max-width` (#91). */
+   the border-box base the padding sits inside `max-width` (#91).
+
+   The columns are full-height panes divided by a hairline, not cards floating on
+   the tinted page with a gap between them. Three things follow from that:
+
+   1. There is no `gap`. Each column carries a `--shell-gutter` on both sides, so
+      its content clears the rule either way and the six gutters are part of the
+      frame (see theme.css). A column's WIDTH is therefore its measure plus its
+      two gutters plus its rule — the measure itself (200/620/232) is unmoved.
+   2. The vertical padding is on the columns, not on `.bn-shell-inner`. A 100vh
+      column inside a container with 72px of vertical padding is 72px taller than
+      the viewport, which puts a scrollbar on every short page.
+   3. `position: sticky` resolves against whatever each app scrolls — the
+      document in the gallery, the `.bn-shell` pane in the app — so one rule
+      gives both a nav that holds the screen while the centre column moves. This
+      is why the outer wrappers can stay different without a prop to bridge them.
+
+   The nav and the rail are each their own scroll context; the centre column is
+   the page's. */
 .bn-shell-inner {
   max-width: var(--container-shell-outer);
   margin: 0 auto;
-  padding: 24px var(--shell-pad-x) 48px;
   display: flex;
-  gap: 24px;
   align-items: flex-start;
 }
 .bn-main {
   flex: 1;
   min-width: 0;
+  padding: 24px var(--shell-gutter) 48px;
 }
+/* The rail scrolls on its own rather than running the page long: it is reference
+   material beside the reading column, not a continuation of it.
+
+   Its scrollbar is hidden, as the proof-shot carousel's is. Two reasons beyond
+   the noise: a classic scrollbar is laid out INSIDE the box, so it would eat 15px
+   of the rail's 232px measure on Windows and Linux and leave the type setting to
+   a width the design never specified — and it would do it only there, which is
+   the sort of thing that gets found months later (#91). The rule stands 24px off
+   the content and reads as the column's edge; the scrollbar would sit just
+   inside it and fight it. */
 .bn-rail {
-  width: 232px;
+  width: calc(232px + 2 * var(--shell-gutter) + 1px);
   flex-shrink: 0;
+  padding: 24px var(--shell-gutter);
+  border-left: 1px solid var(--color-line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.bn-rail::-webkit-scrollbar {
+  display: none;
 }
 
-/* ── Left nav ──────────────────────────────────────────────────────────────── */
+/* ── Left nav ────────────────────────────────────────────────────────────────
+   A full-height pane: it holds the screen while the centre column scrolls past
+   it, which is what puts the user stub on the bottom edge (`margin-top: auto`
+   below — inert until something stretches the column, which 100vh now does).
+
+   The 8px is the rail's own optical offset against the centre column's first
+   line, from back when `.bn-shell-inner` supplied the other 24px; it reads as
+   32px here for the same reason it read as 32px there. */
 .bn-nav {
-  width: 200px;
+  width: calc(200px + 2 * var(--shell-gutter) + 1px);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding-top: 8px;
+  padding: 32px var(--shell-gutter) 24px;
+  border-right: 1px solid var(--color-line);
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 .bn-nav-logo {
   padding: 0 12px 20px;
@@ -116,8 +164,13 @@
   color: var(--color-ink3);
   letter-spacing: var(--tracking-tag);
 }
+/* The one part of the nav that can outgrow the screen (Launchpad's interest
+   list). It yields first and scrolls, so the items above and the user stub below
+   keep their place on a short viewport. */
 .bn-nav-filters {
   padding: 0 12px;
+  min-height: 0;
+  overflow-y: auto;
 }
 .bn-nav-user {
   margin-top: auto;
@@ -141,6 +194,33 @@
   font-family: var(--font-body);
   font-size: var(--text-micro);
   color: var(--color-ink3);
+}
+
+/* ── Shell: the single-column collapse ───────────────────────────────────────
+   Below ~900px there is no three-column frame to divide, so everything the frame
+   costs comes back off: the panes stop holding the screen, stop being their own
+   scroll contexts, and give up their gutters and rules. Stacked, a column's
+   margin is the shell's to set — and each app sets it, because how far the
+   content sits from the edge of a phone is a per-app call.
+
+   This lives next to the rules it undoes. Each app still owns the rest of its
+   collapse (which parts fold away, what the nav turns into); this is only the
+   part that would otherwise leave a 100vh sidebar on a phone. */
+@media (max-width: 900px) {
+  .bn-nav,
+  .bn-main,
+  .bn-rail {
+    width: 100%;
+    position: static;
+    height: auto;
+    overflow: visible;
+    border-left: none;
+    border-right: none;
+    padding: 0;
+  }
+  .bn-nav-filters {
+    overflow: visible;
+  }
 }
 
 /* ── Avatar ──────────────────────────────────────────────────────────────────

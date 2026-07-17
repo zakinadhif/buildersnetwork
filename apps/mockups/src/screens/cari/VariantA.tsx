@@ -566,14 +566,9 @@ function RightRail() {
 
   return (
     <aside className="bn-rail" style={{
-      width:         232,
-      flexShrink:    0,
       display:       "flex",
       flexDirection: "column" as const,
       gap:           16,
-      paddingTop:    0,
-      position:      "sticky" as const,
-      top:           24,
     }}>
       {/* ── Status kamu — seeker badge picker ─────────────────────────────── */}
       {/* Prompts the viewer to set or update their own "looking for" badge. */}

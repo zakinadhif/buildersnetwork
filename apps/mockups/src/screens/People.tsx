@@ -165,8 +165,6 @@ export default function PeopleScreen() {
 
       {/* Filter rail */}
       <aside className="bn-rail" style={{
-        width: 232,
-        flexShrink: 0,
         display: "flex",
         flexDirection: "column" as const,
         gap: 24,

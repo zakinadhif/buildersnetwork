@@ -470,7 +470,7 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
   const discussions = useMemo(() => activeDiscussions(feed), [feed]);
 
   return (
-    <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20 }}>
+    <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
       {/* Open collaborator slots — surfaced from ajakan updates */}
       {openAsks.length > 0 && (
         <div>

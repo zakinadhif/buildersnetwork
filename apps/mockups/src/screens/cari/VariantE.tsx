@@ -427,8 +427,6 @@ function FilterRail({ filterType, onFilter }: {
 
   return (
     <aside className="bn-rail" style={{
-      width: 232,
-      flexShrink: 0,
       display: "flex",
       flexDirection: "column" as const,
       gap: 20,

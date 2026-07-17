@@ -3,10 +3,11 @@ import type { ReactNode } from "react";
 import { Avatar } from "./Avatar";
 
 /**
- * The frame the three columns sit in (#92) — the measure, the gutters and the
- * gap. This is the thing that actually drifted: the same `max-width` meant 1100px
- * of content in the gallery and 1052px in the app, and the centre column silently
- * came out 48px short (#91). Now there is one of it.
+ * The frame the three columns sit in (#92) — the measure, the gutters, and the
+ * rules that divide them. This is the thing that actually drifted: the same
+ * `max-width` meant the CONTENT the columns divide up in the gallery but the
+ * shell's OUTER box in the app, so the app's gutters ate into the columns and
+ * the centre column silently came out 48px short (#91). Now there is one of it.
  *
  * Children are the columns themselves (`.bn-nav`, `.bn-main`, `.bn-rail`), which
  * each app composes: the gallery's screens carry their own rail content, the app

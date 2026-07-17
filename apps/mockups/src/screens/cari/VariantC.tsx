@@ -540,13 +540,9 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
   return (
     <aside className="bn-rail" style={{
-      width: 232,
-      flexShrink: 0,
       display: "flex",
       flexDirection: "column" as const,
       gap: 16,
-      position: "sticky" as const,
-      top: 24,
     }}>
       {/* Profile card */}
       <div style={{

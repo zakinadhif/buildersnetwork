@@ -241,7 +241,7 @@ export default function KaryaNewScreen() {
       </main>
 
       {/* Tips rail */}
-      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, position: "sticky" as const, top: 68 }}>
+      <aside className="bn-rail">
         <p style={{ ...eyebrow, marginBottom: 12 }}>Biar makin dilirik</p>
         <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
           {TIPS.map((tip) => (

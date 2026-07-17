@@ -74,7 +74,7 @@ export default function MinatSayaScreen() {
       </main>
 
       {/* Right rail — pick up more */}
-      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, position: "sticky" as const, top: 68 }}>
+      <aside className="bn-rail">
         <p style={{ ...eyebrow, marginBottom: 12 }}>Tambah minat</p>
         <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
           {suggestions.length === 0 ? (

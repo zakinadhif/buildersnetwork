@@ -10,11 +10,19 @@ import { authed, expect } from "./fixtures";
 // Nothing caught that — the shell has no test, and 48px is easy to miss by eye.
 // So the numbers are pinned here, measured off apps/mockups at 1440px:
 //
-//     nav 200  +  gap 24  +  main 620  +  gap 24  +  rail 232  =  1100
+//     nav 200  +  main 620  +  rail 232  =  1052
+//
+// What this locks is the MEASURE — the width the type actually sets to. That is
+// the thing #91 got wrong, and it is deliberately not the same as a column's
+// rendered box: the columns are divided by a hairline now and each carries a
+// gutter on both sides, so every box is its measure plus 48px plus its rule.
+// Assert the measure, not the box, or this test passes while the type reflows.
 //
 // If one of these fails, the shell's box model has moved. Fix the cause; don't
 // retune the number to whatever it now renders — that is how the drift got in.
 const SHELL = { nav: 200, main: 620, rail: 232 };
+const GUTTER = 24; // per column edge — six of them across the frame
+const RULE = 1; // the two hairlines between the three columns
 
 const PROFILE = {
   id: "test-user-id",
@@ -60,6 +68,24 @@ async function widthOf(page: Page, selector: string): Promise<number> {
   return Math.round(box.width);
 }
 
+/** The MEASURE of a column: its content width, with the gutters it carries on
+ *  either side and its rule taken back off. `clientWidth` already excludes the
+ *  border, so only the padding has to come out. */
+async function measureOf(page: Page, selector: string): Promise<number> {
+  const width = await page
+    .locator(selector)
+    .first()
+    .evaluate((el) => {
+      const cs = getComputedStyle(el);
+      return (
+        el.clientWidth -
+        Number.parseFloat(cs.paddingLeft) -
+        Number.parseFloat(cs.paddingRight)
+      );
+    });
+  return Math.round(width);
+}
+
 authed(
   "the three-column shell holds the mockup's geometry",
   async ({ page }) => {
@@ -68,13 +94,15 @@ authed(
     await page.goto("/");
     await expect(page.locator(".bn-shell-inner")).toBeVisible();
 
-    expect(await widthOf(page, ".bn-nav")).toBe(SHELL.nav);
-    expect(await widthOf(page, ".bn-main")).toBe(SHELL.main);
-    expect(await widthOf(page, ".bn-rail")).toBe(SHELL.rail);
+    expect(await measureOf(page, ".bn-nav")).toBe(SHELL.nav);
+    expect(await measureOf(page, ".bn-main")).toBe(SHELL.main);
+    expect(await measureOf(page, ".bn-rail")).toBe(SHELL.rail);
 
-    // The columns and their two 24px gaps are exactly --container-shell (1100px).
-    // This is the assertion that would have caught the original bug: the centre
-    // column absorbs any error in the shell's width, so it silently went 48 short.
-    expect(await widthOf(page, ".bn-shell-inner")).toBe(1100 + 2 * 24);
+    // The three measures, their six gutters and their two rules are exactly
+    // --container-shell-outer (1198px). This is the assertion that would have
+    // caught the original bug: the centre column absorbs any error in the
+    // shell's width, so it silently went 48 short.
+    const outer = SHELL.nav + SHELL.main + SHELL.rail + 6 * GUTTER + 2 * RULE;
+    expect(await widthOf(page, ".bn-shell-inner")).toBe(outer);
   },
 );

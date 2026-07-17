@@ -304,7 +304,7 @@ export default function KaryaDetailScreen() {
       </main>
 
       {/* Action rail */}
-      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20, position: "sticky" as const, top: 68 }}>
+      <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
         {/* Role toggle — gallery affordance to preview both viewer states */}
         <RoleToggle owner={owner} onChange={setOwner} />
 

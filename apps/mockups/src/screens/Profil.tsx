@@ -116,7 +116,7 @@ export default function ProfilScreen() {
       </main>
 
       {/* Actions rail */}
-      <aside className="bn-rail" style={{ width: 232, flexShrink: 0, display: "flex", flexDirection: "column" as const, gap: 20, position: "sticky" as const, top: 68 }}>
+      <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
         {/* Self/other toggle — gallery affordance to preview both viewer states */}
         <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
           {([["visitor", "Orang lain"], ["self", "Profil sendiri"]] as const).map(([val, label]) => {

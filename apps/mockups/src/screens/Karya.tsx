@@ -377,12 +377,9 @@ function RightRail({ query, onQuery, filter, onFilter }: {
 }) {
   return (
     <aside className="bn-rail" style={{
-      width: 232,
-      flexShrink: 0,
       display: "flex",
       flexDirection: "column" as const,
       gap: 20,
-      paddingTop: 0,
     }}>
       {/* Directory search — the catalog's own search, moved out of the reading column */}
       <div>
