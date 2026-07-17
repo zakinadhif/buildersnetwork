@@ -257,30 +257,18 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
           </div>
         )}
 
-        {/* Footer — appreciate, open the thread, jump to the karya. No interest tags:
-            they describe the karya's standing state, which is the karya page's job;
-            a feed carries what just happened. */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14, flexWrap: "wrap" as const }}>
+        {/* Footer — appreciate, and the thread. No "lihat karya" link: the karya is
+            already the post's byline and its cover, so the way in was said three
+            times. No interest tags either: they describe the karya's standing
+            state, which is the karya page's job; a feed carries what just
+            happened. */}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
           <AppreciateButton
             count={karya.appreciations + (appreciated ? 1 : 0)}
             active={appreciated}
             onClick={() => onAppreciate(update.id)}
           />
           <CommentCount count={discussion?.total ?? 0} />
-          <button type="button" style={{
-            marginLeft: "auto",
-            background: "none",
-            border: "none",
-            padding: 0,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            fontWeight: T.weight.medium,
-            color: T.accentMid,
-            cursor: "pointer",
-            whiteSpace: "nowrap" as const,
-          }}>
-            Lihat karya →
-          </button>
         </div>
 
         {/* Who's in there, then the newest thing said — the thread, seen through a window */}
