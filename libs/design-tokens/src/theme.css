@@ -139,6 +139,21 @@
      Both apps do. Derive it rather than writing 1246 down, so the two can
      never drift apart again.
 
+     The measure is declared per column and the total is derived from the parts.
+     It used to be the other way round — a `1052` total here, with `200px` and
+     `232px` written as literals in libs/ui's width calcs — which is #91's own
+     disease one level down: two declarations of one number, nothing forcing
+     them to agree, and the centre column (`flex: 1`) silently absorbing any
+     difference. Exactly how 620 rendered as 572 for months. Now the parts are
+     the source and the total cannot contradict them.
+
+     `--shell-main` is the odd one out: the centre column is `flex: 1`, so
+     nothing sets it — it MATERIALISES as whatever the frame leaves over. It is
+     declared anyway, because it is the number the type actually sets to and the
+     one worth arguing about, and because leaving it implicit is what let it go
+     wrong unnoticed. If it ever measures as something other than this, the frame
+     is wrong, not this token. The e2e lock asserts precisely that.
+
      `--shell-gutter` is per COLUMN EDGE, not per side of the shell — it was
      `--shell-pad-x` under the old frame, where it meant the latter. Renamed
      because it is the same trap as above: a declaration whose meaning quietly
@@ -151,8 +166,15 @@
      measure instead was tried and reverted: 200/680/256 at a 36px gutter left
      the frame 43px from the screen edge, which read as cramped rather than
      spacious. If this ever needs to grow again, the margin is what pays. */
-  --container-shell: 1052px; /* three-column app shell: the columns' content */
+  --shell-nav: 200px; /* left nav: items, and the user stub on the bottom edge */
+  --shell-main: 620px; /* the reading column — derived (flex: 1); see above */
+  --shell-rail: 232px; /* right rail: reference beside the reading column */
   --shell-gutter: 32px; /* gutter on each of the six column edges */
+  --container-shell: calc(
+    var(--shell-nav) +
+    var(--shell-main) +
+    var(--shell-rail)
+  );
   --container-shell-outer: calc(
     var(--container-shell) +
     6 *

@@ -66,8 +66,14 @@ export const T = {
   radiusCard: "var(--radius-card)",
   radiusPanel: "var(--radius-panel)",
 
-  /** The content the shell's three columns divide up (1052px). */
+  /** The content the shell's three columns divide up (1052px) — derived from the
+   *  three measures below, never written down. */
   shellMax: "var(--container-shell)",
+  /** The measures themselves. `shellMain` is what the centre column comes out at
+   *  rather than what sets it (it is `flex: 1`); see theme.css. */
+  shellNav: "var(--shell-nav)",
+  shellMain: "var(--shell-main)",
+  shellRail: "var(--shell-rail)",
   /** What the shell's `max-width` should actually be: the columns plus their
    *  gutters and rules. Under the border-box base, `max-width` is the outer box
    *  — reach for this, not `shellMax`, or the columns come out short (#91). */
