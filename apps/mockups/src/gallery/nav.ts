@@ -19,23 +19,33 @@ export type Screen =
   | "minat"
   | "onboarding";
 
-/** Which gallery screen a left-nav label routes to. The sidebar now pins only the
- *  three live surfaces; Cari Kolaborator and Minat Saya were retired from it but
- *  stay reachable through the screen switcher (SCREEN_META). */
+/** Which gallery screen a left-nav label routes to. The sidebar pins only the
+ *  live surfaces — retired ones (see `retired` in SCREEN_META) were pulled from
+ *  the rail and stay reachable through the screen switcher alone. */
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
   Karya: "karya",
   People: "people",
 };
 
+export type ScreenMeta = {
+  key: Screen;
+  label: string;
+  group: "Surface" | "Alur" | "Funnel";
+  /** The product has moved past this screen (03d4cc1 pulled Cari Kolaborator and
+   *  Minat Saya off the rail when the surfaces collapsed 4 → 3). Kept as a design
+   *  record, so the switcher hides it behind its "Layar tidak dipakai" toggle. */
+  retired?: true;
+};
+
 /** The screen switcher's menu, grouped. Sidebar surfaces sit under "Surface";
  *  the standalone flows under "Alur". Grows as flow mockups land. */
-export const SCREEN_META: { key: Screen; label: string; group: "Surface" | "Alur" | "Funnel" }[] = [
+export const SCREEN_META: ScreenMeta[] = [
   { key: "scroll", label: "Scroll", group: "Surface" },
   { key: "karya", label: "Karya", group: "Surface" },
   { key: "people", label: "People", group: "Surface" },
-  { key: "cari", label: "Cari Kolaborator", group: "Surface" },
-  { key: "minat", label: "Minat Saya", group: "Surface" },
+  { key: "cari", label: "Cari Kolaborator", group: "Surface", retired: true },
+  { key: "minat", label: "Minat Saya", group: "Surface", retired: true },
   { key: "auth", label: "Masuk / Daftar", group: "Alur" },
   { key: "mulai", label: "Mulai (profil minimal)", group: "Alur" },
   { key: "onboarding", label: "Onboarding AI", group: "Alur" },

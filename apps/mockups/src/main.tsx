@@ -23,11 +23,12 @@ import OnboardingScreen from "./screens/Onboarding";
 import ProfilScreen from "./screens/Profil";
 
 // ─── Mockup gallery ────────────────────────────────────────────────────────────
-// Two ways to move between screens: the sidebar surfaces (Scroll / Karya /
-// People / Cari) route from each screen's own left nav, and the bottom-left screen switcher
+// Two ways to move between screens: the live sidebar surfaces (Scroll / Karya /
+// People) route from each screen's own left nav, and the bottom-left screen switcher
 // reaches everything — including the flow mockups (auth, entry, detail, creation)
-// that carry no product sidebar. Font choice lives bottom-right (shared chrome),
-// so a font persists across navigation.
+// that carry no product sidebar, and the retired surfaces it keeps behind a toggle.
+// Font choice lives bottom-right (shared chrome), so a font persists across
+// navigation.
 const SCREENS: Record<Screen, ComponentType> = {
   scroll:    ScrollScreen,
   karya:     KaryaScreen,
