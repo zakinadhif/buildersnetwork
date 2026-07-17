@@ -56,9 +56,9 @@
    the noise: a classic scrollbar is laid out INSIDE the box, so it would eat 15px
    of the rail's 232px measure on Windows and Linux and leave the type setting to
    a width the design never specified — and it would do it only there, which is
-   the sort of thing that gets found months later (#91). The rule stands 24px off
-   the content and reads as the column's edge; the scrollbar would sit just
-   inside it and fight it. */
+   the sort of thing that gets found months later (#91). The rule stands a full
+   gutter off the content and reads as the column's edge; the scrollbar would sit
+   just inside it and fight it. */
 .bn-rail {
   width: calc(232px + 2 * var(--shell-gutter) + 1px);
   flex-shrink: 0;

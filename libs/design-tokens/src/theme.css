@@ -131,20 +131,28 @@
      around it changed:
 
          --container-shell        1052  = 200 nav + 620 main + 232 rail
-         --container-shell-outer  1198  = that, plus a gutter on each of the six
+         --container-shell-outer  1246  = that, plus a gutter on each of the six
                                           column edges, plus the two 1px rules
 
      Under the shared border-box base, `max-width` sets the OUTER box, so a
      shell wanting 1052px of content must ask for `--container-shell-outer`.
-     Both apps do. Derive it rather than writing 1198 down, so the two can
+     Both apps do. Derive it rather than writing 1246 down, so the two can
      never drift apart again.
 
      `--shell-gutter` is per COLUMN EDGE, not per side of the shell — it was
      `--shell-pad-x` under the old frame, where it meant the latter. Renamed
      because it is the same trap as above: a declaration whose meaning quietly
-     changed under it is exactly how the 48px got in. */
+     changed under it is exactly how the 48px got in.
+
+     It is also the expensive one: the frame carries six, so +8px here grew the
+     outer box by 48 and took it straight out of the page margin at the 1440
+     reference (121px -> 97px). That is the whole budget this knob spends — the
+     measure is what the type sets to and it does not move for it. Widening the
+     measure instead was tried and reverted: 200/680/256 at a 36px gutter left
+     the frame 43px from the screen edge, which read as cramped rather than
+     spacious. If this ever needs to grow again, the margin is what pays. */
   --container-shell: 1052px; /* three-column app shell: the columns' content */
-  --shell-gutter: 24px; /* gutter on each of the six column edges */
+  --shell-gutter: 32px; /* gutter on each of the six column edges */
   --container-shell-outer: calc(
     var(--container-shell) +
     6 *

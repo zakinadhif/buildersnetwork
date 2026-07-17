@@ -15,13 +15,15 @@ import { authed, expect } from "./fixtures";
 // What this locks is the MEASURE — the width the type actually sets to. That is
 // the thing #91 got wrong, and it is deliberately not the same as a column's
 // rendered box: the columns are divided by a hairline now and each carries a
-// gutter on both sides, so every box is its measure plus 48px plus its rule.
-// Assert the measure, not the box, or this test passes while the type reflows.
+// gutter on both sides, so every box is its measure plus two gutters plus its
+// rule. Assert the measure, not the box, or this passes while the type reflows.
+// The gutter has since moved (24 -> 32) without the measure moving an inch,
+// which is exactly the split this test exists to keep honest.
 //
 // If one of these fails, the shell's box model has moved. Fix the cause; don't
 // retune the number to whatever it now renders — that is how the drift got in.
 const SHELL = { nav: 200, main: 620, rail: 232 };
-const GUTTER = 24; // per column edge — six of them across the frame
+const GUTTER = 32; // per column edge — six of them across the frame
 const RULE = 1; // the two hairlines between the three columns
 
 const PROFILE = {
@@ -99,7 +101,7 @@ authed(
     expect(await measureOf(page, ".bn-rail")).toBe(SHELL.rail);
 
     // The three measures, their six gutters and their two rules are exactly
-    // --container-shell-outer (1198px). This is the assertion that would have
+    // --container-shell-outer (1246px). This is the assertion that would have
     // caught the original bug: the centre column absorbs any error in the
     // shell's width, so it silently went 48 short.
     const outer = SHELL.nav + SHELL.main + SHELL.rail + 6 * GUTTER + 2 * RULE;
