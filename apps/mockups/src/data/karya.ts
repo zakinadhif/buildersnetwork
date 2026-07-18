@@ -55,7 +55,7 @@ export const KARYA: Karya[] = [
     description: "Model bahasa kecil yang dilatih dengan corpus teks Sunda & Jawa — untuk eksperimen NLP lokal.",
     stages: ["Riset"],
     interests: ["AI/ML", "Bahasa", "Open Source"],
-    roster: [{ name: "Rizal Hakim", handle: "@rizalh" }],
+    roster: [{ name: "Rizal Hakim", handle: "@rizalh" }, { name: "Zaki Nadhif", handle: "@zaki_n" }],
     appreciations: 156,
     lastActivity: { text: "Bagikan catatan riset", hoursAgo: 9 },
   },
@@ -87,7 +87,7 @@ export const KARYA: Karya[] = [
     description: "Koordinasi jadwal kelompok tanpa drama — sinkron kalender akademik Telkom secara otomatis.",
     stages: ["Prototype"],
     interests: ["Produktivitas", "Web", "Kolaborasi"],
-    roster: [{ name: "Mega Wulandari", handle: "@megaw" }, { name: "Taufik Hidayat", handle: "@taufikhi" }],
+    roster: [{ name: "Mega Wulandari", handle: "@megaw" }, { name: "Taufik Hidayat", handle: "@taufikhi" }, { name: "Zaki Nadhif", handle: "@zaki_n" }],
     appreciations: 98,
     lastActivity: { text: "Pasang update progres", hoursAgo: 38 },
     landscapeScreenshots: [covers.productivity, covers.ai, covers.data],
@@ -103,6 +103,28 @@ export const KARYA: Karya[] = [
     lastActivity: { text: "Buka lowongan kolaborator", hoursAgo: 52 },
   },
 ];
+
+/**
+ * Whoever is signed in — the left rail's user stub, and the person the composer
+ * posts *as*. The gallery has always named him in the rail; what is new is that
+ * something now asks which karya he may speak for, and the roster is the only
+ * honest answer.
+ */
+export const ME: Roster = { name: "Zaki Nadhif", handle: "@zaki_n" };
+
+/**
+ * The karya I may post as. Derived from the rosters rather than listed here,
+ * because roster membership *is* the permission: a post is authored by the karya
+ * (see updates.ts), so being able to speak for one is the same fact as being on
+ * it. A second list would be a second answer to one question.
+ *
+ * Empty is a real state, not an edge case — most people arrive with no karya at
+ * all — and it is what the composer's nudge is for. To see that state, take
+ * @zaki_n off the two rosters above.
+ */
+export const MY_KARYA: Karya[] = KARYA.filter((k) =>
+  k.roster.some((r) => r.handle === ME.handle),
+);
 
 export const MEMBERS: Member[] = [
   { id: 1, name: "Arief Maulana", handle: "@arief_dev", bio: "Full-stack, suka bangun produk yang beneran dipakai orang.", interests: ["Karir", "Web"], skills: ["React", "Hono", "PostgreSQL"], year: 3, major: "S1 Teknik Informatika", karya: 3 },

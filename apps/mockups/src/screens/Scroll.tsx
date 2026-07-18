@@ -25,6 +25,7 @@ import { useMemo, useState } from "react";
 import { MessageCircle } from "lucide-react";
 import { Avatar, KaryaCover } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
+import { Composer } from "../components/Composer";
 import { Shell } from "../components/Shell";
 import { MEMBERS, type Member } from "../data/karya";
 import {
@@ -517,6 +518,14 @@ export default function ScrollScreen() {
             <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Scroll</h1>
             <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Kabar progres dari karya yang kamu ikuti</span>
           </div>
+        </div>
+
+        {/* The one place in Scroll you can type. It is not a contradiction of the
+            "nowhere to type" rule above so much as its point restated: what it
+            takes is a kabar from one of your karya, posted as that karya. There is
+            still no reply box, and still nowhere to say something to nobody. */}
+        <div style={{ marginTop: 16 }}>
+          <Composer />
         </div>
 
         {/* Feed */}

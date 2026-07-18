@@ -7,13 +7,23 @@
  * frame. The center column is the reading surface (cover, roster, stages,
  * screenshot gallery, update stream); the sticky right rail carries the actions.
  *
- * A role toggle previews the owner affordances (feature, kelola tim, composer)
+ * A role toggle previews the owner affordances (tulis kabar, feature, kelola tim)
  * vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
+ *
+ * The composer at the stream's head is the shared one now (components/Composer),
+ * handed this karya. It replaces a local box that led with a person's avatar and
+ * a textarea — "bagikan progres, milestone, atau minta bantuan…" — and which had
+ * quietly drifted: it carried its own `Kind` vocabulary, offering "Milestone" and
+ * "Butuh bantuan" where updates.ts said "tonggak" and "ajakan", with no "riset" at
+ * all. Two composers, two vocabularies, and nothing forcing them to agree. The
+ * `KIND` map below still displays the old names on the seeded stream, so it has
+ * the same drift left in it.
  */
 
 import { useState } from "react";
 import { Avatar, Tag } from "@myapp/ui";
 import { T, eyebrow } from "@myapp/design-tokens";
+import { Composer } from "../components/Composer";
 import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
 import { coverFor, screenshots } from "../lib/images";
@@ -141,84 +151,6 @@ function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boo
   );
 }
 
-// ─── Composer (owner / member) ───────────────────────────────────────────────
-function Composer() {
-  const [kind, setKind] = useState<Kind>("progress");
-  return (
-    <div style={{
-      display: "flex",
-      gap: 12,
-      padding: "14px 16px",
-      background: T.surface,
-      border: `1px solid ${T.line}`,
-      borderRadius: T.radiusPanel,
-      marginBottom: 20,
-    }}>
-      <Avatar name="Arief Maulana" size={34} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <textarea
-          placeholder="Bagikan progres, milestone, atau minta bantuan…"
-          rows={2}
-          style={{
-            width: "100%",
-            boxSizing: "border-box" as const,
-            background: "transparent",
-            border: "none",
-            outline: "none",
-            resize: "none" as const,
-            fontFamily: T.fontBody,
-            fontSize: T.size.body,
-            color: T.ink,
-            lineHeight: T.lh.body,
-          }}
-        />
-        <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 6, flexWrap: "wrap" as const }}>
-          {(Object.keys(KIND) as Kind[]).map((k) => {
-            const on = k === kind;
-            return (
-              <button
-                key={k}
-                type="button"
-                onClick={() => setKind(k)}
-                aria-pressed={on}
-                style={{
-                  fontFamily: T.fontBody,
-                  fontSize: T.size.micro,
-                  padding: "3px 10px",
-                  borderRadius: 99,
-                  cursor: "pointer",
-                  border: `1px solid ${on ? T.accent : T.line}`,
-                  background: on ? T.accentTint : "transparent",
-                  color: on ? T.accent : T.ink2,
-                }}
-              >
-                {KIND[k].label}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            style={{
-              marginLeft: "auto",
-              fontFamily: T.fontBody,
-              fontSize: T.size.ui,
-              fontWeight: T.weight.semibold,
-              padding: "7px 16px",
-              borderRadius: T.radiusCard,
-              border: "none",
-              background: T.ink,
-              color: T.bg,
-              cursor: "pointer",
-            }}
-          >
-            Post
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 // ─── Screen ──────────────────────────────────────────────────────────────────
 export default function KaryaDetailScreen() {
   const [owner, setOwner] = useState(true);
@@ -285,9 +217,16 @@ export default function KaryaDetailScreen() {
           ))}
         </div>
 
-        {/* Update stream */}
+        {/* Update stream. The composer sits at its head, where the old one did:
+            this stream is the karya's progress log, and writing a kabar is adding
+            to it — the one place on this page where that reads as the same act.
+            Handed this karya, so there is nothing to pick. */}
         <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Update terbaru</p>
-        {owner && <Composer />}
+        {owner && (
+          <div style={{ marginBottom: 20 }}>
+            <Composer karya={KARYA_ITEM} />
+          </div>
+        )}
         <div style={{ display: "flex", flexDirection: "column" as const }}>
           {POSTS.map((p) => (
             <article key={p.id} style={{ padding: "16px 0", borderTop: `1px solid ${T.line}` }}>

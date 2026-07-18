@@ -25,6 +25,11 @@ const NAV_ITEMS: { label: string; icon: ReactNode }[] = [
  * `children` fills the optional filter slot between the nav items and the user
  * stub (Launchpad puts interest filters there, Cari variant B puts intent
  * filters there, everything else leaves it empty).
+ *
+ * There is deliberately no "Tulis kabar" here. It was tried: one door on every
+ * surface put a second one three inches from the karya page's own, and two doors
+ * to one room read as a mistake however you style them. The composer is embedded
+ * in the two surfaces a kabar can come from instead — see Composer.tsx.
  */
 export function LeftNav({ active, children }: { active: Screen; children?: ReactNode }) {
   const navigate = useNavigate();

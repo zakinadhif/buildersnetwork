@@ -14,6 +14,13 @@ import { LeftNav } from "./LeftNav";
  * renders, so the measure cannot drift apart again. What stays here is what is
  * genuinely the gallery's: it is a document that scrolls, where the app is a
  * fixed pane that scrolls inside itself.
+ *
+ * The composer is not here. It briefly was — a modal the left rail opened from
+ * any surface — on the theory that reach is what a composer needs. But a kabar is
+ * always *about* one karya, and only two surfaces ever have one in hand: Scroll
+ * (yours) and a karya's own page (that one). Everywhere else the door had nothing
+ * to open with, and on the karya page it stood next to a better one. So it lives
+ * on those two surfaces instead; see Composer.tsx.
  */
 export function Shell({ active, navFilters, children }: {
   active:      Screen;
