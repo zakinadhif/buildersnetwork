@@ -530,7 +530,6 @@ export default function ScrollScreen() {
 
         {/* Feed */}
         <div style={{ display: "flex", flexDirection: "column" as const }}>
-          <div style={{ ...eyebrow, margin: "14px 0 2px" }}>Terbaru</div>
           {feed.length === 0 ? (
             <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
               Belum ada kabar progres.

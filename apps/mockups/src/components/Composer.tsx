@@ -18,21 +18,12 @@ import { coverFor } from "../lib/images";
  *
  * What keeps this from being the status box that productive-posting-only exists
  * to refuse is no longer the `kind` enum — that is going away — but the shape of
- * the panel itself:
- *
- *   1. The karya is not a form field, it is the byline. "The karya is the account"
- *      (Scroll.tsx) means picking one is picking an identity, the way you post as
- *      a page and not as yourself. So the top of this panel is built to look like
- *      the top of the post it will become — same cover, same serif title, the
- *      human demoted to a line of small print underneath. You are not filling in
- *      a field; you are looking at who is about to speak.
- *
- *   2. It asks for a headline, not for a thought. "Apa yang terjadi — satu baris",
- *      set in the display face at the size the post will use, because a thought
- *      does not have a headline and being asked for one is the moment you notice.
- *      That is a softer gate than an enum you cannot lie your way past, and it is
- *      worth being honest that it is softer: what is left is a norm with a nudge,
- *      not a mechanism.
+ * the panel itself: the karya is not a form field, it is the byline. "The karya
+ * is the account" (Scroll.tsx) means picking one is picking an identity, the way
+ * you post as a page and not as yourself. So the top of this panel is built to
+ * look like the top of the post it will become — same cover, same serif title,
+ * the human demoted to a line of small print underneath. You are not filling in
+ * a field; you are looking at who is about to speak.
  */
 
 const field = {
@@ -46,11 +37,11 @@ const field = {
   color: T.ink,
 } as const;
 
-// ─── No karya yet — the principle at the door ───────────────────────────────────
-// An invitation, never a disabled composer. The reason there is nothing to post is
-// not a permission problem: a kabar is *about* work, and there is no work yet. So
-// the only useful thing this panel can do is point at the making of some, which is
-// also the shortest statement of what the place is for.
+// ─── No karya yet — the principle at the door ────────────────────────────────
+// An invitation, never a disabled composer. The reason there is nothing to post
+// is not a permission problem: a kabar is *about* work, and there is no work
+// yet. So the only useful thing this panel can do is point at the making of
+// some, which is also the shortest statement of what the place is for.
 function NoKarya() {
   const navigate = useNavigate();
 
@@ -94,11 +85,12 @@ function NoKarya() {
   );
 }
 
-// ─── The byline, which is also the identity control ─────────────────────────────
-// One karya renders as plain print with no control at all: a picker over a set of
-// one is a decision you cannot make, and offering it implies a choice that isn't
-// there. Two or more gets "Ganti" — the risk with several is never picking wrong,
-// it is not *noticing*, so the identity stays loud and the control stays quiet.
+// ─── The byline, which is also the identity control ──────────────────────────
+// One karya renders as plain print with no control at all: a picker over a set
+// of one is a decision you cannot make, and offering it implies a choice that
+// isn't there. Two or more gets "Ganti" — the risk with several is never picking
+// wrong, it is not *noticing*, so the identity stays loud and the control stays
+// quiet.
 function Byline({ karya, onSwitch }: { karya: Karya; onSwitch?: () => void }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
@@ -139,34 +131,33 @@ function Byline({ karya, onSwitch }: { karya: Karya; onSwitch?: () => void }) {
 }
 
 /**
- * `karya` pins the identity: the karya page's own stream hands one over, and then
- * there is nothing to pick. Standing on Aksara AI's page and being offered "Ganti"
- * would be absurd — the page *is* the byline, and a control that lets you post as
- * something else from here is one that only ever fires by mistake. On Scroll there
- * is no such context, so the choice comes back.
+ * `karya` pins the identity: the karya page's own stream hands one over, and
+ * then there is nothing to pick. Standing on Aksara AI's page and being offered
+ * "Ganti" would be absurd — the page *is* the byline, and a control that lets
+ * you post as something else from here is one that only ever fires by mistake.
+ * On Scroll there is no such context, so the choice comes back.
  */
 export function Composer({ karya: pinned }: { karya?: Karya }) {
   const [chosen, setChosen] = useState<Karya | undefined>(MY_KARYA[0]);
   const [switching, setSwitching] = useState(false);
-  const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
 
   const karya = pinned ?? chosen;
   if (!karya) return <NoKarya />;
 
-  // A kabar needs a karya to speak for and a headline. The body can wait — some
-  // news is one line, and padding it out to earn the button helps nobody.
-  const ready = Boolean(title.trim());
+  const ready = Boolean(body.trim());
 
   return (
     <div style={{
-      background: T.surface,
-      border: `1px solid ${T.line}`,
-      borderRadius: T.radiusPanel,
-      padding: 16,
       display: "flex",
       flexDirection: "column" as const,
       gap: 12,
+      paddingBottom: 16,
+      paddingLeft: T.shellGutter,
+      paddingRight: T.shellGutter,
+      marginLeft: `calc(-1 * ${T.shellGutter})`,
+      marginRight: `calc(-1 * ${T.shellGutter})`,
+      borderBottom: `1px solid ${T.line}`,
     }}>
       <Byline
         karya={karya}
@@ -210,15 +201,6 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
         </div>
       )}
 
-      {/* The headline leads, in the face and size the post will set it in — what
-          you type is what you will have said. */}
-      <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Apa yang terjadi — satu baris"
-        aria-label="Judul kabar"
-        style={{ ...field, fontFamily: T.fontDisplay, fontSize: T.size.title, lineHeight: T.lh.heading }}
-      />
       <textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
