@@ -9,7 +9,6 @@
  */
 
 import { Avatar, Tag } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
 import { MEMBERS } from "../data/karya";
 
 const CHAT: { role: "ai" | "user"; text: string }[] = [
@@ -29,71 +28,71 @@ export default function OnboardingScreen() {
   const matches = MEMBERS.filter((m) => m.interests.some((i) => CAPTURED.minat.includes(i)) || m.skills.includes("React")).slice(0, 2);
 
   return (
-    <div style={{ minHeight: "100vh", background: T.bg, fontFamily: T.fontBody }}>
-      <div style={{ maxWidth: 900, margin: "0 auto", padding: "24px 24px 40px", display: "flex", gap: 32, alignItems: "flex-start" }}>
+    <div className="min-h-screen bg-bg font-body">
+      <div className="mx-auto flex max-w-[900px] items-start gap-8 px-6 pb-10 pt-6">
         {/* ── Chat column ── */}
-        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, minHeight: "calc(100vh - 64px)" }}>
+        <div className="flex min-h-[calc(100vh-64px)] min-w-0 flex-1 flex-col">
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, paddingBottom: 18, marginBottom: 22, borderBottom: `1px solid ${T.line}` }}>
-            <span aria-hidden="true" style={{ fontFamily: T.fontDisplay, fontSize: 22, color: T.accent, lineHeight: 1 }}>✦</span>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>Asisten Al-Fath</div>
-              <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>Opsional — bisa kamu tutup kapan aja</div>
+          <div className="mb-[22px] flex items-center gap-2.5 border-b border-line pb-[18px]">
+            <span aria-hidden="true" className="font-display text-[22px] leading-none text-accent">✦</span>
+            <div className="flex-1">
+              <div className="font-body text-ui font-medium text-ink">Asisten Al-Fath</div>
+              <div className="font-body text-micro text-ink3">Opsional — bisa kamu tutup kapan aja</div>
             </div>
-            <button type="button" aria-label="Tutup" style={{ background: "none", border: "none", cursor: "pointer", color: T.ink3, fontSize: T.size.title, lineHeight: 1, padding: 4 }}>×</button>
+            <button type="button" aria-label="Tutup" className="cursor-pointer border-none bg-none p-1 font-body text-title leading-none text-ink3">×</button>
           </div>
 
           {/* Transcript */}
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 20, flex: 1 }}>
+          <div className="flex flex-1 flex-col gap-5">
             {CHAT.map((m, i) =>
               m.role === "ai" ? (
-                <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                  <span aria-hidden="true" style={{ fontSize: 16, color: T.accent, lineHeight: 1.4, flexShrink: 0 }}>✦</span>
-                  <p style={{ margin: 0, fontFamily: T.fontMono, fontSize: T.size.body, color: T.ink, lineHeight: T.lh.body, whiteSpace: "pre-wrap" as const }}>{m.text}</p>
+                <div key={i} className="flex items-start gap-2.5">
+                  <span aria-hidden="true" className="shrink-0 text-[16px] leading-[1.4] text-accent">✦</span>
+                  <p className="m-0 whitespace-pre-wrap font-mono text-body leading-body text-ink">{m.text}</p>
                 </div>
               ) : (
-                <p key={i} style={{ alignSelf: "flex-end", maxWidth: "78%", margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink, textAlign: "right" as const, lineHeight: T.lh.body }}>{m.text}</p>
+                <p key={i} className="m-0 ml-auto max-w-[78%] text-right font-body text-body font-medium leading-body text-ink">{m.text}</p>
               ),
             )}
           </div>
 
           {/* Input bar */}
-          <div style={{ display: "flex", gap: 10, alignItems: "center", borderTop: `1px solid ${T.line}`, paddingTop: 16, marginTop: 22 }}>
+          <div className="mt-[22px] flex items-center gap-2.5 border-t border-line pt-4">
             <input
               placeholder="Tulis balasan…"
-              style={{ flex: 1, boxSizing: "border-box" as const, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99, padding: "11px 16px", fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink, outline: "none" }}
+              className="flex-1 rounded-full border border-line bg-surface px-4 py-[11px] font-body text-body text-ink outline-none placeholder:text-ink3"
             />
-            <button type="button" aria-label="Kirim" style={{ background: T.ink, color: T.bg, border: "none", borderRadius: "50%", width: 40, height: 40, cursor: "pointer", fontSize: 16, flexShrink: 0 }}>↑</button>
+            <button type="button" aria-label="Kirim" className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full border-none bg-ink text-[16px] text-bg">↑</button>
           </div>
-          <button type="button" style={{ alignSelf: "center", marginTop: 12, background: "none", border: "none", cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+          <button type="button" className="mt-3 self-center border-none bg-none p-0 font-body text-micro text-ink3 cursor-pointer">
             Lewati dulu — aku jelajah sendiri
           </button>
         </div>
 
         {/* ── Review + Matches panel ── */}
-        <aside style={{ width: 288, flexShrink: 0, position: "sticky" as const, top: 24, display: "flex", flexDirection: "column" as const, gap: 18 }}>
+        <aside className="flex w-[288px] shrink-0 flex-col gap-[18px] sticky top-6">
           {/* Captured (Review) */}
-          <div style={{ background: T.surface, border: `1px solid ${T.line}`, borderRadius: T.radiusPanel, padding: 16 }}>
-            <div style={{ ...eyebrow, marginBottom: 12 }}>Yang kita tangkap</div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>Minat</div>
-            <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 5, marginBottom: 14 }}>
+          <div className="rounded-panel border border-line bg-surface p-4">
+            <div className="eyebrow mb-3">Yang kita tangkap</div>
+            <div className="mb-1 font-body text-micro text-ink3">Minat</div>
+            <div className="mb-3.5 flex flex-wrap gap-[5px]">
               {CAPTURED.minat.map((i) => <Tag key={i} label={i} />)}
             </div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>Arah</div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink, fontWeight: T.weight.medium }}>{CAPTURED.arah}</div>
+            <div className="mb-1 font-body text-micro text-ink3">Arah</div>
+            <div className="font-body text-body font-medium text-ink">{CAPTURED.arah}</div>
           </div>
 
           {/* Matches */}
           <div>
-            <div style={{ ...eyebrow, marginBottom: 12 }}>Kenalan yang cocok</div>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 12 }}>
+            <div className="eyebrow mb-3">Kenalan yang cocok</div>
+            <div className="flex flex-col gap-3">
               {matches.map((m) => (
-                <div key={m.id} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+                <div key={m.id} className="flex items-start gap-2.5">
                   <Avatar name={m.name} size={34} />
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</div>
-                    <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 5 }}>{m.handle} · Tkt {m.year}</div>
-                    <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 4 }}>
+                  <div className="min-w-0">
+                    <div className="font-body text-ui font-medium text-ink">{m.name}</div>
+                    <div className="mb-[5px] font-body text-micro text-ink3">{m.handle} · Tkt {m.year}</div>
+                    <div className="flex flex-wrap gap-1">
                       {m.skills.slice(0, 2).map((s) => <Tag key={s} label={s} accent />)}
                     </div>
                   </div>
@@ -102,7 +101,7 @@ export default function OnboardingScreen() {
             </div>
           </div>
 
-          <button type="button" style={{ background: T.ink, color: T.bg, border: "none", borderRadius: T.radiusCard, padding: "11px 18px", fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.semibold, letterSpacing: T.track.heading, cursor: "pointer" }}>
+          <button type="button" className="cursor-pointer rounded-card border-none bg-ink px-[18px] py-[11px] font-body text-ui font-semibold tracking-heading text-bg">
             Selesai &amp; masuk →
           </button>
         </aside>

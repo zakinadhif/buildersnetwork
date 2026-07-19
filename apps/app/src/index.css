@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@source "../../../libs/ui/src";
 
 /* The design tokens live in @myapp/design-tokens and are shared with
    apps/mockups — this app declares none of its own. The two used to hold
@@ -26,7 +27,6 @@
    reintroduce a reset here. */
 @import "@myapp/design-tokens/base.css";
 @import "@myapp/design-tokens/theme.css";
-@import "@myapp/ui/ui.css";
 
 /* The inherited default is the body ROLE, decided rather than inherited (#87).
    It used to be 15px/1.6 — a size the scale doesn't have, silently inflating
@@ -426,17 +426,17 @@ body {
   gap: 6px;
   flex-wrap: wrap;
 }
-/* `.avatar` and `.karya-cover` live in @myapp/ui now (#92). The app used to
-   declare its own — a dark disc with light initials, hashed off the handle —
-   which was a second design of the same thing, not a port of it. It renders the
-   mockup's now: a pastel disc with dark initials. Only the detail page's larger
-   tile keeps a rule here, and only for the margin under it. */
+/* Avatar and KaryaCover live in @myapp/ui now (#92). The app used to declare
+   its own — a dark disc with light initials, hashed off the handle — which was a
+   second design of the same thing, not a port of it. It renders the mockup's
+   now: a pastel disc with dark initials. Only the detail page's larger tile
+   keeps a rule here, and only for the margin under it. */
 .karya-cover-lg {
   margin-bottom: 20px;
 }
 /* Detail-page screenshot gallery (issue #19) — Play Store-style portrait proof
-   shots. The feed row's landscape carousel is @myapp/ui's now (`.karya-card-shots`,
-   #92); this stays because the detail page is app-only, not shared chrome. */
+   shots. The feed row's landscape carousel is @myapp/ui's now (#92); this stays
+   because the detail page is app-only, not shared chrome. */
 .screenshot-gallery {
   display: flex;
   overflow-x: auto;
@@ -807,11 +807,6 @@ button.post-author:hover .post-author-name {
   background: var(--color-accent-tint);
   font-weight: var(--font-weight-medium);
 }
-/* Center content column — `flex: 1; min-width: 0` comes from @myapp/ui. */
-.bn-main {
-  display: flex;
-  flex-direction: column;
-}
 
 /* Display heading (Lora) for in-shell page headers */
 .bn-head {
@@ -924,13 +919,6 @@ button.post-author:hover .post-author-name {
    The third shell column: community pulse + builders to meet + a CTA. A
    full-height pane that scrolls on its own on desktop; folds below the feed on
    mobile (see the 900px block). */
-/* The width, the gutters, the rule, and the pane's own scroll all come from
-   @myapp/ui (#92). What stacks inside it is this app's. */
-.bn-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
 
 /* Community pulse strip — live counts from GET /api/stats */
 .bn-pulse {
@@ -1084,8 +1072,8 @@ button.post-author:hover .post-author-name {
     gap: 20px;
   }
   /* The panes' desktop frame — 100vh, sticky, the hairlines, the gutters — is
-     undone in @myapp/ui's own 900px block, next to the rules that set it. What's
-     left here is this app's own collapse. */
+     undone by @myapp/ui at 900px, next to the rules that set it. What's left
+     here is this app's own collapse. */
   .bn-nav {
     flex-direction: row;
     flex-wrap: wrap;

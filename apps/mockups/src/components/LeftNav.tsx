@@ -1,8 +1,7 @@
 import type { ReactNode } from "react";
 import { LayoutGrid, Newspaper, Users } from "lucide-react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
-import { T, eyebrow } from "@myapp/design-tokens";
-import { LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
+import { cn, LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 
 /** The three live product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
  *  were retired from the sidebar — the first two remain reachable via the screen
@@ -66,8 +65,8 @@ export function NavFilterList<Value extends string>({ label, options, active, on
 }) {
   return (
     <div>
-      <div style={{ ...eyebrow, marginBottom: 10 }}>{label}</div>
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
+      <div className="eyebrow mb-2.5">{label}</div>
+      <div className="flex flex-col gap-0.5">
         {options.map((opt) => {
           const on = active === opt.value;
           return (
@@ -76,19 +75,12 @@ export function NavFilterList<Value extends string>({ label, options, active, on
               type="button"
               onClick={() => onSelect(opt.value)}
               aria-pressed={on}
-              style={{
-                textAlign:       "left" as const,
-                background:      "none",
-                border:          "none",
-                padding:         "4px 8px",
-                borderRadius:    "4px",
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.ui,
-                color:           on ? T.accent : T.ink2,
-                backgroundColor: on ? T.accentTint : "transparent",
-                cursor:          "pointer",
-                fontWeight:      on ? T.weight.medium : T.weight.regular,
-              }}
+              className={cn(
+                "w-full rounded-card px-2 py-1 text-left font-body text-ui cursor-pointer",
+                on
+                  ? "bg-accent-tint text-accent font-medium"
+                  : "bg-transparent text-ink2 font-normal",
+              )}
             >
               {opt.label}
             </button>

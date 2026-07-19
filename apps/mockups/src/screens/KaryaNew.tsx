@@ -9,14 +9,13 @@
  */
 
 import { useState } from "react";
-import { T, eyebrow } from "@myapp/design-tokens";
-import { Avatar } from "@myapp/ui";
+import { Avatar, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 
 const TIPS = [
   "Cover & tangkapan layar bikin karyamu lebih hidup di feed.",
   "Pilih tahap yang jujur — orang paham kamu lagi di mana.",
-  "Tandai tahap “Cari Kolaborator” kalau lagi butuh tim.",
+  "Tandai tahap \"Cari Kolaborator\" kalau lagi butuh tim.",
 ];
 
 const STAGES = ["Ide", "Prototype", "MVP", "Beta", "Rilis", "Cari Kolaborator"];
@@ -25,28 +24,17 @@ const SUGGESTED = ["Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komun
 // ─── Small field wrapper ─────────────────────────────────────────────────────
 function Labelled({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
   return (
-    <div style={{ marginBottom: 22 }}>
-      <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 8 }}>
-        <span style={eyebrow}>{label}</span>
-        {hint && <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{hint}</span>}
+    <div className="mb-[22px]">
+      <div className="mb-2 flex items-baseline gap-2.5">
+        <span className="eyebrow">{label}</span>
+        {hint && <span className="font-body text-micro text-ink3">{hint}</span>}
       </div>
       {children}
     </div>
   );
 }
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  boxSizing: "border-box",
-  background: T.surface,
-  border: `1px solid ${T.line}`,
-  borderRadius: T.radiusCard,
-  padding: "11px 13px",
-  fontFamily: T.fontBody,
-  fontSize: T.size.body,
-  color: T.ink,
-  outline: "none",
-};
+const inputCls = "w-full rounded-card border border-line bg-surface px-[13px] py-[11px] font-body text-body text-ink outline-none placeholder:text-ink3";
 
 function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
   return (
@@ -54,17 +42,12 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
       type="button"
       onClick={onClick}
       aria-pressed={on}
-      style={{
-        fontFamily: T.fontBody,
-        fontSize: T.size.ui,
-        padding: "6px 13px",
-        borderRadius: 99,
-        cursor: "pointer",
-        border: `1px solid ${on ? T.accent : T.line}`,
-        background: on ? T.accentTint : "transparent",
-        color: on ? T.accent : T.ink2,
-        fontWeight: on ? T.weight.medium : T.weight.regular,
-      }}
+      className={cn(
+        "cursor-pointer rounded-full border px-[13px] py-1.5 font-body text-ui",
+        on
+          ? "border-accent bg-accent-tint text-accent font-medium"
+          : "border-line bg-transparent text-ink2 font-normal",
+      )}
     >
       {label}
     </button>
@@ -84,87 +67,62 @@ function ManualForm({ onAi }: { onAi: () => void }) {
       <button
         type="button"
         onClick={onAi}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 12,
-          width: "100%",
-          textAlign: "left" as const,
-          padding: "13px 16px",
-          background: T.accentTint,
-          border: `1px solid ${T.accentLine}`,
-          borderRadius: T.radiusPanel,
-          cursor: "pointer",
-          marginBottom: 30,
-        }}
+        className="mb-[30px] flex w-full cursor-pointer items-center gap-3 rounded-panel border border-accent-line bg-accent-tint px-4 py-[13px] text-left"
       >
-        <span aria-hidden="true" style={{ fontSize: 20, color: T.accent, lineHeight: 1 }}>✦</span>
-        <span style={{ flex: 1, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink }}>
-          Males ngetik? <span style={{ color: T.accentMid, fontWeight: T.weight.medium }}>Biar AI yang nyusun dari obrolan.</span>
+        <span aria-hidden="true" className="text-[20px] leading-none text-accent">✦</span>
+        <span className="flex-1 font-body text-ui text-ink">
+          Males ngetik? <span className="font-medium text-accent-mid">Biar AI yang nyusun dari obrolan.</span>
         </span>
-        <span aria-hidden="true" style={{ color: T.accent }}>→</span>
+        <span aria-hidden="true" className="text-accent">→</span>
       </button>
 
       <Labelled label="Cover" hint="opsional">
-        <div style={{
-          height: 120,
-          border: `1.5px dashed ${T.lineDark}`,
-          borderRadius: T.radiusPanel,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: 8,
-          color: T.ink3,
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          cursor: "pointer",
-          background: T.surface,
-        }}>
-          <span aria-hidden="true" style={{ fontSize: 18 }}>⬆</span> Seret gambar atau pilih file
+        <div className="flex h-[120px] cursor-pointer items-center justify-center gap-2 rounded-panel border-[1.5px] border-dashed border-line-dark bg-surface font-body text-ui text-ink3">
+          <span aria-hidden="true" className="text-[18px]">⬆</span> Seret gambar atau pilih file
         </div>
       </Labelled>
 
       <Labelled label="Tangkapan layar" hint="landscape muncul di feed · potret di galeri detail">
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           {[0, 1].map((i) => (
-            <div key={i} style={{ width: 92, height: 68, border: `1px solid ${T.line}`, borderRadius: 10, background: T.surface }} />
+            <div key={i} className="h-[68px] w-[92px] rounded-[10px] border border-line bg-surface" />
           ))}
-          <button type="button" style={{ width: 92, height: 68, border: `1.5px dashed ${T.lineDark}`, borderRadius: 10, background: "transparent", color: T.ink3, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.micro }}>
+          <button type="button" className="h-[68px] w-[92px] cursor-pointer rounded-[10px] border-[1.5px] border-dashed border-line-dark bg-transparent font-body text-micro text-ink3">
             + tambah
           </button>
         </div>
       </Labelled>
 
       <Labelled label="Judul">
-        <input style={inputStyle} defaultValue="Peta Kost" placeholder="Nama karya kamu" />
+        <input className={inputCls} defaultValue="Peta Kost" placeholder="Nama karya kamu" />
       </Labelled>
 
       <Labelled label="Deskripsi">
         <textarea
           rows={3}
-          style={{ ...inputStyle, resize: "vertical" as const, lineHeight: T.lh.body }}
+          className={`${inputCls} resize-y leading-body`}
           defaultValue="Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif."
           placeholder="Ceritain karyanya dalam satu-dua kalimat."
         />
       </Labelled>
 
       <Labelled label="Tahap" hint="boleh lebih dari satu">
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
           {STAGES.map((s) => <Chip key={s} label={s} on={stages.includes(s)} onClick={() => toggle(stages, s, setStages)} />)}
         </div>
       </Labelled>
 
       <Labelled label="Minat / tag">
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8 }}>
+        <div className="flex flex-wrap gap-2">
           {SUGGESTED.map((s) => <Chip key={s} label={s} on={tags.includes(s)} onClick={() => toggle(tags, s, setTags)} />)}
-          <button type="button" style={{ fontFamily: T.fontBody, fontSize: T.size.ui, padding: "6px 13px", borderRadius: 99, border: `1px dashed ${T.lineDark}`, background: "transparent", color: T.ink3, cursor: "pointer" }}>
+          <button type="button" className="cursor-pointer rounded-full border border-dashed border-line-dark bg-transparent px-[13px] py-1.5 font-body text-ui text-ink3">
             + tag lain
           </button>
         </div>
       </Labelled>
 
-      <div style={{ borderTop: `1px solid ${T.line}`, marginTop: 8, paddingTop: 22, display: "flex", justifyContent: "flex-end" }}>
-        <button type="button" style={{ background: T.ink, color: T.bg, border: "none", borderRadius: T.radiusCard, padding: "12px 22px", fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.semibold, letterSpacing: T.track.heading, cursor: "pointer" }}>
+      <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
+        <button type="button" className="cursor-pointer rounded-card border-none bg-ink px-[22px] py-3 font-body text-ui font-semibold tracking-heading text-bg">
           Terbitkan karya →
         </button>
       </div>
@@ -182,44 +140,44 @@ const CHAT: { role: "ai" | "user"; text: string }[] = [
 function AiMode({ onManual }: { onManual: () => void }) {
   return (
     <>
-      <button type="button" onClick={onManual} style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, marginBottom: 22 }}>
+      <button type="button" onClick={onManual} className="mb-[22px] cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">
         ← Isi sendiri aja
       </button>
 
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 18, marginBottom: 20 }}>
+      <div className="mb-5 flex flex-col gap-[18px]">
         {CHAT.map((m, i) =>
           m.role === "ai" ? (
-            <div key={i} style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-              <span aria-hidden="true" style={{ fontSize: 18, color: T.accent, lineHeight: 1.2 }}>✦</span>
-              <p style={{ margin: 0, fontFamily: T.fontMono, fontSize: T.size.body, color: T.ink, lineHeight: T.lh.body, whiteSpace: "pre-wrap" as const }}>{m.text}</p>
+            <div key={i} className="flex items-start gap-2.5">
+              <span aria-hidden="true" className="text-[18px] leading-[1.2] text-accent">✦</span>
+              <p className="m-0 whitespace-pre-wrap font-mono text-body leading-body text-ink">{m.text}</p>
             </div>
           ) : (
-            <p key={i} style={{ alignSelf: "flex-end", maxWidth: "76%", margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink, textAlign: "right" as const }}>{m.text}</p>
+            <p key={i} className="m-0 ml-auto max-w-[76%] text-right font-body text-body font-medium text-ink">{m.text}</p>
           ),
         )}
       </div>
 
       {/* Draft preview being filled */}
-      <div style={{ background: T.surface, border: `1px solid ${T.accentLine}`, borderRadius: T.radiusPanel, padding: 16, marginBottom: 18 }}>
-        <div style={{ ...eyebrow, color: T.accent, marginBottom: 10 }}>Draft otomatis</div>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, color: T.ink, marginBottom: 4 }}>Peta Kost</div>
-        <p style={{ margin: "0 0 10px", fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink2, lineHeight: T.lh.body }}>
+      <div className="mb-[18px] rounded-panel border border-accent-line bg-surface p-4">
+        <div className="eyebrow mb-2.5 !text-accent">Draft otomatis</div>
+        <div className="mb-1 font-display text-title text-ink">Peta Kost</div>
+        <p className="mb-2.5 mt-0 font-body text-caption leading-body text-ink2">
           Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif.
         </p>
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+        <div className="flex flex-wrap gap-1.5">
           {["Beta", "Cari Kolaborator", "Web", "Komunitas"].map((t) => (
-            <span key={t} style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink2, background: T.bg, border: `1px solid ${T.line}`, padding: "2px 8px", borderRadius: 99 }}>{t}</span>
+            <span key={t} className="rounded-full border border-line bg-bg px-2 py-[2px] font-body text-micro text-ink2">{t}</span>
           ))}
         </div>
-        <button type="button" style={{ marginTop: 14, background: T.ink, color: T.bg, border: "none", borderRadius: T.radiusCard, padding: "9px 18px", fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.semibold, cursor: "pointer" }}>
+        <button type="button" className="mt-3.5 cursor-pointer rounded-card border-none bg-ink px-[18px] py-[9px] font-body text-ui font-semibold text-bg">
           Cek &amp; terbitkan →
         </button>
       </div>
 
       {/* Input bar */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", borderTop: `1px solid ${T.line}`, paddingTop: 16 }}>
+      <div className="flex items-center gap-2.5 border-t border-line pt-4">
         <Avatar name="Zaki Nadhif" size={30} />
-        <input placeholder="Balas asisten…" style={{ ...inputStyle, borderRadius: 99 }} />
+        <input placeholder="Balas asisten…" className={`${inputCls} rounded-full`} />
       </div>
     </>
   );
@@ -232,26 +190,26 @@ export default function KaryaNewScreen() {
   return (
     <Shell active="karya-new">
       {/* Form column */}
-      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
-        <h1 style={{ margin: "0 0 26px", fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>
+      <MainColumn>
+        <h1 className="mb-[26px] mt-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
           Bikin karya baru.
         </h1>
 
         {mode === "manual" ? <ManualForm onAi={() => setMode("ai")} /> : <AiMode onManual={() => setMode("manual")} />}
-      </main>
+      </MainColumn>
 
       {/* Tips rail */}
-      <aside className="bn-rail">
-        <p style={{ ...eyebrow, marginBottom: 12 }}>Biar makin dilirik</p>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+      <RailColumn>
+        <p className="eyebrow mb-3">Biar makin dilirik</p>
+        <div className="flex flex-col gap-3.5">
           {TIPS.map((tip) => (
-            <div key={tip} style={{ display: "flex", gap: 9, alignItems: "flex-start" }}>
-              <span aria-hidden="true" style={{ color: T.accent, lineHeight: T.lh.body }}>◆</span>
-              <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, lineHeight: T.lh.body }}>{tip}</p>
+            <div key={tip} className="flex items-start gap-[9px]">
+              <span aria-hidden="true" className="leading-body text-accent">◆</span>
+              <p className="m-0 font-body text-ui leading-body text-ink2">{tip}</p>
             </div>
           ))}
         </div>
-      </aside>
+      </RailColumn>
     </Shell>
   );
 }

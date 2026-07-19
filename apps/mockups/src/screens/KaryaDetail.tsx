@@ -21,8 +21,7 @@
  */
 
 import { useState } from "react";
-import { Avatar, Tag } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Avatar, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Composer } from "../components/Composer";
 import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
@@ -49,18 +48,12 @@ const POSTS: { id: number; author: string; kind: Kind; body: string; hoursAgo: n
 function KindChip({ kind }: { kind: Kind }) {
   const k = KIND[kind];
   return (
-    <span style={{
-      fontFamily: T.fontBody,
-      fontSize: T.size.micro,
-      fontWeight: T.weight.medium,
-      letterSpacing: T.track.tag,
-      textTransform: "uppercase" as const,
-      color: k.tint ? T.accent : T.ink3,
-      background: k.tint ? T.accentTint : "transparent",
-      border: k.tint ? `1px solid ${T.accentLine}` : `1px solid ${T.line}`,
-      borderRadius: 99,
-      padding: "2px 9px",
-    }}>
+    <span className={cn(
+      "rounded-full border px-[9px] py-[2px] font-body text-micro font-medium tracking-tag uppercase",
+      k.tint
+        ? "border-accent-line bg-accent-tint text-accent"
+        : "border-line bg-transparent text-ink3",
+    )}>
       {k.label}
     </span>
   );
@@ -74,44 +67,30 @@ function RailActions({ owner, featured, onToggleFeatured }: {
   featured: boolean;
   onToggleFeatured: () => void;
 }) {
-  const btn = (primary: boolean): React.CSSProperties => ({
-    width: "100%",
-    boxSizing: "border-box" as const,
-    textAlign: "center" as const,
-    fontFamily: T.fontBody,
-    fontSize: T.size.ui,
-    fontWeight: T.weight.medium,
-    padding: "9px 16px",
-    borderRadius: T.radiusCard,
-    cursor: "pointer",
-    border: primary ? "none" : `1px solid ${T.line}`,
-    background: primary ? T.ink : "transparent",
-    color: primary ? T.bg : T.ink,
-  });
   return (
-    <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+    <div className="flex flex-col gap-2">
       {owner ? (
         <>
           <button
             type="button"
             onClick={onToggleFeatured}
             aria-pressed={featured}
-            style={{
-              ...btn(false),
-              borderColor: featured ? T.accent : T.line,
-              color: featured ? T.accent : T.ink,
-              background: featured ? T.accentTint : "transparent",
-            }}
+            className={cn(
+              "w-full cursor-pointer rounded-card border px-4 py-[9px] text-center font-body text-ui font-medium",
+              featured
+                ? "border-accent bg-accent-tint text-accent"
+                : "border-line bg-transparent text-ink",
+            )}
           >
             {featured ? "✦ Jadi unggulan" : "✦ Tandai unggulan"}
           </button>
-          <button type="button" style={btn(false)}>Kelola tim</button>
-          <button type="button" style={btn(false)}>Sunting</button>
+          <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">Kelola tim</button>
+          <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">Sunting</button>
         </>
       ) : (
         <>
-          <button type="button" style={btn(true)}>Gabung karya →</button>
-          <button type="button" style={btn(false)}>♡ Apresiasi · {KARYA_ITEM.appreciations}</button>
+          <button type="button" className="w-full cursor-pointer rounded-card border-none bg-ink px-4 py-[9px] text-center font-body text-ui font-medium text-bg">Gabung karya →</button>
+          <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">♡ Apresiasi · {KARYA_ITEM.appreciations}</button>
         </>
       )}
     </div>
@@ -121,7 +100,7 @@ function RailActions({ owner, featured, onToggleFeatured }: {
 // ─── Role toggle (gallery affordance) ────────────────────────────────────────
 function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boolean) => void }) {
   return (
-    <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
+    <div className="flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
       {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
         const on = (val === "owner") === owner;
         return (
@@ -130,18 +109,10 @@ function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boo
             type="button"
             onClick={() => onChange(val === "owner")}
             aria-pressed={on}
-            style={{
-              flex: 1,
-              border: "none",
-              borderRadius: 99,
-              padding: "5px 12px",
-              background: on ? T.ink : "transparent",
-              color: on ? T.bg : T.ink2,
-              fontFamily: T.fontBody,
-              fontSize: T.size.micro,
-              fontWeight: on ? T.weight.medium : T.weight.regular,
-              cursor: "pointer",
-            }}
+            className={cn(
+              "flex-1 cursor-pointer rounded-full border-none px-3 py-[5px] font-body text-micro",
+              on ? "bg-ink text-bg font-medium" : "bg-transparent text-ink2 font-normal",
+            )}
           >
             {label}
           </button>
@@ -160,9 +131,9 @@ export default function KaryaDetailScreen() {
   return (
     <Shell active="karya-detail">
       {/* Reading column */}
-      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
+      <MainColumn>
         {/* Back to the feed the card funnelled from */}
-        <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, marginBottom: 20 }}>
+        <button type="button" className="mb-5 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">
           ← Balik
         </button>
 
@@ -170,49 +141,53 @@ export default function KaryaDetailScreen() {
         <img
           src={coverFor(k.interests)}
           alt={k.title}
-          style={{ width: "100%", height: 220, objectFit: "cover", borderRadius: T.radiusPanel, display: "block", border: `1px solid ${T.line}` }}
+          className="block h-[220px] w-full rounded-panel border border-line object-cover"
         />
 
         {/* Title block */}
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const, alignItems: "center", margin: "22px 0 10px" }}>
+        <div className="my-[22px] mb-2.5 flex flex-wrap items-center gap-2">
           {featured && <KindChip kind="launch" />}
-          {k.stages.map((s) => <span key={s} style={eyebrow}>{s}</span>)}
+          {k.stages.map((s) => <span key={s} className="eyebrow">{s}</span>)}
         </div>
-        <h1 style={{ margin: "0 0 12px", fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>
+        <h1 className="mb-3 mt-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
           {k.title}
         </h1>
 
         {/* Roster */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 16 }}>
-          <div style={{ display: "flex" }}>
+        <div className="mb-4 flex items-center gap-2.5">
+          <div className="flex">
             {k.roster.map((r, i) => (
               <span key={r.handle} style={{ marginLeft: i === 0 ? 0 : -8, zIndex: k.roster.length - i }}>
                 <Avatar name={r.name} size={30} />
               </span>
             ))}
           </div>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
+          <span className="font-body text-ui text-ink2">
             {k.roster.map((r) => r.name).join(" · ")}
           </span>
         </div>
 
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
+        <p className="m-0 font-body text-body leading-body text-ink2">
           {k.description}
         </p>
 
-        <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginTop: 14 }}>
+        <div className="mt-3.5 flex flex-wrap gap-1">
           {k.interests.map((i) => <Tag key={i} label={i} />)}
         </div>
 
         {/* Screenshots */}
-        <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Tangkapan layar</p>
-        <div style={{ display: "flex", gap: 12, overflowX: "auto" as const, paddingBottom: 6, scrollSnapType: "x mandatory" }}>
+        <p className="eyebrow mb-3 mt-[34px]">Tangkapan layar</p>
+        <div
+          className="flex gap-3 overflow-x-auto pb-1.5"
+          style={{ scrollSnapType: "x mandatory" }}
+        >
           {screenshots.map((src, i) => (
             <img
               key={src}
               src={src}
               alt={`${k.title} — layar ${i + 1}`}
-              style={{ height: 300, width: "auto", flexShrink: 0, borderRadius: 14, border: `1px solid ${T.line}`, scrollSnapAlign: "start", background: T.bg }}
+              className="h-[300px] w-auto shrink-0 rounded-[14px] border border-line bg-bg"
+              style={{ scrollSnapAlign: "start" }}
             />
           ))}
         </div>
@@ -221,50 +196,50 @@ export default function KaryaDetailScreen() {
             this stream is the karya's progress log, and writing a kabar is adding
             to it — the one place on this page where that reads as the same act.
             Handed this karya, so there is nothing to pick. */}
-        <p style={{ ...eyebrow, margin: "34px 0 12px" }}>Update terbaru</p>
+        <p className="eyebrow mb-3 mt-[34px]">Update terbaru</p>
         {owner && (
-          <div style={{ marginBottom: 20 }}>
+          <div className="mb-5">
             <Composer karya={KARYA_ITEM} />
           </div>
         )}
-        <div style={{ display: "flex", flexDirection: "column" as const }}>
+        <div className="flex flex-col">
           {POSTS.map((p) => (
-            <article key={p.id} style={{ padding: "16px 0", borderTop: `1px solid ${T.line}` }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
+            <article key={p.id} className="border-t border-line py-4">
+              <div className="mb-2 flex items-center gap-2.5">
                 <Avatar name={p.author} size={28} />
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{p.author}</span>
+                <span className="font-body text-ui font-medium text-ink">{p.author}</span>
                 <KindChip kind={p.kind} />
-                <span style={{ marginLeft: "auto", fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{relativeTime(p.hoursAgo)}</span>
+                <span className="ml-auto font-body text-micro text-ink3">{relativeTime(p.hoursAgo)}</span>
               </div>
-              <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>{p.body}</p>
+              <p className="m-0 font-body text-body leading-body text-ink2">{p.body}</p>
             </article>
           ))}
         </div>
-      </main>
+      </MainColumn>
 
       {/* Action rail */}
-      <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
+      <RailColumn className="flex flex-col gap-5">
         {/* Role toggle — gallery affordance to preview both viewer states */}
         <RoleToggle owner={owner} onChange={setOwner} />
 
         <RailActions owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
 
         {/* Meta */}
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, paddingTop: 4, borderTop: `1px solid ${T.line}` }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", paddingTop: 12 }}>
-            <span style={{ ...eyebrow }}>Tahap</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{k.stages[k.stages.length - 1]}</span>
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
+          <div className="flex items-baseline justify-between">
+            <span className="eyebrow">Tahap</span>
+            <span className="font-body text-ui text-ink2">{k.stages[k.stages.length - 1]}</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ ...eyebrow }}>Tim</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{k.roster.length} orang</span>
+          <div className="flex items-baseline justify-between">
+            <span className="eyebrow">Tim</span>
+            <span className="font-body text-ui text-ink2">{k.roster.length} orang</span>
           </div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-            <span style={{ ...eyebrow }}>Apresiasi</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accentMid }}>♥ {k.appreciations}</span>
+          <div className="flex items-baseline justify-between">
+            <span className="eyebrow">Apresiasi</span>
+            <span className="font-body text-ui text-accent-mid">♥ {k.appreciations}</span>
           </div>
         </div>
-      </aside>
+      </RailColumn>
     </Shell>
   );
 }

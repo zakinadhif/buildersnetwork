@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Avatar } from "./Avatar";
 import { KaryaCover } from "./KaryaCover";
+import { cn } from "./lib/cn";
 import { Tag } from "./Tag";
 
 /** A lifecycle stage or seeking-signal, pre-labelled by the caller. `accent`
@@ -34,6 +35,10 @@ export interface KaryaCardActivity {
 
 /** How many faces the roster shows before collapsing the rest into "+N". */
 const ROSTER_VISIBLE = 4;
+
+const card = "flex flex-col gap-3 border-b border-line px-0.5 py-4";
+const linkCard =
+  "cursor-pointer transition-opacity duration-150 hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 /**
  * A karya as a feed row (#92): an optional proof-shot carousel, then the
@@ -86,13 +91,13 @@ export function KaryaCard({
     <>
       {screenshots && screenshots.length > 0 && (
         <section
-          className="karya-card-shots"
+          className="flex snap-x snap-mandatory gap-2.5 overflow-x-auto rounded-card [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
           aria-label={`Tangkapan layar ${title}`}
         >
           {screenshots.map((s) => (
             <img
               key={s.key}
-              className="karya-card-shot"
+              className="block h-[137px] w-[242px] shrink-0 snap-start rounded-card border border-line object-cover"
               src={s.src}
               alt={s.alt ?? ""}
               aria-hidden={s.alt ? undefined : true}
@@ -102,40 +107,50 @@ export function KaryaCard({
         </section>
       )}
 
-      <div className="karya-card-row">
+      <div className="flex gap-3.5">
         <KaryaCover src={cover} size={56} radius={14} />
-        <div className="karya-card-body">
+        <div className="min-w-0 flex-1">
           {activity && (
-            <div className="karya-card-activity">
-              <span className="karya-card-activity-what">{activity.text}</span>
-              <span className="karya-card-activity-when" aria-hidden="true">
+            <div className="mb-1 flex items-center gap-1.5 font-body text-micro tracking-tag">
+              <span className="font-medium text-accent-mid">
+                {activity.text}
+              </span>
+              <span className="text-ink3" aria-hidden="true">
                 ·
               </span>
-              <span className="karya-card-activity-when">{activity.time}</span>
+              <span className="text-ink3">{activity.time}</span>
             </div>
           )}
 
-          <div className="karya-card-head">
-            <h3 className="karya-card-title">{title}</h3>
+          <div className="mb-1 flex flex-wrap items-baseline gap-2">
+            <h3 className="m-0 font-display text-title font-regular leading-heading text-ink">
+              {title}
+            </h3>
             {stages.map((s) => (
               <Tag key={s.label} label={s.label} accent={s.accent} />
             ))}
           </div>
 
-          <p className="karya-card-desc">{description}</p>
+          <p className="m-0 mb-2.5 font-body text-body leading-body text-ink2">
+            {description}
+          </p>
 
-          <div className="karya-card-foot">
-            <div className="karya-card-interests">
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex flex-wrap gap-1">
               {interests.map((i) => (
                 <Tag key={i} label={i} />
               ))}
             </div>
-            <div className="karya-card-side">
-              <div className="karya-card-roster">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center [&>*+*]:-ml-2">
                 {shown.map((m) => (
                   <Avatar key={m.key} name={m.name} image={m.image} size={22} />
                 ))}
-                {extra > 0 && <span className="karya-card-more">+{extra}</span>}
+                {extra > 0 && (
+                  <span className="inline-flex size-[22px] shrink-0 items-center justify-center rounded-full bg-line font-body text-micro text-ink2">
+                    +{extra}
+                  </span>
+                )}
               </div>
               {appreciate}
             </div>
@@ -149,7 +164,7 @@ export function KaryaCard({
     return (
       // biome-ignore lint/a11y/useSemanticElements: contains block children, can't use <button>
       <div
-        className="karya-card"
+        className={cn(card, linkCard)}
         role="button"
         tabIndex={0}
         onClick={onOpen}
@@ -159,5 +174,5 @@ export function KaryaCard({
       </div>
     );
   }
-  return <article className="karya-card">{body}</article>;
+  return <article className={card}>{body}</article>;
 }

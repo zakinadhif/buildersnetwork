@@ -1,4 +1,10 @@
-import { type NavItem, ShellColumns, LeftNav as UiLeftNav } from "@myapp/ui";
+import {
+  MainColumn,
+  type NavItem,
+  RailColumn,
+  ShellColumns,
+  LeftNav as UiLeftNav,
+} from "@myapp/ui";
 import { useLocation } from "wouter";
 import type { Member } from "@/lib/members";
 
@@ -64,8 +70,10 @@ export default function Shell({
     <div className="bn-shell">
       <ShellColumns>
         <UiLeftNav items={items} user={{ name: me.name, handle: me.handle }} />
-        <main className="bn-main">{children}</main>
-        {rail && <aside className="bn-rail">{rail}</aside>}
+        <MainColumn className="flex flex-col">{children}</MainColumn>
+        {rail && (
+          <RailColumn className="flex flex-col gap-6">{rail}</RailColumn>
+        )}
       </ShellColumns>
     </div>
   );

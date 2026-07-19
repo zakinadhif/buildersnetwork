@@ -190,3 +190,21 @@
   );
   --container-page: 580px; /* single reading column: auth, welcome, chat */
 }
+
+/* ── Eyebrow utility ──────────────────────────────────────────────────────────
+   A @utility so migrated components can write className="eyebrow" instead of
+   style={eyebrow}. The properties mirror the `eyebrow` object in ./index.ts;
+   neither is the source — both point at the tokens above.
+
+   Adding an `@utility` here rather than at the app level keeps the class
+   available to both consumers (app + mockups) through the same import that
+   already gives them the tokens. */
+@utility eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-micro);
+  font-weight: var(--font-weight-medium);
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--color-ink3);
+  line-height: var(--leading-compact);
+}

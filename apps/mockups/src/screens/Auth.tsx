@@ -11,7 +11,7 @@
  */
 
 import { useRef, useState } from "react";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { cn } from "@myapp/ui";
 
 type Mode = "daftar" | "masuk";
 
@@ -25,28 +25,17 @@ function Field({ label, type = "text", placeholder, value, onChange, note }: {
   note?: string;
 }) {
   return (
-    <label style={{ display: "block" }}>
-      <span style={{ ...eyebrow, display: "block", marginBottom: 6 }}>{label}</span>
+    <label className="block">
+      <span className="eyebrow mb-1.5 block">{label}</span>
       <input
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        style={{
-          width: "100%",
-          boxSizing: "border-box" as const,
-          background: T.surface,
-          border: `1px solid ${T.line}`,
-          borderRadius: T.radiusCard,
-          padding: "11px 13px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink,
-          outline: "none",
-        }}
+        className="w-full rounded-card border border-line bg-surface px-[13px] py-[11px] font-body text-body text-ink outline-none placeholder:text-ink3"
       />
       {note && (
-        <span style={{ display: "block", marginTop: 6, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+        <span className="mt-1.5 block font-body text-micro text-ink3">
           {note}
         </span>
       )}
@@ -59,19 +48,7 @@ function PrimaryButton({ children, onClick }: { children: React.ReactNode; onCli
     <button
       type="button"
       onClick={onClick}
-      style={{
-        width: "100%",
-        background: T.ink,
-        color: T.bg,
-        border: "none",
-        borderRadius: T.radiusCard,
-        padding: "12px 18px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.ui,
-        fontWeight: T.weight.semibold,
-        letterSpacing: T.track.heading,
-        cursor: "pointer",
-      }}
+      className="w-full cursor-pointer rounded-card border-none bg-ink px-[18px] py-3 font-body text-ui font-semibold tracking-heading text-bg"
     >
       {children}
     </button>
@@ -90,15 +67,7 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
   return (
     <>
       {/* Mode toggle */}
-      <div style={{
-        display: "flex",
-        gap: 2,
-        padding: 3,
-        background: T.surface,
-        border: `1px solid ${T.line}`,
-        borderRadius: 99,
-        marginBottom: 28,
-      }}>
+      <div className="mb-7 flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
         {(["daftar", "masuk"] as const).map((m) => {
           const on = m === mode;
           return (
@@ -107,19 +76,12 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
               type="button"
               onClick={() => setMode(m)}
               aria-pressed={on}
-              style={{
-                flex: 1,
-                border: "none",
-                borderRadius: 99,
-                padding: "7px 0",
-                background: on ? T.ink : "transparent",
-                color: on ? T.bg : T.ink2,
-                fontFamily: T.fontBody,
-                fontSize: T.size.ui,
-                fontWeight: on ? T.weight.medium : T.weight.regular,
-                cursor: "pointer",
-                transition: "background 0.12s, color 0.12s",
-              }}
+              className={cn(
+                "flex-1 cursor-pointer rounded-full border-none py-[7px] font-body text-ui transition-[background,color] duration-[120ms]",
+                on
+                  ? "bg-ink text-bg font-medium"
+                  : "bg-transparent text-ink2 font-normal",
+              )}
             >
               {m === "daftar" ? "Daftar" : "Masuk"}
             </button>
@@ -127,7 +89,7 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
         })}
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 18 }}>
+      <div className="flex flex-col gap-[18px]">
         <Field
           label="Email"
           type="email"
@@ -143,21 +105,12 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
         </PrimaryButton>
       </div>
 
-      <p style={{ marginTop: 22, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
+      <p className="mt-[22px] font-body text-ui text-ink2">
         {daftar ? "Sudah punya akun? " : "Belum gabung? "}
         <button
           type="button"
           onClick={() => setMode(daftar ? "masuk" : "daftar")}
-          style={{
-            background: "none",
-            border: "none",
-            padding: 0,
-            cursor: "pointer",
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            color: T.accent,
-            fontWeight: T.weight.medium,
-          }}
+          className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent"
         >
           {daftar ? "Masuk" : "Daftar"} →
         </button>
@@ -179,7 +132,7 @@ function VerifyView({ onBack }: { onBack: () => void }) {
 
   return (
     <>
-      <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
+      <div className="mb-5 flex gap-3">
         {code.map((digit, i) => (
           <input
             key={i}
@@ -188,35 +141,26 @@ function VerifyView({ onBack }: { onBack: () => void }) {
             onChange={(e) => setDigit(i, e.target.value)}
             inputMode="numeric"
             aria-label={`Digit ${i + 1}`}
-            style={{
-              width: 46,
-              height: 56,
-              textAlign: "center" as const,
-              background: T.surface,
-              border: `1px solid ${digit ? T.accent : T.line}`,
-              borderRadius: T.radiusCard,
-              fontFamily: T.fontBody,
-              fontSize: T.size.title,
-              fontWeight: T.weight.medium,
-              color: T.ink,
-              outline: "none",
-            }}
+            className={cn(
+              "h-[56px] w-[46px] rounded-card border bg-surface text-center font-body text-title font-medium text-ink outline-none",
+              digit ? "border-accent" : "border-line",
+            )}
           />
         ))}
       </div>
 
       <PrimaryButton>Verifikasi &amp; masuk →</PrimaryButton>
 
-      <p style={{ marginTop: 20, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
+      <p className="mt-5 font-body text-ui text-ink2">
         Nggak ada kodenya?{" "}
-        <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accent, fontWeight: T.weight.medium }}>
+        <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent">
           Kirim ulang
         </button>
       </p>
       <button
         type="button"
         onClick={onBack}
-        style={{ marginTop: 8, background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3 }}
+        className="mt-2 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink3"
       >
         ← Ganti email
       </button>
@@ -234,39 +178,17 @@ export default function AuthScreen() {
   const daftar = mode === "daftar";
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: T.bg,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      padding: "48px 24px",
-      fontFamily: T.fontBody,
-    }}>
-      <div style={{ width: "100%", maxWidth: 396 }}>
-        <div style={{ ...eyebrow, marginBottom: 14 }}>Al-Fath Berkarya</div>
+    <div className="flex min-h-screen items-center justify-center bg-bg px-6 py-12 font-body">
+      <div className="w-full max-w-[396px]">
+        <div className="eyebrow mb-3.5">Al-Fath Berkarya</div>
 
-        <h1 style={{
-          margin: "0 0 10px",
-          fontFamily: T.fontDisplay,
-          fontSize: T.size.feature,
-          fontWeight: T.weight.light,
-          letterSpacing: T.track.heading,
-          lineHeight: T.lh.heading,
-          color: T.ink,
-        }}>
+        <h1 className="mb-2.5 mt-0 font-display text-feature font-light tracking-heading leading-heading text-ink">
           {verifying ? "Cek email kamu." : daftar ? "Gabung ke komunitas builder." : "Selamat datang kembali."}
         </h1>
 
-        <p style={{
-          margin: "0 0 32px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink2,
-          lineHeight: T.lh.body,
-        }}>
+        <p className="mb-8 mt-0 font-body text-body leading-body text-ink2">
           {verifying
-            ? <>Kami kirim kode 6-digit ke <span style={{ color: T.ink, fontWeight: T.weight.medium }}>{email || "email kamu"}</span>. Masukkan di bawah.</>
+            ? <><span>Kami kirim kode 6-digit ke </span><span className="font-medium text-ink">{email || "email kamu"}</span><span>. Masukkan di bawah.</span></>
             : daftar
               ? "Orang-orang di sini lagi bikin sesuatu yang nyata. Kenalan dulu."
               : "Lanjut dari mana kamu berhenti."}

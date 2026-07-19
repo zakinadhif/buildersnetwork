@@ -9,8 +9,7 @@
  */
 
 import { useState } from "react";
-import { KaryaCard } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { KaryaCard, MainColumn, RailColumn } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { ALL_INTERESTS, KARYA } from "../data/karya";
 import { coverFor } from "../lib/images";
@@ -28,35 +27,40 @@ export default function MinatSayaScreen() {
   return (
     <Shell active="minat">
       {/* Center column */}
-      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ marginBottom: 22 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Minat Saya</h1>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Yang kamu ikuti menyetel apa yang muncul di Launchpad</span>
+      <MainColumn>
+        <div className="mb-[22px]">
+          <div className="flex items-baseline gap-2.5">
+            <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Minat Saya</h1>
+            <span className="font-body text-caption text-ink3">Yang kamu ikuti menyetel apa yang muncul di Launchpad</span>
           </div>
         </div>
 
         {/* Followed interests */}
-        <p style={{ ...eyebrow, marginBottom: 10 }}>Minat yang kamu ikuti</p>
+        <p className="eyebrow mb-2.5">Minat yang kamu ikuti</p>
         {following.length === 0 ? (
-          <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "10px 0 20px" }}>
+          <p className="pb-5 pt-2.5 font-body text-body text-ink3">
             Belum ada minat. Pilih beberapa di kanan — Launchpad langsung menyesuaikan.
           </p>
         ) : (
-          <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 8, marginBottom: 30 }}>
+          <div className="mb-[30px] flex flex-wrap gap-2">
             {following.map((f) => (
-              <span key={f} style={{ display: "inline-flex", alignItems: "center", gap: 7, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accent, background: T.accentTint, border: `1px solid ${T.accentLine}`, borderRadius: 99, padding: "5px 8px 5px 13px" }}>
+              <span key={f} className="inline-flex items-center gap-[7px] rounded-full border border-accent-line bg-accent-tint py-[5px] pl-[13px] pr-2 font-body text-ui text-accent">
                 {f}
-                <button type="button" onClick={() => remove(f)} aria-label={`Berhenti ikuti ${f}`} style={{ background: "none", border: "none", cursor: "pointer", color: T.accentMid, fontSize: T.size.body, lineHeight: 1, padding: 0 }}>×</button>
+                <button
+                  type="button"
+                  onClick={() => remove(f)}
+                  aria-label={`Berhenti ikuti ${f}`}
+                  className="cursor-pointer border-none bg-none p-0 font-body text-body leading-none text-accent-mid"
+                >×</button>
               </span>
             ))}
           </div>
         )}
 
         {/* Karya for these interests */}
-        <p style={{ ...eyebrow, marginBottom: 4 }}>Karya untuk minatmu</p>
+        <p className="eyebrow mb-1">Karya untuk minatmu</p>
         {matched.length === 0 ? (
-          <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "16px 0" }}>Belum ada karya untuk minat ini.</p>
+          <p className="py-4 font-body text-body text-ink3">Belum ada karya untuk minat ini.</p>
         ) : (
           matched.slice(0, 4).map((k) => (
             <KaryaCard
@@ -71,28 +75,28 @@ export default function MinatSayaScreen() {
             />
           ))
         )}
-      </main>
+      </MainColumn>
 
       {/* Right rail — pick up more */}
-      <aside className="bn-rail">
-        <p style={{ ...eyebrow, marginBottom: 12 }}>Tambah minat</p>
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6 }}>
+      <RailColumn>
+        <p className="eyebrow mb-3">Tambah minat</p>
+        <div className="flex flex-wrap gap-1.5">
           {suggestions.length === 0 ? (
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3 }}>Kamu sudah ikuti semuanya 🎉</span>
+            <span className="font-body text-ui text-ink3">Kamu sudah ikuti semuanya 🎉</span>
           ) : (
             suggestions.map((s) => (
               <button
                 key={s}
                 type="button"
                 onClick={() => add(s)}
-                style={{ display: "inline-flex", alignItems: "center", gap: 5, fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, background: "transparent", border: `1px solid ${T.line}`, borderRadius: 99, padding: "4px 11px", cursor: "pointer" }}
+                className="inline-flex cursor-pointer items-center gap-[5px] rounded-full border border-line bg-transparent px-[11px] py-1 font-body text-ui text-ink2"
               >
-                <span aria-hidden="true" style={{ color: T.accent }}>+</span> {s}
+                <span aria-hidden="true" className="text-accent">+</span> {s}
               </button>
             ))
           )}
         </div>
-      </aside>
+      </RailColumn>
     </Shell>
   );
 }

@@ -1,3 +1,5 @@
+import { cn } from "@myapp/ui";
+
 // ─── Font options ─────────────────────────────────────────────────────────────
 // Shared by every screen. The selection is published as CSS custom properties on
 // :root (see FontVars); screens read them through T.fontDisplay / T.fontBody, so
@@ -23,17 +25,6 @@ export function FontVars({ displayFont, bodyFont }: { displayFont: string; bodyF
   );
 }
 
-// ─── Switcher chrome ──────────────────────────────────────────────────────────
-// Gallery chrome, independent of any mockup's tokens — brand values inlined.
-const C = {
-  surface:  "oklch(100% 0 0)",
-  bg:       "oklch(98% 0 0)",
-  ink:      "oklch(18% 0 0)",
-  ink3:     "oklch(53% 0 0)",
-  lineDark: "oklch(85% 0 0)",
-  body:     "'Plus Jakarta Sans', sans-serif",
-};
-
 function FontSwitcher({ options, activeIdx, onChange }: {
   options:   readonly { font: string; label: string }[];
   activeIdx: number;
@@ -42,15 +33,7 @@ function FontSwitcher({ options, activeIdx, onChange }: {
   return (
     <div
       role="group"
-      style={{
-        background:   C.surface,
-        border:       `1px solid ${C.lineDark}`,
-        borderRadius: 99,
-        boxShadow:    "0 4px 16px oklch(0% 0 0 / 10%)",
-        display:      "flex",
-        padding:      3,
-        gap:          2,
-      }}
+      className="flex gap-0.5 rounded-full border border-line-dark bg-surface p-[3px] shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
     >
       {options.map((opt, i) => {
         const active = i === activeIdx;
@@ -59,25 +42,12 @@ function FontSwitcher({ options, activeIdx, onChange }: {
             key={i}
             onClick={() => onChange(i)}
             aria-pressed={active}
-            style={{
-              display:       "inline-flex",
-              alignItems:    "center",
-              gap:           6,
-              padding:       "5px 13px",
-              borderRadius:  99,
-              border:        "none",
-              background:    active ? C.ink : "transparent",
-              color:         active ? C.bg : C.ink3,
-              fontFamily:    C.body,
-              fontSize:      10,
-              fontWeight:    active ? 500 : 400,
-              cursor:        "pointer",
-              letterSpacing: "0.02em",
-              whiteSpace:    "nowrap" as const,
-              transition:    "background 0.12s, color 0.12s",
-            }}
+            className={cn(
+              "inline-flex cursor-pointer items-center gap-1.5 rounded-full border-none px-3.25 py-1.25 font-body text-micro tracking-tag whitespace-nowrap transition-colors duration-[120ms]",
+              active ? "bg-ink font-medium text-bg" : "bg-transparent font-normal text-ink3",
+            )}
           >
-            <span style={{ fontFamily: opt.font, fontSize: 15, fontWeight: 400, lineHeight: 1 }}>Aa</span>
+            <span style={{ fontFamily: opt.font }} className="text-[15px] font-normal leading-none">Aa</span>
             {opt.label}
           </button>
         );
@@ -95,16 +65,7 @@ export function FontControls({ displayIdx, bodyIdx, onDisplay, onBody }: {
   onBody:     (i: number) => void;
 }) {
   return (
-    <div style={{
-      position:      "fixed",
-      bottom:        20,
-      right:         20,
-      zIndex:        100,
-      display:       "flex",
-      flexDirection: "column",
-      gap:           8,
-      alignItems:    "flex-end",
-    }}>
+    <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 items-end">
       <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={onDisplay} />
       <FontSwitcher options={BODY_FONTS}    activeIdx={bodyIdx}    onChange={onBody}    />
     </div>

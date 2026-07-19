@@ -1,4 +1,5 @@
 import { RING } from "./Avatar";
+import { cn } from "./lib/cn";
 
 /**
  * A karya's cover tile — the app-icon square (#92). Renders nothing without a
@@ -25,10 +26,14 @@ export function KaryaCover({
   const box = size + RING * 2;
   return (
     <div
-      className={className ? `karya-cover ${className}` : "karya-cover"}
+      className={cn(
+        "block shrink-0 overflow-hidden border border-line bg-bg",
+        className,
+      )}
       style={{ width: box, height: box, borderRadius: radius }}
     >
       <img
+        className="block size-full object-cover"
         src={src}
         alt={alt}
         aria-hidden={alt ? undefined : true}
