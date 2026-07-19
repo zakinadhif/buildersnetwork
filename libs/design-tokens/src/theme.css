@@ -189,6 +189,15 @@
     2px
   );
   --container-page: 580px; /* single reading column: auth, welcome, chat */
+
+  /* ── Tailwind max-width utilities ─────────────────────────────────────────
+     Tailwind v4 maps `--max-width-{name}` → `max-w-{name}`. The semantic
+     token names above (`--container-*`) don't follow that namespace, so the
+     classes `max-w-shell-outer` and `max-w-page` used in @myapp/ui components
+     would silently produce no constraint without these aliases.
+     These point at — they do not copy — the container values above. */
+  --max-width-shell-outer: var(--container-shell-outer); /* → max-w-shell-outer (ShellColumns) */
+  --max-width-page: var(--container-page); /* → max-w-page (Dialog) */
 }
 
 /* ── Eyebrow utility ──────────────────────────────────────────────────────────
