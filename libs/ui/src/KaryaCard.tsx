@@ -36,7 +36,7 @@ export interface KaryaCardActivity {
 /** How many faces the roster shows before collapsing the rest into "+N". */
 const ROSTER_VISIBLE = 4;
 
-const card = "flex flex-col gap-3 border-b border-line px-0.5 py-4";
+const card = "karya-card flex flex-col gap-3 border-b border-line px-0.5 py-4";
 const linkCard =
   "cursor-pointer transition-opacity duration-150 hover:opacity-60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
