@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "@myapp/design-tokens/base.css";
+@import "@myapp/design-tokens/theme.css";
 @source "../../../libs/ui/src";
 
 /* The design tokens live in @myapp/design-tokens and are shared with
@@ -25,8 +27,6 @@
    @myapp/design-tokens/base.css, which apps/mockups imports too. That is the
    point: the app and the reference no longer stand on different ground. Don't
    reintroduce a reset here. */
-@import "@myapp/design-tokens/base.css";
-@import "@myapp/design-tokens/theme.css";
 
 /* The inherited default is the body ROLE, decided rather than inherited (#87).
    It used to be 15px/1.6 — a size the scale doesn't have, silently inflating
