@@ -26,7 +26,7 @@ function VariantPicker({ idx, onPick }: { idx: number; onPick: (i: number) => vo
       aria-label="Varian Cari Kolaborator"
       className="fixed left-1/2 top-[52px] z-[200] flex -translate-x-1/2 gap-0.5 bg-surface border border-line rounded-full p-[3px] shadow-[0_2px_10px_oklch(0%_0_0_/_8%)]"
     >
-      <span className="eyebrow self-center pl-1.5 pr-2 whitespace-nowrap">Varian</span>
+      <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 self-center pl-1.5 pr-2 whitespace-nowrap">Varian</span>
       {CARI_VARIANTS.map((v, i) => {
         const active = i === idx;
         return (

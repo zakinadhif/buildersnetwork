@@ -65,7 +65,7 @@ export function NavFilterList<Value extends string>({ label, options, active, on
 }) {
   return (
     <div>
-      <div className="eyebrow mb-2.5">{label}</div>
+      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">{label}</div>
       <div className="flex flex-col gap-0.5">
         {options.map((opt) => {
           const on = active === opt.value;

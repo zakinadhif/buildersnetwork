@@ -120,7 +120,7 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
 
       {/* Open roles pill */}
       <div className="mb-2.5 flex items-center gap-1.5 rounded-card border border-line bg-surface px-[11px] py-[7px]">
-        <span className="eyebrow mr-0.5">Butuh</span>
+        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mr-0.5">Butuh</span>
         <span className="font-body text-ui text-ink2">{karya.openRoles.join(" · ")}</span>
       </div>
 
@@ -373,7 +373,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
         {/* Status / looking-for badge — editable */}
         <div>
-          <div className="eyebrow mb-1.5">Status kamu</div>
+          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1.5">Status kamu</div>
           <button
             onClick={cycleStatus}
             title="Klik untuk ganti status"
@@ -388,7 +388,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
         {/* Skills */}
         <div>
-          <div className="eyebrow mb-1.5">Keahlian kamu</div>
+          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1.5">Keahlian kamu</div>
           <div className="flex flex-wrap gap-1">
             {ZAKI.skills.map((s) => <Tag key={s} label={s} accent />)}
           </div>
@@ -397,7 +397,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
       {/* Karya Saya — with open roles that drive Section 2 matches */}
       <div>
-        <div className="eyebrow mb-2.5">Karya kamu</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Karya kamu</div>
         <div className="flex flex-col gap-2">
           {ZAKI_KARYA.map((k) => (
             <div key={k.id} className="rounded-card border border-line bg-surface px-3 py-2.5">
@@ -414,7 +414,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
                 <span className="font-body text-ui font-medium text-ink">{k.title}</span>
               </div>
               {/* Open roles */}
-              <div className="eyebrow mb-[5px]">Butuh</div>
+              <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-[5px]">Butuh</div>
               <div className="flex flex-col gap-[3px]">
                 {k.openRoles.map((r) => (
                   <div key={r} className="flex items-center gap-1.5">

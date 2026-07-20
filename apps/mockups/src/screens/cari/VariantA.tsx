@@ -71,7 +71,7 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
           {/* Current karya */}
           {seeker.currentKarya && (
             <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
-              <span className="eyebrow">sedang bangun</span>
+              <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">sedang bangun</span>
               <span className="rounded-[3px] border border-line-dark bg-surface px-2 py-[2px] font-body text-micro text-ink">
                 {seeker.currentKarya.title}
                 <span className="text-ink3"> — {seeker.currentKarya.role}</span>
@@ -129,7 +129,7 @@ function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
 
           {/* Open roles — the core matchmaking signal */}
           <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
-            <span className="eyebrow">butuh</span>
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">butuh</span>
             {slot.openRoles.map((r) => (
               <span key={r} className="rounded-[3px] border border-accent-line bg-accent-tint px-2 py-[2px] font-body text-micro text-ink">{r}</span>
             ))}
@@ -321,7 +321,7 @@ function RightRail() {
       {/* ── Status kamu — seeker badge picker ─────────────────────────────── */}
       {/* Prompts the viewer to set or update their own "looking for" badge. */}
       <div className="rounded-panel border border-accent-line bg-accent-tint p-3.5">
-        <div className="eyebrow mb-2.5">Status kamu</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Status kamu</div>
 
         {myBadge ? (
           /* Badge set — show current status with option to change. */
@@ -368,7 +368,7 @@ function RightRail() {
       <div className="rounded-panel border border-line bg-surface p-3.5">
         <div className="mb-2 flex items-center gap-2">
           <span aria-hidden="true" className="text-[14px] text-accent">✦</span>
-          <div className="eyebrow">GEMASTIK 2026</div>
+          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">GEMASTIK 2026</div>
         </div>
         <p className="mb-2.5 mt-0 font-body text-body leading-compact text-ink">
           6 orang lagi bentuk tim untuk kompetisi ini.
@@ -389,7 +389,7 @@ function RightRail() {
 
       {/* ── Community pulse ────────────────────────────────────────────────── */}
       <div className="rounded-panel border border-line bg-surface p-3.5">
-        <div className="eyebrow mb-2.5">Denyut sekarang</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Denyut sekarang</div>
         <div className="flex flex-col gap-2">
           {[
             { label: "Orang aktif cari tim", value: SEEKERS.length },

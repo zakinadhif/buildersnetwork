@@ -74,7 +74,7 @@ function HackathonBanner() {
       <div className="min-w-0 flex-1">
         <div className="mb-[3px] flex flex-wrap items-center gap-2">
           <span className="font-display text-title font-normal leading-heading text-ink">{HACKATHON_EVENT.name}</span>
-          <span className="eyebrow !text-accent-mid">lagi bentuk tim</span>
+          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 !text-accent-mid">lagi bentuk tim</span>
         </div>
         <div className="font-body text-body leading-compact text-ink2">
           {HACKATHON_EVENT.theme} ·{" "}
@@ -107,7 +107,7 @@ function PersonSeekerCard({ person }: { person: PersonSeeker }) {
           </div>
           <div className="flex flex-wrap items-center gap-1.5">
             <BadgePill badge={person.badge} />
-            <span className="eyebrow">orang</span>
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">orang</span>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
           <h3 className="mb-1 mt-0 font-display text-title font-normal leading-heading text-ink">{karya.title}</h3>
           <div className="flex flex-wrap items-center gap-1.5">
             <BadgePill badge={karya.badge} />
-            <span className="eyebrow">karya</span>
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">karya</span>
             <Tag label={karya.stage} />
           </div>
         </div>
@@ -176,7 +176,7 @@ function KaryaSeekerCard({ karya }: { karya: KaryaSeeker }) {
 
       {/* Open roles — the key field */}
       <div className="flex flex-wrap items-baseline gap-2 rounded-card border border-accent-line bg-accent-tint px-3 py-2">
-        <span className="eyebrow !text-accent-mid">butuh</span>
+        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 !text-accent-mid">butuh</span>
         <span className="font-body text-ui font-medium text-ink">
           {karya.openRoles.join(" · ")}
         </span>
@@ -362,7 +362,7 @@ function RightRail() {
     <RailColumn className="flex flex-col gap-5">
       {/* ── User's own seeking status ─────────────────────────────────── */}
       <div className="rounded-panel border border-line bg-surface p-3.5">
-        <div className="eyebrow mb-2.5">Status kamu</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Status kamu</div>
         {seeking ? (
           <>
             <div className="mb-2">
@@ -402,7 +402,7 @@ function RightRail() {
 
       {/* ── Board pulse ───────────────────────────────────────────────── */}
       <div className="rounded-panel border border-line bg-surface p-3.5">
-        <div className="eyebrow mb-2.5">Papan sekarang</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Papan sekarang</div>
         <div className="mb-0.5 font-body text-stat font-medium leading-heading text-ink">
           {totalSeeking}
         </div>

@@ -112,7 +112,7 @@ function Composer() {
 
       {/* Type selector + post button */}
       <div className="flex items-center gap-1.5 pl-[42px]">
-        <span className="eyebrow mr-1">Cari:</span>
+        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mr-1">Cari:</span>
         {LOOKING_FOR.map((type) => {
           const active = selectedType === type;
           return (
@@ -250,7 +250,7 @@ function BulletinBoard({ filterType }: { filterType: Filter }) {
 
       {/* Wall of asks — reverse-chronological (ASKS array is already ordered) */}
       <div>
-        <div className="eyebrow mb-0.5">
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-0.5">
           {filtered.length} ajakan · terbaru dulu
         </div>
         {filtered.length === 0 ? (
@@ -287,7 +287,7 @@ function FilterRail({ filterType, onFilter }: {
     <RailColumn className="flex flex-col gap-5">
       {/* Filter by type */}
       <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
-        <div className="eyebrow mb-2.5">Filter Ajakan</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Filter Ajakan</div>
         <div className="flex flex-col gap-0.5">
           {filterOpts.map(({ key, icon, label }) => {
             const active = filterType === key;
@@ -322,7 +322,7 @@ function FilterRail({ filterType, onFilter }: {
 
       {/* Community pulse */}
       <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
-        <div className="eyebrow mb-2.5">Denyut Papan</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Denyut Papan</div>
         <div className="flex flex-col gap-2">
           {[
             { label: "Ajakan aktif", value: ASKS.length },
@@ -341,7 +341,7 @@ function FilterRail({ filterType, onFilter }: {
 
       {/* Top skills currently sought — aggregated from ASKS data */}
       <div>
-        <div className="eyebrow mb-2.5">Paling Dicari</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Paling Dicari</div>
         <div className="flex flex-col gap-1.5">
           {TOP_SKILLS.map(([skill, count]) => (
             <div key={skill} className="flex items-center gap-2">

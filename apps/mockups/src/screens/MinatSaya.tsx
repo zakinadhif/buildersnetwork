@@ -36,7 +36,7 @@ export default function MinatSayaScreen() {
         </div>
 
         {/* Followed interests */}
-        <p className="eyebrow mb-2.5">Minat yang kamu ikuti</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Minat yang kamu ikuti</p>
         {following.length === 0 ? (
           <p className="pb-5 pt-2.5 font-body text-body text-ink3">
             Belum ada minat. Pilih beberapa di kanan — Launchpad langsung menyesuaikan.
@@ -58,7 +58,7 @@ export default function MinatSayaScreen() {
         )}
 
         {/* Karya for these interests */}
-        <p className="eyebrow mb-1">Karya untuk minatmu</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1">Karya untuk minatmu</p>
         {matched.length === 0 ? (
           <p className="py-4 font-body text-body text-ink3">Belum ada karya untuk minat ini.</p>
         ) : (
@@ -79,7 +79,7 @@ export default function MinatSayaScreen() {
 
       {/* Right rail — pick up more */}
       <RailColumn>
-        <p className="eyebrow mb-3">Tambah minat</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3">Tambah minat</p>
         <div className="flex flex-wrap gap-1.5">
           {suggestions.length === 0 ? (
             <span className="font-body text-ui text-ink3">Kamu sudah ikuti semuanya 🎉</span>

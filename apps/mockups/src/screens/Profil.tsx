@@ -37,7 +37,7 @@ function KaryaMini({ title, description, stages, interests }: {
       <div className="min-w-0">
         <div className="mb-[3px] flex flex-wrap items-baseline gap-2">
           <span className="font-display text-title text-ink">{title}</span>
-          <span className="eyebrow">{stages[stages.length - 1]}</span>
+          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{stages[stages.length - 1]}</span>
         </div>
         <p className="m-0 font-body text-caption leading-body text-ink2">{description}</p>
       </div>
@@ -52,7 +52,7 @@ export default function ProfilScreen() {
 
   const metaRow = (label: string, value: number | string) => (
     <div className="flex items-baseline justify-between">
-      <span className="eyebrow">{label}</span>
+      <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{label}</span>
       <span className="font-body text-ui text-ink2">{value}</span>
     </div>
   );
@@ -77,17 +77,17 @@ export default function ProfilScreen() {
         </div>
 
         {/* Skills & interests */}
-        <p className="eyebrow mb-2.5 mt-[30px]">Keahlian</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5 mt-[30px]">Keahlian</p>
         <div className="mb-[22px] flex flex-wrap gap-1.5">
           {m.skills.map((s) => <Tag key={s} label={s} accent />)}
         </div>
-        <p className="eyebrow mb-2.5">Minat</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Minat</p>
         <div className="mb-[30px] flex flex-wrap gap-1.5">
           {m.interests.map((i) => <Tag key={i} label={i} />)}
         </div>
 
         {/* Their karya */}
-        <p className="eyebrow mb-1">Karya yang digarap</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1">Karya yang digarap</p>
         {THEIR_KARYA.length === 0 ? (
           <p className="py-[18px] font-body text-body text-ink3">Belum ada karya yang dibagikan.</p>
         ) : (

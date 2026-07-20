@@ -15,7 +15,7 @@ export default function MulaiScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6 py-12 font-body">
       <div className="w-full max-w-[412px]">
-        <div className="eyebrow mb-3.5">Selangkah lagi</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3.5">Selangkah lagi</div>
 
         <h1 className="mb-2.5 mt-0 font-display text-feature font-light tracking-heading leading-heading text-ink">
           Hai — kenalan dulu.
@@ -28,7 +28,7 @@ export default function MulaiScreen() {
 
         {/* The one field */}
         <label className="mb-5 block">
-          <span className="eyebrow mb-1.5 block">Nama kamu</span>
+          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1.5 block">Nama kamu</span>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

@@ -180,7 +180,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
         {/* Ajakan — the open role, made concrete */}
         {update.role && (
           <div className="mt-2.5 inline-flex items-center gap-2 rounded-card border border-accent-line bg-accent-tint px-3 py-1.5">
-            <span className="eyebrow !text-accent-mid">Butuh</span>
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 !text-accent-mid">Butuh</span>
             <span className="font-body text-ui font-medium text-accent">{update.role}</span>
           </div>
         )}
@@ -238,7 +238,7 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
       {/* The dot carries the "live" claim for the whole block; the arrow is the way in */}
       <div className="mb-2.5 flex items-center gap-[7px]">
         <span className="bn-live-dot" aria-hidden="true" />
-        <div className="eyebrow">Diskusi aktif</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Diskusi aktif</div>
         <button
           type="button"
           aria-label={`Lihat semua diskusi aktif (${ACTIVE_WINDOW_MIN} menit terakhir)`}
@@ -296,7 +296,7 @@ function BuildersToMeet() {
   return (
     <div>
       <div className="mb-2.5 flex items-center justify-between">
-        <div className="eyebrow">Kenalan dengan builder</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Kenalan dengan builder</div>
         <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-micro text-accent-mid">Lihat semua</button>
       </div>
 
@@ -340,7 +340,7 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
       {/* Open collaborator slots — surfaced from ajakan updates */}
       {openAsks.length > 0 && (
         <div>
-          <div className="eyebrow mb-2.5">Slot kolaborasi terbuka</div>
+          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Slot kolaborasi terbuka</div>
           <div className="flex flex-col gap-0">
             {openAsks.map(({ update, karya }, idx) => (
               <div key={update.id} className="flex items-center gap-2.5 py-2.5" style={{ borderBottom: idx < openAsks.length - 1 ? "1px solid var(--color-line)" : "none" }}>

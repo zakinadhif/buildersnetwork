@@ -62,7 +62,7 @@ export function ScreenSwitcher({ active, onChange }: {
         if (items.length === 0) return null;
         return (
           <div key={group} className="flex flex-col gap-1">
-            <span className="eyebrow px-1 tracking-[0.12em] font-semibold text-ink3">
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 px-1 tracking-[0.12em] font-semibold text-ink3">
               {group}
             </span>
             <div className="flex flex-wrap gap-[3px]">

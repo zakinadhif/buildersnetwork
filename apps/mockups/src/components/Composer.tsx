@@ -118,7 +118,7 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
 
       {switching && (
         <div className="border-t border-line pt-3">
-          <div className="eyebrow mb-2">Posting sebagai</div>
+          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2">Posting sebagai</div>
           <div className="flex flex-col gap-0.5">
             {MY_KARYA.map((k) => {
               const on = k.id === karya.id;

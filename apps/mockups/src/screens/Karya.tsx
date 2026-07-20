@@ -79,7 +79,7 @@ function SpotlightMetric({ value, label, accent }: { value: string; label: strin
       <div className={["font-body text-stat font-medium leading-heading mb-[3px]", accent ? "text-accent" : "text-ink"].join(" ")}>
         {value}
       </div>
-      <div className="eyebrow">{label}</div>
+      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{label}</div>
     </div>
   );
 }
@@ -91,7 +91,7 @@ function Spotlight({ karya }: { karya: Karya }) {
   return (
     <section className="mb-[18px] overflow-hidden rounded-panel border border-accent bg-surface shadow-[0_0_0_1px_oklch(39%_0.085_62_/_0.133),0_4px_16px_#0f0e0b10]">
       {/* Accent header band */}
-      <div className="eyebrow bg-accent px-[18px] py-1 !text-accent-fg">
+      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 bg-accent px-[18px] py-1 !text-accent-fg">
         <span aria-hidden="true">◈</span> Pilihan Minggu Ini
       </div>
 
@@ -135,7 +135,7 @@ function Spotlight({ karya }: { karya: Karya }) {
 
       {/* Screenshot gallery */}
       <div className="flex items-baseline justify-between px-[18px] pb-2">
-        <span className="eyebrow">Tangkapan Layar</span>
+        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Tangkapan Layar</span>
         <span className="font-body text-micro text-ink3">← geser →</span>
       </div>
       <div
@@ -227,7 +227,7 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
       ) : (
         <div className="flex flex-col gap-0">
           <div className="mb-0.5 mt-1 flex items-baseline justify-between">
-            <span className="eyebrow">Semua karya</span>
+            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Semua karya</span>
             <span className="font-body text-micro tabular-nums text-ink3">{matched.length} karya</span>
           </div>
           {rest.map((k) => (
@@ -261,7 +261,7 @@ function RightRail({ query, onQuery, filter, onFilter }: {
     <RailColumn className="flex flex-col gap-5">
       {/* Directory search — the catalog's own search, moved out of the reading column */}
       <div>
-        <div className="eyebrow mb-2">Cari karya</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2">Cari karya</div>
         <input
           type="text"
           value={query}

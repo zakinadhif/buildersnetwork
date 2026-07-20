@@ -46,7 +46,7 @@ function FilterColumn({ label, items, active, onToggle }: {
 }) {
   return (
     <div>
-      <div className="eyebrow mb-2.5">{label}</div>
+      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">{label}</div>
       <div className="flex flex-col gap-0.5">
         {items.map((item) => {
           const on = active.includes(item);
@@ -125,7 +125,7 @@ export default function PeopleScreen() {
 
         {/* Result count */}
         <div className="flex items-baseline justify-between border-b border-line pb-2">
-          <span className="eyebrow">Builder</span>
+          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Builder</span>
           <span className="font-body text-micro tabular-nums text-ink3">{filteredMembers.length} orang</span>
         </div>
 

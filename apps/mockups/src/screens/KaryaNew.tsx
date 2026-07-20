@@ -26,7 +26,7 @@ function Labelled({ label, hint, children }: { label: string; hint?: string; chi
   return (
     <div className="mb-[22px]">
       <div className="mb-2 flex items-baseline gap-2.5">
-        <span className="eyebrow">{label}</span>
+        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{label}</span>
         {hint && <span className="font-body text-micro text-ink3">{hint}</span>}
       </div>
       {children}
@@ -159,7 +159,7 @@ function AiMode({ onManual }: { onManual: () => void }) {
 
       {/* Draft preview being filled */}
       <div className="mb-[18px] rounded-panel border border-accent-line bg-surface p-4">
-        <div className="eyebrow mb-2.5 !text-accent">Draft otomatis</div>
+        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5 !text-accent">Draft otomatis</div>
         <div className="mb-1 font-display text-title text-ink">Peta Kost</div>
         <p className="mb-2.5 mt-0 font-body text-caption leading-body text-ink2">
           Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif.
@@ -200,7 +200,7 @@ export default function KaryaNewScreen() {
 
       {/* Tips rail */}
       <RailColumn>
-        <p className="eyebrow mb-3">Biar makin dilirik</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3">Biar makin dilirik</p>
         <div className="flex flex-col gap-3.5">
           {TIPS.map((tip) => (
             <div key={tip} className="flex items-start gap-[9px]">
