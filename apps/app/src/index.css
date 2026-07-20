@@ -1,4 +1,4 @@
-@import "@myapp/design-tokens/base.css";
+@import "tailwindcss/preflight.css";
 @import "tailwindcss/theme.css";
 @source "../../../libs/ui/src";
 @import "tailwindcss/utilities.css";

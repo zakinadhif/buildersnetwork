@@ -30,7 +30,7 @@
    diffing elements' ABSOLUTE x/y, where resizing one container makes every
    descendant "move" — one cause, hundreds of phantom symptoms. Measure each
    element's OWN box instead.) */
-@import "@myapp/design-tokens/base.css";
+@import "tailwindcss/preflight.css";
 @import "tailwindcss/theme.css";
 @source "../../../libs/ui/src";
 @import "tailwindcss/utilities.css";
