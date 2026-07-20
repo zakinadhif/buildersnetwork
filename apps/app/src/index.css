@@ -1,7 +1,5 @@
-@import "tailwindcss/preflight.css";
-@import "tailwindcss/theme.css";
+@import "tailwindcss";
 @source "../../../libs/ui/src";
-@import "tailwindcss/utilities.css";
 @import "@myapp/design-tokens/theme.css";
 
 /* The design tokens live in @myapp/design-tokens and are shared with
