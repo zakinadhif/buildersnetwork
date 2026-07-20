@@ -1,7 +1,8 @@
-@import "tailwindcss";
 @import "@myapp/design-tokens/base.css";
-@import "@myapp/design-tokens/theme.css";
+@import "tailwindcss/theme.css";
 @source "../../../libs/ui/src";
+@import "tailwindcss/utilities.css";
+@import "@myapp/design-tokens/theme.css";
 
 /* The design tokens live in @myapp/design-tokens and are shared with
    apps/mockups — this app declares none of its own. The two used to hold
