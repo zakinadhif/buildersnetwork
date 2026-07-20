@@ -14,39 +14,13 @@ export default function Onboarding() {
   const [, navigate] = useLocation();
 
   return (
-    <div
-      className="screen"
-      style={{ display: "flex", flexDirection: "column" }}
-    >
-      <div
-        style={{
-          padding: "18px 28px",
-          borderBottom: "1px solid var(--color-line)",
-          flexShrink: 0,
-        }}
-      >
+    <div className="fixed inset-0 animate-up flex flex-col">
+      <div className="px-7 py-[18px] border-b border-line shrink-0">
         <p className="eyebrow">Al-Fath Berkarya · onboarding</p>
       </div>
 
-      <div
-        style={{
-          flex: 1,
-          display: "flex",
-          flexDirection: "column",
-          minHeight: 0,
-          padding: "0 28px 20px",
-        }}
-      >
-        <div
-          className="wrap"
-          style={{
-            padding: 0,
-            flex: 1,
-            display: "flex",
-            flexDirection: "column",
-            minHeight: 0,
-          }}
-        >
+      <div className="flex-1 flex flex-col min-h-0 px-7 pb-5">
+        <div className="max-w-[var(--container-page)] mx-auto w-full flex-1 flex flex-col min-h-0">
           <AssistantChat
             intro={INTRO_NEW}
             onProfile={(draft) => {

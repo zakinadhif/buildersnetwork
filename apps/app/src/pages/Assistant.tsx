@@ -11,6 +11,7 @@ import {
 } from "@/components/ui-atoms";
 import { introForMember } from "@/lib/assistant-copy";
 import type { Member } from "@/lib/members";
+import { Button } from "@myapp/ui";
 
 /**
  * The AI assistant tab (issue #8) — the onboarding chat, now an always-available
@@ -84,9 +85,9 @@ export default function Assistant({ user }: { user: Member }) {
 
   return (
     <>
-      <div className="bn-head">
-        <h1 className="bn-title">Asisten</h1>
-        <span className="bn-title-sub">
+      <div className="flex items-baseline gap-2.5 mb-6">
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Asisten</h1>
+        <span className="font-body text-caption text-ink3">
           Ngobrol buat ngerapiin atau nambahin ke profilmu
         </span>
       </div>
@@ -104,90 +105,90 @@ export default function Assistant({ user }: { user: Member }) {
 
       {phase === "review" && (
         <div>
-          <p className="sub mb32" style={{ marginTop: 4 }}>
+          <p className="text-body text-ink2 leading-body mb-8 mt-1">
             Ini yang aku tangkap — cek dulu, kalau ada yang meleset ketuk
             langsung. Belum kesimpen sampai kamu terapin.
           </p>
 
-          <div className="pf">
-            <p className="eyebrow mb6">Nama</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Nama</p>
             <EditField value={p.name} onChange={(v) => set("name", v)} />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Handle</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Handle</p>
             <EditField
               value={p.handle ?? ""}
               onChange={(v) => set("handle", v)}
             />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Angkatan</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Angkatan</p>
             <EditField value={p.year} onChange={(v) => set("year", v)} />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Jurusan</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Jurusan</p>
             <EditField value={p.major} onChange={(v) => set("major", v)} />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Bio</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Bio</p>
             <EditField
               value={p.bio ?? ""}
               onChange={(v) => set("bio", v)}
               multiline
             />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Skills</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Skills</p>
             <SkillsEditor
               skills={p.skills}
               onChange={(v) => set("skills", v)}
             />
           </div>
-          <div className="pf">
-            <p className="eyebrow mb6">Minat</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Minat</p>
             <InterestsEditor
               interests={p.interests}
               onChange={(v) => set("interests", v)}
             />
           </div>
 
-          <hr className="hr" />
-          <div className="row-end">
-            <button
+          <hr className="border-none border-b border-line my-8" />
+          <div className="flex justify-end gap-3">
+            <Button
               type="button"
-              className="btn btn-outline"
+              variant="secondary"
               onClick={() => setPhase("chat")}
             >
               Ngobrol lagi
-            </button>
-            <button type="button" className="btn btn-dark" onClick={apply}>
+            </Button>
+            <Button type="button" variant="primary" onClick={apply}>
               Terapkan ke profil →
-            </button>
+            </Button>
           </div>
         </div>
       )}
 
       {phase === "done" && (
-        <div style={{ paddingTop: 8 }}>
-          <p className="sub mb32">Profil kamu ke-update ✓</p>
-          <div className="row">
-            <button
+        <div className="pt-2">
+          <p className="text-body text-ink2 leading-body mb-8">Profil kamu ke-update ✓</p>
+          <div className="flex gap-3">
+            <Button
               type="button"
-              className="btn btn-dark"
+              variant="primary"
               onClick={() => navigate("/home")}
             >
               Ke Launchpad →
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
-              className="btn btn-outline"
+              variant="secondary"
               onClick={() => {
                 setP((x) => x);
                 setPhase("chat");
               }}
             >
               Ngobrol lagi
-            </button>
+            </Button>
           </div>
         </div>
       )}

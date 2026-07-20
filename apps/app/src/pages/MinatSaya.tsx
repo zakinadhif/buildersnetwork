@@ -22,26 +22,25 @@ export default function MinatSaya({ user }: { user: Member }) {
 
   return (
     <>
-      <div className="bn-head">
-        <h1 className="bn-title">Minat Saya</h1>
-        <span className="bn-title-sub">Karya yang selaras dengan minatmu</span>
+      <div className="flex items-baseline gap-2.5 mb-6">
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Minat Saya</h1>
+        <span className="font-body text-caption text-ink3">Karya yang selaras dengan minatmu</span>
       </div>
 
       {user.interests.length === 0 ? (
-        <p className="bn-soon">
+        <p className="py-12 font-mono text-body text-ink3 leading-body">
           Kamu belum nambahin minat.
           <br />
           <button
             type="button"
-            className="post-karya-link"
-            style={{ marginTop: 8, fontSize: 13 }}
+            className="bg-transparent border-none p-0 cursor-pointer text-[13px] text-ink2 transition-colors hover:text-accent mt-2"
             onClick={() => navigate("/assistant")}
           >
             Ngobrol sama asisten buat ngisi profilmu →
           </button>
         </p>
       ) : shown.length === 0 ? (
-        <p className="empty-state">
+        <p className="font-mono text-ui text-ink3 py-5">
           belum ada karya baru buat minat kamu — cek Launchpad buat semua
           aktivitas.
         </p>

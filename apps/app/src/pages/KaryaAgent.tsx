@@ -149,57 +149,47 @@ Obrolan:\n${transcript}`;
   if (genning) return <Loading label="lagi nyusun draft karya kamu" />;
 
   return (
-    <div
-      className="screen"
-      style={{ display: "flex", flexDirection: "column" }}
-    >
-      <div
-        style={{
-          padding: "18px 28px",
-          borderBottom: "1px solid var(--color-line)",
-          flexShrink: 0,
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
+    <div className="fixed inset-0 animate-up flex flex-col">
+      <div className="px-7 py-[18px] border-b border-line shrink-0 flex justify-between items-center">
         <p className="eyebrow">Al-Fath Berkarya · bikin karya</p>
         <button
           type="button"
           onClick={() => navigate("/karya/new")}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--color-ink2)",
-            fontSize: 13,
-            padding: 0,
-          }}
+          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0"
         >
           isi manual →
         </button>
       </div>
 
-      <div style={{ flex: 1, overflowY: "auto", padding: "36px 28px 24px" }}>
-        <div className="wrap" style={{ padding: 0 }}>
-          <div className="chat">
+      <div className="flex-1 overflow-y-auto px-7 pt-9 pb-6">
+        <div className="max-w-[var(--container-page)] mx-auto w-full">
+          <div className="flex flex-col gap-6">
             {msgs.map((m) => (
-              <div key={m.id} className={`msg-${m.role}`}>
+              <div
+                key={m.id}
+                className={
+                  m.role === "ai"
+                    ? "text-feature text-ink leading-heading font-light max-w-[80%]"
+                    : "text-body text-ink2 leading-body self-end max-w-[80%] text-right"
+                }
+              >
                 {m.text}
               </div>
             ))}
             {streamingText !== null && (
-              <div className="msg-ai">{streamingText || <Dots />}</div>
+              <div className="text-feature text-ink leading-heading font-light max-w-[80%]">
+                {streamingText || <Dots />}
+              </div>
             )}
             <div ref={endRef} />
           </div>
         </div>
       </div>
 
-      <div className="input-bar">
-        <div className="input-inner">
+      <div className="shrink-0 p-3 bg-bg flex justify-center">
+        <div className="max-w-[var(--container-page)] w-full flex items-end gap-3 p-1.5 pl-3 border border-line rounded-panel transition-colors focus-within:border-accent-line">
           <textarea
-            className="chat-textarea"
+            className="flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
             rows={1}
             placeholder="balas…"
             value={input}
@@ -208,7 +198,7 @@ Obrolan:\n${transcript}`;
           />
           <button
             type="button"
-            className="send-btn"
+            className="w-9 h-9 rounded-card bg-ink text-bg border-none flex items-center justify-center font-ui text-ui cursor-pointer shrink-0 transition-opacity hover:opacity-85 disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={send}
             disabled={!input.trim() || busy}
           >

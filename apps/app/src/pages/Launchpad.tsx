@@ -48,54 +48,57 @@ export default function Launchpad({ user }: { user: Member }) {
 
   return (
     <>
-      <div className="bn-head">
-        <h1 className="bn-title">Launchpad</h1>
-        <span className="bn-title-sub">Apa yang lagi dikerjakan komunitas</span>
+      <div className="flex items-baseline gap-2.5 mb-6">
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Launchpad</h1>
+        <span className="font-body text-caption text-ink3">Apa yang lagi dikerjakan komunitas</span>
       </div>
 
       {/* Calm on-ramp to the AI assistant (opt-in, never a gate) */}
       <button
         type="button"
-        className="bn-ramp"
+        className="w-full flex items-center gap-3.5 px-[18px] py-3.5 mb-6 bg-accent-tint border border-accent-line rounded-panel text-left cursor-pointer transition-opacity hover:opacity-85"
         onClick={() => navigate("/assistant")}
       >
-        <span className="bn-ramp-mark" aria-hidden="true">
+        <span className="font-display text-[28px] text-accent leading-none shrink-0" aria-hidden="true">
           ✦
         </span>
-        <span style={{ flex: 1, minWidth: 0 }}>
-          <span className="bn-ramp-title">hei {firstName(user.name)} 👋</span>
-          <span className="bn-ramp-sub">
+        <span className="flex-1 min-w-0">
+          <span className="block font-display text-title text-ink leading-heading mb-0.5">hei {firstName(user.name)} 👋</span>
+          <span className="block font-body text-body text-ink2 leading-body">
             Belum tahu mau mulai dari mana? Ngobrol sebentar sama asisten — kita
             rapiin profil & cari arahmu.
           </span>
         </span>
-        <span className="bn-ramp-cue" aria-hidden="true">
+        <span className="shrink-0 text-accent text-ui font-semibold" aria-hidden="true">
           Mulai →
         </span>
       </button>
 
       {/* Interest filter strip (client-side) */}
       {interests.length > 0 && (
-        <div className="skills-wrap" style={{ marginBottom: 24 }}>
-          {["Semua", ...interests].map((f) => (
-            <button
-              key={f}
-              type="button"
-              className={`stage-chip stage-pick${filter === f ? " on" : ""}`}
-              aria-pressed={filter === f}
-              onClick={() => setFilter(f)}
-            >
-              {f}
-            </button>
-          ))}
+        <div className="flex flex-wrap items-center gap-1.5 mb-6">
+          {["Semua", ...interests].map((f) => {
+            const isOn = filter === f;
+            return (
+              <button
+                key={f}
+                type="button"
+                className={`inline-flex items-center px-2.5 py-[3px] text-ui tracking-tag border cursor-pointer pointer:min-h-[44px] ${isOn ? "bg-ink border-ink text-bg" : "border-line text-ink2"}`}
+                aria-pressed={isOn}
+                onClick={() => setFilter(f)}
+              >
+                {f}
+              </button>
+            );
+          })}
         </div>
       )}
 
-      <p className="eyebrow sec-rule">Pilihan inspiratif</p>
+      <p className="eyebrow pb-2.5 border-b border-line">Pilihan inspiratif</p>
       {featuredShown.length === 0 ? (
-        <p className="empty-state">belum ada pilihan.</p>
+        <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
       ) : (
-        <div className="featured">
+        <div className="flex flex-col">
           {featuredShown.map((k) => (
             <FeaturedCard
               key={k.id}
@@ -106,9 +109,9 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="eyebrow mt40 mb4">Kabar terbaru</p>
+      <p className="eyebrow mt-10 mb-1">Kabar terbaru</p>
       {feedShown.length === 0 ? (
-        <p className="empty-state">belum ada aktivitas.</p>
+        <p className="font-mono text-ui text-ink3 py-5">belum ada aktivitas.</p>
       ) : (
         <Feed items={feedShown} />
       )}
@@ -172,52 +175,52 @@ export function LaunchpadRail({ user }: { user: Member }) {
 
   return (
     <>
-      <section className="bn-pulse">
-        <p className="eyebrow bn-pulse-head">Denyut komunitas</p>
-        <div className="bn-pulse-rows">
+      <section className="bg-surface border border-line rounded-panel px-4 py-3.5">
+        <p className="eyebrow mb-2.5">Denyut komunitas</p>
+        <div className="flex flex-col gap-2">
           {pulse.map((s) => (
-            <div key={s.label} className="bn-pulse-row">
-              <span className="bn-pulse-label">{s.label}</span>
-              <span className="bn-pulse-value">{s.value ?? "—"}</span>
+            <div key={s.label} className="flex justify-between items-baseline gap-3">
+              <span className="text-ui text-ink2">{s.label}</span>
+              <span className="text-body font-medium text-ink tabular-nums">{s.value ?? "—"}</span>
             </div>
           ))}
         </div>
       </section>
 
-      <section className="bn-rail-sec">
-        <div className="bn-rail-head">
+      <section className="flex flex-col">
+        <div className="flex items-center justify-between gap-3 mb-2.5">
           <p className="eyebrow">Kenalan dengan builder</p>
           <button
             type="button"
-            className="bn-rail-link"
+            className="bg-transparent border-none p-0 cursor-pointer font-body text-micro text-accent-mid transition-colors hover:text-accent"
             onClick={() => navigate("/jelajahi")}
           >
             Lihat semua
           </button>
         </div>
         {toMeet.length === 0 ? (
-          <p className="empty-state">belum ada builder lain.</p>
+          <p className="font-mono text-ui text-ink3 py-5">belum ada builder lain.</p>
         ) : (
-          <ul className="bn-builders">
+          <ul className="list-none flex flex-col">
             {toMeet.map((m) => (
-              <li key={m.id}>
+              <li key={m.id} className="border-b border-line last:border-none">
                 <button
                   type="button"
-                  className="bn-builder"
+                  className="group w-full flex gap-2.5 items-start text-left bg-transparent border-none py-2.5 cursor-pointer"
                   onClick={() => navigate(`/member/${m.id}`)}
                 >
                   <Avatar name={m.name} size={34} />
-                  <span className="bn-builder-body">
-                    <span className="bn-builder-name">{m.name}</span>
-                    <span className="bn-builder-meta">
+                  <span className="flex-1 min-w-0 flex flex-col gap-[3px]">
+                    <span className="text-ui font-medium text-ink transition-colors group-hover:text-accent">{m.name}</span>
+                    <span className="text-micro text-ink3">
                       {[m.handle && `@${m.handle}`, m.year]
                         .filter(Boolean)
                         .join(" · ")}
                     </span>
                     {m.skills.length > 0 && (
-                      <span className="bn-builder-skills">
+                      <span className="flex flex-wrap gap-1 mt-0.5">
                         {m.skills.slice(0, 3).map((s) => (
-                          <span key={s} className="bn-builder-skill">
+                          <span key={s} className="text-micro text-ink2 bg-bg border border-line px-1.5 py-[1px] rounded-[3px]">
                             {s}
                           </span>
                         ))}
@@ -231,14 +234,14 @@ export function LaunchpadRail({ user }: { user: Member }) {
         )}
       </section>
 
-      <section className="bn-rail-cta">
-        <p className="bn-rail-cta-copy">
+      <section className="bg-accent rounded-panel p-4">
+        <p className="text-body text-accent-fg leading-compact mb-3">
           Punya ide atau progres baru? Bagikan sebagai karya — komunitas senang
           lihat apa yang lagi kamu garap.
         </p>
         <button
           type="button"
-          className="bn-rail-cta-btn"
+          className="w-full bg-accent-fg text-accent border-none rounded-card px-3.5 py-[7px] font-body text-ui font-semibold cursor-pointer transition-opacity hover:opacity-85"
           onClick={() => navigate("/karya/new")}
         >
           Mulai karya baru

@@ -67,7 +67,7 @@ export default function Shell({
   }));
 
   return (
-    <div className="bn-shell">
+    <div className="min-h-screen bg-bg-layer flex justify-center text-ink font-body selection:bg-accent-tint selection:text-accent">
       <ShellColumns>
         <UiLeftNav items={items} user={{ name: me.name, handle: me.handle }} />
         <MainColumn className="flex flex-col">{children}</MainColumn>

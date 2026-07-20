@@ -1,5 +1,6 @@
 import { useGetMember } from "@myapp/api-client-react";
 import { Loading, Tag } from "@/components/ui-atoms";
+import { Button } from "@myapp/ui";
 
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);
@@ -7,70 +8,59 @@ export default function MemberProfilePage({ id }: { id: string }) {
   if (isLoading) return <Loading />;
   if (!member) {
     return (
-      <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-        <div className="wrap">
-          <p className="sub">anggota tidak ditemukan.</p>
-          <button
+      <div className="fixed inset-0 animate-up flex items-center">
+        <div className="max-w-[var(--container-page)] mx-auto px-7">
+          <p className="text-body text-ink2 leading-body">anggota tidak ditemukan.</p>
+          <Button
             type="button"
-            className="btn btn-outline"
-            style={{ marginTop: 24 }}
+            variant="secondary"
+            className="mt-6"
             onClick={() => window.history.back()}
           >
             ← balik
-          </button>
+          </Button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="screen" style={{ overflowY: "auto" }}>
-      <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
+    <div className="fixed inset-0 animate-up overflow-y-auto">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-10 pb-[80px]">
         <button
           type="button"
           onClick={() => window.history.back()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--color-ink2)",
-            fontSize: 13,
-            padding: 0,
-            marginBottom: 40,
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
+          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0 mb-10 flex items-center gap-1.5"
         >
           ← balik
         </button>
 
-        <h1 className="h1" style={{ marginBottom: 4 }}>
+        <h1 className="text-feature font-light tracking-heading leading-heading mb-1">
           {member.name}
         </h1>
-        <p className="sub" style={{ marginBottom: 40 }}>
+        <p className="text-body text-ink2 leading-body mb-10">
           {member.year} · {member.major}
         </p>
 
-        <hr className="hr" style={{ margin: "0 0 28px" }} />
+        <hr className="border-none border-b border-line m-0 mb-7" />
 
         {member.bio && (
-          <div className="pf">
-            <p className="eyebrow mb6">Bio</p>
+          <div className="mb-7">
+            <p className="eyebrow mb-1.5">Bio</p>
             <p>{member.bio}</p>
           </div>
         )}
-        <div className="pf">
-          <p className="eyebrow mb6">Skills</p>
-          <div className="skills-wrap">
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Skills</p>
+          <div className="flex flex-wrap items-center gap-1.5">
             {(member.skills ?? []).map((s) => (
               <Tag key={s} label={s} />
             ))}
           </div>
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Minat</p>
-          <div className="skills-wrap">
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Minat</p>
+          <div className="flex flex-wrap items-center gap-1.5">
             {(member.interests ?? []).map((s) => (
               <Tag key={s} label={s} />
             ))}

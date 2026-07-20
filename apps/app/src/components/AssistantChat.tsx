@@ -148,32 +148,34 @@ Percakapan:\n${transcript}`;
   if (genning) return <Loading label={genLabel} />;
 
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        flex: 1,
-        minHeight: 0,
-      }}
-    >
-      <div style={{ flex: 1, overflowY: "auto", padding: "8px 0 24px" }}>
-        <div className="chat">
+    <div className="flex flex-col flex-1 min-h-0">
+      <div className="flex-1 overflow-y-auto py-2 pb-6">
+        <div className="flex flex-col gap-6">
           {msgs.map((m) => (
-            <div key={m.id} className={`msg-${m.role}`}>
+            <div
+              key={m.id}
+              className={
+                m.role === "ai"
+                  ? "text-feature text-ink leading-heading font-light max-w-[80%]"
+                  : "text-body text-ink2 leading-body self-end max-w-[80%] text-right"
+              }
+            >
               {m.text}
             </div>
           ))}
           {streamingText !== null && (
-            <div className="msg-ai">{streamingText || <Dots />}</div>
+            <div className="text-feature text-ink leading-heading font-light max-w-[80%]">
+              {streamingText || <Dots />}
+            </div>
           )}
           <div ref={endRef} />
         </div>
       </div>
 
-      <div className="input-bar" style={{ padding: "14px 0 0" }}>
-        <div className="input-inner" style={{ maxWidth: "none" }}>
+      <div className="shrink-0 pt-3.5 bg-bg flex justify-center">
+        <div className="w-full flex items-end gap-3 p-1.5 pl-3 border border-line rounded-panel transition-colors focus-within:border-accent-line">
           <textarea
-            className="chat-textarea"
+            className="flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
             rows={1}
             placeholder="balas…"
             value={input}
@@ -182,7 +184,7 @@ Percakapan:\n${transcript}`;
           />
           <button
             type="button"
-            className="send-btn"
+            className="w-9 h-9 rounded-card bg-ink text-bg border-none flex items-center justify-center font-ui text-ui cursor-pointer shrink-0 transition-opacity hover:opacity-85 disabled:opacity-30 disabled:cursor-not-allowed"
             onClick={send}
             disabled={!input.trim() || busy}
           >

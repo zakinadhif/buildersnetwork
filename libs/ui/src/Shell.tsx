@@ -19,7 +19,7 @@ import { cn } from "./lib/cn";
  */
 export function ShellColumns({ children }: { children: ReactNode }) {
   return (
-    <div className="bn-shell-inner mx-auto flex max-w-shell-outer items-start">
+    <div className="mx-auto flex max-w-shell-outer items-start">
       {children}
     </div>
   );
@@ -32,7 +32,7 @@ export function MainColumn({
   return (
     <main
       className={cn(
-        "bn-main min-w-0 flex-1 px-[var(--shell-gutter)] pb-12 pt-6 max-[900px]:w-full max-[900px]:p-0",
+        "min-w-0 flex-1 px-[var(--shell-gutter)] pb-12 pt-6 max-[900px]:w-full max-[900px]:p-0",
         className,
       )}
       {...props}
@@ -47,7 +47,7 @@ export function RailColumn({
   return (
     <aside
       className={cn(
-        "bn-rail sticky top-0 h-screen w-[calc(var(--shell-rail)+2*var(--shell-gutter)+1px)] shrink-0 overflow-y-auto border-l border-line px-[var(--shell-gutter)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-l-0 max-[900px]:border-r-0 max-[900px]:p-0",
+        "sticky top-0 h-screen w-[calc(var(--shell-rail)+2*var(--shell-gutter)+1px)] shrink-0 overflow-y-auto border-l border-line px-[var(--shell-gutter)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-l-0 max-[900px]:border-r-0 max-[900px]:p-0",
         className,
       )}
       {...props}
@@ -87,38 +87,38 @@ export function LeftNav({
   filters?: ReactNode;
 }) {
   return (
-    <aside className="bn-nav sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
-      <div className="bn-nav-logo mb-4 border-b border-line px-3 pb-5">
+    <aside className="sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
+      <div className="mb-4 border-b border-line px-3 pb-5">
         <div className="eyebrow mb-1" style={eyebrow}>
           Al-Fath
         </div>
-        <div className="bn-nav-wordmark font-display text-feature font-regular leading-none text-ink">
+        <div className="font-display text-feature font-regular leading-none text-ink">
           Berkarya
         </div>
       </div>
 
       <nav
-        className="bn-nav-items mb-6 flex flex-col"
+        className="mb-6 flex flex-col"
         aria-label="Navigasi utama"
       >
         {items.map((item) => (
           <button
             key={item.label}
             type="button"
-            className="bn-nav-item mb-px flex w-full cursor-pointer items-center gap-2.5 rounded-card bg-transparent px-3 py-[7px] text-left font-body text-body leading-compact text-ink2 transition-colors duration-[120ms] hover:text-ink disabled:cursor-default disabled:text-ink3 disabled:hover:text-ink3 aria-[current=page]:bg-accent-tint aria-[current=page]:font-medium aria-[current=page]:text-accent aria-[current=page]:hover:text-accent"
+            className="mb-px flex w-full cursor-pointer items-center gap-2.5 rounded-card bg-transparent px-3 py-[7px] text-left font-body text-body leading-compact text-ink2 transition-colors duration-[120ms] hover:text-ink disabled:cursor-default disabled:text-ink3 disabled:hover:text-ink3 aria-[current=page]:bg-accent-tint aria-[current=page]:font-medium aria-[current=page]:text-accent aria-[current=page]:hover:text-accent"
             disabled={item.disabled}
             aria-current={item.active ? "page" : undefined}
             onClick={item.disabled ? undefined : item.onClick}
           >
             <span
-              className="bn-nav-icon inline-flex shrink-0 items-center justify-center font-body text-ui"
+              className="inline-flex shrink-0 items-center justify-center font-body text-ui"
               aria-hidden="true"
             >
               {item.icon}
             </span>
             {item.label}
             {item.badge && (
-              <span className="bn-nav-soon ml-auto text-micro tracking-tag text-ink3">
+              <span className="ml-auto text-micro tracking-tag text-ink3">
                 {item.badge}
               </span>
             )}
@@ -127,19 +127,19 @@ export function LeftNav({
       </nav>
 
       {filters && (
-        <div className="bn-nav-filters min-h-0 overflow-y-auto px-3 max-[900px]:overflow-visible">
+        <div className="min-h-0 overflow-y-auto px-3 max-[900px]:overflow-visible">
           {filters}
         </div>
       )}
 
-      <div className="bn-nav-user mt-auto flex items-center gap-2 border-t border-line px-3 pt-4">
+      <div className="mt-auto flex items-center gap-2 border-t border-line px-3 pt-4">
         <Avatar name={user.name} size={28} />
         <div className="min-w-0">
-          <div className="bn-nav-user-name font-body text-ui font-medium text-ink">
+          <div className="font-body text-ui font-medium text-ink">
             {user.name}
           </div>
           {user.handle && (
-            <div className="bn-nav-user-handle font-body text-micro text-ink3">
+            <div className="font-body text-micro text-ink3">
               @{user.handle}
             </div>
           )}

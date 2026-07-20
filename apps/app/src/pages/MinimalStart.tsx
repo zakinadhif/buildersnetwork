@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
+import { Button } from "@myapp/ui";
 
 /**
  * The minimal-profile start (issue #8, grooming decision 2: a quick one-field
@@ -41,17 +42,17 @@ export default function MinimalStart({
   if (busy) return <Loading label="lagi nyiapin ruangmu" />;
 
   return (
-    <div className="screen" style={{ overflowY: "auto" }}>
-      <div className="bn-start">
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1">Sebelum masuk — panggil kamu siapa?</h1>
-        <p className="sub mt8">
+    <div className="fixed inset-0 animate-up overflow-y-auto">
+      <div className="max-w-[440px] mx-auto px-7 py-[72px]">
+        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <h1 className="text-feature font-light tracking-heading leading-heading">Sebelum masuk — panggil kamu siapa?</h1>
+        <p className="text-body text-ink2 leading-body mt-2">
           Cukup ini dulu. Sisanya bisa kamu lengkapi kapan aja — sendiri atau
           ngobrol sama asisten.
         </p>
 
         <input
-          className="bn-start-field"
+          className="w-full bg-transparent border-none border-b-2 border-ink font-body text-feature font-light tracking-heading text-ink outline-none py-1.5 my-5 mb-2 placeholder:text-ink3"
           placeholder="nama kamu"
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -63,15 +64,15 @@ export default function MinimalStart({
           aria-label="Nama kamu"
         />
 
-        <div className="row-end mt24">
-          <button
+        <div className="flex justify-end gap-3 mt-6">
+          <Button
             type="button"
-            className="btn btn-dark"
+            variant="primary"
             onClick={begin}
             disabled={!name.trim()}
           >
             Masuk ke Launchpad →
-          </button>
+          </Button>
         </div>
       </div>
     </div>

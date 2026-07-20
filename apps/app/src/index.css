@@ -63,11 +63,7 @@ body {
   }
 }
 
-.screen {
-  position: fixed;
-  inset: 0;
-  animation: up 0.28s ease;
-}
+
 
 /* Layout */
 .wrap {
@@ -106,114 +102,9 @@ body {
   line-height: var(--leading-body);
 }
 
-/* Chat messages */
-.chat {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-}
 
-.msg-ai {
-  font-family: var(--font-mono);
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-ink);
-  animation: up 0.22s ease;
-  white-space: pre-wrap;
-}
-.msg-user {
-  align-self: flex-end;
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-ink);
-  animation: up 0.18s ease;
-  max-width: 72%;
-  text-align: right;
-}
 
-/* Input bar */
-.input-bar {
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-line);
-  padding: 14px 28px 20px;
-  flex-shrink: 0;
-}
-.input-inner {
-  max-width: var(--container-page);
-  margin: 0 auto;
-  display: flex;
-  gap: 10px;
-  align-items: flex-end;
-}
-.chat-textarea {
-  flex: 1;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--color-line);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  color: var(--color-ink);
-  outline: none;
-  resize: none;
-  padding: 3px 0;
-  line-height: var(--leading-body);
-  max-height: 100px;
-  overflow-y: auto;
-  transition: border-color 0.15s;
-}
-.chat-textarea::placeholder {
-  color: var(--color-ink3);
-}
-.chat-textarea:focus {
-  border-bottom-color: var(--color-accent);
-}
-/* GLYPH SIZES — off the type scale on purpose (#87). The scale sizes *text*; a
-   lone mark (the ↑ here, the ••• below, the ✦ on the ramp) is a drawing sized by
-   eye against the control it sits in, and snapping it to a text step would move
-   it for no reason a reader could name. The mockups do exactly this — see the
-   literal `fontSize: 28` on the ✦ in Launchpad's SeekerRamp. `line-height: 1` on
-   these is the same idea: a single glyph has no leading to set. */
-.send-btn {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-accent);
-  font-size: 17px;
-  padding: 3px;
-  line-height: 1;
-  transition: opacity 0.15s;
-}
-.send-btn:hover {
-  opacity: 0.6;
-}
-.send-btn:disabled {
-  opacity: 0.2;
-  cursor: default;
-}
 
-/* Thinking dots */
-@keyframes blink {
-  0%,
-  80%,
-  100% {
-    opacity: 0.15;
-  }
-  40% {
-    opacity: 1;
-  }
-}
-.dots span {
-  font-family: var(--font-mono);
-  font-size: 16px;
-  color: var(--color-ink2);
-  animation: blink 1.3s ease-in-out infinite;
-}
-.dots span:nth-child(2) {
-  animation-delay: 0.2s;
-}
-.dots span:nth-child(3) {
-  animation-delay: 0.4s;
-}
 
 /* Buttons */
 .btn {
@@ -243,118 +134,9 @@ body {
   border-color: var(--color-ink2);
 }
 
-/* Skills */
-.skills-wrap {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: center;
-}
-/* Editor chips (the skills/interests editors) take the `ui` control step, not
-   the `micro` step the read-only tags below use: these are things you click and
-   type into, and 10px is a label size, not a target size. */
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
-  border: 1px solid var(--color-line);
-  font-size: var(--text-ui);
-  color: var(--color-ink2);
-}
-.chip-rm {
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-ink3);
-  font-size: var(--text-body);
-  line-height: 1;
-  padding: 0;
-  transition: color 0.12s;
-}
-.chip-rm:hover {
-  color: var(--color-ink);
-}
-.chip-add {
-  background: transparent;
-  border: none;
-  font-family: var(--font-body);
-  font-size: var(--text-ui);
-  color: var(--color-ink3);
-  outline: none;
-  padding: 3px 4px;
-  min-width: 60px;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.15s;
-}
-.chip-add:focus {
-  border-bottom-color: var(--color-accent);
-  color: var(--color-ink);
-}
-.chip-add::placeholder {
-  color: var(--color-ink3);
-}
 
-/* Tappable catalog suggestions (interests editor) */
-.chip-suggests {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 8px;
-}
-.chip-suggest {
-  background: none;
-  cursor: pointer;
-  padding: 3px 10px;
-  border: 1px dashed var(--color-line);
-  font-family: var(--font-body);
-  font-size: var(--text-ui);
-  color: var(--color-ink3);
-  transition:
-    color 0.12s,
-    border-color 0.12s;
-}
-.chip-suggest:hover {
-  color: var(--color-ink);
-  border-color: var(--color-ink2);
-}
 
-/* Editable fields */
-.field-val {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  cursor: pointer;
-  border-bottom: 1px solid transparent;
-  transition: border-color 0.15s;
-  display: block;
-}
-.field-val:hover {
-  border-bottom-color: var(--color-line);
-}
-.field-ta {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--color-accent);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  color: var(--color-ink);
-  outline: none;
-  resize: none;
-  padding: 2px 0;
-  line-height: var(--leading-body);
-}
-.field-in {
-  width: 100%;
-  background: transparent;
-  border: none;
-  border-bottom: 1px solid var(--color-accent);
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  color: var(--color-ink);
-  outline: none;
-  padding: 2px 0;
-}
+
 
 /* Profile field block */
 .pf {
@@ -467,34 +249,7 @@ body {
    declare a plainer second design of it here; that whole block is gone, and both
    the feed's new-karya item and the featured strip render the shared card. */
 
-/* Stage chips — a karya lifecycle signal. `micro` + the tag tracking is the
-   mockup's Tag (apps/mockups/src/components/Tag.tsx), which these are the app's
-   copy of; the padding keeps the tap target while the type comes down to it. */
-.stage-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-tag);
-  border: 1px solid var(--color-line);
-  color: var(--color-ink2);
-  cursor: default;
-}
-.stage-chip.on {
-  background: var(--color-ink);
-  border-color: var(--color-ink);
-  color: var(--color-bg);
-  cursor: pointer;
-}
-/* The same chip, but *interactive* (the Launchpad's interest filter). Its mockup
-   counterpart is not the read-only Tag above — it's NavFilterList's buttons,
-   which sit at the `ui` control step. A control is not a label: at `micro` this
-   chip measured 23.5px tall, below the 44px touch target the rail already
-   guarantees for its own nav items. */
-.stage-pick {
-  cursor: pointer;
-  font-size: var(--text-ui);
-}
+
 
 /* Pending join request row (owner approve/decline) */
 .pending-row {
@@ -525,150 +280,7 @@ body {
   padding: 20px 0;
 }
 
-/* --- Sprint 3: posts, feed & homepage --- */
 
-/* Post kind chip — a colored variant per update type (progress/challenge/
-   achievement). Reuses the stage-chip footprint with a kind-tinted accent. */
-.kind-chip {
-  display: inline-flex;
-  align-items: center;
-  padding: 3px 10px;
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-tag);
-  border: 1px solid var(--color-line);
-  color: var(--color-ink2);
-  background: transparent;
-  cursor: default;
-}
-.kind-progress {
-  border-color: oklch(50% 0.07 230 / 0.5);
-  color: oklch(45% 0.08 230);
-}
-.kind-challenge {
-  border-color: oklch(55% 0.09 60 / 0.5);
-  color: oklch(48% 0.1 55);
-}
-.kind-achievement {
-  border-color: oklch(50% 0.08 145 / 0.5);
-  color: oklch(44% 0.09 150);
-}
-/* Composer kind picker — same chips, but tappable + a selected state. A control,
-   so it takes the `ui` step, not the tag's `micro` (see `.stage-pick`). */
-.kind-pick {
-  cursor: pointer;
-  font-size: var(--text-ui);
-  opacity: 0.55;
-  transition: opacity 0.12s;
-}
-.kind-pick.on {
-  opacity: 1;
-  font-weight: var(--font-weight-medium);
-}
-
-/* Post compose box (members only) */
-.composer {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 16px 0 24px;
-}
-.kind-select {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.composer-input {
-  width: 100%;
-  resize: vertical;
-  background: transparent;
-  border: 1px solid var(--color-line);
-  padding: 10px 12px;
-  font-family: var(--font-body);
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-ink);
-  outline: none;
-  transition: border-color 0.15s;
-}
-.composer-input:focus {
-  border-color: var(--color-accent);
-}
-.composer-input::placeholder {
-  color: var(--color-ink3);
-}
-.composer .btn {
-  align-self: flex-start;
-}
-
-/* Post cards — the karya stream + the feed post item */
-.stream,
-.feed {
-  display: flex;
-  flex-direction: column;
-}
-.post-card {
-  padding: 16px 0;
-  border-bottom: 1px solid var(--color-line);
-}
-.post-card-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-.post-author {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  min-width: 0;
-  text-align: left;
-}
-.post-author-name {
-  font-size: var(--text-body);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-ink);
-}
-button.post-author:hover .post-author-name {
-  color: var(--color-accent);
-}
-.post-body {
-  font-size: var(--text-body);
-  line-height: var(--leading-body);
-  color: var(--color-ink);
-  margin-top: 10px;
-  white-space: pre-wrap;
-}
-.post-card-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: 10px;
-}
-.post-karya-link {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font-size: var(--text-ui);
-  color: var(--color-ink2);
-  transition: color 0.12s;
-}
-.post-karya-link:hover {
-  color: var(--color-accent);
-}
-/* Timestamps are dense inline meta — the `micro` step, as in the mockup's
-   activity line ("3 jam lalu"). */
-.post-time {
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  color: var(--color-ink3);
-  flex-shrink: 0;
-}
 
 /* "karya baru" is the shared card's accent activity line now (#92), not a
    separate eyebrow tag; the class it used is gone with the app's old card. */
@@ -768,46 +380,7 @@ button.post-author:hover .post-author-name {
   gap: 12px;
 }
 
-/* ── Launchpad app shell (issue #8) ────────────────────────────────────────
-   Persistent left-sidebar rail + center content, ported from MockupB's
-   three-column `bn-*` layout. Logged-in routes render inside `.bn-shell`;
-   auth/welcome stay outside it. Collapses to one column below 900px. */
-.bn-shell {
-  position: fixed;
-  inset: 0;
-  overflow-y: auto;
-  animation: up 0.28s ease;
-}
-/* The three columns, the left rail, the avatar, the tag and the cover tile all
-   live in @myapp/ui now (#92) — one implementation, rendered by the gallery and
-   this app alike. An `Avatar` that exists once cannot drift. What's left below is
-   only what is genuinely the app's: this shell is a fixed pane that scrolls
-   inside itself and animates in, where the gallery is a document that scrolls.
 
-   The nav used to be pinned here (`sticky; top: 24px`). It is a full-height pane
-   in @myapp/ui now, and `sticky` resolves against whatever scrolls — this pane
-   here, the document there — so both apps get it from the one rule. */
-.bn-nav-filter {
-  display: block;
-  width: 100%;
-  text-align: left;
-  background: transparent;
-  border: none;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-family: var(--font-body);
-  font-size: var(--text-ui);
-  color: var(--color-ink2);
-  cursor: pointer;
-  transition:
-    background 0.12s,
-    color 0.12s;
-}
-.bn-nav-filter[aria-pressed="true"] {
-  color: var(--color-accent);
-  background: var(--color-accent-tint);
-  font-weight: var(--font-weight-medium);
-}
 
 /* Display heading (Lora) for in-shell page headers */
 .bn-head {
@@ -1066,50 +639,4 @@ button.post-author:hover .post-author-name {
   opacity: 0.85;
 }
 
-@media (max-width: 900px) {
-  .bn-shell-inner {
-    flex-direction: column;
-    padding: 16px 16px 40px;
-    gap: 20px;
-  }
-  /* The panes' desktop frame — 100vh, sticky, the hairlines, the gutters — is
-     undone by @myapp/ui at 900px, next to the rules that set it. What's left
-     here is this app's own collapse. */
-  .bn-nav {
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px 16px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid var(--color-line);
-  }
-  .bn-nav-logo {
-    margin: 0 auto 0 0;
-    padding: 0;
-    border-bottom: none;
-  }
-  .bn-nav-items {
-    flex-flow: row wrap;
-    gap: 2px 4px;
-    margin: 0;
-  }
-  .bn-nav-item {
-    width: auto;
-  }
-  .bn-nav-filters,
-  .bn-nav-user {
-    display: none;
-  }
-}
-@media (pointer: coarse) {
-  .bn-nav-item {
-    min-height: 44px;
-  }
-  /* Chip-shaped controls are small by design; on touch they still have to be
-     hittable. Display chips (`.stage-chip`, `.kind-chip` on their own) are not
-     targets and are left alone. */
-  .stage-pick,
-  .kind-pick {
-    min-height: 44px;
-  }
-}
+

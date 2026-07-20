@@ -54,7 +54,7 @@ export function timeAgo(input: string | Date): string {
 
 export function Dots() {
   return (
-    <span className="dots">
+    <span className="inline-flex gap-[2px] animate-[pulse_1.5s_ease-in-out_infinite] opacity-60 ml-0.5">
       <span>·</span>
       <span>·</span>
       <span>·</span>
@@ -64,21 +64,8 @@ export function Dots() {
 
 export function Loading({ label = "loading" }: { label?: string }) {
   return (
-    <div
-      className="screen"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-      }}
-    >
-      <span
-        style={{
-          fontFamily: "var(--font-mono)",
-          fontSize: 13,
-          color: "var(--color-ink2)",
-        }}
-      >
+    <div className="fixed inset-0 animate-up flex items-center justify-center">
+      <span className="font-mono text-[13px] text-ink2">
         {label}
         <Dots />
       </span>
@@ -101,13 +88,13 @@ export function SkillsEditor({
     }
   };
   return (
-    <div className="skills-wrap">
+    <div className="flex flex-wrap items-center gap-1.5">
       {skills.map((s, i) => (
-        <span key={s} className="chip">
+        <span key={s} className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors">
           {s}
           <button
             type="button"
-            className="chip-rm"
+            className="bg-transparent border-none p-0 flex items-center justify-center text-ink3 cursor-pointer hover:text-ink w-3 h-3 text-[14px] leading-none mb-0.5"
             onClick={() => onChange(skills.filter((_, j) => j !== i))}
           >
             ×
@@ -115,7 +102,7 @@ export function SkillsEditor({
         </span>
       ))}
       <input
-        className="chip-add"
+        className="bg-transparent border-none p-0 m-0 w-[120px] outline-none font-body text-body text-ink placeholder:text-ink3"
         placeholder="+ tambah skill"
         value={val}
         onChange={(e) => setVal(e.target.value)}
@@ -169,13 +156,13 @@ export function InterestsEditor({
 
   return (
     <div>
-      <div className="skills-wrap">
+      <div className="flex flex-wrap items-center gap-1.5">
         {interests.map((s, i) => (
-          <span key={s} className="chip">
+          <span key={s} className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors">
             {s}
             <button
               type="button"
-              className="chip-rm"
+              className="bg-transparent border-none p-0 flex items-center justify-center text-ink3 cursor-pointer hover:text-ink w-3 h-3 text-[14px] leading-none mb-0.5"
               onClick={() => onChange(interests.filter((_, j) => j !== i))}
             >
               ×
@@ -183,7 +170,7 @@ export function InterestsEditor({
           </span>
         ))}
         <input
-          className="chip-add"
+          className="bg-transparent border-none p-0 m-0 w-[120px] outline-none font-body text-body text-ink placeholder:text-ink3"
           placeholder="+ tambah minat"
           value={val}
           onChange={(e) => setVal(e.target.value)}
@@ -191,12 +178,12 @@ export function InterestsEditor({
         />
       </div>
       {suggestions.length > 0 && (
-        <div className="chip-suggests">
+        <div className="flex flex-wrap gap-1 mt-1">
           {suggestions.map((s) => (
             <button
               key={s.id}
               type="button"
-              className="chip-suggest"
+              className="bg-bg border border-dashed border-line text-ink2 text-micro px-2 py-0.5 rounded-[100px] cursor-pointer hover:border-ink2 transition-colors"
               onClick={() => add(s.name)}
             >
               + {s.name}
@@ -225,14 +212,18 @@ export function StageMultiSelect({
       stages.includes(s) ? stages.filter((x) => x !== s) : [...stages, s],
     );
   return (
-    <div className="skills-wrap">
+    <div className="flex flex-wrap items-center gap-1.5">
       {KARYA_STAGE_ORDER.map((s) => {
         const on = stages.includes(s);
         return (
           <button
             key={s}
             type="button"
-            className={`stage-chip stage-pick${on ? " on" : ""}`}
+            className={`inline-flex items-center px-2 py-[3px] bg-bg border border-line rounded-[100px] font-body text-body cursor-pointer transition-all ${
+              on
+                ? "text-bg bg-ink border-ink opacity-100 ring-2 ring-ink ring-offset-1 ring-offset-bg"
+                : "text-ink opacity-70 hover:opacity-100"
+            }`}
             aria-pressed={on}
             onClick={() => toggle(s)}
           >
@@ -258,17 +249,17 @@ export function EditField({
     return (
       <button
         type="button"
-        className="field-val"
+        className="bg-transparent border-none text-left p-0 cursor-text font-body text-body text-ink min-h-6 break-words whitespace-pre-wrap outline-none w-full"
         onClick={() => setEditing(true)}
       >
         {value || (
-          <span style={{ color: "var(--color-ink3)" }}>ketuk buat edit</span>
+          <span className="text-ink3">ketuk buat edit</span>
         )}
       </button>
     );
   return multiline ? (
     <textarea
-      className="field-ta"
+      className="w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
       value={value}
       rows={3}
       onChange={(e) => onChange(e.target.value)}
@@ -278,7 +269,7 @@ export function EditField({
     />
   ) : (
     <input
-      className="field-in"
+      className="w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}

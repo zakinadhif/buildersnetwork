@@ -15,6 +15,7 @@ import {
   validateCoverFile,
   validateScreenshotFile,
 } from "@/lib/upload";
+import { Button } from "@myapp/ui";
 
 type Orientation = "landscape" | "portrait";
 interface ScreenshotDraft {
@@ -46,21 +47,12 @@ function ScreenshotGroup({
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div style={{ marginBottom: 18 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "baseline",
-          gap: 10,
-          marginBottom: 8,
-        }}
-      >
-        <span
-          style={{ fontSize: 13, fontWeight: 600, color: "var(--color-ink)" }}
-        >
+    <div className="mb-[18px]">
+      <div className="flex items-baseline gap-2.5 mb-2">
+        <span className="text-[13px] font-semibold text-ink">
           {label}
         </span>
-        <span style={{ fontSize: 12, color: "var(--color-ink3)" }}>{hint}</span>
+        <span className="text-[12px] text-ink3">{hint}</span>
       </div>
       <input
         ref={inputRef}
@@ -73,71 +65,61 @@ function ScreenshotGroup({
         }}
         style={{ display: "none" }}
       />
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div className="flex flex-wrap gap-2">
         {items.map((it, i) => (
           <div
             key={it.preview}
-            style={{ display: "flex", flexDirection: "column", gap: 4 }}
+            className="flex flex-col gap-1"
           >
             <img
               src={it.preview}
               alt=""
-              style={{
-                width: 96,
-                height: 72,
-                objectFit: "cover",
-                borderRadius: 10,
-                border: "1px solid var(--color-line)",
-                display: "block",
-              }}
+              className="w-24 h-[72px] object-cover rounded-card border border-line block"
             />
-            <div style={{ display: "flex", gap: 4, justifyContent: "center" }}>
-              <button
+            <div className="flex justify-center gap-1">
+              <Button
                 type="button"
-                className="btn btn-outline"
-                style={{ padding: "2px 6px", fontSize: 11 }}
+                variant="secondary"
+                size="sm"
+                className="px-1.5 py-0.5 text-[11px]"
                 disabled={i === 0}
                 onClick={() => onMove(i, -1)}
               >
                 ↑
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="btn btn-outline"
-                style={{ padding: "2px 6px", fontSize: 11 }}
+                variant="secondary"
+                size="sm"
+                className="px-1.5 py-0.5 text-[11px]"
                 disabled={i === items.length - 1}
                 onClick={() => onMove(i, 1)}
               >
                 ↓
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
-                className="btn btn-outline"
-                style={{ padding: "2px 6px", fontSize: 11 }}
+                variant="secondary"
+                size="sm"
+                className="px-1.5 py-0.5 text-[11px]"
                 onClick={() => onRemove(i)}
               >
                 ×
-              </button>
+              </Button>
             </div>
           </div>
         ))}
-        <button
+        <Button
           type="button"
-          className="btn btn-outline"
-          style={{ width: 96, height: 72, flexShrink: 0 }}
+          variant="secondary"
+          className="w-24 h-[72px] shrink-0"
           onClick={() => inputRef.current?.click()}
         >
           + tambah
-        </button>
+        </Button>
       </div>
       {error && (
-        <p
-          style={{
-            margin: "6px 0 0",
-            fontSize: 12,
-            color: "var(--color-danger)",
-          }}
-        >
+        <p className="m-0 mt-1.5 text-[12px] text-danger">
           {error}
         </p>
       )}
@@ -297,40 +279,32 @@ export default function KaryaNew() {
   if (busy) return <Loading label="lagi nerbitin karya kamu" />;
 
   return (
-    <div className="screen" style={{ overflowY: "auto" }}>
-      <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
+    <div className="fixed inset-0 animate-up overflow-y-auto">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
         <button
           type="button"
           onClick={() => window.history.back()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--color-ink2)",
-            fontSize: 13,
-            padding: 0,
-            marginBottom: 32,
-          }}
+          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0 mb-8"
         >
           ← balik
         </button>
 
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1">Bikin karya baru.</h1>
-        <p className="sub mt8 mb16">
+        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <h1 className="text-feature font-light tracking-heading leading-heading">Bikin karya baru.</h1>
+        <p className="text-body text-ink2 leading-body mt-2 mb-4">
           Isi sendiri, atau biar AI yang bantu nyusun dari obrolan.
         </p>
-        <button
+        <Button
           type="button"
-          className="btn btn-outline"
+          variant="secondary"
           onClick={() => navigate("/karya/new/ai")}
         >
           isi pakai AI ✨
-        </button>
-        <hr className="hr" style={{ margin: "28px 0 32px" }} />
+        </Button>
+        <hr className="border-none border-b border-line my-7 mb-8" />
 
-        <div className="pf">
-          <p className="eyebrow mb6">Cover (opsional)</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Cover (opsional)</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -338,59 +312,47 @@ export default function KaryaNew() {
             onChange={(e) => pickCover(e.target.files?.[0])}
             style={{ display: "none" }}
           />
-          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div className="flex items-center gap-3.5">
             {coverPreview ? (
               <KaryaCover src={coverPreview} size={72} />
             ) : (
               <div
                 aria-hidden="true"
-                style={{
-                  width: 72,
-                  height: 72,
-                  borderRadius: 16,
-                  border: "1px dashed var(--color-line)",
-                  flexShrink: 0,
-                }}
+                className="w-[72px] h-[72px] rounded-[16px] border border-dashed border-line shrink-0"
               />
             )}
-            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-              <div style={{ display: "flex", gap: 8 }}>
-                <button
+            <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Button
                   type="button"
-                  className="btn btn-outline"
+                  variant="secondary"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {coverFile ? "Ganti gambar" : "Pilih gambar"}
-                </button>
+                </Button>
                 {coverFile && (
-                  <button
+                  <Button
                     type="button"
-                    className="btn btn-outline"
+                    variant="secondary"
                     onClick={clearCover}
                   >
                     Hapus
-                  </button>
+                  </Button>
                 )}
               </div>
-              <p className="sub" style={{ margin: 0, fontSize: 12 }}>
+              <p className="text-body text-ink2 leading-body m-0 text-[12px]">
                 PNG, JPG, atau WebP — maks 2 MB.
               </p>
               {coverError && (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: 12,
-                    color: "var(--color-danger)",
-                  }}
-                >
+                <p className="m-0 text-[12px] text-danger">
                   {coverError}
                 </p>
               )}
             </div>
           </div>
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Tangkapan layar (opsional)</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Tangkapan layar (opsional)</p>
           <ScreenshotGroup
             label="Landscape"
             hint="muncul di baris feed"
@@ -410,38 +372,38 @@ export default function KaryaNew() {
             onMove={(i, dir) => moveScreenshot("portrait", i, dir)}
           />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Judul</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Judul</p>
           <EditField value={draft.title} onChange={(v) => set("title", v)} />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Deskripsi</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Deskripsi</p>
           <EditField
             value={draft.description}
             onChange={(v) => set("description", v)}
             multiline
           />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Tahap</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Tahap</p>
           <StageMultiSelect
             stages={draft.stages}
             onChange={(v) => set("stages", v)}
           />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Minat / tag</p>
+        <div className="mb-7">
+          <p className="eyebrow mb-1.5">Minat / tag</p>
           <InterestsEditor
             interests={draft.interests}
             onChange={(v) => set("interests", v)}
           />
         </div>
 
-        <hr className="hr" />
-        <div className="row-end">
-          <button
+        <hr className="border-none border-b border-line my-8" />
+        <div className="flex justify-end gap-3">
+          <Button
             type="button"
-            className="btn btn-dark"
+            variant="primary"
             onClick={publish}
             disabled={!canPublish}
             style={
@@ -449,7 +411,7 @@ export default function KaryaNew() {
             }
           >
             Publish karya →
-          </button>
+          </Button>
         </div>
       </div>
     </div>

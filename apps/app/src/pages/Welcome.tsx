@@ -2,6 +2,7 @@ import { sendOtp } from "@myapp/api-client-react";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
+import { Button } from "@myapp/ui";
 
 type Mode = "signup" | "signin";
 
@@ -60,65 +61,57 @@ export default function Welcome() {
   const isSignup = mode === "signup";
 
   return (
-    <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-      <div className="wrap" style={{ paddingTop: 0 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1" style={{ marginBottom: 16 }}>
+    <div className="fixed inset-0 animate-up flex items-center">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-0">
+        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <h1 className="text-feature font-light tracking-heading leading-heading mb-4">
           {isSignup ? "Gabung ke komunitas." : "Selamat datang kembali."}
         </h1>
         {isSignup && (
-          <p className="sub" style={{ marginBottom: 40, maxWidth: 360 }}>
+          <p className="text-body text-ink2 leading-body mb-10 max-w-[360px]">
             Orang-orang di sini lagi ngerjain sesuatu yang nyata. Kenalan dulu.
           </p>
         )}
 
-        <form onSubmit={handleSubmit} style={{ marginTop: isSignup ? 0 : 40 }}>
-          <div style={{ marginBottom: 12 }}>
+        <form onSubmit={handleSubmit} className={isSignup ? "mt-0" : "mt-10"}>
+          <div className="mb-3">
             <input
               type="email"
               placeholder="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="chat-textarea"
-              style={{ width: "100%", padding: "10px 14px", resize: "none" }}
+              className="w-full bg-transparent border-none border-b border-line font-body text-body text-ink outline-none resize-none px-3.5 py-2.5 leading-body max-h-[100px] overflow-y-auto transition-colors focus:border-accent placeholder:text-ink3"
             />
           </div>
-          <div style={{ marginBottom: 20 }}>
+          <div className="mb-5">
             <input
               type="password"
               placeholder="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="chat-textarea"
-              style={{ width: "100%", padding: "10px 14px", resize: "none" }}
+              className="w-full bg-transparent border-none border-b border-line font-body text-body text-ink outline-none resize-none px-3.5 py-2.5 leading-body max-h-[100px] overflow-y-auto transition-colors focus:border-accent placeholder:text-ink3"
             />
           </div>
 
           {error && (
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--color-ink2)",
-                marginBottom: 12,
-              }}
-            >
+            <p className="text-[13px] text-ink2 mb-3">
               {error}
             </p>
           )}
 
-          <button
+          <Button
             type="submit"
             disabled={loading}
-            className="btn btn-dark"
-            style={{ width: "100%", justifyContent: "center" }}
+            variant="primary"
+            className="w-full"
           >
             {loading ? "…" : isSignup ? "Mulai →" : "Masuk →"}
-          </button>
+          </Button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--color-ink2)", marginTop: 20 }}>
+        <p className="text-[13px] text-ink2 mt-5">
           {isSignup ? "sudah anggota? " : "belum anggota? "}
           <button
             type="button"
@@ -126,15 +119,7 @@ export default function Welcome() {
               setMode(isSignup ? "signin" : "signup");
               setError(null);
             }}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: "pointer",
-              fontSize: 13,
-              color: "var(--color-ink)",
-              textDecoration: "underline",
-              padding: 0,
-            }}
+            className="bg-transparent border-none cursor-pointer text-[13px] text-ink underline p-0"
           >
             {isSignup ? "masuk ↗" : "daftar ↗"}
           </button>
