@@ -26,7 +26,10 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "noInvalidPositionAtImportRule": "off"
+      }
     }
   },
   "css": {
@@ -34,6 +37,7 @@
       "tailwindDirectives": true
     }
   },
+
   "javascript": {
     "formatter": {
       "quoteStyle": "double"
