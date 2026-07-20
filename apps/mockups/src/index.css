@@ -11,7 +11,7 @@
    decided by us rather than inherited from the reader. Adopting it did not move
    the gallery: the declared values that carried a ring or a gutter were
    corrected in the same change, and all three screens measure pixel-identical to
-   what they rendered before.
+   what they rendered before. */
 
 @import "tailwindcss";
 @source "../../../libs/ui/src";
