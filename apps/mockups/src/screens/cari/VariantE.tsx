@@ -13,6 +13,7 @@ import { ASKS, TOP_SKILLS, type Ask } from "../../data/asks";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";
 import { coverFor } from "../../lib/images";
+import { Eyebrow } from "@myapp/ui";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -112,7 +113,7 @@ function Composer() {
 
       {/* Type selector + post button */}
       <div className="flex items-center gap-1.5 pl-[42px]">
-        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mr-1">Cari:</span>
+        <Eyebrow as="span" className="mr-1">Cari:</Eyebrow>
         {LOOKING_FOR.map((type) => {
           const active = selectedType === type;
           return (
@@ -250,9 +251,9 @@ function BulletinBoard({ filterType }: { filterType: Filter }) {
 
       {/* Wall of asks — reverse-chronological (ASKS array is already ordered) */}
       <div>
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-0.5">
+        <Eyebrow as="div" className="mb-0.5">
           {filtered.length} ajakan · terbaru dulu
-        </div>
+        </Eyebrow>
         {filtered.length === 0 ? (
           <div className="py-10 text-center font-body text-body text-ink3">
             Belum ada ajakan untuk jenis ini — atau jadilah yang pertama 🙂
@@ -287,7 +288,7 @@ function FilterRail({ filterType, onFilter }: {
     <RailColumn className="flex flex-col gap-5">
       {/* Filter by type */}
       <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Filter Ajakan</div>
+        <Eyebrow as="div" className="mb-2.5">Filter Ajakan</Eyebrow>
         <div className="flex flex-col gap-0.5">
           {filterOpts.map(({ key, icon, label }) => {
             const active = filterType === key;
@@ -322,7 +323,7 @@ function FilterRail({ filterType, onFilter }: {
 
       {/* Community pulse */}
       <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Denyut Papan</div>
+        <Eyebrow as="div" className="mb-2.5">Denyut Papan</Eyebrow>
         <div className="flex flex-col gap-2">
           {[
             { label: "Ajakan aktif", value: ASKS.length },
@@ -341,7 +342,7 @@ function FilterRail({ filterType, onFilter }: {
 
       {/* Top skills currently sought — aggregated from ASKS data */}
       <div>
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Paling Dicari</div>
+        <Eyebrow as="div" className="mb-2.5">Paling Dicari</Eyebrow>
         <div className="flex flex-col gap-1.5">
           {TOP_SKILLS.map(([skill, count]) => (
             <div key={skill} className="flex items-center gap-2">

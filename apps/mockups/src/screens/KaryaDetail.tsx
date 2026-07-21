@@ -27,6 +27,7 @@ import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
 import { coverFor, screenshots } from "../lib/images";
 import { relativeTime } from "../lib/format";
+import { Eyebrow } from "@myapp/ui";
 
 const KARYA_ITEM = KARYA[0]; // KampusKerja — featured, two-person roster
 
@@ -147,7 +148,7 @@ export default function KaryaDetailScreen() {
         {/* Title block */}
         <div className="my-[22px] mb-2.5 flex flex-wrap items-center gap-2">
           {featured && <KindChip kind="launch" />}
-          {k.stages.map((s) => <span key={s} className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{s}</span>)}
+          {k.stages.map((s) => <Eyebrow as="span" key={s}>{s}</Eyebrow>)}
         </div>
         <h1 className="mb-3 mt-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
           {k.title}
@@ -176,7 +177,7 @@ export default function KaryaDetailScreen() {
         </div>
 
         {/* Screenshots */}
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3 mt-[34px]">Tangkapan layar</p>
+        <Eyebrow className="mb-3 mt-[34px]">Tangkapan layar</Eyebrow>
         <div
           className="flex gap-3 overflow-x-auto pb-1.5"
           style={{ scrollSnapType: "x mandatory" }}
@@ -196,7 +197,7 @@ export default function KaryaDetailScreen() {
             this stream is the karya's progress log, and writing a kabar is adding
             to it — the one place on this page where that reads as the same act.
             Handed this karya, so there is nothing to pick. */}
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3 mt-[34px]">Update terbaru</p>
+        <Eyebrow className="mb-3 mt-[34px]">Update terbaru</Eyebrow>
         {owner && (
           <div className="mb-5">
             <Composer karya={KARYA_ITEM} />
@@ -227,15 +228,15 @@ export default function KaryaDetailScreen() {
         {/* Meta */}
         <div className="flex flex-col gap-3 border-t border-line pt-4">
           <div className="flex items-baseline justify-between">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Tahap</span>
+            <Eyebrow as="span">Tahap</Eyebrow>
             <span className="font-body text-ui text-ink2">{k.stages[k.stages.length - 1]}</span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Tim</span>
+            <Eyebrow as="span">Tim</Eyebrow>
             <span className="font-body text-ui text-ink2">{k.roster.length} orang</span>
           </div>
           <div className="flex items-baseline justify-between">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Apresiasi</span>
+            <Eyebrow as="span">Apresiasi</Eyebrow>
             <span className="font-body text-ui text-accent-mid">♥ {k.appreciations}</span>
           </div>
         </div>

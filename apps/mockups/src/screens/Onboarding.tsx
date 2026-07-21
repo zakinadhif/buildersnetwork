@@ -10,6 +10,7 @@
 
 import { Avatar, Tag } from "@myapp/ui";
 import { MEMBERS } from "../data/karya";
+import { Eyebrow } from "@myapp/ui";
 
 const CHAT: { role: "ai" | "user"; text: string }[] = [
   { role: "ai", text: "Hai! Aku bantu kamu nemu arah di komunitas ini. Santai aja — nggak ada jawaban yang salah.\n\nLagi paling tertarik ke hal apa akhir-akhir ini?" },
@@ -73,7 +74,7 @@ export default function OnboardingScreen() {
         <aside className="flex w-[288px] shrink-0 flex-col gap-[18px] sticky top-6">
           {/* Captured (Review) */}
           <div className="rounded-panel border border-line bg-surface p-4">
-            <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3">Yang kita tangkap</div>
+            <Eyebrow as="div" className="mb-3">Yang kita tangkap</Eyebrow>
             <div className="mb-1 font-body text-micro text-ink3">Minat</div>
             <div className="mb-3.5 flex flex-wrap gap-[5px]">
               {CAPTURED.minat.map((i) => <Tag key={i} label={i} />)}
@@ -84,7 +85,7 @@ export default function OnboardingScreen() {
 
           {/* Matches */}
           <div>
-            <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3">Kenalan yang cocok</div>
+            <Eyebrow as="div" className="mb-3">Kenalan yang cocok</Eyebrow>
             <div className="flex flex-col gap-3">
               {matches.map((m) => (
                 <div key={m.id} className="flex items-start gap-2.5">

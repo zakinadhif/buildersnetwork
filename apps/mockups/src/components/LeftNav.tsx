@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { LayoutGrid, Newspaper, Users } from "lucide-react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
 import { cn, LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
+import { Eyebrow } from "@myapp/ui";
 
 /** The three live product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
  *  were retired from the sidebar — the first two remain reachable via the screen
@@ -65,7 +66,7 @@ export function NavFilterList<Value extends string>({ label, options, active, on
 }) {
   return (
     <div>
-      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">{label}</div>
+      <Eyebrow as="div" className="mb-2.5">{label}</Eyebrow>
       <div className="flex flex-col gap-0.5">
         {options.map((opt) => {
           const on = active === opt.value;

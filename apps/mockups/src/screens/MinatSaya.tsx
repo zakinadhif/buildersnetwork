@@ -14,6 +14,7 @@ import { Shell } from "../components/Shell";
 import { ALL_INTERESTS, KARYA } from "../data/karya";
 import { coverFor } from "../lib/images";
 import { relativeTime } from "../lib/format";
+import { Eyebrow } from "@myapp/ui";
 
 export default function MinatSayaScreen() {
   const [following, setFollowing] = useState<string[]>(["Web", "AI/ML", "Komunitas", "Edukasi"]);
@@ -36,7 +37,7 @@ export default function MinatSayaScreen() {
         </div>
 
         {/* Followed interests */}
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Minat yang kamu ikuti</p>
+        <Eyebrow className="mb-2.5">Minat yang kamu ikuti</Eyebrow>
         {following.length === 0 ? (
           <p className="pb-5 pt-2.5 font-body text-body text-ink3">
             Belum ada minat. Pilih beberapa di kanan — Launchpad langsung menyesuaikan.
@@ -58,7 +59,7 @@ export default function MinatSayaScreen() {
         )}
 
         {/* Karya for these interests */}
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1">Karya untuk minatmu</p>
+        <Eyebrow className="mb-1">Karya untuk minatmu</Eyebrow>
         {matched.length === 0 ? (
           <p className="py-4 font-body text-body text-ink3">Belum ada karya untuk minat ini.</p>
         ) : (
@@ -79,7 +80,7 @@ export default function MinatSayaScreen() {
 
       {/* Right rail — pick up more */}
       <RailColumn>
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3">Tambah minat</p>
+        <Eyebrow className="mb-3">Tambah minat</Eyebrow>
         <div className="flex flex-wrap gap-1.5">
           {suggestions.length === 0 ? (
             <span className="font-body text-ui text-ink3">Kamu sudah ikuti semuanya 🎉</span>

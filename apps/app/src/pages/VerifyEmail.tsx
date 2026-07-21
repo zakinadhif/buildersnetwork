@@ -2,6 +2,7 @@ import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
+import { Eyebrow } from "@/components/ui-atoms";
 
 function extractApiError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -61,7 +62,7 @@ export default function VerifyEmail() {
   return (
     <div className="fixed inset-0 animate-up flex items-center">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-0">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
         <h1 className="text-feature font-light tracking-heading leading-heading mb-4">
           Cek email kamu.
         </h1>

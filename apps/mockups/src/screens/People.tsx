@@ -11,6 +11,7 @@ import { useState } from "react";
 import { Avatar, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { ALL_INTERESTS, ALL_SKILLS, MEMBERS, type Member } from "../data/karya";
+import { Eyebrow } from "@myapp/ui";
 
 // ─── Search list row (member) ──────────────────────────────────────────────────
 function MemberRow({ member }: { member: Member }) {
@@ -46,7 +47,7 @@ function FilterColumn({ label, items, active, onToggle }: {
 }) {
   return (
     <div>
-      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">{label}</div>
+      <Eyebrow as="div" className="mb-2.5">{label}</Eyebrow>
       <div className="flex flex-col gap-0.5">
         {items.map((item) => {
           const on = active.includes(item);
@@ -125,7 +126,7 @@ export default function PeopleScreen() {
 
         {/* Result count */}
         <div className="flex items-baseline justify-between border-b border-line pb-2">
-          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Builder</span>
+          <Eyebrow as="span">Builder</Eyebrow>
           <span className="font-body text-micro tabular-nums text-ink3">{filteredMembers.length} orang</span>
         </div>
 

@@ -1,6 +1,7 @@
 import { useGetMember } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { Loading, Tag } from "@/components/ui-atoms";
+import { Eyebrow } from "@/components/ui-atoms";
 
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);
@@ -48,12 +49,12 @@ export default function MemberProfilePage({ id }: { id: string }) {
 
         {member.bio && (
           <div className="mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
+            <Eyebrow className="mb-1.5">Bio</Eyebrow>
             <p>{member.bio}</p>
           </div>
         )}
         <div className="mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
+          <Eyebrow className="mb-1.5">Skills</Eyebrow>
           <div className="flex flex-wrap items-center gap-1.5">
             {(member.skills ?? []).map((s) => (
               <Tag key={s} label={s} />
@@ -61,7 +62,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           </div>
         </div>
         <div className="mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
+          <Eyebrow className="mb-1.5">Minat</Eyebrow>
           <div className="flex flex-wrap items-center gap-1.5">
             {(member.interests ?? []).map((s) => (
               <Tag key={s} label={s} />

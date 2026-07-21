@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { cn } from "@myapp/ui";
 import { SCREEN_META, type Screen } from "./nav";
+import { Eyebrow } from "@myapp/ui";
 
 const GROUP_ORDER = ["Surface", "Alur", "Funnel"] as const;
 
@@ -62,9 +63,9 @@ export function ScreenSwitcher({ active, onChange }: {
         if (items.length === 0) return null;
         return (
           <div key={group} className="flex flex-col gap-1">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 px-1 tracking-[0.12em] font-semibold text-ink3">
+            <Eyebrow as="span" className="px-1 tracking-[0.12em] font-semibold text-ink3">
               {group}
-            </span>
+            </Eyebrow>
             <div className="flex flex-wrap gap-[3px]">
               {items.map((s) => {
                 const on = s.key === active;

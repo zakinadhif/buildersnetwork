@@ -8,6 +8,7 @@
  */
 
 import { useState } from "react";
+import { Eyebrow } from "@myapp/ui";
 
 export default function MulaiScreen() {
   const [name, setName] = useState("Zaki Nadhif");
@@ -15,7 +16,7 @@ export default function MulaiScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6 py-12 font-body">
       <div className="w-full max-w-[412px]">
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3.5">Selangkah lagi</div>
+        <Eyebrow as="div" className="mb-3.5">Selangkah lagi</Eyebrow>
 
         <h1 className="mb-2.5 mt-0 font-display text-feature font-light tracking-heading leading-heading text-ink">
           Hai — kenalan dulu.
@@ -28,7 +29,7 @@ export default function MulaiScreen() {
 
         {/* The one field */}
         <label className="mb-5 block">
-          <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1.5 block">Nama kamu</span>
+          <Eyebrow as="span" className="mb-1.5 block">Nama kamu</Eyebrow>
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}

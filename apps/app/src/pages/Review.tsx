@@ -17,6 +17,7 @@ import {
 import { groundMatches } from "@/lib/matching";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
+import { Eyebrow } from "@/components/ui-atoms";
 
 export default function Review() {
   const { draft: initialDraft, setMatches } = useOnboarding();
@@ -98,7 +99,7 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Ini yang aku tangkap.
         </h1>
@@ -108,26 +109,26 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         <hr className="border-none border-b border-line m-0 mb-8" />
 
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Nama</p>
+          <Eyebrow className="mb-1.5">Nama</Eyebrow>
           <EditField value={p.name} onChange={(v) => set("name", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Handle</p>
+          <Eyebrow className="mb-1.5">Handle</Eyebrow>
           <EditField
             value={p.handle ?? ""}
             onChange={(v) => set("handle", v)}
           />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Angkatan</p>
+          <Eyebrow className="mb-1.5">Angkatan</Eyebrow>
           <EditField value={p.year} onChange={(v) => set("year", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Jurusan</p>
+          <Eyebrow className="mb-1.5">Jurusan</Eyebrow>
           <EditField value={p.major} onChange={(v) => set("major", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
+          <Eyebrow className="mb-1.5">Bio</Eyebrow>
           <EditField
             value={p.bio ?? ""}
             onChange={(v) => set("bio", v)}
@@ -135,11 +136,11 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
           />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
+          <Eyebrow className="mb-1.5">Skills</Eyebrow>
           <SkillsEditor skills={p.skills} onChange={(v) => set("skills", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
+          <Eyebrow className="mb-1.5">Minat</Eyebrow>
           <InterestsEditor
             interests={p.interests}
             onChange={(v) => set("interests", v)}

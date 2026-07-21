@@ -4,6 +4,7 @@ import { cn, KaryaCover } from "@myapp/ui";
 import { useNavigate } from "../gallery";
 import { ME, MY_KARYA, type Karya } from "../data/karya";
 import { coverFor } from "../lib/images";
+import { Eyebrow } from "@myapp/ui";
 
 /**
  * Tulis kabar — the composer, embedded at the head of the two surfaces a kabar
@@ -118,7 +119,7 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
 
       {switching && (
         <div className="border-t border-line pt-3">
-          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2">Posting sebagai</div>
+          <Eyebrow as="div" className="mb-2">Posting sebagai</Eyebrow>
           <div className="flex flex-col gap-0.5">
             {MY_KARYA.map((k) => {
               const on = k.id === karya.id;

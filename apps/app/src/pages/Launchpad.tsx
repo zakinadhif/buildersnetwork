@@ -10,6 +10,7 @@ import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
 import { Avatar, KaryaCard, STAGE_LABELS } from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
+import { Eyebrow } from "@/components/ui-atoms";
 
 /**
  * The Launchpad home (issue #8) — the Launchpad-mockup treatment of the feed-first
@@ -106,7 +107,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact pb-2.5 border-b border-line">Pilihan inspiratif</p>
+      <Eyebrow className="pb-2.5 border-b border-line">Pilihan inspiratif</Eyebrow>
       {featuredShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
       ) : (
@@ -121,7 +122,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mt-10 mb-1">Kabar terbaru</p>
+      <Eyebrow className="mt-10 mb-1">Kabar terbaru</Eyebrow>
       {feedShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada aktivitas.</p>
       ) : (
@@ -188,7 +189,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
   return (
     <>
       <section className="bg-surface border border-line rounded-panel px-4 py-3.5">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2.5">Denyut komunitas</p>
+        <Eyebrow className="mb-2.5">Denyut komunitas</Eyebrow>
         <div className="flex flex-col gap-2">
           {pulse.map((s) => (
             <div
@@ -206,7 +207,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
 
       <section className="flex flex-col">
         <div className="flex items-center justify-between gap-3 mb-2.5">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">Kenalan dengan builder</p>
+          <Eyebrow>Kenalan dengan builder</Eyebrow>
           <button
             type="button"
             className="bg-transparent border-none p-0 cursor-pointer font-body text-micro text-accent-mid transition-colors hover:text-accent"

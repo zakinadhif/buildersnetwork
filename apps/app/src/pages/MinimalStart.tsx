@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
+import { Eyebrow } from "@/components/ui-atoms";
 
 /**
  * The minimal-profile start (issue #8, grooming decision 2: a quick one-field
@@ -44,7 +45,7 @@ export default function MinimalStart({
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[440px] mx-auto px-7 py-[72px]">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Sebelum masuk — panggil kamu siapa?
         </h1>

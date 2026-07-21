@@ -8,6 +8,7 @@ import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
+import { Eyebrow } from "@/components/ui-atoms";
 
 export default function Matches() {
   const { matches: contextMatches } = useOnboarding();
@@ -32,7 +33,7 @@ export default function Matches() {
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
         {user && (
           <p className="text-body text-ink2 leading-body">
             Dipublish. Selamat datang, {firstName(user.name)}.

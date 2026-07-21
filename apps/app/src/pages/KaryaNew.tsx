@@ -10,6 +10,7 @@ import {
   StageMultiSelect,
 } from "@/components/ui-atoms";
 import { type KaryaDraft, useKaryaDraft } from "@/lib/karya-draft-ctx";
+import { Eyebrow } from "@/components/ui-atoms";
 import {
   uploadKaryaCover,
   uploadKaryaScreenshot,
@@ -280,7 +281,7 @@ export default function KaryaNew() {
           ← balik
         </button>
 
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Bikin karya baru.
         </h1>
@@ -297,7 +298,7 @@ export default function KaryaNew() {
         <hr className="border-none border-b border-line my-7 mb-8" />
 
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Cover (opsional)</p>
+          <Eyebrow className="mb-1.5">Cover (opsional)</Eyebrow>
           <input
             ref={fileInputRef}
             type="file"
@@ -343,7 +344,7 @@ export default function KaryaNew() {
           </div>
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Tangkapan layar (opsional)</p>
+          <Eyebrow className="mb-1.5">Tangkapan layar (opsional)</Eyebrow>
           <ScreenshotGroup
             label="Landscape"
             hint="muncul di baris feed"
@@ -364,11 +365,11 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Judul</p>
+          <Eyebrow className="mb-1.5">Judul</Eyebrow>
           <EditField value={draft.title} onChange={(v) => set("title", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Deskripsi</p>
+          <Eyebrow className="mb-1.5">Deskripsi</Eyebrow>
           <EditField
             value={draft.description}
             onChange={(v) => set("description", v)}
@@ -376,14 +377,14 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Tahap</p>
+          <Eyebrow className="mb-1.5">Tahap</Eyebrow>
           <StageMultiSelect
             stages={draft.stages}
             onChange={(v) => set("stages", v)}
           />
         </div>
         <div className="pf mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat / tag</p>
+          <Eyebrow className="mb-1.5">Minat / tag</Eyebrow>
           <InterestsEditor
             interests={draft.interests}
             onChange={(v) => set("interests", v)}

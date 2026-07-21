@@ -11,6 +11,7 @@ import {
 } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useState } from "react";
+import { Eyebrow } from "@/components/ui-atoms";
 import {
   Avatar,
   KaryaCover,
@@ -178,7 +179,7 @@ export default function Karya({ id }: { id: string }) {
 
         {karya.interests.length > 0 && (
           <div className="mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat / tag</p>
+            <Eyebrow className="mb-1.5">Minat / tag</Eyebrow>
             <div className="flex flex-wrap items-center gap-1.5">
               {karya.interests.map((s) => (
                 <Tag key={s} label={s} />
@@ -188,7 +189,7 @@ export default function Karya({ id }: { id: string }) {
         )}
 
         <div className="mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Kontributor ({karya.roster.length})</p>
+          <Eyebrow className="mb-1.5">Kontributor ({karya.roster.length})</Eyebrow>
           <div className="flex flex-wrap gap-2">
             {karya.roster.map((m) => (
               <Avatar key={m.id} name={m.name} image={m.image} />
@@ -199,7 +200,7 @@ export default function Karya({ id }: { id: string }) {
         {/* Owner-only: pending join requests */}
         {isOwner && karya.pendingRequests.length > 0 && (
           <div className="mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Permintaan gabung</p>
+            <Eyebrow className="mb-1.5">Permintaan gabung</Eyebrow>
             {karya.pendingRequests.map((m) => (
               <div
                 key={m.id}
@@ -236,7 +237,7 @@ export default function Karya({ id }: { id: string }) {
 
         {/* Post stream — Sprint 3 (FR-18/19). Members compose; everyone reads. */}
         <div className="mb-7">
-          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Update</p>
+          <Eyebrow className="mb-1.5">Update</Eyebrow>
 
           {isMember && (
             <div className="composer bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">

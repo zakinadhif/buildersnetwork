@@ -12,6 +12,7 @@ import {
 } from "@/components/ui-atoms";
 import { introForMember } from "@/lib/assistant-copy";
 import type { Member } from "@/lib/members";
+import { Eyebrow } from "@/components/ui-atoms";
 
 /**
  * The AI assistant tab (issue #8) — the onboarding chat, now an always-available
@@ -113,26 +114,26 @@ export default function Assistant({ user }: { user: Member }) {
           </p>
 
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Nama</p>
+            <Eyebrow className="mb-1.5">Nama</Eyebrow>
             <EditField value={p.name} onChange={(v) => set("name", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Handle</p>
+            <Eyebrow className="mb-1.5">Handle</Eyebrow>
             <EditField
               value={p.handle ?? ""}
               onChange={(v) => set("handle", v)}
             />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Angkatan</p>
+            <Eyebrow className="mb-1.5">Angkatan</Eyebrow>
             <EditField value={p.year} onChange={(v) => set("year", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Jurusan</p>
+            <Eyebrow className="mb-1.5">Jurusan</Eyebrow>
             <EditField value={p.major} onChange={(v) => set("major", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
+            <Eyebrow className="mb-1.5">Bio</Eyebrow>
             <EditField
               value={p.bio ?? ""}
               onChange={(v) => set("bio", v)}
@@ -140,14 +141,14 @@ export default function Assistant({ user }: { user: Member }) {
             />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
+            <Eyebrow className="mb-1.5">Skills</Eyebrow>
             <SkillsEditor
               skills={p.skills}
               onChange={(v) => set("skills", v)}
             />
           </div>
           <div className="pf mb-7">
-            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
+            <Eyebrow className="mb-1.5">Minat</Eyebrow>
             <InterestsEditor
               interests={p.interests}
               onChange={(v) => set("interests", v)}

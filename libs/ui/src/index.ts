@@ -16,6 +16,7 @@
  * `RailColumn`; the styling lives with those source components now.
  */
 export { Avatar, avatarColor, initials, RING } from "./Avatar";
+export { Eyebrow } from "./Eyebrow";
 export {
   KaryaCard,
   type KaryaCardActivity,

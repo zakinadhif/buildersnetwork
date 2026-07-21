@@ -12,6 +12,7 @@
 
 import { useRef, useState } from "react";
 import { cn } from "@myapp/ui";
+import { Eyebrow } from "@myapp/ui";
 
 type Mode = "daftar" | "masuk";
 
@@ -26,7 +27,7 @@ function Field({ label, type = "text", placeholder, value, onChange, note }: {
 }) {
   return (
     <label className="block">
-      <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-1.5 block">{label}</span>
+      <Eyebrow as="span" className="mb-1.5 block">{label}</Eyebrow>
       <input
         type={type}
         placeholder={placeholder}
@@ -180,7 +181,7 @@ export default function AuthScreen() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-bg px-6 py-12 font-body">
       <div className="w-full max-w-[396px]">
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-3.5">Al-Fath Berkarya</div>
+        <Eyebrow as="div" className="mb-3.5">Al-Fath Berkarya</Eyebrow>
 
         <h1 className="mb-2.5 mt-0 font-display text-feature font-light tracking-heading leading-heading text-ink">
           {verifying ? "Cek email kamu." : daftar ? "Gabung ke komunitas builder." : "Selamat datang kembali."}

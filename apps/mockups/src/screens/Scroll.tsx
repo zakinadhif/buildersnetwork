@@ -38,6 +38,7 @@ import {
 } from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeMinutes, relativeTime } from "../lib/format";
+import { Eyebrow } from "@myapp/ui";
 
 // ─── Post identity — the karya leads, the author dips into its corner ────────────
 // This is the platform's signature: the post is authored by the *project*, not the
@@ -180,7 +181,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
         {/* Ajakan — the open role, made concrete */}
         {update.role && (
           <div className="mt-2.5 inline-flex items-center gap-2 rounded-card border border-accent-line bg-accent-tint px-3 py-1.5">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3 !text-accent-mid">Butuh</span>
+            <Eyebrow as="span" className="!text-accent-mid">Butuh</Eyebrow>
             <span className="font-body text-ui font-medium text-accent">{update.role}</span>
           </div>
         )}
@@ -238,7 +239,7 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
       {/* The dot carries the "live" claim for the whole block; the arrow is the way in */}
       <div className="mb-2.5 flex items-center gap-[7px]">
         <span className="bn-live-dot" aria-hidden="true" />
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Diskusi aktif</div>
+        <Eyebrow as="div">Diskusi aktif</Eyebrow>
         <button
           type="button"
           aria-label={`Lihat semua diskusi aktif (${ACTIVE_WINDOW_MIN} menit terakhir)`}
@@ -296,7 +297,7 @@ function BuildersToMeet() {
   return (
     <div>
       <div className="mb-2.5 flex items-center justify-between">
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Kenalan dengan builder</div>
+        <Eyebrow as="div">Kenalan dengan builder</Eyebrow>
         <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-micro text-accent-mid">Lihat semua</button>
       </div>
 
@@ -340,7 +341,7 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
       {/* Open collaborator slots — surfaced from ajakan updates */}
       {openAsks.length > 0 && (
         <div>
-          <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2.5">Slot kolaborasi terbuka</div>
+          <Eyebrow as="div" className="mb-2.5">Slot kolaborasi terbuka</Eyebrow>
           <div className="flex flex-col gap-0">
             {openAsks.map(({ update, karya }, idx) => (
               <div key={update.id} className="flex items-center gap-2.5 py-2.5" style={{ borderBottom: idx < openAsks.length - 1 ? "1px solid var(--color-line)" : "none" }}>

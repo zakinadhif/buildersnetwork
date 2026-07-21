@@ -4,6 +4,7 @@ import { useLocation } from "wouter";
 import { Dots, KARYA_STAGE_ORDER, Loading } from "@/components/ui-atoms";
 import { type KaryaDraft, useKaryaDraft } from "@/lib/karya-draft-ctx";
 import { callClaude, cleanJSON } from "@/lib/members";
+import { Eyebrow } from "@/components/ui-atoms";
 
 const INTRO =
   "oke, ceritain karya yang mau kamu bikin. mulai dari yang paling simpel: namanya apa, atau lagi ngerjain apa?";
@@ -151,7 +152,7 @@ Obrolan:\n${transcript}`;
   return (
     <div className="fixed inset-0 animate-up flex flex-col">
       <div className="px-7 py-[18px] border-b border-line shrink-0 flex justify-between items-center">
-        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">Al-Fath Berkarya · bikin karya</p>
+        <Eyebrow>Al-Fath Berkarya · bikin karya</Eyebrow>
         <button
           type="button"
           onClick={() => navigate("/karya/new")}

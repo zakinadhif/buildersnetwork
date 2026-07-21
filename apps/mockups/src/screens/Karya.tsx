@@ -19,6 +19,7 @@ import { KARYA, type Karya } from "../data/karya";
 import { relativeTime } from "../lib/format";
 import { coverFor, screenshots } from "../lib/images";
 import { T } from "@myapp/design-tokens";
+import { Eyebrow } from "@myapp/ui";
 
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"] as const;
 type Interest = (typeof INTEREST_FILTERS)[number];
@@ -79,7 +80,7 @@ function SpotlightMetric({ value, label, accent }: { value: string; label: strin
       <div className={["font-body text-stat font-medium leading-heading mb-[3px]", accent ? "text-accent" : "text-ink"].join(" ")}>
         {value}
       </div>
-      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3">{label}</div>
+      <Eyebrow as="div">{label}</Eyebrow>
     </div>
   );
 }
@@ -91,9 +92,9 @@ function Spotlight({ karya }: { karya: Karya }) {
   return (
     <section className="mb-[18px] overflow-hidden rounded-panel border border-accent bg-surface shadow-[0_0_0_1px_oklch(39%_0.085_62_/_0.133),0_4px_16px_#0f0e0b10]">
       {/* Accent header band */}
-      <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 bg-accent px-[18px] py-1 !text-accent-fg">
+      <Eyebrow as="div" className="bg-accent px-[18px] py-1 !text-accent-fg">
         <span aria-hidden="true">◈</span> Pilihan Minggu Ini
-      </div>
+      </Eyebrow>
 
       {/* App header */}
       <div className="flex items-center gap-3.5 px-[18px] pb-3.5 pt-4">
@@ -135,7 +136,7 @@ function Spotlight({ karya }: { karya: Karya }) {
 
       {/* Screenshot gallery */}
       <div className="flex items-baseline justify-between px-[18px] pb-2">
-        <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Tangkapan Layar</span>
+        <Eyebrow as="span">Tangkapan Layar</Eyebrow>
         <span className="font-body text-micro text-ink3">← geser →</span>
       </div>
       <div
@@ -227,7 +228,7 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
       ) : (
         <div className="flex flex-col gap-0">
           <div className="mb-0.5 mt-1 flex items-baseline justify-between">
-            <span className="text-micro font-medium tracking-eyebrow uppercase text-ink3">Semua karya</span>
+            <Eyebrow as="span">Semua karya</Eyebrow>
             <span className="font-body text-micro tabular-nums text-ink3">{matched.length} karya</span>
           </div>
           {rest.map((k) => (
@@ -261,7 +262,7 @@ function RightRail({ query, onQuery, filter, onFilter }: {
     <RailColumn className="flex flex-col gap-5">
       {/* Directory search — the catalog's own search, moved out of the reading column */}
       <div>
-        <div className="text-micro font-medium tracking-eyebrow uppercase text-ink3 mb-2">Cari karya</div>
+        <Eyebrow as="div" className="mb-2">Cari karya</Eyebrow>
         <input
           type="text"
           value={query}

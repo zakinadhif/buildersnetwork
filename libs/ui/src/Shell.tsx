@@ -1,6 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { Avatar } from "./Avatar";
 import { cn } from "./lib/cn";
+import { Eyebrow } from "./Eyebrow";
 
 /**
  * The frame the three columns sit in (#92) — the measure, the gutters, and the
@@ -88,9 +89,9 @@ export function LeftNav({
   return (
     <aside className="bn-nav sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
       <div className="mb-4 border-b border-line px-3 pb-5">
-        <div className="mb-1 text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">
+        <Eyebrow as="div" className="mb-1">
           Al-Fath
-        </div>
+        </Eyebrow>
         <div className="font-display text-feature font-regular leading-none text-ink">
           Berkarya
         </div>
