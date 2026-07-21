@@ -1,6 +1,6 @@
 import { useGetMember } from "@myapp/api-client-react";
-import { Loading, Tag } from "@/components/ui-atoms";
 import { Button } from "@myapp/ui";
+import { Loading, Tag } from "@/components/ui-atoms";
 
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);
@@ -10,7 +10,9 @@ export default function MemberProfilePage({ id }: { id: string }) {
     return (
       <div className="fixed inset-0 animate-up flex items-center">
         <div className="max-w-[var(--container-page)] mx-auto px-7">
-          <p className="text-body text-ink2 leading-body">anggota tidak ditemukan.</p>
+          <p className="text-body text-ink2 leading-body">
+            anggota tidak ditemukan.
+          </p>
           <Button
             type="button"
             variant="secondary"

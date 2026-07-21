@@ -4,6 +4,7 @@ import {
   saveProfile,
   useListMembers,
 } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
@@ -16,7 +17,6 @@ import {
 import { groundMatches } from "@/lib/matching";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
-import { Button } from "@myapp/ui";
 
 export default function Review() {
   const { draft: initialDraft, setMatches } = useOnboarding();
@@ -99,8 +99,12 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
         <p className="eyebrow mb-2">Al-Fath Berkarya</p>
-        <h1 className="text-feature font-light tracking-heading leading-heading">Ini yang aku tangkap.</h1>
-        <p className="text-body text-ink2 leading-body mt-2 mb-8">Kalau ada yang meleset, ketuk langsung.</p>
+        <h1 className="text-feature font-light tracking-heading leading-heading">
+          Ini yang aku tangkap.
+        </h1>
+        <p className="text-body text-ink2 leading-body mt-2 mb-8">
+          Kalau ada yang meleset, ketuk langsung.
+        </p>
         <hr className="border-none border-b border-line m-0 mb-8" />
 
         <div className="mb-7">

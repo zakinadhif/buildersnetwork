@@ -19,9 +19,7 @@ import { cn } from "./lib/cn";
  */
 export function ShellColumns({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto flex max-w-shell-outer items-start">
-      {children}
-    </div>
+    <div className="mx-auto flex max-w-shell-outer items-start">{children}</div>
   );
 }
 
@@ -97,10 +95,7 @@ export function LeftNav({
         </div>
       </div>
 
-      <nav
-        className="mb-6 flex flex-col"
-        aria-label="Navigasi utama"
-      >
+      <nav className="mb-6 flex flex-col" aria-label="Navigasi utama">
         {items.map((item) => (
           <button
             key={item.label}
@@ -139,9 +134,7 @@ export function LeftNav({
             {user.name}
           </div>
           {user.handle && (
-            <div className="font-body text-micro text-ink3">
-              @{user.handle}
-            </div>
+            <div className="font-body text-micro text-ink3">@{user.handle}</div>
           )}
         </div>
       </div>

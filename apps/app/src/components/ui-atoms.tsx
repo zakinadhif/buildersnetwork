@@ -90,7 +90,10 @@ export function SkillsEditor({
   return (
     <div className="flex flex-wrap items-center gap-1.5">
       {skills.map((s, i) => (
-        <span key={s} className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors">
+        <span
+          key={s}
+          className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors"
+        >
           {s}
           <button
             type="button"
@@ -158,7 +161,10 @@ export function InterestsEditor({
     <div>
       <div className="flex flex-wrap items-center gap-1.5">
         {interests.map((s, i) => (
-          <span key={s} className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors">
+          <span
+            key={s}
+            className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors"
+          >
             {s}
             <button
               type="button"
@@ -252,9 +258,7 @@ export function EditField({
         className="bg-transparent border-none text-left p-0 cursor-text font-body text-body text-ink min-h-6 break-words whitespace-pre-wrap outline-none w-full"
         onClick={() => setEditing(true)}
       >
-        {value || (
-          <span className="text-ink3">ketuk buat edit</span>
-        )}
+        {value || <span className="text-ink3">ketuk buat edit</span>}
       </button>
     );
   return multiline ? (

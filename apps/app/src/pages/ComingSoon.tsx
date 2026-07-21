@@ -14,7 +14,9 @@ export default function ComingSoon({
   return (
     <>
       <div className="flex items-baseline gap-2.5 mb-6">
-        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">{title}</h1>
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
+          {title}
+        </h1>
         <span className="font-body text-caption text-ink3">segera hadir</span>
       </div>
       <p className="py-12 font-mono text-body text-ink3 leading-body">{sub}</p>

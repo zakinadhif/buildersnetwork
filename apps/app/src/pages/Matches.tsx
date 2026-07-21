@@ -3,11 +3,11 @@ import {
   useGetMatches,
   useGetMe,
 } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
-import { Button } from "@myapp/ui";
 
 export default function Matches() {
   const { matches: contextMatches } = useOnboarding();
@@ -49,12 +49,17 @@ export default function Matches() {
             </p>
           )}
           {matches.map((m, i) => (
-            <div key={m.id ?? i} className="py-6 border-b border-line first:border-t">
+            <div
+              key={m.id ?? i}
+              className="py-6 border-b border-line first:border-t"
+            >
               <p className="text-title font-medium mb-0.5">{m.name}</p>
               <p className="text-body text-ink2 mb-3">
                 {m.year} · {m.major}
               </p>
-              <p className="font-mono text-ui text-ink2 leading-body mb-3.5">"{m.reason}"</p>
+              <p className="font-mono text-ui text-ink2 leading-body mb-3.5">
+                "{m.reason}"
+              </p>
               <Button
                 type="button"
                 variant="secondary"

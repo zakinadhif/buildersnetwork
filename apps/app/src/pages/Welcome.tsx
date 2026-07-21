@@ -1,8 +1,8 @@
 import { sendOtp } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
-import { Button } from "@myapp/ui";
 
 type Mode = "signup" | "signin";
 
@@ -95,11 +95,7 @@ export default function Welcome() {
             />
           </div>
 
-          {error && (
-            <p className="text-[13px] text-ink2 mb-3">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-[13px] text-ink2 mb-3">{error}</p>}
 
           <Button
             type="submit"

@@ -23,8 +23,12 @@ export default function MinatSaya({ user }: { user: Member }) {
   return (
     <>
       <div className="flex items-baseline gap-2.5 mb-6">
-        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Minat Saya</h1>
-        <span className="font-body text-caption text-ink3">Karya yang selaras dengan minatmu</span>
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
+          Minat Saya
+        </h1>
+        <span className="font-body text-caption text-ink3">
+          Karya yang selaras dengan minatmu
+        </span>
       </div>
 
       {user.interests.length === 0 ? (

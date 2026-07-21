@@ -9,6 +9,7 @@ import {
   useGetKarya,
   useGetKaryaPosts,
 } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useState } from "react";
 import {
   Avatar,
@@ -20,7 +21,6 @@ import {
   Tag,
   timeAgo,
 } from "@/components/ui-atoms";
-import { Button } from "@myapp/ui";
 
 export default function Karya({ id }: { id: string }) {
   const { data: karya, isLoading, refetch } = useGetKarya(id);
@@ -34,7 +34,9 @@ export default function Karya({ id }: { id: string }) {
     return (
       <div className="fixed inset-0 animate-up flex items-center">
         <div className="max-w-[var(--container-page)] mx-auto px-7">
-          <p className="text-body text-ink2 leading-body">karya tidak ditemukan.</p>
+          <p className="text-body text-ink2 leading-body">
+            karya tidak ditemukan.
+          </p>
           <Button
             type="button"
             variant="secondary"
@@ -93,11 +95,7 @@ export default function Karya({ id }: { id: string }) {
           ← balik
         </button>
 
-        <KaryaCover
-          src={karya.coverUrl}
-          size={72}
-          radius={16}
-        />
+        <KaryaCover src={karya.coverUrl} size={72} radius={16} />
 
         <h1 className="text-feature font-light tracking-heading leading-heading mt-4 mb-3">
           {karya.title}
@@ -109,7 +107,9 @@ export default function Karya({ id }: { id: string }) {
           ))}
         </div>
 
-        <p className="text-body text-ink leading-body mb-8">{karya.description}</p>
+        <p className="text-body text-ink leading-body mb-8">
+          {karya.description}
+        </p>
 
         {/* Portrait screenshot gallery (issue #19) — no screenshots, no
             gallery, never an empty slot. */}
@@ -201,7 +201,10 @@ export default function Karya({ id }: { id: string }) {
           <div className="mb-7">
             <p className="eyebrow mb-1.5">Permintaan gabung</p>
             {karya.pendingRequests.map((m) => (
-              <div key={m.id} className="flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2">
+              <div
+                key={m.id}
+                className="flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2"
+              >
                 <div className="flex items-center gap-3 text-body font-medium text-ink">
                   <Avatar name={m.name} image={m.image} size={28} />
                   <span>{m.name}</span>
@@ -243,7 +246,9 @@ export default function Karya({ id }: { id: string }) {
                     key={k}
                     type="button"
                     className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${k} cursor-pointer transition-opacity hover:opacity-100 ${
-                      postKind === k ? "opacity-100 ring-2 ring-ink ring-offset-1" : "opacity-70"
+                      postKind === k
+                        ? "opacity-100 ring-2 ring-ink ring-offset-1"
+                        : "opacity-70"
                     }`}
                     aria-pressed={postKind === k}
                     onClick={() => setPostKind(k)}
@@ -273,11 +278,16 @@ export default function Karya({ id }: { id: string }) {
           )}
 
           {posts.length === 0 ? (
-            <p className="font-mono text-ui text-ink3 py-5">belum ada update.</p>
+            <p className="font-mono text-ui text-ink3 py-5">
+              belum ada update.
+            </p>
           ) : (
             <div className="flex flex-col gap-3">
               {posts.map((p) => (
-                <article key={p.id} className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3">
+                <article
+                  key={p.id}
+                  className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+                >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <Avatar
@@ -285,15 +295,23 @@ export default function Karya({ id }: { id: string }) {
                         image={p.author.image}
                         size={28}
                       />
-                      <span className="text-ui font-medium text-ink">{p.author.name}</span>
+                      <span className="text-ui font-medium text-ink">
+                        {p.author.name}
+                      </span>
                     </div>
-                    <span className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${p.kind}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${p.kind}`}
+                    >
                       {POST_KIND_LABELS[p.kind]}
                     </span>
                   </div>
-                  <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">{p.body}</p>
+                  <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
+                    {p.body}
+                  </p>
                   <div className="flex justify-end">
-                    <span className="text-micro text-ink3">{timeAgo(p.createdAt)}</span>
+                    <span className="text-micro text-ink3">
+                      {timeAgo(p.createdAt)}
+                    </span>
                   </div>
                 </article>
               ))}

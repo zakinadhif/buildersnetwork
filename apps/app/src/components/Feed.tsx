@@ -22,7 +22,10 @@ export default function Feed({ items }: { items: FeedItem[] }) {
     <div className="flex flex-col gap-5">
       {items.map((it) =>
         it.type === "post" ? (
-          <article key={`post-${it.id}`} className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3">
+          <article
+            key={`post-${it.id}`}
+            className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+          >
             <div className="flex justify-between items-center">
               <button
                 type="button"
@@ -34,13 +37,19 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                   image={it.author.image}
                   size={28}
                 />
-                <span className="text-ui font-medium text-ink group-hover:underline">{it.author.name}</span>
+                <span className="text-ui font-medium text-ink group-hover:underline">
+                  {it.author.name}
+                </span>
               </button>
-              <span className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${it.kind}`}>
+              <span
+                className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${it.kind}`}
+              >
                 {POST_KIND_LABELS[it.kind]}
               </span>
             </div>
-            <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">{it.body}</p>
+            <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
+              {it.body}
+            </p>
             <div className="flex justify-between items-center mt-1">
               <button
                 type="button"
@@ -49,7 +58,9 @@ export default function Feed({ items }: { items: FeedItem[] }) {
               >
                 {it.karya.title}
               </button>
-              <span className="text-micro text-ink3">{timeAgo(it.createdAt)}</span>
+              <span className="text-micro text-ink3">
+                {timeAgo(it.createdAt)}
+              </span>
             </div>
           </article>
         ) : (

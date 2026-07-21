@@ -1,9 +1,9 @@
 import { getGetMeQueryKey, saveProfile } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { Loading } from "@/components/ui-atoms";
-import { Button } from "@myapp/ui";
 
 /**
  * The minimal-profile start (issue #8, grooming decision 2: a quick one-field
@@ -45,7 +45,9 @@ export default function MinimalStart({
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[440px] mx-auto px-7 py-[72px]">
         <p className="eyebrow mb-2">Al-Fath Berkarya</p>
-        <h1 className="text-feature font-light tracking-heading leading-heading">Sebelum masuk — panggil kamu siapa?</h1>
+        <h1 className="text-feature font-light tracking-heading leading-heading">
+          Sebelum masuk — panggil kamu siapa?
+        </h1>
         <p className="text-body text-ink2 leading-body mt-2">
           Cukup ini dulu. Sisanya bisa kamu lengkapi kapan aja — sendiri atau
           ngobrol sama asisten.

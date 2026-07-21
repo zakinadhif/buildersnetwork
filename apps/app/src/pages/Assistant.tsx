@@ -1,4 +1,5 @@
 import { getGetMeQueryKey, saveProfile } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
@@ -11,7 +12,6 @@ import {
 } from "@/components/ui-atoms";
 import { introForMember } from "@/lib/assistant-copy";
 import type { Member } from "@/lib/members";
-import { Button } from "@myapp/ui";
 
 /**
  * The AI assistant tab (issue #8) — the onboarding chat, now an always-available
@@ -86,7 +86,9 @@ export default function Assistant({ user }: { user: Member }) {
   return (
     <>
       <div className="flex items-baseline gap-2.5 mb-6">
-        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Asisten</h1>
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
+          Asisten
+        </h1>
         <span className="font-body text-caption text-ink3">
           Ngobrol buat ngerapiin atau nambahin ke profilmu
         </span>
@@ -170,7 +172,9 @@ export default function Assistant({ user }: { user: Member }) {
 
       {phase === "done" && (
         <div className="pt-2">
-          <p className="text-body text-ink2 leading-body mb-8">Profil kamu ke-update ✓</p>
+          <p className="text-body text-ink2 leading-body mb-8">
+            Profil kamu ke-update ✓
+          </p>
           <div className="flex gap-3">
             <Button
               type="button"

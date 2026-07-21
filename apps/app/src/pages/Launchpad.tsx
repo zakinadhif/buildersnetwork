@@ -49,8 +49,12 @@ export default function Launchpad({ user }: { user: Member }) {
   return (
     <>
       <div className="flex items-baseline gap-2.5 mb-6">
-        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Launchpad</h1>
-        <span className="font-body text-caption text-ink3">Apa yang lagi dikerjakan komunitas</span>
+        <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
+          Launchpad
+        </h1>
+        <span className="font-body text-caption text-ink3">
+          Apa yang lagi dikerjakan komunitas
+        </span>
       </div>
 
       {/* Calm on-ramp to the AI assistant (opt-in, never a gate) */}
@@ -59,17 +63,25 @@ export default function Launchpad({ user }: { user: Member }) {
         className="w-full flex items-center gap-3.5 px-[18px] py-3.5 mb-6 bg-accent-tint border border-accent-line rounded-panel text-left cursor-pointer transition-opacity hover:opacity-85"
         onClick={() => navigate("/assistant")}
       >
-        <span className="font-display text-[28px] text-accent leading-none shrink-0" aria-hidden="true">
+        <span
+          className="font-display text-[28px] text-accent leading-none shrink-0"
+          aria-hidden="true"
+        >
           ✦
         </span>
         <span className="flex-1 min-w-0">
-          <span className="block font-display text-title text-ink leading-heading mb-0.5">hei {firstName(user.name)} 👋</span>
+          <span className="block font-display text-title text-ink leading-heading mb-0.5">
+            hei {firstName(user.name)} 👋
+          </span>
           <span className="block font-body text-body text-ink2 leading-body">
             Belum tahu mau mulai dari mana? Ngobrol sebentar sama asisten — kita
             rapiin profil & cari arahmu.
           </span>
         </span>
-        <span className="shrink-0 text-accent text-ui font-semibold" aria-hidden="true">
+        <span
+          className="shrink-0 text-accent text-ui font-semibold"
+          aria-hidden="true"
+        >
           Mulai →
         </span>
       </button>
@@ -179,9 +191,14 @@ export function LaunchpadRail({ user }: { user: Member }) {
         <p className="eyebrow mb-2.5">Denyut komunitas</p>
         <div className="flex flex-col gap-2">
           {pulse.map((s) => (
-            <div key={s.label} className="flex justify-between items-baseline gap-3">
+            <div
+              key={s.label}
+              className="flex justify-between items-baseline gap-3"
+            >
               <span className="text-ui text-ink2">{s.label}</span>
-              <span className="text-body font-medium text-ink tabular-nums">{s.value ?? "—"}</span>
+              <span className="text-body font-medium text-ink tabular-nums">
+                {s.value ?? "—"}
+              </span>
             </div>
           ))}
         </div>
@@ -199,7 +216,9 @@ export function LaunchpadRail({ user }: { user: Member }) {
           </button>
         </div>
         {toMeet.length === 0 ? (
-          <p className="font-mono text-ui text-ink3 py-5">belum ada builder lain.</p>
+          <p className="font-mono text-ui text-ink3 py-5">
+            belum ada builder lain.
+          </p>
         ) : (
           <ul className="list-none flex flex-col">
             {toMeet.map((m) => (
@@ -211,7 +230,9 @@ export function LaunchpadRail({ user }: { user: Member }) {
                 >
                   <Avatar name={m.name} size={34} />
                   <span className="flex-1 min-w-0 flex flex-col gap-[3px]">
-                    <span className="text-ui font-medium text-ink transition-colors group-hover:text-accent">{m.name}</span>
+                    <span className="text-ui font-medium text-ink transition-colors group-hover:text-accent">
+                      {m.name}
+                    </span>
                     <span className="text-micro text-ink3">
                       {[m.handle && `@${m.handle}`, m.year]
                         .filter(Boolean)
@@ -220,7 +241,10 @@ export function LaunchpadRail({ user }: { user: Member }) {
                     {m.skills.length > 0 && (
                       <span className="flex flex-wrap gap-1 mt-0.5">
                         {m.skills.slice(0, 3).map((s) => (
-                          <span key={s} className="text-micro text-ink2 bg-bg border border-line px-1.5 py-[1px] rounded-[3px]">
+                          <span
+                            key={s}
+                            className="text-micro text-ink2 bg-bg border border-line px-1.5 py-[1px] rounded-[3px]"
+                          >
                             {s}
                           </span>
                         ))}

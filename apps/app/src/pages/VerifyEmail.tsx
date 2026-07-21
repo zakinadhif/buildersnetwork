@@ -1,7 +1,7 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
-import { Button } from "@myapp/ui";
 
 function extractApiError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -88,11 +88,7 @@ export default function VerifyEmail() {
             />
           </div>
 
-          {error && (
-            <p className="text-[13px] text-ink2 mb-3">
-              {error}
-            </p>
-          )}
+          {error && <p className="text-[13px] text-ink2 mb-3">{error}</p>}
 
           <Button
             type="submit"

@@ -1,4 +1,5 @@
 import { createKarya } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import {
@@ -15,7 +16,6 @@ import {
   validateCoverFile,
   validateScreenshotFile,
 } from "@/lib/upload";
-import { Button } from "@myapp/ui";
 
 type Orientation = "landscape" | "portrait";
 interface ScreenshotDraft {
@@ -49,9 +49,7 @@ function ScreenshotGroup({
   return (
     <div className="mb-[18px]">
       <div className="flex items-baseline gap-2.5 mb-2">
-        <span className="text-[13px] font-semibold text-ink">
-          {label}
-        </span>
+        <span className="text-[13px] font-semibold text-ink">{label}</span>
         <span className="text-[12px] text-ink3">{hint}</span>
       </div>
       <input
@@ -67,10 +65,7 @@ function ScreenshotGroup({
       />
       <div className="flex flex-wrap gap-2">
         {items.map((it, i) => (
-          <div
-            key={it.preview}
-            className="flex flex-col gap-1"
-          >
+          <div key={it.preview} className="flex flex-col gap-1">
             <img
               src={it.preview}
               alt=""
@@ -118,11 +113,7 @@ function ScreenshotGroup({
           + tambah
         </Button>
       </div>
-      {error && (
-        <p className="m-0 mt-1.5 text-[12px] text-danger">
-          {error}
-        </p>
-      )}
+      {error && <p className="m-0 mt-1.5 text-[12px] text-danger">{error}</p>}
     </div>
   );
 }
@@ -290,7 +281,9 @@ export default function KaryaNew() {
         </button>
 
         <p className="eyebrow mb-2">Al-Fath Berkarya</p>
-        <h1 className="text-feature font-light tracking-heading leading-heading">Bikin karya baru.</h1>
+        <h1 className="text-feature font-light tracking-heading leading-heading">
+          Bikin karya baru.
+        </h1>
         <p className="text-body text-ink2 leading-body mt-2 mb-4">
           Isi sendiri, atau biar AI yang bantu nyusun dari obrolan.
         </p>
@@ -344,9 +337,7 @@ export default function KaryaNew() {
                 PNG, JPG, atau WebP — maks 2 MB.
               </p>
               {coverError && (
-                <p className="m-0 text-[12px] text-danger">
-                  {coverError}
-                </p>
+                <p className="m-0 text-[12px] text-danger">{coverError}</p>
               )}
             </div>
           </div>
