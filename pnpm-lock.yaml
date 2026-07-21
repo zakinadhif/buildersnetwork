@@ -4,6 +4,54 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@radix-ui/react-dialog':
+      specifier: ^1.1.19
+      version: 1.1.19
+    '@radix-ui/react-dropdown-menu':
+      specifier: ^2.1.20
+      version: 2.1.20
+    '@radix-ui/react-popover':
+      specifier: ^1.1.19
+      version: 1.1.19
+    '@radix-ui/react-switch':
+      specifier: ^1.3.3
+      version: 1.3.3
+    '@radix-ui/react-toggle-group':
+      specifier: ^1.1.15
+      version: 1.1.15
+    '@radix-ui/react-tooltip':
+      specifier: ^1.2.12
+      version: 1.2.12
+    '@tailwindcss/vite':
+      specifier: ^4.2.1
+      version: 4.3.2
+    '@tanstack/react-query':
+      specifier: ^5.90.21
+      version: 5.101.2
+    '@types/node':
+      specifier: 25.3.5
+      version: 25.3.5
+    '@types/react':
+      specifier: ^19.2.0
+      version: 19.2.17
+    class-variance-authority:
+      specifier: ^0.7.1
+      version: 0.7.1
+    clsx:
+      specifier: ^2.1.1
+      version: 2.1.1
+    drizzle-orm:
+      specifier: ^0.45.1
+      version: 0.45.2
+    tailwind-merge:
+      specifier: ^3.5.0
+      version: 3.6.0
+    zod:
+      specifier: 3.25.76
+      version: 3.25.76
+
 overrides:
   '@biomejs/biome': 2.4.15
   orval: 8.11.0
@@ -200,6 +248,9 @@ importers:
 
   apps/mockups:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^5.4.0
+        version: 5.4.0(react-hook-form@7.82.0(react@19.2.7))
       '@myapp/design-tokens':
         specifier: workspace:*
         version: link:../../libs/design-tokens
@@ -209,6 +260,9 @@ importers:
       '@tailwindcss/vite':
         specifier: 'catalog:'
         version: 4.3.2(vite@8.1.3(@types/node@24.13.3)(esbuild@0.28.1)(jiti@2.7.0)(tsx@4.23.0)(yaml@2.9.0))
+      embla-carousel-wheel-gestures:
+        specifier: ^8.1.0
+        version: 8.1.0(embla-carousel@8.6.0)
       lucide-react:
         specifier: ^0.577.0
         version: 0.577.0(react@19.2.7)
@@ -218,9 +272,15 @@ importers:
       react-dom:
         specifier: ^19.2.4
         version: 19.2.7(react@19.2.7)
+      react-hook-form:
+        specifier: ^7.82.0
+        version: 7.82.0(react@19.2.7)
       tailwindcss:
         specifier: ^4.2.1
         version: 4.3.2
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/node':
         specifier: ^24.12.0
@@ -415,6 +475,9 @@ importers:
       embla-carousel-react:
         specifier: ^8.6.0
         version: 8.6.0(react@19.2.7)
+      embla-carousel-wheel-gestures:
+        specifier: ^8.1.0
+        version: 8.1.0(embla-carousel@8.6.0)
       input-otp:
         specifier: ^1.4.2
         version: 1.4.2(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -3950,6 +4013,12 @@ packages:
     peerDependencies:
       embla-carousel: 8.6.0
 
+  embla-carousel-wheel-gestures@8.1.0:
+    resolution: {integrity: sha512-J68jkYrxbWDmXOm2n2YHl+uMEXzkGSKjWmjaEgL9xVvPb3HqVmg6rJSKfI3sqIDVvm7mkeTy87wtG/5263XqHQ==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      embla-carousel: ^8.0.0 || ~8.0.0-rc03
+
   embla-carousel@8.6.0:
     resolution: {integrity: sha512-SjWyZBHJPbqxHOzckOfo8lHisEaJWmwd23XppYFYVh10bU66/Pn5tkVkbkCMZVdbUE5eTCI2nD8OyIP4Z+uwkA==}
 
@@ -5983,6 +6052,10 @@ packages:
 
   whatwg-url@5.0.0:
     resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
+
+  wheel-gestures@2.2.48:
+    resolution: {integrity: sha512-f+Gy33Oa5Z14XY9679Zze+7VFhbsQfBFXodnU2x589l4kxGM9L5Y8zETTmcMR5pWOPQyRv4Z0lNax6xCO0NSlA==}
+    engines: {node: '>=18'}
 
   which-pm-runs@1.1.0:
     resolution: {integrity: sha512-n1brCuqClxfFfq/Rb0ICg9giSZqCS+pLtccdag6C2HyufBrh3fBOiy9nb6ggRMvWOVH5GrdJskj5iGTZNxd7SA==}
@@ -8725,7 +8798,7 @@ snapshots:
   '@types/request@2.48.13':
     dependencies:
       '@types/caseless': 0.12.5
-      '@types/node': 25.3.5
+      '@types/node': 24.13.3
       '@types/tough-cookie': 4.0.5
       form-data: 2.5.6
 
@@ -8737,7 +8810,7 @@ snapshots:
 
   '@types/ws@8.18.1':
     dependencies:
-      '@types/node': 25.3.5
+      '@types/node': 24.13.3
 
   '@typescript-eslint/eslint-plugin@8.63.0(@typescript-eslint/parser@8.63.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3))(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)':
     dependencies:
@@ -9497,6 +9570,11 @@ snapshots:
   embla-carousel-reactive-utils@8.6.0(embla-carousel@8.6.0):
     dependencies:
       embla-carousel: 8.6.0
+
+  embla-carousel-wheel-gestures@8.1.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+      wheel-gestures: 2.2.48
 
   embla-carousel@8.6.0: {}
 
@@ -11080,7 +11158,7 @@ snapshots:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.2
-      '@types/node': 25.3.5
+      '@types/node': 24.13.3
       long: 5.3.2
 
   punycode.js@2.3.1: {}
@@ -12010,6 +12088,8 @@ snapshots:
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
+
+  wheel-gestures@2.2.48: {}
 
   which-pm-runs@1.1.0: {}
 

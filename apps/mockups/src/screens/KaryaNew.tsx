@@ -9,7 +9,10 @@
  */
 
 import { useState } from "react";
-import { Avatar, MainColumn, RailColumn, cn, Input, Textarea, Button, Toggle } from "@myapp/ui";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Avatar, MainColumn, RailColumn, cn, Input, Textarea, Button, Toggle, Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { Eyebrow } from "@myapp/ui";
 
@@ -21,6 +24,14 @@ const TIPS = [
 
 const STAGES = ["Ide", "Prototype", "MVP", "Beta", "Rilis", "Cari Kolaborator"];
 const SUGGESTED = ["Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"];
+
+const draftSchema = z.object({
+  title: z.string().min(1, "Judul karya tidak boleh kosong."),
+  description: z.string().min(1, "Deskripsi karya tidak boleh kosong."),
+  stages: z.array(z.string()).min(1, "Pilih minimal satu tahap."),
+  tags: z.array(z.string()).min(1, "Pilih minimal satu minat/tag."),
+});
+type DraftValues = z.infer<typeof draftSchema>;
 
 // ─── Small field wrapper ─────────────────────────────────────────────────────
 function Labelled({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
@@ -54,77 +65,144 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 
 // ─── Manual form ─────────────────────────────────────────────────────────────
 function ManualForm({ onAi }: { onAi: () => void }) {
-  const [stages, setStages] = useState<string[]>(["Prototype"]);
-  const [tags, setTags] = useState<string[]>(["Web", "Komunitas"]);
-  const toggle = (arr: string[], v: string, set: (x: string[]) => void) =>
-    set(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
+  const form = useForm<DraftValues>({
+    resolver: zodResolver(draftSchema),
+    defaultValues: {
+      title: "Peta Kost",
+      description: "Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif.",
+      stages: ["Prototype"],
+      tags: ["Web", "Komunitas"],
+    },
+  });
+
+  function onSubmit(values: DraftValues) {
+    console.log("draft", values);
+  }
+
+  const toggle = (arr: string[], v: string, onChange: (x: string[]) => void) =>
+    onChange(arr.includes(v) ? arr.filter((x) => x !== v) : [...arr, v]);
 
   return (
-    <>
-      {/* AI shortcut */}
-      <button
-        type="button"
-        onClick={onAi}
-        className="mb-[30px] flex w-full cursor-pointer items-center gap-3 rounded-panel border border-accent-line bg-accent-tint px-4 py-[13px] text-left"
-      >
-        <span aria-hidden="true" className="text-[20px] leading-none text-accent">✦</span>
-        <span className="flex-1 font-body text-ui text-ink">
-          Males ngetik? <span className="font-medium text-accent-mid">Biar AI yang nyusun dari obrolan.</span>
-        </span>
-        <span aria-hidden="true" className="text-accent">→</span>
-      </button>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        {/* AI shortcut */}
+        <button
+          type="button"
+          onClick={onAi}
+          className="mb-[30px] flex w-full cursor-pointer items-center gap-3 rounded-panel border border-accent-line bg-accent-tint px-4 py-[13px] text-left"
+        >
+          <span aria-hidden="true" className="text-[20px] leading-none text-accent">✦</span>
+          <span className="flex-1 font-body text-ui text-ink">
+            Males ngetik? <span className="font-medium text-accent-mid">Biar AI yang nyusun dari obrolan.</span>
+          </span>
+          <span aria-hidden="true" className="text-accent">→</span>
+        </button>
 
-      <Labelled label="Cover" hint="opsional">
-        <div className="flex h-[120px] cursor-pointer items-center justify-center gap-2 rounded-panel border-[1.5px] border-dashed border-line-dark bg-surface font-body text-ui text-ink3">
-          <span aria-hidden="true" className="text-[18px]">⬆</span> Seret gambar atau pilih file
-        </div>
-      </Labelled>
+        <Labelled label="Cover" hint="opsional">
+          <div className="flex h-[120px] cursor-pointer items-center justify-center gap-2 rounded-panel border-[1.5px] border-dashed border-line-dark bg-surface font-body text-ui text-ink3">
+            <span aria-hidden="true" className="text-[18px]">⬆</span> Seret gambar atau pilih file
+          </div>
+        </Labelled>
 
-      <Labelled label="Tangkapan layar" hint="landscape muncul di feed · potret di galeri detail">
-        <div className="flex gap-2">
-          {[0, 1].map((i) => (
-            <div key={i} className="h-[68px] w-[92px] rounded-[10px] border border-line bg-surface" />
-          ))}
-          <button type="button" className="h-[68px] w-[92px] cursor-pointer rounded-[10px] border-[1.5px] border-dashed border-line-dark bg-transparent font-body text-micro text-ink3">
-            + tambah
-          </button>
-        </div>
-      </Labelled>
+        <Labelled label="Tangkapan layar" hint="landscape muncul di feed · potret di galeri detail">
+          <div className="flex gap-2">
+            {[0, 1].map((i) => (
+              <div key={i} className="h-[68px] w-[92px] rounded-[10px] border border-line bg-surface" />
+            ))}
+            <button type="button" className="h-[68px] w-[92px] cursor-pointer rounded-[10px] border-[1.5px] border-dashed border-line-dark bg-transparent font-body text-micro text-ink3">
+              + tambah
+            </button>
+          </div>
+        </Labelled>
 
-      <Labelled label="Judul">
-        <Input defaultValue="Peta Kost" placeholder="Nama karya kamu" />
-      </Labelled>
-
-      <Labelled label="Deskripsi">
-        <Textarea
-          rows={3}
-          className="resize-y leading-body"
-          defaultValue="Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif."
-          placeholder="Ceritain karyanya dalam satu-dua kalimat."
+        <FormField
+          control={form.control}
+          name="title"
+          render={({ field }) => (
+            <FormItem className="mb-[22px]">
+              <div className="mb-2 flex items-baseline gap-2.5">
+                <FormLabel asChild><Eyebrow as="span">Judul</Eyebrow></FormLabel>
+              </div>
+              <FormControl>
+                <Input placeholder="Nama karya kamu" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
-      </Labelled>
 
-      <Labelled label="Tahap" hint="boleh lebih dari satu">
-        <div className="flex flex-wrap gap-2">
-          {STAGES.map((s) => <Chip key={s} label={s} on={stages.includes(s)} onClick={() => toggle(stages, s, setStages)} />)}
+        <FormField
+          control={form.control}
+          name="description"
+          render={({ field }) => (
+            <FormItem className="mb-[22px]">
+              <div className="mb-2 flex items-baseline gap-2.5">
+                <FormLabel asChild><Eyebrow as="span">Deskripsi</Eyebrow></FormLabel>
+              </div>
+              <FormControl>
+                <Textarea
+                  rows={3}
+                  className="resize-y leading-body"
+                  placeholder="Ceritain karyanya dalam satu-dua kalimat."
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="stages"
+          render={({ field }) => (
+            <FormItem className="mb-[22px]">
+              <div className="mb-2 flex items-baseline gap-2.5">
+                <FormLabel asChild><Eyebrow as="span">Tahap</Eyebrow></FormLabel>
+                <span className="font-body text-micro text-ink3">boleh lebih dari satu</span>
+              </div>
+              <FormControl>
+                <div className="flex flex-wrap gap-2">
+                  {STAGES.map((s) => (
+                    <Chip key={s} label={s} on={field.value.includes(s)} onClick={() => toggle(field.value, s, field.onChange)} />
+                  ))}
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="tags"
+          render={({ field }) => (
+            <FormItem className="mb-[22px]">
+              <div className="mb-2 flex items-baseline gap-2.5">
+                <FormLabel asChild><Eyebrow as="span">Minat / tag</Eyebrow></FormLabel>
+              </div>
+              <FormControl>
+                <div className="flex flex-wrap gap-2">
+                  {SUGGESTED.map((s) => (
+                    <Chip key={s} label={s} on={field.value.includes(s)} onClick={() => toggle(field.value, s, field.onChange)} />
+                  ))}
+                  <button type="button" className="cursor-pointer rounded-full border border-dashed border-line-dark bg-transparent px-[13px] py-1.5 font-body text-ui text-ink3">
+                    + tag lain
+                  </button>
+                </div>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
+          <Button type="submit" className="bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading px-[22px]" size="lg">
+            Terbitkan karya →
+          </Button>
         </div>
-      </Labelled>
-
-      <Labelled label="Minat / tag">
-        <div className="flex flex-wrap gap-2">
-          {SUGGESTED.map((s) => <Chip key={s} label={s} on={tags.includes(s)} onClick={() => toggle(tags, s, setTags)} />)}
-          <button type="button" className="cursor-pointer rounded-full border border-dashed border-line-dark bg-transparent px-[13px] py-1.5 font-body text-ui text-ink3">
-            + tag lain
-          </button>
-        </div>
-      </Labelled>
-
-      <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
-        <Button className="bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading px-[22px]" size="lg">
-          Terbitkan karya →
-        </Button>
-      </div>
-    </>
+      </form>
+    </Form>
   );
 }
 

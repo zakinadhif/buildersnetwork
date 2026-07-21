@@ -22,6 +22,7 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "embla-carousel-react": "^8.6.0",
+    "embla-carousel-wheel-gestures": "^8.1.0",
     "input-otp": "^1.4.2",
     "lucide-react": "^0.577.0",
     "react-hook-form": "^7.82.0",

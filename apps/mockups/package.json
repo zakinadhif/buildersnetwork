@@ -10,13 +10,17 @@
     "deploy": "pnpm build && wrangler pages deploy"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@myapp/design-tokens": "workspace:*",
     "@myapp/ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",
+    "embla-carousel-wheel-gestures": "^8.1.0",
     "lucide-react": "^0.577.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
-    "tailwindcss": "^4.2.1"
+    "react-hook-form": "^7.82.0",
+    "tailwindcss": "^4.2.1",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@types/node": "^24.12.0",

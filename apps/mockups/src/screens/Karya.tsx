@@ -12,7 +12,8 @@
  */
 
 import { useState } from "react";
-import { KaryaCard, Tag, MainColumn, RailColumn, Input, Button, Toggle, cn } from "@myapp/ui";
+import { KaryaCard, Tag, MainColumn, RailColumn, Input, Button, Toggle, cn, Card, CardHeader, CardTitle, CardDescription, CardContent, Carousel, CarouselContent, CarouselItem } from "@myapp/ui";
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
 import { KARYA, type Karya } from "../data/karya";
@@ -90,14 +91,14 @@ function Spotlight({ karya }: { karya: Karya }) {
   const latestStage = karya.stages[karya.stages.length - 1];
 
   return (
-    <section className="mb-[18px] overflow-hidden rounded-panel border border-accent bg-surface shadow-[0_0_0_1px_oklch(39%_0.085_62_/_0.133),0_4px_16px_#0f0e0b10]">
+    <Card className="mb-[18px] overflow-hidden rounded-panel border-accent bg-surface shadow-[0_0_0_1px_oklch(39%_0.085_62_/_0.133),0_4px_16px_#0f0e0b10]">
       {/* Accent header band */}
       <Eyebrow as="div" className="bg-accent px-[18px] py-1 !text-accent-fg">
         <span aria-hidden="true">◈</span> Pilihan Minggu Ini
       </Eyebrow>
 
       {/* App header */}
-      <div className="flex items-center gap-3.5 px-[18px] pb-3.5 pt-4">
+      <CardHeader className="flex flex-row items-center gap-3.5 px-[18px] pb-3.5 pt-4 space-y-0">
         {/* App icon */}
         <div
           aria-hidden="true"
@@ -107,10 +108,10 @@ function Spotlight({ karya }: { karya: Karya }) {
           {karya.title.charAt(0)}
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="mb-[3px] font-display text-feature font-normal leading-heading text-ink">{karya.title}</h2>
-          <div className="mb-[5px] font-body text-ui font-medium text-accent-mid">
+          <CardTitle className="mb-[3px] font-display text-feature font-normal leading-heading text-ink">{karya.title}</CardTitle>
+          <CardDescription className="mb-[5px] font-body text-ui font-medium text-accent-mid">
             oleh {builders}
-          </div>
+          </CardDescription>
           <div className="flex flex-wrap gap-1">
             {karya.interests.map((i) => <Tag key={i} label={i} />)}
           </div>
@@ -118,7 +119,7 @@ function Spotlight({ karya }: { karya: Karya }) {
         <Button className="self-start bg-accent text-accent-fg hover:bg-accent-mid font-semibold px-5">
           Lihat Karya
         </Button>
-      </div>
+      </CardHeader>
 
       {/* Play-Store-style metrics strip */}
       <div className="mx-[18px] flex items-stretch border-y border-line px-3 py-[11px]">
@@ -129,31 +130,33 @@ function Spotlight({ karya }: { karya: Karya }) {
         <SpotlightMetric value={latestStage} label="Tahap" />
       </div>
 
-      {/* Tagline */}
-      <p className="m-0 px-[18px] pb-3 pt-3.5 font-body text-body leading-body text-ink2">
-        {karya.description}
-      </p>
+      <CardContent className="p-0">
+        {/* Tagline */}
+        <p className="m-0 px-[18px] pb-3 pt-3.5 font-body text-body leading-body text-ink2">
+          {karya.description}
+        </p>
 
-      {/* Screenshot gallery */}
-      <div className="flex items-baseline justify-between px-[18px] pb-2">
-        <Eyebrow as="span">Tangkapan Layar</Eyebrow>
-        <span className="font-body text-micro text-ink3">← geser →</span>
-      </div>
-      <div
-        className="spotlight-carousel flex gap-3 overflow-x-auto px-[18px] pb-[18px]"
-        style={{ scrollSnapType: "x mandatory", scrollPaddingLeft: 18 }}
-      >
-        {screenshots.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={`${karya.title} — tangkapan layar ${i + 1}`}
-            className="h-[364px] w-auto shrink-0 rounded-[18px] border-2 border-line-dark bg-bg shadow-[0_2px_10px_#0f0e0b14]"
-            style={{ scrollSnapAlign: "start" }}
-          />
-        ))}
-      </div>
-    </section>
+        {/* Screenshot gallery */}
+        <div className="flex items-baseline justify-between px-[18px] pb-2">
+          <Eyebrow as="span">Tangkapan Layar</Eyebrow>
+          <span className="font-body text-micro text-ink3">← geser →</span>
+        </div>
+        
+        <Carousel className="w-full px-[18px] pb-[18px]" opts={{ align: "start" }} plugins={[WheelGesturesPlugin()]}>
+          <CarouselContent className="-ml-3">
+            {screenshots.map((src, i) => (
+              <CarouselItem key={src} className="pl-3 basis-auto">
+                <img
+                  src={src}
+                  alt={`${karya.title} — tangkapan layar ${i + 1}`}
+                  className="h-[364px] w-auto rounded-[18px] border-2 border-line-dark bg-bg shadow-[0_2px_10px_#0f0e0b14]"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -162,20 +165,20 @@ function Spotlight({ karya }: { karya: Karya }) {
 // when the surfaces settle.
 function SeekerRamp() {
   return (
-    <section className="mb-[18px] flex items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5">
+    <Card className="mb-[18px] flex flex-row items-center gap-3.5 rounded-panel border-accent-line bg-accent-tint px-[18px] py-3.5">
       <div aria-hidden="true" className="shrink-0 font-display text-[28px] leading-none text-accent">✦</div>
       <div className="min-w-0 flex-1">
-        <div className="font-display text-title font-normal leading-heading text-ink mb-0.5">
+        <CardTitle className="font-display text-title font-normal leading-heading text-ink mb-0.5">
           Belum tahu mau bikin apa?
-        </div>
-        <div className="font-body text-body leading-body text-ink2">
+        </CardTitle>
+        <CardDescription className="font-body text-body leading-body text-ink2">
           Ngobrol sebentar sama asisten — kita cari arah yang pas buat kamu.
-        </div>
+        </CardDescription>
       </div>
       <Button variant="outline" className="shrink-0 border-accent bg-transparent text-accent hover:bg-accent-tint hover:text-accent font-semibold px-4 py-2 h-auto">
         Mulai cari arah →
       </Button>
-    </section>
+    </Card>
   );
 }
 

@@ -11,6 +11,9 @@
  */
 
 import { useState } from "react";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   cn,
   Eyebrow,
@@ -21,48 +24,28 @@ import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@myapp/ui";
 
 type Mode = "daftar" | "masuk";
 
-function Field({ label, type = "text", placeholder, value, onChange, note }: {
-  label: string;
-  type?: string;
-  placeholder?: string;
-  value?: string;
-  onChange?: (v: string) => void;
-  note?: string;
-}) {
-  return (
-    <label className="block">
-      <Eyebrow as="span" className="mb-1.5 block">{label}</Eyebrow>
-      <Input
-        type={type}
-        placeholder={placeholder}
-        value={value}
-        onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-      />
-      {note && (
-        <span className="mt-1.5 block font-body text-micro text-ink3">
-          {note}
-        </span>
-      )}
-    </label>
-  );
-}
+const authSchema = z.object({
+  email: z
+    .string()
+    .email("Email tidak valid.")
+    .endsWith("@student.telkomuniversity.ac.id", "Gunakan email @student.telkomuniversity.ac.id"),
+  password: z.string().min(8, "Password minimal 8 karakter."),
+});
+type AuthValues = z.infer<typeof authSchema>;
 
-function PrimaryButton({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
-  return (
-    <Button
-      type="button"
-      onClick={onClick}
-      className="w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
-      size="lg"
-    >
-      {children}
-    </Button>
-  );
-}
+const verifySchema = z.object({
+  code: z.string().length(6, "Kode verifikasi harus 6 digit."),
+});
 
 // ─── Form view (daftar / masuk) ──────────────────────────────────────────────────
 function FormView({ mode, setMode, email, setEmail, onSubmit }: {
@@ -73,92 +56,158 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
   onSubmit: () => void;
 }) {
   const daftar = mode === "daftar";
+  
+  const form = useForm<AuthValues>({
+    resolver: zodResolver(authSchema),
+    defaultValues: { email, password: "" },
+  });
+
+  function handleSubmit(values: AuthValues) {
+    setEmail(values.email);
+    if (daftar) onSubmit();
+  }
+
   return (
-    <>
-      {/* Mode toggle */}
-      <div className="mb-7 flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
-        <ToggleGroup type="single" value={mode} onValueChange={(v) => { if (v) setMode(v as Mode) }} className="flex-1 w-full flex">
-          {(["daftar", "masuk"] as const).map((m) => (
-            <ToggleGroupItem
-              key={m}
-              value={m}
-              className={cn(
-                "flex-1 rounded-full font-body text-ui transition-[background,color] duration-[120ms]",
-                m === mode ? "bg-ink text-bg font-medium" : "text-ink2 font-normal hover:bg-transparent"
-              )}
-            >
-              {m === "daftar" ? "Daftar" : "Masuk"}
-            </ToggleGroupItem>
-          ))}
-        </ToggleGroup>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)}>
+        {/* Mode toggle */}
+        <div className="mb-7 flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
+          <ToggleGroup type="single" value={mode} onValueChange={(v) => { if (v) setMode(v as Mode) }} className="flex-1 w-full flex">
+            {(["daftar", "masuk"] as const).map((m) => (
+              <ToggleGroupItem
+                key={m}
+                value={m}
+                className={cn(
+                  "flex-1 rounded-full font-body text-ui transition-[background,color] duration-[120ms]",
+                  m === mode ? "bg-ink text-bg font-medium" : "text-ink2 font-normal hover:bg-transparent"
+                )}
+              >
+                {m === "daftar" ? "Daftar" : "Masuk"}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        </div>
 
-      <div className="flex flex-col gap-[18px]">
-        <Field
-          label="Email"
-          type="email"
-          placeholder="nama@student.telkomuniversity.ac.id"
-          value={email}
-          onChange={setEmail}
-          note={daftar ? "Pakai email student Telkom — itu yang mengunci komunitas ini." : undefined}
-        />
-        <Field label="Password" type="password" placeholder="••••••••" />
+        <div className="flex flex-col gap-[18px]">
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <div className="mb-1.5">
+                  <FormLabel asChild><Eyebrow as="span">Email</Eyebrow></FormLabel>
+                </div>
+                <FormControl>
+                  <Input type="email" placeholder="nama@student.telkomuniversity.ac.id" {...field} />
+                </FormControl>
+                {daftar && <span className="mt-1.5 block font-body text-micro text-ink3">Pakai email student Telkom — itu yang mengunci komunitas ini.</span>}
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-        <PrimaryButton onClick={onSubmit}>
-          {daftar ? "Kirim kode ke email →" : "Masuk →"}
-        </PrimaryButton>
-      </div>
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <div className="mb-1.5">
+                  <FormLabel asChild><Eyebrow as="span">Password</Eyebrow></FormLabel>
+                </div>
+                <FormControl>
+                  <Input type="password" placeholder="••••••••" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-      <p className="mt-[22px] font-body text-ui text-ink2">
-        {daftar ? "Sudah punya akun? " : "Belum gabung? "}
-        <button
-          type="button"
-          onClick={() => setMode(daftar ? "masuk" : "daftar")}
-          className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent"
-        >
-          {daftar ? "Masuk" : "Daftar"} →
-        </button>
-      </p>
-    </>
+          <Button
+            type="submit"
+            className="mt-2 w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
+            size="lg"
+          >
+            {daftar ? "Kirim kode ke email →" : "Masuk →"}
+          </Button>
+        </div>
+
+        <p className="mt-[22px] font-body text-ui text-ink2">
+          {daftar ? "Sudah punya akun? " : "Belum gabung? "}
+          <button
+            type="button"
+            onClick={() => setMode(daftar ? "masuk" : "daftar")}
+            className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent"
+          >
+            {daftar ? "Masuk" : "Daftar"} →
+          </button>
+        </p>
+      </form>
+    </Form>
   );
 }
 
 // ─── Verify view (OTP) ───────────────────────────────────────────────────────────
 function VerifyView({ onBack }: { onBack: () => void }) {
-  const [code, setCode] = useState("");
+  const form = useForm<z.infer<typeof verifySchema>>({
+    resolver: zodResolver(verifySchema),
+    defaultValues: { code: "" },
+  });
+
+  function onSubmit(values: z.infer<typeof verifySchema>) {
+    console.log("verify", values);
+  }
 
   return (
-    <>
-      <div className="mb-5 flex gap-3">
-        <InputOTP maxLength={6} value={code} onChange={setCode}>
-          <InputOTPGroup className="gap-3">
-            {[0, 1, 2, 3, 4, 5].map((i) => (
-              <InputOTPSlot 
-                key={i} 
-                index={i} 
-                className="h-[56px] w-[46px] rounded-card border bg-surface font-body text-title font-medium text-ink"
-              />
-            ))}
-          </InputOTPGroup>
-        </InputOTP>
-      </div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)}>
+        <div className="mb-5 flex gap-3">
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormControl>
+                  <InputOTP maxLength={6} {...field}>
+                    <InputOTPGroup className="gap-3">
+                      {[0, 1, 2, 3, 4, 5].map((i) => (
+                        <InputOTPSlot 
+                          key={i} 
+                          index={i} 
+                          className="h-[56px] w-[46px] rounded-card border bg-surface font-body text-title font-medium text-ink"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
-      <PrimaryButton>Verifikasi &amp; masuk →</PrimaryButton>
+        <Button
+          type="submit"
+          className="w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
+          size="lg"
+        >
+          Verifikasi &amp; masuk →
+        </Button>
 
-      <p className="mt-5 font-body text-ui text-ink2">
-        Nggak ada kodenya?{" "}
-        <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent">
-          Kirim ulang
+        <p className="mt-5 font-body text-ui text-ink2">
+          Nggak ada kodenya?{" "}
+          <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-ui font-medium text-accent">
+            Kirim ulang
+          </button>
+        </p>
+        <button
+          type="button"
+          onClick={onBack}
+          className="mt-2 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink3"
+        >
+          ← Ganti email
         </button>
-      </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-2 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink3"
-      >
-        ← Ganti email
-      </button>
-    </>
+      </form>
+    </Form>
   );
 }
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn, KaryaCover, Button, Textarea } from "@myapp/ui";
+import { cn, KaryaCover, Button, Textarea, Card, CardTitle, CardDescription } from "@myapp/ui";
 import { useNavigate } from "../gallery";
 import { ME, MY_KARYA, type Karya } from "../data/karya";
 import { coverFor } from "../lib/images";
@@ -35,14 +35,14 @@ function NoKarya() {
   const navigate = useNavigate();
 
   return (
-    <div className="flex items-center gap-3.5 rounded-panel border border-line bg-surface p-4">
+    <Card className="flex flex-row items-center gap-3.5 border-line bg-surface p-4 shadow-none">
       <div className="min-w-0 flex-1">
-        <div className="font-body text-body font-medium text-ink">
+        <CardTitle className="font-body text-body font-medium text-ink mb-0.5">
           Kabar selalu punya karya
-        </div>
-        <div className="mt-0.5 font-body text-caption leading-compact text-ink3">
+        </CardTitle>
+        <CardDescription className="font-body text-caption leading-compact text-ink3">
           Yang tayang di sini kemajuan sebuah karya, dan karyanya yang jadi penulis.
-        </div>
+        </CardDescription>
       </div>
       <Button
         onClick={() => navigate("karya-new")}
@@ -50,7 +50,7 @@ function NoKarya() {
       >
         Bikin karya
       </Button>
-    </div>
+    </Card>
   );
 }
 
