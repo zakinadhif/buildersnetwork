@@ -106,7 +106,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="eyebrow pb-2.5 border-b border-line">Pilihan inspiratif</p>
+      <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact pb-2.5 border-b border-line">Pilihan inspiratif</p>
       {featuredShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
       ) : (
@@ -121,7 +121,7 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <p className="eyebrow mt-10 mb-1">Kabar terbaru</p>
+      <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mt-10 mb-1">Kabar terbaru</p>
       {feedShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada aktivitas.</p>
       ) : (
@@ -188,7 +188,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
   return (
     <>
       <section className="bg-surface border border-line rounded-panel px-4 py-3.5">
-        <p className="eyebrow mb-2.5">Denyut komunitas</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2.5">Denyut komunitas</p>
         <div className="flex flex-col gap-2">
           {pulse.map((s) => (
             <div
@@ -206,7 +206,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
 
       <section className="flex flex-col">
         <div className="flex items-center justify-between gap-3 mb-2.5">
-          <p className="eyebrow">Kenalan dengan builder</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">Kenalan dengan builder</p>
           <button
             type="button"
             className="bg-transparent border-none p-0 cursor-pointer font-body text-micro text-accent-mid transition-colors hover:text-accent"

@@ -44,7 +44,7 @@ export default function MinimalStart({
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[440px] mx-auto px-7 py-[72px]">
-        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Sebelum masuk — panggil kamu siapa?
         </h1>

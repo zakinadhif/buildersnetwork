@@ -16,7 +16,7 @@ export default function Onboarding() {
   return (
     <div className="fixed inset-0 animate-up flex flex-col">
       <div className="px-7 py-[18px] border-b border-line shrink-0">
-        <p className="eyebrow">Al-Fath Berkarya · onboarding</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">Al-Fath Berkarya · onboarding</p>
       </div>
 
       <div className="flex-1 flex flex-col min-h-0 px-7 pb-5">

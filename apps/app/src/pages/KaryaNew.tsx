@@ -280,7 +280,7 @@ export default function KaryaNew() {
           ← balik
         </button>
 
-        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Bikin karya baru.
         </h1>
@@ -297,7 +297,7 @@ export default function KaryaNew() {
         <hr className="border-none border-b border-line my-7 mb-8" />
 
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Cover (opsional)</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Cover (opsional)</p>
           <input
             ref={fileInputRef}
             type="file"
@@ -343,7 +343,7 @@ export default function KaryaNew() {
           </div>
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Tangkapan layar (opsional)</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Tangkapan layar (opsional)</p>
           <ScreenshotGroup
             label="Landscape"
             hint="muncul di baris feed"
@@ -364,11 +364,11 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Judul</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Judul</p>
           <EditField value={draft.title} onChange={(v) => set("title", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Deskripsi</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Deskripsi</p>
           <EditField
             value={draft.description}
             onChange={(v) => set("description", v)}
@@ -376,14 +376,14 @@ export default function KaryaNew() {
           />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Tahap</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Tahap</p>
           <StageMultiSelect
             stages={draft.stages}
             onChange={(v) => set("stages", v)}
           />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Minat / tag</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat / tag</p>
           <InterestsEditor
             interests={draft.interests}
             onChange={(v) => set("interests", v)}

@@ -151,7 +151,7 @@ Obrolan:\n${transcript}`;
   return (
     <div className="fixed inset-0 animate-up flex flex-col">
       <div className="px-7 py-[18px] border-b border-line shrink-0 flex justify-between items-center">
-        <p className="eyebrow">Al-Fath Berkarya · bikin karya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact">Al-Fath Berkarya · bikin karya</p>
         <button
           type="button"
           onClick={() => navigate("/karya/new")}

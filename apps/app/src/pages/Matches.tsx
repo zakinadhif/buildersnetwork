@@ -32,7 +32,7 @@ export default function Matches() {
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
-        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
         {user && (
           <p className="text-body text-ink2 leading-body">
             Dipublish. Selamat datang, {firstName(user.name)}.

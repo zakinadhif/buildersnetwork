@@ -61,7 +61,7 @@ export default function VerifyEmail() {
   return (
     <div className="fixed inset-0 animate-up flex items-center">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-0">
-        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
         <h1 className="text-feature font-light tracking-heading leading-heading mb-4">
           Cek email kamu.
         </h1>

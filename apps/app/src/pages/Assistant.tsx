@@ -113,26 +113,26 @@ export default function Assistant({ user }: { user: Member }) {
           </p>
 
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Nama</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Nama</p>
             <EditField value={p.name} onChange={(v) => set("name", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Handle</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Handle</p>
             <EditField
               value={p.handle ?? ""}
               onChange={(v) => set("handle", v)}
             />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Angkatan</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Angkatan</p>
             <EditField value={p.year} onChange={(v) => set("year", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Jurusan</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Jurusan</p>
             <EditField value={p.major} onChange={(v) => set("major", v)} />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Bio</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
             <EditField
               value={p.bio ?? ""}
               onChange={(v) => set("bio", v)}
@@ -140,14 +140,14 @@ export default function Assistant({ user }: { user: Member }) {
             />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Skills</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
             <SkillsEditor
               skills={p.skills}
               onChange={(v) => set("skills", v)}
             />
           </div>
           <div className="pf mb-7">
-            <p className="eyebrow mb-1.5">Minat</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
             <InterestsEditor
               interests={p.interests}
               onChange={(v) => set("interests", v)}

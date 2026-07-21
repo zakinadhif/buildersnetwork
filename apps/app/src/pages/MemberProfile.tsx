@@ -48,12 +48,12 @@ export default function MemberProfilePage({ id }: { id: string }) {
 
         {member.bio && (
           <div className="mb-7">
-            <p className="eyebrow mb-1.5">Bio</p>
+            <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
             <p>{member.bio}</p>
           </div>
         )}
         <div className="mb-7">
-          <p className="eyebrow mb-1.5">Skills</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
           <div className="flex flex-wrap items-center gap-1.5">
             {(member.skills ?? []).map((s) => (
               <Tag key={s} label={s} />
@@ -61,7 +61,7 @@ export default function MemberProfilePage({ id }: { id: string }) {
           </div>
         </div>
         <div className="mb-7">
-          <p className="eyebrow mb-1.5">Minat</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
           <div className="flex flex-wrap items-center gap-1.5">
             {(member.interests ?? []).map((s) => (
               <Tag key={s} label={s} />

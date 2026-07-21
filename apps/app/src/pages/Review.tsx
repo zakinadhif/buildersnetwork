@@ -98,7 +98,7 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">
       <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
-        <p className="eyebrow mb-2">Al-Fath Berkarya</p>
+        <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-2">Al-Fath Berkarya</p>
         <h1 className="text-feature font-light tracking-heading leading-heading">
           Ini yang aku tangkap.
         </h1>
@@ -108,26 +108,26 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         <hr className="border-none border-b border-line m-0 mb-8" />
 
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Nama</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Nama</p>
           <EditField value={p.name} onChange={(v) => set("name", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Handle</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Handle</p>
           <EditField
             value={p.handle ?? ""}
             onChange={(v) => set("handle", v)}
           />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Angkatan</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Angkatan</p>
           <EditField value={p.year} onChange={(v) => set("year", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Jurusan</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Jurusan</p>
           <EditField value={p.major} onChange={(v) => set("major", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Bio</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Bio</p>
           <EditField
             value={p.bio ?? ""}
             onChange={(v) => set("bio", v)}
@@ -135,11 +135,11 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
           />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Skills</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Skills</p>
           <SkillsEditor skills={p.skills} onChange={(v) => set("skills", v)} />
         </div>
         <div className="pf mb-7">
-          <p className="eyebrow mb-1.5">Minat</p>
+          <p className="text-micro font-medium tracking-eyebrow uppercase text-ink3 leading-compact mb-1.5">Minat</p>
           <InterestsEditor
             interests={p.interests}
             onChange={(v) => set("interests", v)}
