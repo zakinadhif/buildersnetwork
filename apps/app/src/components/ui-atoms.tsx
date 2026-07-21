@@ -4,7 +4,7 @@ import {
   useListInterests,
 } from "@myapp/api-client-react";
 import { Input, Textarea, Toggle } from "@myapp/ui";
-import * as React from "react";
+import type * as React from "react";
 import { useState } from "react";
 
 /**
@@ -276,7 +276,9 @@ export function EditField({
       className="field-ta w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
       value={value}
       rows={3}
-      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
+      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+        onChange(e.target.value)
+      }
       onBlur={() => setEditing(false)}
       autoFocus
     />
@@ -284,7 +286,9 @@ export function EditField({
     <Input
       className="field-in w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
       value={value}
-      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        onChange(e.target.value)
+      }
       onBlur={() => setEditing(false)}
       autoFocus
     />

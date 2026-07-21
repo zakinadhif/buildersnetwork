@@ -19,6 +19,7 @@ const ToggleGroup = React.forwardRef<
   <ToggleGroupPrimitive.Root
     ref={ref}
     className={cn("flex items-center justify-center gap-1", className)}
+    // biome-ignore lint/suspicious/noExplicitAny: generic types mismatch in Radix UI
     {...(props as any)}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -46,6 +47,7 @@ const ToggleGroupItem = React.forwardRef<
         }),
         className,
       )}
+      // biome-ignore lint/suspicious/noExplicitAny: generic types mismatch in Radix UI
       {...(props as any)}
     >
       {children}
