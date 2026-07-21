@@ -13,6 +13,9 @@ import { defineConfig } from "vite";
 // screens are written in utilities — they aren't. See src/index.css.
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  resolve: {
+    tsconfigPaths: true,
+  },
   build: {
     outDir: "dist",
   },

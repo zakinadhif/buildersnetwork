@@ -9,7 +9,7 @@
  */
 
 import { useState } from "react";
-import { Avatar, MainColumn, RailColumn, cn } from "@myapp/ui";
+import { Avatar, MainColumn, RailColumn, cn, Input, Textarea, Button, Toggle } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { Eyebrow } from "@myapp/ui";
 
@@ -35,23 +35,20 @@ function Labelled({ label, hint, children }: { label: string; hint?: string; chi
   );
 }
 
-const inputCls = "w-full rounded-card border border-line bg-surface px-[13px] py-[11px] font-body text-body text-ink outline-none placeholder:text-ink3";
-
 function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () => void }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-pressed={on}
+    <Toggle
+      pressed={on}
+      onPressedChange={onClick}
       className={cn(
-        "cursor-pointer rounded-full border px-[13px] py-1.5 font-body text-ui",
+        "rounded-full border px-[13px] py-1.5 font-body text-ui h-auto",
         on
-          ? "border-accent bg-accent-tint text-accent font-medium"
-          : "border-line bg-transparent text-ink2 font-normal",
+          ? "border-accent bg-accent-tint text-accent font-medium hover:bg-accent-tint hover:text-accent"
+          : "border-line bg-transparent text-ink2 font-normal hover:bg-transparent hover:text-ink"
       )}
     >
       {label}
-    </button>
+    </Toggle>
   );
 }
 
@@ -95,13 +92,13 @@ function ManualForm({ onAi }: { onAi: () => void }) {
       </Labelled>
 
       <Labelled label="Judul">
-        <input className={inputCls} defaultValue="Peta Kost" placeholder="Nama karya kamu" />
+        <Input defaultValue="Peta Kost" placeholder="Nama karya kamu" />
       </Labelled>
 
       <Labelled label="Deskripsi">
-        <textarea
+        <Textarea
           rows={3}
-          className={`${inputCls} resize-y leading-body`}
+          className="resize-y leading-body"
           defaultValue="Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif."
           placeholder="Ceritain karyanya dalam satu-dua kalimat."
         />
@@ -123,9 +120,9 @@ function ManualForm({ onAi }: { onAi: () => void }) {
       </Labelled>
 
       <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
-        <button type="button" className="cursor-pointer rounded-card border-none bg-ink px-[22px] py-3 font-body text-ui font-semibold tracking-heading text-bg">
+        <Button className="bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading px-[22px]" size="lg">
           Terbitkan karya →
-        </button>
+        </Button>
       </div>
     </>
   );
@@ -141,9 +138,9 @@ const CHAT: { role: "ai" | "user"; text: string }[] = [
 function AiMode({ onManual }: { onManual: () => void }) {
   return (
     <>
-      <button type="button" onClick={onManual} className="mb-[22px] cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">
+      <Button variant="ghost" onClick={onManual} className="mb-[22px] text-ink2 p-0 h-auto font-body text-ui hover:bg-transparent hover:text-ink">
         ← Isi sendiri aja
-      </button>
+      </Button>
 
       <div className="mb-5 flex flex-col gap-[18px]">
         {CHAT.map((m, i) =>
@@ -170,15 +167,15 @@ function AiMode({ onManual }: { onManual: () => void }) {
             <span key={t} className="rounded-full border border-line bg-bg px-2 py-[2px] font-body text-micro text-ink2">{t}</span>
           ))}
         </div>
-        <button type="button" className="mt-3.5 cursor-pointer rounded-card border-none bg-ink px-[18px] py-[9px] font-body text-ui font-semibold text-bg">
+        <Button className="mt-3.5 bg-ink text-bg hover:bg-ink/90 font-semibold px-[18px]">
           Cek &amp; terbitkan →
-        </button>
+        </Button>
       </div>
 
       {/* Input bar */}
       <div className="flex items-center gap-2.5 border-t border-line pt-4">
         <Avatar name="Zaki Nadhif" size={30} />
-        <input placeholder="Balas asisten…" className={`${inputCls} rounded-full`} />
+        <Input placeholder="Balas asisten…" className="rounded-full flex-1" />
       </div>
     </>
   );

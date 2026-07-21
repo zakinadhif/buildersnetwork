@@ -12,7 +12,7 @@
  */
 
 import { useState } from "react";
-import { KaryaCard, Tag, MainColumn, RailColumn } from "@myapp/ui";
+import { KaryaCard, Tag, MainColumn, RailColumn, Input, Button, Toggle, cn } from "@myapp/ui";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
 import { KARYA, type Karya } from "../data/karya";
@@ -27,20 +27,20 @@ type Interest = (typeof INTEREST_FILTERS)[number];
 // ─── Quiet appreciation toggle — a warm signal, never a ranking input ───────────
 function AppreciateButton({ count, active, onClick }: { count: number; active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
+    <Toggle
+      pressed={active}
+      onPressedChange={onClick}
       aria-label={`Apresiasi (${count})`}
-      className={[
-        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-[11px] py-[5px] font-body text-caption font-medium transition-all duration-150",
+      className={cn(
+        "inline-flex h-auto items-center gap-1.5 rounded-full border px-[11px] py-[5px] font-body text-caption font-medium transition-all duration-150",
         active
-          ? "border-accent bg-accent-tint text-accent"
-          : "border-line bg-transparent text-ink2",
-      ].join(" ")}
+          ? "border-accent bg-accent-tint text-accent hover:bg-accent-tint hover:text-accent"
+          : "border-line bg-transparent text-ink2 hover:bg-transparent hover:text-ink"
+      )}
     >
       <span className="text-ui leading-none">{active ? "♥" : "♡"}</span>
       <span>{count}</span>
-    </button>
+    </Toggle>
   );
 }
 
@@ -115,9 +115,9 @@ function Spotlight({ karya }: { karya: Karya }) {
             {karya.interests.map((i) => <Tag key={i} label={i} />)}
           </div>
         </div>
-        <button className="self-start cursor-pointer rounded-card border-none bg-accent px-5 py-[9px] font-body text-ui font-semibold whitespace-nowrap text-accent-fg">
+        <Button className="self-start bg-accent text-accent-fg hover:bg-accent-mid font-semibold px-5">
           Lihat Karya
-        </button>
+        </Button>
       </div>
 
       {/* Play-Store-style metrics strip */}
@@ -172,9 +172,9 @@ function SeekerRamp() {
           Ngobrol sebentar sama asisten — kita cari arah yang pas buat kamu.
         </div>
       </div>
-      <button className="shrink-0 cursor-pointer rounded-card border border-accent bg-transparent px-4 py-2 font-body text-ui font-semibold whitespace-nowrap text-accent">
+      <Button variant="outline" className="shrink-0 border-accent bg-transparent text-accent hover:bg-accent-tint hover:text-accent font-semibold px-4 py-2 h-auto">
         Mulai cari arah →
-      </button>
+      </Button>
     </section>
   );
 }
@@ -243,9 +243,9 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
           <div className="mb-0.5 font-body text-body font-medium text-ink">Punya karya baru?</div>
           <div className="font-body text-ui text-ink2">Tambahkan ke katalog — komunitas senang lihat progresmu, sekecil apa pun.</div>
         </div>
-        <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-4 py-2 font-body text-ui font-semibold text-accent-fg">
+        <Button className="whitespace-nowrap bg-accent text-accent-fg hover:bg-accent-mid font-semibold px-4 h-auto py-2">
           Bikin Karya
-        </button>
+        </Button>
       </div>
     </MainColumn>
   );
@@ -263,13 +263,13 @@ function RightRail({ query, onQuery, filter, onFilter }: {
       {/* Directory search — the catalog's own search, moved out of the reading column */}
       <div>
         <Eyebrow as="div" className="mb-2">Cari karya</Eyebrow>
-        <input
+        <Input
           type="text"
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder="Nama, deskripsi, minat…"
           aria-label="Cari karya"
-          className="w-full rounded-card border border-line bg-surface px-[11px] py-[7px] font-body text-ui text-ink outline-none placeholder:text-ink3"
+          className="w-full"
         />
       </div>
 
@@ -289,9 +289,9 @@ function RightRail({ query, onQuery, filter, onFilter }: {
         <div className="mb-2.5 font-body text-body font-light leading-compact text-accent-fg">
           Bergabung sebagai builder Telkom University.
         </div>
-        <button className="w-full cursor-pointer rounded-card border-none bg-accent-fg px-3.5 py-1.5 font-body text-ui font-semibold text-accent">
+        <Button className="w-full bg-accent-fg text-accent hover:bg-accent-fg/90 font-semibold px-3.5 h-auto py-1.5 mt-2.5">
           Daftar Sekarang
-        </button>
+        </Button>
       </div>
     </RailColumn>
   );

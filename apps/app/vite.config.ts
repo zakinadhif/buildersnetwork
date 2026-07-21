@@ -15,9 +15,7 @@ export default defineConfig(({ mode, command }) => {
     base: command === "build" ? "/app/" : "/",
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      tsconfigPaths: true,
     },
     server: {
       proxy: {

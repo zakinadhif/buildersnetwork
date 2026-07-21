@@ -3,20 +3,30 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@hookform/resolvers": "^5.4.0",
     "@myapp/design-tokens": "workspace:*",
     "@radix-ui/react-dialog": "catalog:",
     "@radix-ui/react-dropdown-menu": "catalog:",
+    "@radix-ui/react-label": "^2.1.12",
     "@radix-ui/react-popover": "catalog:",
+    "@radix-ui/react-slot": "^1.3.0",
     "@radix-ui/react-switch": "catalog:",
+    "@radix-ui/react-toggle": "^1.1.15",
     "@radix-ui/react-toggle-group": "catalog:",
     "@radix-ui/react-tooltip": "catalog:",
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
-    "tailwind-merge": "catalog:"
+    "embla-carousel-react": "^8.6.0",
+    "input-otp": "^1.4.2",
+    "lucide-react": "^0.577.0",
+    "react-hook-form": "^7.82.0",
+    "tailwind-merge": "catalog:",
+    "zod": "catalog:"
   },
   "peerDependencies": {
     "react": "^19.0.0",

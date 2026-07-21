@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { cn, KaryaCover } from "@myapp/ui";
+import { cn, KaryaCover, Button, Textarea } from "@myapp/ui";
 import { useNavigate } from "../gallery";
 import { ME, MY_KARYA, type Karya } from "../data/karya";
 import { coverFor } from "../lib/images";
@@ -44,13 +44,12 @@ function NoKarya() {
           Yang tayang di sini kemajuan sebuah karya, dan karyanya yang jadi penulis.
         </div>
       </div>
-      <button
-        type="button"
+      <Button
         onClick={() => navigate("karya-new")}
-        className="shrink-0 cursor-pointer rounded-card border-none bg-accent px-3.5 py-2 font-body text-ui font-medium text-accent-fg"
+        className="shrink-0 bg-accent text-accent-fg hover:bg-accent-mid font-medium px-3.5 py-2 h-auto"
       >
         Bikin karya
-      </button>
+      </Button>
     </div>
   );
 }
@@ -74,14 +73,14 @@ function Byline({ karya, onSwitch }: { karya: Karya; onSwitch?: () => void }) {
         </div>
       </div>
       {onSwitch && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
           onClick={onSwitch}
-          className="inline-flex cursor-pointer items-center gap-1 rounded-full border border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2"
+          className="inline-flex h-auto items-center gap-1 rounded-full border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2 hover:bg-transparent hover:text-ink"
         >
           Ganti
           <ChevronDown size={13} strokeWidth={2} aria-hidden="true" />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -145,13 +144,13 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
         </div>
       )}
 
-      <textarea
+      <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
         placeholder="Ceritakan secukupnya. Yang paling berguna biasanya bagian yang tidak terduga."
         aria-label="Isi kabar"
-        className="w-full resize-y rounded-card border border-line bg-bg px-[11px] py-[9px] font-body text-body leading-body text-ink outline-none placeholder:text-ink3"
+        className="w-full resize-y font-body text-body leading-body text-ink"
       />
 
       <div className="flex items-center gap-3">
@@ -160,18 +159,12 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
         <div className="font-body text-micro leading-compact text-ink3">
           Tayang di halaman {karya.title}, lalu muncul di Scroll orang yang mengikutinya.
         </div>
-        <button
-          type="button"
+        <Button
           disabled={!ready}
-          className={cn(
-            "ml-auto shrink-0 rounded-card border-none px-4 py-2 font-body text-ui font-medium transition-[background,color] duration-[120ms]",
-            ready
-              ? "cursor-pointer bg-accent text-accent-fg"
-              : "cursor-default bg-line text-ink3",
-          )}
+          className="ml-auto shrink-0 bg-accent text-accent-fg hover:bg-accent-mid font-medium px-4 h-auto py-2"
         >
           Posting
-        </button>
+        </Button>
       </div>
     </div>
   );

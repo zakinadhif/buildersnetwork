@@ -10,13 +10,21 @@
  * interacting — no extra gallery chrome needed.
  */
 
-import { useRef, useState } from "react";
-import { cn } from "@myapp/ui";
-import { Eyebrow } from "@myapp/ui";
+import { useState } from "react";
+import {
+  cn,
+  Eyebrow,
+  Input,
+  Button,
+  ToggleGroup,
+  ToggleGroupItem,
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@myapp/ui";
 
 type Mode = "daftar" | "masuk";
 
-// ─── Field ──────────────────────────────────────────────────────────────────────
 function Field({ label, type = "text", placeholder, value, onChange, note }: {
   label: string;
   type?: string;
@@ -28,12 +36,11 @@ function Field({ label, type = "text", placeholder, value, onChange, note }: {
   return (
     <label className="block">
       <Eyebrow as="span" className="mb-1.5 block">{label}</Eyebrow>
-      <input
+      <Input
         type={type}
         placeholder={placeholder}
         value={value}
         onChange={onChange ? (e) => onChange(e.target.value) : undefined}
-        className="w-full rounded-card border border-line bg-surface px-[13px] py-[11px] font-body text-body text-ink outline-none placeholder:text-ink3"
       />
       {note && (
         <span className="mt-1.5 block font-body text-micro text-ink3">
@@ -46,13 +53,14 @@ function Field({ label, type = "text", placeholder, value, onChange, note }: {
 
 function PrimaryButton({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) {
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className="w-full cursor-pointer rounded-card border-none bg-ink px-[18px] py-3 font-body text-ui font-semibold tracking-heading text-bg"
+      className="w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
+      size="lg"
     >
       {children}
-    </button>
+    </Button>
   );
 }
 
@@ -69,25 +77,20 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
     <>
       {/* Mode toggle */}
       <div className="mb-7 flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
-        {(["daftar", "masuk"] as const).map((m) => {
-          const on = m === mode;
-          return (
-            <button
+        <ToggleGroup type="single" value={mode} onValueChange={(v) => { if (v) setMode(v as Mode) }} className="flex-1 w-full flex">
+          {(["daftar", "masuk"] as const).map((m) => (
+            <ToggleGroupItem
               key={m}
-              type="button"
-              onClick={() => setMode(m)}
-              aria-pressed={on}
+              value={m}
               className={cn(
-                "flex-1 cursor-pointer rounded-full border-none py-[7px] font-body text-ui transition-[background,color] duration-[120ms]",
-                on
-                  ? "bg-ink text-bg font-medium"
-                  : "bg-transparent text-ink2 font-normal",
+                "flex-1 rounded-full font-body text-ui transition-[background,color] duration-[120ms]",
+                m === mode ? "bg-ink text-bg font-medium" : "text-ink2 font-normal hover:bg-transparent"
               )}
             >
               {m === "daftar" ? "Daftar" : "Masuk"}
-            </button>
-          );
-        })}
+            </ToggleGroupItem>
+          ))}
+        </ToggleGroup>
       </div>
 
       <div className="flex flex-col gap-[18px]">
@@ -122,32 +125,22 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
 
 // ─── Verify view (OTP) ───────────────────────────────────────────────────────────
 function VerifyView({ onBack }: { onBack: () => void }) {
-  const [code, setCode] = useState<string[]>(Array(6).fill(""));
-  const refs = useRef<(HTMLInputElement | null)[]>([]);
-
-  function setDigit(i: number, v: string) {
-    const d = v.replace(/\D/g, "").slice(-1);
-    setCode((prev) => prev.map((c, idx) => (idx === i ? d : c)));
-    if (d && i < 5) refs.current[i + 1]?.focus();
-  }
+  const [code, setCode] = useState("");
 
   return (
     <>
       <div className="mb-5 flex gap-3">
-        {code.map((digit, i) => (
-          <input
-            key={i}
-            ref={(el) => { refs.current[i] = el; }}
-            value={digit}
-            onChange={(e) => setDigit(i, e.target.value)}
-            inputMode="numeric"
-            aria-label={`Digit ${i + 1}`}
-            className={cn(
-              "h-[56px] w-[46px] rounded-card border bg-surface text-center font-body text-title font-medium text-ink outline-none",
-              digit ? "border-accent" : "border-line",
-            )}
-          />
-        ))}
+        <InputOTP maxLength={6} value={code} onChange={setCode}>
+          <InputOTPGroup className="gap-3">
+            {[0, 1, 2, 3, 4, 5].map((i) => (
+              <InputOTPSlot 
+                key={i} 
+                index={i} 
+                className="h-[56px] w-[46px] rounded-card border bg-surface font-body text-title font-medium text-ink"
+              />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
       </div>
 
       <PrimaryButton>Verifikasi &amp; masuk →</PrimaryButton>

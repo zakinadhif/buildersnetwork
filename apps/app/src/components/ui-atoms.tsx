@@ -11,7 +11,7 @@ import { useState } from "react";
  * to declare its own of each, which is how they drifted into different designs.
  * Re-exported here so call sites keep importing atoms from one place.
  */
-export { Avatar, Eyebrow, KaryaCard, KaryaCover, Tag } from "@myapp/ui";
+export { Avatar, Eyebrow, KaryaCard, KaryaCover, Tag, Toggle, Input, Textarea } from "@myapp/ui";
 
 // Lifecycle stages in canonical order, with Indonesian labels for the UI.
 export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStage[];
@@ -222,19 +222,18 @@ export function StageMultiSelect({
       {KARYA_STAGE_ORDER.map((s) => {
         const on = stages.includes(s);
         return (
-          <button
+          <Toggle
             key={s}
-            type="button"
-            className={`inline-flex items-center px-2 py-[3px] bg-bg border border-line rounded-[100px] font-body text-body cursor-pointer transition-all ${
+            pressed={on}
+            onPressedChange={() => toggle(s)}
+            className={`inline-flex h-auto items-center px-2 py-[3px] rounded-[100px] font-body text-body transition-all ${
               on
-                ? "text-bg bg-ink border-ink opacity-100 ring-2 ring-ink ring-offset-1 ring-offset-bg"
-                : "text-ink opacity-70 hover:opacity-100"
+                ? "text-bg bg-ink border border-ink opacity-100 ring-2 ring-ink ring-offset-1 ring-offset-bg hover:bg-ink hover:text-bg"
+                : "text-ink border border-line bg-bg opacity-70 hover:opacity-100 hover:bg-bg"
             }`}
-            aria-pressed={on}
-            onClick={() => toggle(s)}
           >
             {STAGE_LABELS[s]}
-          </button>
+          </Toggle>
         );
       })}
     </div>
@@ -262,7 +261,7 @@ export function EditField({
       </button>
     );
   return multiline ? (
-    <textarea
+    <Textarea
       className="field-ta w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
       value={value}
       rows={3}
@@ -272,7 +271,7 @@ export function EditField({
       autoFocus
     />
   ) : (
-    <input
+    <Input
       className="field-in w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
       value={value}
       onChange={(e) => onChange(e.target.value)}
