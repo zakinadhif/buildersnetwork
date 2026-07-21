@@ -19,7 +19,7 @@ import { cn } from "./lib/cn";
  */
 export function ShellColumns({ children }: { children: ReactNode }) {
   return (
-    <div className="bn-shell-inner mx-auto flex max-w-shell-outer items-start">
+    <div className="bn-shell-inner mx-auto flex w-full max-w-shell-outer items-start">
       {children}
     </div>
   );
