@@ -203,7 +203,7 @@ export default function Karya({ id }: { id: string }) {
             {karya.pendingRequests.map((m) => (
               <div
                 key={m.id}
-                className="flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2"
+                className="pending-row flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2"
               >
                 <div className="flex items-center gap-3 text-body font-medium text-ink">
                   <Avatar name={m.name} image={m.image} size={28} />
@@ -239,7 +239,7 @@ export default function Karya({ id }: { id: string }) {
           <p className="eyebrow mb-1.5">Update</p>
 
           {isMember && (
-            <div className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">
+            <div className="composer bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">
               <div className="flex flex-wrap gap-1.5">
                 {POST_KIND_ORDER.map((k) => (
                   <button
@@ -258,7 +258,7 @@ export default function Karya({ id }: { id: string }) {
                 ))}
               </div>
               <textarea
-                className="bg-transparent border-none font-body text-body text-ink resize-none outline-none min-h-[60px] placeholder:text-ink3"
+                className="composer-input bg-transparent border-none font-body text-body text-ink resize-none outline-none min-h-[60px] placeholder:text-ink3"
                 rows={3}
                 placeholder="bagikan progres, tantangan, atau capaian…"
                 value={postBody}
@@ -286,7 +286,7 @@ export default function Karya({ id }: { id: string }) {
               {posts.map((p) => (
                 <article
                   key={p.id}
-                  className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+                  className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
                 >
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">

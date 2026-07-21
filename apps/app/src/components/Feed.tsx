@@ -19,12 +19,12 @@ export default function Feed({ items }: { items: FeedItem[] }) {
   const [, navigate] = useLocation();
 
   return (
-    <div className="flex flex-col gap-5">
+    <div className="feed flex flex-col gap-5">
       {items.map((it) =>
         it.type === "post" ? (
           <article
             key={`post-${it.id}`}
-            className="bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+            className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
           >
             <div className="flex justify-between items-center">
               <button
@@ -53,7 +53,7 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             <div className="flex justify-between items-center mt-1">
               <button
                 type="button"
-                className="bg-transparent border-none p-0 font-ui text-ui font-medium text-ink2 cursor-pointer hover:text-ink hover:underline"
+                className="post-karya-link bg-transparent border-none p-0 font-ui text-ui font-medium text-ink2 cursor-pointer hover:text-ink hover:underline"
                 onClick={() => navigate(`/karya/${it.karya.id}`)}
               >
                 {it.karya.title}

@@ -175,7 +175,7 @@ Percakapan:\n${transcript}`;
       <div className="shrink-0 pt-3.5 bg-bg flex justify-center">
         <div className="w-full flex items-end gap-3 p-1.5 pl-3 border border-line rounded-panel transition-colors focus-within:border-accent-line">
           <textarea
-            className="flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
+            className="chat-textarea flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
             rows={1}
             placeholder="balas…"
             value={input}

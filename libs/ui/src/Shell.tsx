@@ -19,7 +19,9 @@ import { cn } from "./lib/cn";
  */
 export function ShellColumns({ children }: { children: ReactNode }) {
   return (
-    <div className="mx-auto flex max-w-shell-outer items-start">{children}</div>
+    <div className="bn-shell-inner mx-auto flex max-w-shell-outer items-start">
+      {children}
+    </div>
   );
 }
 
@@ -30,7 +32,7 @@ export function MainColumn({
   return (
     <main
       className={cn(
-        "min-w-0 flex-1 px-[var(--shell-gutter)] pb-12 pt-6 max-[900px]:w-full max-[900px]:p-0",
+        "bn-main min-w-0 flex-1 px-[var(--shell-gutter)] pb-12 pt-6 max-[900px]:w-full max-[900px]:p-0",
         className,
       )}
       {...props}
@@ -45,7 +47,7 @@ export function RailColumn({
   return (
     <aside
       className={cn(
-        "sticky top-0 h-screen w-[calc(var(--shell-rail)+2*var(--shell-gutter)+1px)] shrink-0 overflow-y-auto border-l border-line px-[var(--shell-gutter)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-l-0 max-[900px]:border-r-0 max-[900px]:p-0",
+        "bn-rail sticky top-0 h-screen w-[calc(var(--shell-rail)+2*var(--shell-gutter)+1px)] shrink-0 overflow-y-auto border-l border-line px-[var(--shell-gutter)] py-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-l-0 max-[900px]:border-r-0 max-[900px]:p-0",
         className,
       )}
       {...props}
@@ -85,7 +87,7 @@ export function LeftNav({
   filters?: ReactNode;
 }) {
   return (
-    <aside className="sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
+    <aside className="bn-nav sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
       <div className="mb-4 border-b border-line px-3 pb-5">
         <div className="eyebrow mb-1" style={eyebrow}>
           Al-Fath
@@ -127,7 +129,7 @@ export function LeftNav({
         </div>
       )}
 
-      <div className="mt-auto flex items-center gap-2 border-t border-line px-3 pt-4">
+      <div className="bn-nav-user mt-auto flex items-center gap-2 border-t border-line px-3 pt-4">
         <Avatar name={user.name} size={28} />
         <div className="min-w-0">
           <div className="font-body text-ui font-medium text-ink">

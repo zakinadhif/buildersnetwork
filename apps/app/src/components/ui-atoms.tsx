@@ -163,7 +163,7 @@ export function InterestsEditor({
         {interests.map((s, i) => (
           <span
             key={s}
-            className="inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors"
+            className="chip inline-flex items-center gap-1.5 px-2.5 py-[5px] bg-bg border border-line rounded-[100px] font-body text-body text-ink transition-colors"
           >
             {s}
             <button
@@ -176,7 +176,7 @@ export function InterestsEditor({
           </span>
         ))}
         <input
-          className="bg-transparent border-none p-0 m-0 w-[120px] outline-none font-body text-body text-ink placeholder:text-ink3"
+          className="chip-add bg-transparent border-none p-0 m-0 w-[120px] outline-none font-body text-body text-ink placeholder:text-ink3"
           placeholder="+ tambah minat"
           value={val}
           onChange={(e) => setVal(e.target.value)}
@@ -255,7 +255,7 @@ export function EditField({
     return (
       <button
         type="button"
-        className="bg-transparent border-none text-left p-0 cursor-text font-body text-body text-ink min-h-6 break-words whitespace-pre-wrap outline-none w-full"
+        className="field-val bg-transparent border-none text-left p-0 cursor-text font-body text-body text-ink min-h-6 break-words whitespace-pre-wrap outline-none w-full"
         onClick={() => setEditing(true)}
       >
         {value || <span className="text-ink3">ketuk buat edit</span>}
@@ -263,7 +263,7 @@ export function EditField({
     );
   return multiline ? (
     <textarea
-      className="w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
+      className="field-ta w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
       value={value}
       rows={3}
       onChange={(e) => onChange(e.target.value)}
@@ -273,7 +273,7 @@ export function EditField({
     />
   ) : (
     <input
-      className="w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
+      className="field-in w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
       value={value}
       onChange={(e) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}

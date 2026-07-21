@@ -110,7 +110,7 @@ export default function Launchpad({ user }: { user: Member }) {
       {featuredShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
       ) : (
-        <div className="flex flex-col">
+        <div className="featured flex flex-col">
           {featuredShown.map((k) => (
             <FeaturedCard
               key={k.id}
@@ -193,10 +193,10 @@ export function LaunchpadRail({ user }: { user: Member }) {
           {pulse.map((s) => (
             <div
               key={s.label}
-              className="flex justify-between items-baseline gap-3"
+              className="bn-pulse-row flex justify-between items-baseline gap-3"
             >
               <span className="text-ui text-ink2">{s.label}</span>
-              <span className="text-body font-medium text-ink tabular-nums">
+              <span className="bn-pulse-value text-body font-medium text-ink tabular-nums">
                 {s.value ?? "—"}
               </span>
             </div>
@@ -230,7 +230,7 @@ export function LaunchpadRail({ user }: { user: Member }) {
                 >
                   <Avatar name={m.name} size={34} />
                   <span className="flex-1 min-w-0 flex flex-col gap-[3px]">
-                    <span className="text-ui font-medium text-ink transition-colors group-hover:text-accent">
+                    <span className="bn-builder-name text-ui font-medium text-ink transition-colors group-hover:text-accent">
                       {m.name}
                     </span>
                     <span className="text-micro text-ink3">

@@ -296,7 +296,7 @@ export default function KaryaNew() {
         </Button>
         <hr className="border-none border-b border-line my-7 mb-8" />
 
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Cover (opsional)</p>
           <input
             ref={fileInputRef}
@@ -342,7 +342,7 @@ export default function KaryaNew() {
             </div>
           </div>
         </div>
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Tangkapan layar (opsional)</p>
           <ScreenshotGroup
             label="Landscape"
@@ -363,11 +363,11 @@ export default function KaryaNew() {
             onMove={(i, dir) => moveScreenshot("portrait", i, dir)}
           />
         </div>
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Judul</p>
           <EditField value={draft.title} onChange={(v) => set("title", v)} />
         </div>
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Deskripsi</p>
           <EditField
             value={draft.description}
@@ -375,14 +375,14 @@ export default function KaryaNew() {
             multiline
           />
         </div>
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Tahap</p>
           <StageMultiSelect
             stages={draft.stages}
             onChange={(v) => set("stages", v)}
           />
         </div>
-        <div className="mb-7">
+        <div className="pf mb-7">
           <p className="eyebrow mb-1.5">Minat / tag</p>
           <InterestsEditor
             interests={draft.interests}
