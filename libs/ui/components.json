@@ -10,8 +10,8 @@
     "cssVariables": true
   },
   "aliases": {
-    "components": "@/primitives",
-    "utils": "@/lib/cn",
-    "ui": "@/primitives"
+    "components": "@ui/primitives",
+    "utils": "@ui/lib/cn",
+    "ui": "@ui/primitives"
   }
 }

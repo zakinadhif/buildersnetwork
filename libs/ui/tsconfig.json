@@ -10,7 +10,7 @@
     "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@ui/*": ["./src/*"]
     }
   },
   "include": ["src"]

@@ -21,7 +21,8 @@
     "noUncheckedSideEffectImports": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@ui/*": ["../../libs/ui/src/*"],
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src"]

@@ -3,6 +3,8 @@ import {
   PostKind,
   useListInterests,
 } from "@myapp/api-client-react";
+import { Input, Textarea, Toggle } from "@myapp/ui";
+import * as React from "react";
 import { useState } from "react";
 
 /**
@@ -11,7 +13,16 @@ import { useState } from "react";
  * to declare its own of each, which is how they drifted into different designs.
  * Re-exported here so call sites keep importing atoms from one place.
  */
-export { Avatar, Eyebrow, KaryaCard, KaryaCover, Tag, Toggle, Input, Textarea } from "@myapp/ui";
+export {
+  Avatar,
+  Eyebrow,
+  Input,
+  KaryaCard,
+  KaryaCover,
+  Tag,
+  Textarea,
+  Toggle,
+} from "@myapp/ui";
 
 // Lifecycle stages in canonical order, with Indonesian labels for the UI.
 export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStage[];
@@ -265,18 +276,16 @@ export function EditField({
       className="field-ta w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink resize-none focus:border-accent-line transition-colors"
       value={value}
       rows={3}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}
-      // biome-ignore lint/a11y/noAutofocus: intentional focus when edit mode activates
       autoFocus
     />
   ) : (
     <Input
       className="field-in w-full bg-bg border border-line rounded-[6px] px-2 py-1 outline-none font-body text-body text-ink min-h-6 focus:border-accent-line transition-colors"
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value)}
       onBlur={() => setEditing(false)}
-      // biome-ignore lint/a11y/noAutofocus: intentional focus when edit mode activates
       autoFocus
     />
   );
