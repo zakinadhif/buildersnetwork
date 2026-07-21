@@ -46,7 +46,8 @@ function NoKarya() {
       </div>
       <Button
         onClick={() => navigate("karya-new")}
-        className="shrink-0 bg-accent text-accent-fg hover:bg-accent-mid font-medium px-3.5 py-2 h-auto"
+        variant="primary"
+        className="shrink-0 font-medium px-3.5 py-2 h-auto"
       >
         Bikin karya
       </Button>
@@ -161,7 +162,8 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
         </div>
         <Button
           disabled={!ready}
-          className="ml-auto shrink-0 bg-accent text-accent-fg hover:bg-accent-mid font-medium px-4 h-auto py-2"
+          variant="primary"
+          className="ml-auto shrink-0 font-medium px-4 h-auto py-2"
         >
           Posting
         </Button>

@@ -56,7 +56,7 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
   onSubmit: () => void;
 }) {
   const daftar = mode === "daftar";
-  
+
   const form = useForm<AuthValues>({
     resolver: zodResolver(authSchema),
     defaultValues: { email, password: "" },
@@ -72,14 +72,14 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
       <form onSubmit={form.handleSubmit(handleSubmit)}>
         {/* Mode toggle */}
         <div className="mb-7 flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
-          <ToggleGroup type="single" value={mode} onValueChange={(v) => { if (v) setMode(v as Mode) }} className="flex-1 w-full flex">
+          <ToggleGroup type="single" value={mode} onValueChange={(v: any) => { if (v) setMode(v as Mode) }} className="flex-1 w-full flex">
             {(["daftar", "masuk"] as const).map((m) => (
               <ToggleGroupItem
                 key={m}
                 value={m}
                 className={cn(
-                  "flex-1 rounded-full font-body text-ui transition-[background,color] duration-[120ms]",
-                  m === mode ? "bg-ink text-bg font-medium" : "text-ink2 font-normal hover:bg-transparent"
+                  "flex-1 rounded-full font-body text-ui transition-[background,color] duration-[120ms] text-ink2 font-normal hover:bg-transparent",
+                  "data-[state=on]:bg-ink data-[state=on]:text-bg data-[state=on]:font-medium"
                 )}
               >
                 {m === "daftar" ? "Daftar" : "Masuk"}
@@ -124,7 +124,7 @@ function FormView({ mode, setMode, email, setEmail, onSubmit }: {
 
           <Button
             type="submit"
-            className="mt-2 w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
+            className="w-full bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading"
             size="lg"
           >
             {daftar ? "Kirim kode ke email →" : "Masuk →"}
@@ -170,9 +170,9 @@ function VerifyView({ onBack }: { onBack: () => void }) {
                   <InputOTP maxLength={6} {...field}>
                     <InputOTPGroup className="gap-3">
                       {[0, 1, 2, 3, 4, 5].map((i) => (
-                        <InputOTPSlot 
-                          key={i} 
-                          index={i} 
+                        <InputOTPSlot
+                          key={i}
+                          index={i}
                           className="h-[56px] w-[46px] rounded-card border bg-surface font-body text-title font-medium text-ink"
                         />
                       ))}

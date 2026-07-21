@@ -66,7 +66,7 @@ function Facepile({ people, max = 3 }: { people: Member[]; max?: number }) {
       {shown.map((p, i) => (
         <span
           key={p.id}
-          className="rounded-full leading-none shadow-[0_0_0_1.5px_var(--color-bg)]"
+          className="flex rounded-full leading-none shadow-[0_0_0_1.5px_var(--color-bg)]"
           style={{ marginLeft: i === 0 ? 0 : -5, zIndex: shown.length - i }}
         >
           <Avatar name={p.name} size={16} />

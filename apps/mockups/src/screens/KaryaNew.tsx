@@ -54,7 +54,7 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
       className={cn(
         "rounded-full border px-[13px] py-1.5 font-body text-ui h-auto",
         on
-          ? "border-accent bg-accent-tint text-accent font-medium hover:bg-accent-tint hover:text-accent"
+          ? "data-[state=on]:border-accent data-[state=on]:bg-accent-tint data-[state=on]:text-accent font-medium hover:bg-accent-tint hover:text-accent"
           : "border-line bg-transparent text-ink2 font-normal hover:bg-transparent hover:text-ink"
       )}
     >
