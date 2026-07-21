@@ -1,7 +1,7 @@
 import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import { Avatar } from "./Avatar";
-import { cn } from "./lib/cn";
 import { Eyebrow } from "./Eyebrow";
+import { cn } from "./lib/cn";
 
 /**
  * The frame the three columns sit in (#92) — the measure, the gutters, and the

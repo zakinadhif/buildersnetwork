@@ -2,8 +2,8 @@ import { sendOtp } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
-import { signIn, signUp, useSession } from "@/lib/auth-client";
 import { Eyebrow } from "@/components/ui-atoms";
+import { signIn, signUp, useSession } from "@/lib/auth-client";
 
 type Mode = "signup" | "signin";
 

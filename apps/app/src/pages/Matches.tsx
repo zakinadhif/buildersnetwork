@@ -5,10 +5,9 @@ import {
 } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useLocation } from "wouter";
-import { Loading } from "@/components/ui-atoms";
+import { Eyebrow, Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
-import { Eyebrow } from "@/components/ui-atoms";
 
 export default function Matches() {
   const { matches: contextMatches } = useOnboarding();

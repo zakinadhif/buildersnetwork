@@ -1,10 +1,14 @@
 import { useStream } from "@myapp/ai/react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import { Dots, KARYA_STAGE_ORDER, Loading } from "@/components/ui-atoms";
+import {
+  Dots,
+  Eyebrow,
+  KARYA_STAGE_ORDER,
+  Loading,
+} from "@/components/ui-atoms";
 import { type KaryaDraft, useKaryaDraft } from "@/lib/karya-draft-ctx";
 import { callClaude, cleanJSON } from "@/lib/members";
-import { Eyebrow } from "@/components/ui-atoms";
 
 const INTRO =
   "oke, ceritain karya yang mau kamu bikin. mulai dari yang paling simpel: namanya apa, atau lagi ngerjain apa?";

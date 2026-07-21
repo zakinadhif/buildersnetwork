@@ -6,13 +6,13 @@ import { useLocation } from "wouter";
 import AssistantChat from "@/components/AssistantChat";
 import {
   EditField,
+  Eyebrow,
   InterestsEditor,
   Loading,
   SkillsEditor,
 } from "@/components/ui-atoms";
 import { introForMember } from "@/lib/assistant-copy";
 import type { Member } from "@/lib/members";
-import { Eyebrow } from "@/components/ui-atoms";
 
 /**
  * The AI assistant tab (issue #8) — the onboarding chat, now an always-available

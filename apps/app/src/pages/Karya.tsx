@@ -11,9 +11,9 @@ import {
 } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useState } from "react";
-import { Eyebrow } from "@/components/ui-atoms";
 import {
   Avatar,
+  Eyebrow,
   KaryaCover,
   Loading,
   POST_KIND_LABELS,
@@ -189,7 +189,9 @@ export default function Karya({ id }: { id: string }) {
         )}
 
         <div className="mb-7">
-          <Eyebrow className="mb-1.5">Kontributor ({karya.roster.length})</Eyebrow>
+          <Eyebrow className="mb-1.5">
+            Kontributor ({karya.roster.length})
+          </Eyebrow>
           <div className="flex flex-wrap gap-2">
             {karya.roster.map((m) => (
               <Avatar key={m.id} name={m.name} image={m.image} />

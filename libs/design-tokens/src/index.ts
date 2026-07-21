@@ -84,4 +84,3 @@ export const T = {
   shellGutter: "var(--shell-gutter)",
   pageMax: "var(--container-page)",
 } as const;
-

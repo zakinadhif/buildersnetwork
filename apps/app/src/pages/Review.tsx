@@ -10,6 +10,7 @@ import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import {
   EditField,
+  Eyebrow,
   InterestsEditor,
   Loading,
   SkillsEditor,
@@ -17,7 +18,6 @@ import {
 import { groundMatches } from "@/lib/matching";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/onboarding-ctx";
-import { Eyebrow } from "@/components/ui-atoms";
 
 export default function Review() {
   const { draft: initialDraft, setMatches } = useOnboarding();

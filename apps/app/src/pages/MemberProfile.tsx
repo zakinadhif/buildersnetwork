@@ -1,7 +1,6 @@
 import { useGetMember } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
-import { Loading, Tag } from "@/components/ui-atoms";
-import { Eyebrow } from "@/components/ui-atoms";
+import { Eyebrow, Loading, Tag } from "@/components/ui-atoms";
 
 export default function MemberProfilePage({ id }: { id: string }) {
   const { data: member, isLoading } = useGetMember(id);

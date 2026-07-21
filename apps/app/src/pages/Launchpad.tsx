@@ -8,9 +8,13 @@ import {
 import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import { Avatar, KaryaCard, STAGE_LABELS } from "@/components/ui-atoms";
+import {
+  Avatar,
+  Eyebrow,
+  KaryaCard,
+  STAGE_LABELS,
+} from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
-import { Eyebrow } from "@/components/ui-atoms";
 
 /**
  * The Launchpad home (issue #8) — the Launchpad-mockup treatment of the feed-first
@@ -107,7 +111,9 @@ export default function Launchpad({ user }: { user: Member }) {
         </div>
       )}
 
-      <Eyebrow className="pb-2.5 border-b border-line">Pilihan inspiratif</Eyebrow>
+      <Eyebrow className="pb-2.5 border-b border-line">
+        Pilihan inspiratif
+      </Eyebrow>
       {featuredShown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
       ) : (

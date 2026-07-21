@@ -3,8 +3,7 @@ import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Loading } from "@/components/ui-atoms";
-import { Eyebrow } from "@/components/ui-atoms";
+import { Eyebrow, Loading } from "@/components/ui-atoms";
 
 /**
  * The minimal-profile start (issue #8, grooming decision 2: a quick one-field
