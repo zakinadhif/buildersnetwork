@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type { Screen } from "../gallery";
-import { T } from "@myapp/design-tokens";
 import { ShellColumns } from "@myapp/ui";
 import { GlobalStyles } from "./GlobalStyles";
 import { LeftNav } from "./LeftNav";
@@ -28,12 +27,7 @@ export function Shell({ active, navFilters, children }: {
   children:    ReactNode;
 }) {
   return (
-    <div style={{
-      backgroundColor: T.bg,
-      minHeight:       "100vh",
-      fontFamily:      T.fontBody,
-      color:           T.ink,
-    }}>
+    <div className="min-h-screen bg-bg font-body text-ink">
       <GlobalStyles />
       {/* Three-column layout (collapses to one column below ~900px) */}
       <ShellColumns>

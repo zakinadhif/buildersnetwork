@@ -11,27 +11,72 @@
    decided by us rather than inherited from the reader. Adopting it did not move
    the gallery: the declared values that carried a ring or a gutter were
    corrected in the same change, and all three screens measure pixel-identical to
-   what they rendered before.
+   what they rendered before. */
 
-   Tailwind is still imported in pieces rather than as `@import "tailwindcss"`,
-   and preflight is still the piece left out — but only barely, and for one
-   reason now. The base carries everything preflight offers that both sides can
-   share for free. What is left is `line-height: 1.5`, and leading is the one
-   thing the gallery cannot adopt without changing: 221 of its elements have
-   never had a leading at all and inherit `line-height: normal` — which is not a
-   number but a value derived from font metrics, so it shifts with the font, the
-   OS's fallback font, and the engine's rounding. Their height is decided by the
-   reader's browser, not by us. Pinning it moves them 2-9px, which necessarily
-   changes the reference. That is a design decision, so it is #93's to make in
-   the open — not a side effect of an import here.
-
-   (The comment this replaced claimed preflight "moved 320 of 335 elements". It
-   didn't, and that number scared off this decision for months. It came from
-   diffing elements' ABSOLUTE x/y, where resizing one container makes every
-   descendant "move" — one cause, hundreds of phantom symptoms. Measure each
-   element's OWN box instead.) */
-@import "@myapp/design-tokens/base.css";
-@import "tailwindcss/theme.css";
-@import "tailwindcss/utilities.css";
+@import "tailwindcss";
+@source "../../../libs/ui/src";
 @import "@myapp/design-tokens/theme.css";
-@import "@myapp/ui/ui.css";
+
+/* ── Static base rules from GlobalStyles.tsx ─────────────────────────────────
+   Rules that were formerly injected at runtime via a <style> tag in
+   GlobalStyles.tsx. They never depend on runtime JS state, so they belong here.
+   GlobalStyles.tsx retains only the truly dynamic bits (gutter-bleed, bn-* media
+   overrides that reference T.* values). */
+
+/* Even line breaks; fewer orphans in prose. */
+h1, h2, h3 { text-wrap: balance; overflow-wrap: break-word; }
+p { text-wrap: pretty; overflow-wrap: break-word; }
+
+/* Leading by role (#93) — headings tight, controls compact. */
+h1, h2, h3, h4 { line-height: var(--leading-heading); }
+button, input, select, textarea { line-height: var(--leading-compact); }
+
+/* Visible keyboard focus on every interactive control. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-card);
+}
+
+/* Placeholder held to body-text contrast, not the UA grey. */
+input::placeholder { color: var(--color-ink3); opacity: 1; }
+
+/* Scrollbar styling for spotlight carousel */
+.spotlight-carousel::-webkit-scrollbar { height: 8px; }
+.spotlight-carousel::-webkit-scrollbar-thumb {
+  background: var(--color-line-dark);
+  border-radius: 99px;
+}
+.spotlight-carousel::-webkit-scrollbar-track { background: transparent; }
+
+/* "Diskusi aktif" live-dot animation */
+@keyframes bn-live-pulse {
+  0%, 100% { opacity: 1;    transform: scale(1);    }
+  50%       { opacity: 0.35; transform: scale(0.78); }
+}
+.bn-live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--color-accent);
+  flex-shrink: 0;
+  animation: bn-live-pulse 2.4s ease-in-out infinite;
+}
+
+/* Honour reduced-motion. */
+@media (prefers-reduced-motion: reduce) {
+  * { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+
+/* Cari variant B's 2-col card grid collapses on a narrow center column. */
+@media (max-width: 700px) {
+  .cari-grid { grid-template-columns: 1fr !important; }
+}
+
+/* Comfortable touch targets where the pointer is coarse. */
+@media (pointer: coarse) {
+  .bn-nav-items button { min-height: 44px; }
+}

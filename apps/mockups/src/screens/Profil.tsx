@@ -12,11 +12,11 @@
  */
 
 import { useState } from "react";
-import { Avatar, Tag } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Avatar, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { KARYA, MEMBERS } from "../data/karya";
 import { coverFor } from "../lib/images";
+import { Eyebrow } from "@myapp/ui";
 
 const MEMBER = MEMBERS[0]; // Arief Maulana
 const THEIR_KARYA = KARYA.filter((k) => k.roster.some((r) => r.name === MEMBER.name));
@@ -29,18 +29,18 @@ function KaryaMini({ title, description, stages, interests }: {
   interests: string[];
 }) {
   return (
-    <div style={{ display: "flex", gap: 14, padding: "14px 0", borderTop: `1px solid ${T.line}` }}>
+    <div className="flex gap-3.5 border-t border-line py-3.5">
       <img
         src={coverFor(interests)}
         alt={title}
-        style={{ width: 60, height: 60, flexShrink: 0, objectFit: "cover", borderRadius: 12, border: `1px solid ${T.line}` }}
+        className="h-[60px] w-[60px] shrink-0 rounded-xl border border-line object-cover"
       />
-      <div style={{ minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 8, flexWrap: "wrap" as const, marginBottom: 3 }}>
-          <span style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, color: T.ink }}>{title}</span>
-          <span style={eyebrow}>{stages[stages.length - 1]}</span>
+      <div className="min-w-0">
+        <div className="mb-[3px] flex flex-wrap items-baseline gap-2">
+          <span className="font-display text-title text-ink">{title}</span>
+          <Eyebrow as="span">{stages[stages.length - 1]}</Eyebrow>
         </div>
-        <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink2, lineHeight: T.lh.body }}>{description}</p>
+        <p className="m-0 font-body text-caption leading-body text-ink2">{description}</p>
       </div>
     </div>
   );
@@ -52,60 +52,45 @@ export default function ProfilScreen() {
   const m = MEMBER;
 
   const metaRow = (label: string, value: number | string) => (
-    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-      <span style={eyebrow}>{label}</span>
-      <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{value}</span>
+    <div className="flex items-baseline justify-between">
+      <Eyebrow as="span">{label}</Eyebrow>
+      <span className="font-body text-ui text-ink2">{value}</span>
     </div>
   );
-
-  const actionBtn = (primary: boolean): React.CSSProperties => ({
-    width: "100%",
-    boxSizing: "border-box" as const,
-    textAlign: "center" as const,
-    fontFamily: T.fontBody,
-    fontSize: T.size.ui,
-    fontWeight: primary ? T.weight.semibold : T.weight.medium,
-    padding: "9px 18px",
-    borderRadius: T.radiusCard,
-    cursor: "pointer",
-    border: primary ? "none" : `1px solid ${T.line}`,
-    background: primary ? T.ink : "transparent",
-    color: primary ? T.bg : T.ink,
-  });
 
   return (
     <Shell active="profil">
       {/* Identity column */}
-      <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
+      <MainColumn>
         {/* Back to the surface the profile was opened from */}
-        <button type="button" style={{ background: "none", border: "none", padding: 0, cursor: "pointer", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, marginBottom: 24 }}>← Balik</button>
+        <button type="button" className="mb-6 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">← Balik</button>
 
         {/* Identity */}
-        <div style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+        <div className="flex items-start gap-[18px]">
           <Avatar name={m.name} size={76} />
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h1 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, letterSpacing: T.track.heading, lineHeight: T.lh.heading, color: T.ink }}>{m.name}</h1>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3, marginBottom: 10 }}>
+          <div className="min-w-0 flex-1">
+            <h1 className="mb-[3px] mt-0 font-display text-feature font-normal tracking-heading leading-heading text-ink">{m.name}</h1>
+            <div className="mb-2.5 font-body text-ui text-ink3">
               {m.handle} · Tkt {m.year} · {m.major}
             </div>
-            <p style={{ margin: 0, fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>{m.bio}</p>
+            <p className="m-0 font-body text-body leading-body text-ink2">{m.bio}</p>
           </div>
         </div>
 
         {/* Skills & interests */}
-        <p style={{ ...eyebrow, margin: "30px 0 10px" }}>Keahlian</p>
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginBottom: 22 }}>
+        <Eyebrow className="mb-2.5 mt-[30px]">Keahlian</Eyebrow>
+        <div className="mb-[22px] flex flex-wrap gap-1.5">
           {m.skills.map((s) => <Tag key={s} label={s} accent />)}
         </div>
-        <p style={{ ...eyebrow, marginBottom: 10 }}>Minat</p>
-        <div style={{ display: "flex", flexWrap: "wrap" as const, gap: 6, marginBottom: 30 }}>
+        <Eyebrow className="mb-2.5">Minat</Eyebrow>
+        <div className="mb-[30px] flex flex-wrap gap-1.5">
           {m.interests.map((i) => <Tag key={i} label={i} />)}
         </div>
 
         {/* Their karya */}
-        <p style={{ ...eyebrow, marginBottom: 4 }}>Karya yang digarap</p>
+        <Eyebrow className="mb-1">Karya yang digarap</Eyebrow>
         {THEIR_KARYA.length === 0 ? (
-          <p style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "18px 0" }}>Belum ada karya yang dibagikan.</p>
+          <p className="py-[18px] font-body text-body text-ink3">Belum ada karya yang dibagikan.</p>
         ) : (
           <div>
             {THEIR_KARYA.map((k) => (
@@ -113,12 +98,12 @@ export default function ProfilScreen() {
             ))}
           </div>
         )}
-      </main>
+      </MainColumn>
 
       {/* Actions rail */}
-      <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
+      <RailColumn className="flex flex-col gap-5">
         {/* Self/other toggle — gallery affordance to preview both viewer states */}
-        <div style={{ display: "flex", gap: 2, padding: 3, background: T.surface, border: `1px solid ${T.line}`, borderRadius: 99 }}>
+        <div className="flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
           {([["visitor", "Orang lain"], ["self", "Profil sendiri"]] as const).map(([val, label]) => {
             const on = (val === "self") === self;
             return (
@@ -127,7 +112,10 @@ export default function ProfilScreen() {
                 type="button"
                 onClick={() => setSelf(val === "self")}
                 aria-pressed={on}
-                style={{ flex: 1, border: "none", borderRadius: 99, padding: "5px 12px", background: on ? T.ink : "transparent", color: on ? T.bg : T.ink2, fontFamily: T.fontBody, fontSize: T.size.micro, fontWeight: on ? T.weight.medium : T.weight.regular, cursor: "pointer" }}
+                className={cn(
+                  "flex-1 cursor-pointer rounded-full border-none px-3 py-[5px] font-body text-micro",
+                  on ? "bg-ink text-bg font-medium" : "bg-transparent text-ink2 font-normal",
+                )}
               >
                 {label}
               </button>
@@ -136,24 +124,30 @@ export default function ProfilScreen() {
         </div>
 
         {/* Actions */}
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+        <div className="flex flex-col gap-2">
           {self ? (
-            <button type="button" style={actionBtn(false)}>Sunting profil</button>
+            <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-[18px] py-[9px] text-center font-body text-ui font-medium text-ink">
+              Sunting profil
+            </button>
           ) : (
             <>
-              <button type="button" style={actionBtn(true)}>Ajak kolaborasi</button>
-              <button type="button" style={actionBtn(false)}>Kirim pesan</button>
+              <button type="button" className="w-full cursor-pointer rounded-card border-none bg-ink px-4 py-[9px] text-center font-body text-ui font-semibold text-bg">
+                Ajak kolaborasi
+              </button>
+              <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">
+                Kirim pesan
+              </button>
             </>
           )}
         </div>
 
         {/* Stats */}
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 12, paddingTop: 16, borderTop: `1px solid ${T.line}` }}>
+        <div className="flex flex-col gap-3 border-t border-line pt-4">
           {metaRow("Karya", m.karya)}
           {metaRow("Skill", m.skills.length)}
           {metaRow("Angkatan", `'${String(20 + m.year)}`)}
         </div>
-      </aside>
+      </RailColumn>
     </Shell>
   );
 }

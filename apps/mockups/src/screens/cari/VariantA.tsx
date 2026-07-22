@@ -6,14 +6,14 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "@myapp/ui";
+import { Avatar, MainColumn, RailColumn, Tag } from "@myapp/ui";
+import { cn } from "@myapp/ui";
 import { Shell } from "../../components/Shell";
-import { Tag } from "@myapp/ui";
 import { KARYA_SLOTS, SEEKERS, type KaryaSlot, type Seeker } from "../../data/seekers";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Eyebrow } from "@myapp/ui";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -26,22 +26,13 @@ const BADGE_LABEL: Record<LookingFor, string> = {
 // Three visual weights: hackathon = terracotta (urgent/event), project =
 // neutral dark border, gig = hairline quiet.
 function BadgeChip({ type }: { type: LookingFor }) {
-  const isHackathon = type === "hackathon";
-  const isProject   = type === "project";
   return (
-    <span style={{
-      display:         "inline-block",
-      fontFamily:      T.fontBody,
-      fontSize:        T.size.micro,
-      letterSpacing:   T.track.eyebrow,
-      textTransform:   "uppercase" as const,
-      padding:         "2px 8px",
-      borderRadius:    "3px",
-      border:          `1px solid ${isHackathon ? T.accent : isProject ? T.ink2 : T.line}`,
-      color:           isHackathon ? T.accent : isProject ? T.ink2 : T.ink3,
-      backgroundColor: isHackathon ? T.accentTint : "transparent",
-      whiteSpace:      "nowrap" as const,
-    }}>
+    <span className={cn(
+      "inline-block whitespace-nowrap rounded-[3px] border px-2 py-[2px] font-body text-micro tracking-eyebrow uppercase",
+      type === "hackathon" && "border-accent bg-accent-tint text-accent",
+      type === "project"   && "border-ink2 bg-transparent text-ink2",
+      type === "gig"       && "border-line bg-transparent text-ink3",
+    )}>
       {BADGE_LABEL[type]}
     </span>
   );
@@ -51,113 +42,50 @@ function BadgeChip({ type }: { type: LookingFor }) {
 // Shows a person who is actively looking for a team or gig.
 function SeekerCard({ seeker }: { seeker: Seeker }) {
   return (
-    <article style={{
-      padding:      "18px 0",
-      borderBottom: `1px solid ${T.line}`,
-    }}>
-      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+    <article className="border-b border-line py-[18px]">
+      <div className="flex items-start gap-3.5">
         {/* Avatar */}
         <Avatar name={seeker.name} size={44} />
 
         {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="min-w-0 flex-1">
           {/* Name + handle + badge */}
-          <div style={{
-            display:      "flex",
-            alignItems:   "center",
-            gap:          8,
-            flexWrap:     "wrap" as const,
-            marginBottom: 2,
-          }}>
-            <span style={{
-              fontFamily: T.fontDisplay,
-              fontSize:   T.size.title,
-              fontWeight: T.weight.regular,
-              color:      T.ink,
-              lineHeight: T.lh.heading,
-            }}>{seeker.name}</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{seeker.handle}</span>
+          <div className="mb-0.5 flex flex-wrap items-center gap-2">
+            <span className="font-display text-title font-normal leading-heading text-ink">{seeker.name}</span>
+            <span className="font-body text-micro text-ink3">{seeker.handle}</span>
             <BadgeChip type={seeker.badge} />
           </div>
 
           {/* Tingkat · Jurusan · posted */}
-          <div style={{
-            fontFamily:   T.fontBody,
-            fontSize:     T.size.micro,
-            color:        T.ink3,
-            marginBottom: 8,
-            lineHeight:   T.lh.compact,
-          }}>
+          <div className="mb-2 font-body text-micro leading-compact text-ink3">
             {seeker.tingkat} · {seeker.jurusan} · diposting {relativeTime(seeker.postedHoursAgo)}
           </div>
 
           {/* Bio */}
-          <p style={{
-            margin:     "0 0 10px",
-            fontFamily: T.fontBody,
-            fontSize:   T.size.body,
-            color:      T.ink2,
-            lineHeight: T.lh.body,
-          }}>{seeker.bio}</p>
+          <p className="mb-2.5 mt-0 font-body text-body leading-body text-ink2">{seeker.bio}</p>
 
           {/* Skill chips */}
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginBottom: 10 }}>
+          <div className="mb-2.5 flex flex-wrap gap-1">
             {seeker.skills.map((s) => <Tag key={s} label={s} accent />)}
           </div>
 
           {/* Current karya */}
           {seeker.currentKarya && (
-            <div style={{
-              display:      "flex",
-              alignItems:   "center",
-              gap:          6,
-              marginBottom: 14,
-              flexWrap:     "wrap" as const,
-            }}>
-              <span style={eyebrow}>sedang bangun</span>
-              <span style={{
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.micro,
-                color:           T.ink,
-                backgroundColor: T.surface,
-                border:          `1px solid ${T.lineDark}`,
-                padding:         "2px 8px",
-                borderRadius:    "3px",
-              }}>
+            <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
+              <Eyebrow as="span">sedang bangun</Eyebrow>
+              <span className="rounded-[3px] border border-line-dark bg-surface px-2 py-[2px] font-body text-micro text-ink">
                 {seeker.currentKarya.title}
-                <span style={{ color: T.ink3 }}> — {seeker.currentKarya.role}</span>
+                <span className="text-ink3"> — {seeker.currentKarya.role}</span>
               </span>
             </div>
           )}
 
           {/* Actions */}
-          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-            <button style={{
-              backgroundColor: T.accent,
-              color:           T.accentFg,
-              border:          "none",
-              borderRadius:    T.radiusCard,
-              padding:         "7px 15px",
-              fontFamily:      T.fontBody,
-              fontSize:        T.size.ui,
-              fontWeight:      T.weight.semibold,
-              cursor:          "pointer",
-              whiteSpace:      "nowrap" as const,
-            }}>
+          <div className="flex flex-wrap gap-2">
+            <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-[15px] py-[7px] font-body text-ui font-semibold text-accent-fg">
               Ajak ke Karya
             </button>
-            <button style={{
-              background:   "transparent",
-              color:        T.ink2,
-              border:       `1px solid ${T.line}`,
-              borderRadius: T.radiusCard,
-              padding:      "7px 15px",
-              fontFamily:   T.fontBody,
-              fontSize:     T.size.ui,
-              fontWeight:   T.weight.medium,
-              cursor:       "pointer",
-              whiteSpace:   "nowrap" as const,
-            }}>
+            <button className="cursor-pointer whitespace-nowrap rounded-card border border-line bg-transparent px-[15px] py-[7px] font-body text-ui font-medium text-ink2">
               Kirim Pesan
             </button>
           </div>
@@ -171,108 +99,53 @@ function SeekerCard({ seeker }: { seeker: Seeker }) {
 // Shows a karya that has open contributor slots.
 function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
   return (
-    <article style={{
-      padding:      "18px 0",
-      borderBottom: `1px solid ${T.line}`,
-    }}>
-      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+    <article className="border-b border-line py-[18px]">
+      <div className="flex items-start gap-3.5">
         {/* Cover thumbnail */}
-        <div style={{
-          width:        56,
-          height:       56,
-          flexShrink:   0,
-          borderRadius: 14,
-          overflow:     "hidden",
-          border:       `1px solid ${T.line}`,
-          background:   T.bg,
-        }}>
+        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-[14px] border border-line bg-bg">
           <img
             src={coverFor(slot.interests)}
             alt={slot.title}
             loading="lazy"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            className="block h-full w-full object-cover"
           />
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, minWidth: 0 }}>
+        <div className="min-w-0 flex-1">
           {/* Title + stage + badge */}
-          <div style={{
-            display:      "flex",
-            alignItems:   "center",
-            gap:          8,
-            flexWrap:     "wrap" as const,
-            marginBottom: 2,
-          }}>
-            <h3 style={{
-              margin:     0,
-              fontFamily: T.fontDisplay,
-              fontSize:   T.size.title,
-              fontWeight: T.weight.regular,
-              color:      T.ink,
-              lineHeight: T.lh.heading,
-            }}>{slot.title}</h3>
+          <div className="mb-0.5 flex flex-wrap items-center gap-2">
+            <h3 className="m-0 font-display text-title font-normal leading-heading text-ink">{slot.title}</h3>
             <Tag label={slot.stage} accent={slot.stage === "GEMASTIK 2026" || slot.stage === "Hackathon"} />
             <BadgeChip type={slot.badge} />
           </div>
 
           {/* Posted time */}
-          <div style={{
-            fontFamily:   T.fontBody,
-            fontSize:     T.size.micro,
-            color:        T.ink3,
-            marginBottom: 8,
-          }}>
+          <div className="mb-2 font-body text-micro text-ink3">
             dibuka {relativeTime(slot.postedHoursAgo)}
           </div>
 
           {/* One-line description */}
-          <p style={{
-            margin:     "0 0 10px",
-            fontFamily: T.fontBody,
-            fontSize:   T.size.body,
-            color:      T.ink2,
-            lineHeight: T.lh.body,
-          }}>{slot.desc}</p>
+          <p className="mb-2.5 mt-0 font-body text-body leading-body text-ink2">{slot.desc}</p>
 
           {/* Open roles — the core matchmaking signal */}
-          <div style={{
-            display:      "flex",
-            alignItems:   "center",
-            gap:          6,
-            flexWrap:     "wrap" as const,
-            marginBottom: 10,
-          }}>
-            <span style={eyebrow}>butuh</span>
+          <div className="mb-2.5 flex flex-wrap items-center gap-1.5">
+            <Eyebrow as="span">butuh</Eyebrow>
             {slot.openRoles.map((r) => (
-              <span key={r} style={{
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.micro,
-                color:           T.ink,
-                backgroundColor: T.accentTint,
-                border:          `1px solid ${T.accentLine}`,
-                padding:         "2px 8px",
-                borderRadius:    "3px",
-              }}>{r}</span>
+              <span key={r} className="rounded-[3px] border border-accent-line bg-accent-tint px-2 py-[2px] font-body text-micro text-ink">{r}</span>
             ))}
           </div>
 
           {/* Interest chips + roster avatars + actions */}
-          <div style={{
-            display:        "flex",
-            alignItems:     "center",
-            justifyContent: "space-between",
-            flexWrap:       "wrap" as const,
-            gap:            10,
-          }}>
+          <div className="flex flex-wrap items-center justify-between gap-2.5">
             {/* Interest chips */}
-            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+            <div className="flex flex-wrap gap-1">
               {slot.interests.map((i) => <Tag key={i} label={i} />)}
             </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div className="flex items-center gap-2.5">
               {/* Roster avatars */}
-              <div style={{ display: "flex", alignItems: "center" }}>
+              <div className="flex items-center">
                 {slot.roster.slice(0, 4).map((r, idx) => (
                   <span
                     key={r.name}
@@ -284,32 +157,10 @@ function KaryaSlotCard({ slot }: { slot: KaryaSlot }) {
               </div>
 
               {/* Actions */}
-              <button style={{
-                backgroundColor: T.accent,
-                color:           T.accentFg,
-                border:          "none",
-                borderRadius:    T.radiusCard,
-                padding:         "6px 13px",
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.ui,
-                fontWeight:      T.weight.semibold,
-                cursor:          "pointer",
-                whiteSpace:      "nowrap" as const,
-              }}>
+              <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-[13px] py-1.5 font-body text-ui font-semibold text-accent-fg">
                 Minta Gabung
               </button>
-              <button style={{
-                background:   "transparent",
-                color:        T.ink2,
-                border:       `1px solid ${T.line}`,
-                borderRadius: T.radiusCard,
-                padding:      "6px 13px",
-                fontFamily:   T.fontBody,
-                fontSize:     T.size.ui,
-                fontWeight:   T.weight.medium,
-                cursor:       "pointer",
-                whiteSpace:   "nowrap" as const,
-              }}>
+              <button className="cursor-pointer whitespace-nowrap rounded-card border border-line bg-transparent px-[13px] py-1.5 font-body text-ui font-medium text-ink2">
                 Tanya Dulu
               </button>
             </div>
@@ -351,48 +202,20 @@ function CenterBoard() {
   const resultCount = lane === "orang" ? filteredSeekers.length : filteredSlots.length;
 
   return (
-    <main className="bn-main" style={{
-      flex:          1,
-      minWidth:      0,
-      display:       "flex",
-      flexDirection: "column" as const,
-      gap:           0,
-    }}>
+    <MainColumn className="flex flex-col gap-0">
       {/* Page heading */}
-      <div style={{ marginBottom: 20 }}>
-        <h1 style={{
-          margin:        "0 0 4px",
-          fontFamily:    T.fontDisplay,
-          fontSize:      T.size.display,
-          fontWeight:    T.weight.regular,
-          letterSpacing: T.track.heading,
-          color:         T.ink,
-          lineHeight:    T.lh.heading,
-        }}>
+      <div className="mb-5">
+        <h1 className="mb-1 mt-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
           Cari Kolaborator
         </h1>
-        <p style={{
-          margin:     0,
-          fontFamily: T.fontBody,
-          fontSize:   T.size.body,
-          color:      T.ink2,
-          lineHeight: T.lh.body,
-        }}>
+        <p className="m-0 font-body text-body leading-body text-ink2">
           Temukan orang yang cocok untuk proyekmu, atau temukan proyek yang cocok untukmu.
         </p>
       </div>
 
       {/* ── Lens Toggle ──────────────────────────────────────────────────────── */}
       {/* The primary choice — which side of the matchmaking are you on? */}
-      <div style={{
-        display:         "flex",
-        gap:             0,
-        marginBottom:    16,
-        backgroundColor: T.bg,
-        border:          `1px solid ${T.lineDark}`,
-        borderRadius:    T.radiusPanel,
-        padding:         4,
-      }}>
+      <div className="mb-4 flex gap-0 rounded-panel border border-line-dark bg-bg p-1">
         {([
           { id: "orang" as Lane, icon: "◎", label: "Aku nyari orang" },
           { id: "karya" as Lane, icon: "◉", label: "Aku nyari karya buat gabung" },
@@ -403,26 +226,14 @@ function CenterBoard() {
               key={id}
               onClick={() => switchLane(id)}
               aria-pressed={active}
-              style={{
-                flex:            1,
-                display:         "flex",
-                alignItems:      "center",
-                justifyContent:  "center",
-                gap:             8,
-                padding:         "10px 16px",
-                border:          "none",
-                borderRadius:    "12px",
-                backgroundColor: active ? T.ink : "transparent",
-                color:           active ? T.bg : T.ink2,
-                fontFamily:      T.fontBody,
-                fontSize:        T.size.body,
-                fontWeight:      active ? T.weight.medium : T.weight.regular,
-                cursor:          "pointer",
-                transition:      "background 0.15s, color 0.15s",
-                whiteSpace:      "nowrap" as const,
-              }}
+              className={cn(
+                "flex flex-1 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[12px] border-none px-4 py-2.5 font-body text-body transition-[background,color] duration-150",
+                active
+                  ? "bg-ink font-medium text-bg"
+                  : "bg-transparent font-normal text-ink2",
+              )}
             >
-              <span aria-hidden="true" style={{ fontSize: T.size.ui }}>{icon}</span>
+              <span aria-hidden="true" className="text-ui">{icon}</span>
               {label}
             </button>
           );
@@ -430,15 +241,7 @@ function CenterBoard() {
       </div>
 
       {/* ── Badge-type filter ────────────────────────────────────────────────── */}
-      <div style={{
-        display:       "flex",
-        gap:           6,
-        marginBottom:  18,
-        paddingBottom: 16,
-        borderBottom:  `1px solid ${T.line}`,
-        flexWrap:      "wrap" as const,
-        alignItems:    "center",
-      }}>
+      <div className="mb-[18px] flex flex-wrap items-center gap-1.5 border-b border-line pb-4">
         {BADGE_FILTERS.map(({ id, label }) => {
           const active = badgeFilter === id;
           return (
@@ -446,19 +249,12 @@ function CenterBoard() {
               key={id}
               onClick={() => setBadgeFilter(id)}
               aria-pressed={active}
-              style={{
-                background:    active ? T.accentTint : "transparent",
-                border:        `1px solid ${active ? T.accent : T.line}`,
-                color:         active ? T.accent : T.ink2,
-                borderRadius:  99,
-                padding:       "4px 14px",
-                fontFamily:    T.fontBody,
-                fontSize:      T.size.ui,
-                fontWeight:    active ? T.weight.medium : T.weight.regular,
-                cursor:        "pointer",
-                letterSpacing: T.track.tag,
-                transition:    "background 0.12s, color 0.12s, border-color 0.12s",
-              }}
+              className={cn(
+                "cursor-pointer rounded-full border px-3.5 py-1 font-body text-ui tracking-tag transition-[background,color,border-color] duration-[120ms]",
+                active
+                  ? "border-accent bg-accent-tint font-medium text-accent"
+                  : "border-line bg-transparent font-normal text-ink2",
+              )}
             >
               {label}
             </button>
@@ -466,12 +262,7 @@ function CenterBoard() {
         })}
 
         {/* Result count */}
-        <span style={{
-          marginLeft: "auto",
-          fontFamily: T.fontBody,
-          fontSize:   T.size.micro,
-          color:      T.ink3,
-        }}>
+        <span className="ml-auto font-body text-micro text-ink3">
           {resultCount} {lane === "orang" ? "orang ditemukan" : "karya buka slot"}
         </span>
       </div>
@@ -480,13 +271,7 @@ function CenterBoard() {
       {lane === "orang" ? (
         <div>
           {filteredSeekers.length === 0 ? (
-            <p style={{
-              fontFamily: T.fontBody,
-              fontSize:   T.size.body,
-              color:      T.ink3,
-              padding:    "32px 0",
-              textAlign:  "center" as const,
-            }}>
+            <p className="py-8 text-center font-body text-body text-ink3">
               Belum ada orang yang pasang badge untuk kategori ini.
             </p>
           ) : (
@@ -496,13 +281,7 @@ function CenterBoard() {
       ) : (
         <div>
           {filteredSlots.length === 0 ? (
-            <p style={{
-              fontFamily: T.fontBody,
-              fontSize:   T.size.body,
-              color:      T.ink3,
-              padding:    "32px 0",
-              textAlign:  "center" as const,
-            }}>
+            <p className="py-8 text-center font-body text-body text-ink3">
               Belum ada karya yang buka slot untuk kategori ini.
             </p>
           ) : (
@@ -512,50 +291,24 @@ function CenterBoard() {
       )}
 
       {/* ── Post a slot CTA ──────────────────────────────────────────────────── */}
-      <div style={{
-        marginTop:      24,
-        padding:        "16px 20px",
-        borderRadius:   T.radiusPanel,
-        border:         `1.5px dashed ${T.lineDark}`,
-        display:        "flex",
-        alignItems:     "center",
-        justifyContent: "space-between",
-        gap:            12,
-      }}>
+      <div className="mt-6 flex items-center justify-between gap-3 rounded-panel border-[1.5px] border-dashed border-line-dark px-5 py-4">
         <div>
-          <div style={{
-            fontFamily:   T.fontBody,
-            fontSize:     T.size.body,
-            fontWeight:   T.weight.medium,
-            color:        T.ink,
-            marginBottom: 2,
-          }}>
+          <div className="mb-0.5 font-body text-body font-medium text-ink">
             {lane === "orang"
               ? "Kamu lagi nyari tim atau gig?"
               : "Karyamu butuh kontributor?"}
           </div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
+          <div className="font-body text-ui text-ink2">
             {lane === "orang"
               ? "Pasang badge supaya komunitas bisa menemukanmu."
               : "Buka lowongan — biar orang yang tepat tahu kamu butuh bantuan."}
           </div>
         </div>
-        <button style={{
-          backgroundColor: T.accent,
-          color:           T.accentFg,
-          border:          "none",
-          borderRadius:    T.radiusCard,
-          padding:         "8px 16px",
-          fontFamily:      T.fontBody,
-          fontSize:        T.size.ui,
-          fontWeight:      T.weight.semibold,
-          cursor:          "pointer",
-          whiteSpace:      "nowrap" as const,
-        }}>
+        <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-4 py-2 font-body text-ui font-semibold text-accent-fg">
           {lane === "orang" ? "Pasang Badge" : "Buka Lowongan"}
         </button>
       </div>
-    </main>
+    </MainColumn>
   );
 }
 
@@ -565,49 +318,25 @@ function RightRail() {
   const [myBadge, setMyBadge] = useState<LookingFor | null>(null);
 
   return (
-    <aside className="bn-rail" style={{
-      display:       "flex",
-      flexDirection: "column" as const,
-      gap:           16,
-    }}>
+    <RailColumn className="flex flex-col gap-4">
       {/* ── Status kamu — seeker badge picker ─────────────────────────────── */}
       {/* Prompts the viewer to set or update their own "looking for" badge. */}
-      <div style={{
-        backgroundColor: T.accentTint,
-        border:          `1px solid ${T.accentLine}`,
-        borderRadius:    T.radiusPanel,
-        padding:         "14px 14px",
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Status kamu</div>
+      <div className="rounded-panel border border-accent-line bg-accent-tint p-3.5">
+        <Eyebrow as="div" className="mb-2.5">Status kamu</Eyebrow>
 
         {myBadge ? (
           /* Badge set — show current status with option to change. */
           <div>
-            <div style={{
-              fontFamily:   T.fontBody,
-              fontSize:     T.size.body,
-              color:        T.ink,
-              lineHeight:   T.lh.compact,
-              marginBottom: 10,
-            }}>
+            <div className="mb-2.5 font-body text-body leading-compact text-ink">
               Kamu lagi cari:{" "}
-              <strong style={{ color: T.accent }}>{BADGE_LABEL[myBadge]}</strong>
+              <strong className="text-accent">{BADGE_LABEL[myBadge]}</strong>
             </div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 10 }}>
+            <div className="mb-2.5 font-body text-micro text-ink3">
               Badge ini terlihat oleh semua anggota komunitas.
             </div>
             <button
               onClick={() => setMyBadge(null)}
-              style={{
-                background:   "transparent",
-                border:       `1px solid ${T.accent}`,
-                borderRadius: T.radiusCard,
-                padding:      "5px 12px",
-                fontFamily:   T.fontBody,
-                fontSize:     T.size.ui,
-                color:        T.accent,
-                cursor:       "pointer",
-              }}
+              className="cursor-pointer rounded-card border border-accent bg-transparent px-3 py-[5px] font-body text-ui text-accent"
             >
               Ubah badge
             </button>
@@ -615,37 +344,17 @@ function RightRail() {
         ) : (
           /* No badge — invite the user to pick one. */
           <>
-            <div style={{
-              fontFamily:   T.fontBody,
-              fontSize:     T.size.body,
-              color:        T.ink,
-              lineHeight:   T.lh.compact,
-              marginBottom: 12,
-            }}>
+            <div className="mb-3 font-body text-body leading-compact text-ink">
               Kasih tahu komunitas kamu lagi nyari apa.
             </div>
-            <div style={{ display: "flex", flexDirection: "column" as const, gap: 6 }}>
+            <div className="flex flex-col gap-1.5">
               {LOOKING_FOR.map((b) => (
                 <button
                   key={b}
                   onClick={() => setMyBadge(b)}
-                  style={{
-                    textAlign:    "left" as const,
-                    background:   T.surface,
-                    border:       `1px solid ${T.line}`,
-                    borderRadius: T.radiusCard,
-                    padding:      "7px 10px",
-                    fontFamily:   T.fontBody,
-                    fontSize:     T.size.ui,
-                    color:        T.ink2,
-                    cursor:       "pointer",
-                    display:      "flex",
-                    alignItems:   "center",
-                    gap:          8,
-                    transition:   "border-color 0.12s, color 0.12s",
-                  }}
+                  className="flex cursor-pointer items-center gap-2 rounded-card border border-line bg-surface px-2.5 py-[7px] text-left font-body text-ui text-ink2 transition-[border-color,color] duration-[120ms]"
                 >
-                  <span aria-hidden="true" style={{ color: T.accent, fontSize: T.size.ui }}>◎</span>
+                  <span aria-hidden="true" className="text-ui text-accent">◎</span>
                   {BADGE_LABEL[b]}
                 </button>
               ))}
@@ -657,66 +366,32 @@ function RightRail() {
       {/* ── Hackathon gesture (FR-29) ──────────────────────────────────────── */}
       {/* Light event-scoped team-formation affordance — hints at the feature
           without implementing a full surface. */}
-      <div style={{
-        backgroundColor: T.surface,
-        border:          `1px solid ${T.line}`,
-        borderRadius:    T.radiusPanel,
-        padding:         "12px 14px",
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-          <span aria-hidden="true" style={{ color: T.accent, fontSize: 14 }}>✦</span>
-          <div style={eyebrow}>GEMASTIK 2026</div>
+      <div className="rounded-panel border border-line bg-surface p-3.5">
+        <div className="mb-2 flex items-center gap-2">
+          <span aria-hidden="true" className="text-[14px] text-accent">✦</span>
+          <Eyebrow as="div">GEMASTIK 2026</Eyebrow>
         </div>
-        <p style={{
-          margin:     "0 0 10px",
-          fontFamily: T.fontBody,
-          fontSize:   T.size.body,
-          color:      T.ink,
-          lineHeight: T.lh.compact,
-        }}>
+        <p className="mb-2.5 mt-0 font-body text-body leading-compact text-ink">
           6 orang lagi bentuk tim untuk kompetisi ini.
         </p>
         {/* A few seekers already tagged to this event */}
-        <div style={{
-          display:      "flex",
-          alignItems:   "center",
-          gap:          4,
-          marginBottom: 12,
-        }}>
+        <div className="mb-3 flex items-center gap-1">
           {["Farhan Ardiansyah", "Dian Pertiwi", "Siti Rahmah"].map((name, i) => (
             <span key={name} style={{ marginLeft: i === 0 ? 0 : -6 }}>
               <Avatar name={name} size={22} />
             </span>
           ))}
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginLeft: 4 }}>
-            +3 lagi
-          </span>
+          <span className="ml-1 font-body text-micro text-ink3">+3 lagi</span>
         </div>
-        <button style={{
-          background:   "transparent",
-          border:       `1px solid ${T.accent}`,
-          color:        T.accent,
-          borderRadius: T.radiusCard,
-          padding:      "6px 12px",
-          fontFamily:   T.fontBody,
-          fontSize:     T.size.ui,
-          fontWeight:   T.weight.medium,
-          cursor:       "pointer",
-          width:        "100%",
-        }}>
+        <button className="w-full cursor-pointer rounded-card border border-accent bg-transparent px-3 py-1.5 font-body text-ui font-medium text-accent">
           Lihat tim GEMASTIK →
         </button>
       </div>
 
       {/* ── Community pulse ────────────────────────────────────────────────── */}
-      <div style={{
-        backgroundColor: T.surface,
-        border:          `1px solid ${T.line}`,
-        borderRadius:    T.radiusPanel,
-        padding:         "12px 14px",
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut sekarang</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+      <div className="rounded-panel border border-line bg-surface p-3.5">
+        <Eyebrow as="div" className="mb-2.5">Denyut sekarang</Eyebrow>
+        <div className="flex flex-col gap-2">
           {[
             { label: "Orang aktif cari tim", value: SEEKERS.length },
             { label: "Karya buka slot",      value: KARYA_SLOTS.length },
@@ -724,23 +399,15 @@ function RightRail() {
           ].map((stat) => (
             <div
               key={stat.label}
-              style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}
+              className="flex items-baseline justify-between"
             >
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
-                {stat.label}
-              </span>
-              <span style={{
-                fontFamily:         T.fontBody,
-                fontSize:           T.size.body,
-                fontWeight:         T.weight.medium,
-                fontVariantNumeric: "tabular-nums",
-                color:              T.ink,
-              }}>{stat.value}</span>
+              <span className="font-body text-ui text-ink2">{stat.label}</span>
+              <span className="font-body text-body font-medium tabular-nums text-ink">{stat.value}</span>
             </div>
           ))}
         </div>
       </div>
-    </aside>
+    </RailColumn>
   );
 }
 

@@ -1,7 +1,8 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
-import { T } from "@myapp/design-tokens";
+import { Button } from "@myapp/ui";
 import { useEffect, useState } from "react";
 import { useSearch } from "wouter";
+import { Eyebrow } from "@/components/ui-atoms";
 
 function extractApiError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -59,20 +60,20 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-      <div className="wrap" style={{ paddingTop: 0 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1" style={{ marginBottom: 16 }}>
+    <div className="fixed inset-0 animate-up flex items-center">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-0">
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
+        <h1 className="text-feature font-light tracking-heading leading-heading mb-4">
           Cek email kamu.
         </h1>
-        <p className="sub" style={{ marginBottom: 40, maxWidth: 360 }}>
+        <p className="text-body text-ink2 leading-body mb-10 max-w-[360px]">
           {sent
             ? `Kode 6 digit dikirim ke ${email}.`
             : `Mengirim kode ke ${email}…`}
         </p>
 
         <form onSubmit={handleSubmit}>
-          <div style={{ marginBottom: 12 }}>
+          <div className="mb-3">
             <input
               type="text"
               inputMode="numeric"
@@ -84,56 +85,33 @@ export default function VerifyEmail() {
               required
               // biome-ignore lint/a11y/noAutofocus: intentional focus on OTP input
               autoFocus
-              className="chat-textarea"
-              style={{
-                width: "100%",
-                padding: "10px 14px",
-                resize: "none",
-                // Not a tracking role: the digits are spread far apart so a
-                // six-digit code reads as six separate characters.
-                letterSpacing: "0.3em",
-                fontSize: T.size.feature,
-              }}
+              className="w-full bg-transparent border-none border-b border-line font-body text-feature tracking-[0.3em] text-ink outline-none resize-none px-3.5 py-2.5 leading-body max-h-[100px] overflow-y-auto transition-colors focus:border-accent placeholder:text-ink3"
             />
           </div>
 
-          {error && (
-            <p
-              style={{
-                fontSize: 13,
-                color: "var(--color-ink2)",
-                marginBottom: 12,
-              }}
-            >
-              {error}
-            </p>
-          )}
+          {error && <p className="text-[13px] text-ink2 mb-3">{error}</p>}
 
-          <button
+          <Button
             type="submit"
             disabled={loading || code.length !== 6}
-            className="btn btn-dark"
-            style={{ width: "100%", justifyContent: "center" }}
+            variant="primary"
+            className="w-full"
           >
             {loading ? "…" : "Verifikasi →"}
-          </button>
+          </Button>
         </form>
 
-        <p style={{ fontSize: 13, color: "var(--color-ink2)", marginTop: 20 }}>
+        <p className="text-[13px] text-ink2 mt-5">
           Tidak menerima kode?{" "}
           <button
             type="button"
             onClick={handleSend}
             disabled={cooldown > 0}
-            style={{
-              background: "none",
-              border: "none",
-              cursor: cooldown > 0 ? "default" : "pointer",
-              fontSize: 13,
-              color: "var(--color-ink)",
-              textDecoration: cooldown > 0 ? "none" : "underline",
-              padding: 0,
-            }}
+            className={`bg-transparent border-none p-0 text-[13px] ${
+              cooldown > 0
+                ? "cursor-default text-ink no-underline"
+                : "cursor-pointer text-ink underline"
+            }`}
           >
             {cooldown > 0 ? `kirim ulang dalam ${cooldown}s` : "kirim ulang ↗"}
           </button>

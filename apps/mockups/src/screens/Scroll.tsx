@@ -18,13 +18,13 @@
  *      affordance is a doorway to the thread's home on the karya's page, and
  *      day-to-day coordination stays in each karya's WhatsApp group, out of band.
  *   2. The karya is the account. A post leads with the karya logo; the contributor
- *      who wrote it is a small avatar dipping into the logo's corner.
+ *      who typed it is a small avatar dipping into the logo's corner.
  */
 
 import { useMemo, useState } from "react";
 import { MessageCircle } from "lucide-react";
-import { Avatar, KaryaCover } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Avatar, KaryaCover, MainColumn, RailColumn } from "@myapp/ui";
+
 import { Composer } from "../components/Composer";
 import { Shell } from "../components/Shell";
 import { MEMBERS, type Member } from "../data/karya";
@@ -38,6 +38,7 @@ import {
 } from "../data/updates";
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeMinutes, relativeTime } from "../lib/format";
+import { Eyebrow } from "@myapp/ui";
 
 // ─── Post identity — the karya leads, the author dips into its corner ────────────
 // This is the platform's signature: the post is authored by the *project*, not the
@@ -45,17 +46,9 @@ import { relativeMinutes, relativeTime } from "../lib/format";
 // the bottom-right, ringed in surface so it reads as sitting on top.
 function PostIdentity({ cover, karyaTitle, authorName }: { cover: string; karyaTitle: string; authorName: string }) {
   return (
-    <div style={{ position: "relative", width: 48, height: 48, flexShrink: 0 }}>
+    <div className="relative size-12 shrink-0">
       <KaryaCover src={cover} size={46} radius={13} alt={`Logo ${karyaTitle}`} />
-      <span style={{
-        position: "absolute",
-        right: -5,
-        bottom: -5,
-        borderRadius: 99,
-        boxShadow: `0 0 0 2px ${T.surface}`,
-        background: T.surface,
-        lineHeight: 0,
-      }}>
+      <span className="absolute -bottom-1.5 -right-1.5 rounded-full bg-surface leading-none shadow-[0_0_0_2px_var(--color-surface)]">
         <Avatar name={authorName} size={17} />
       </span>
     </div>
@@ -69,17 +62,12 @@ function PostIdentity({ cover, karyaTitle, authorName }: { cover: string; karyaT
 function Facepile({ people, max = 3 }: { people: Member[]; max?: number }) {
   const shown = people.slice(0, max);
   return (
-    <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+    <div className="flex shrink-0 items-center">
       {shown.map((p, i) => (
         <span
           key={p.id}
-          style={{
-            marginLeft: i === 0 ? 0 : -5,
-            borderRadius: 99,
-            boxShadow: `0 0 0 1.5px ${T.bg}`,
-            lineHeight: 0,
-            zIndex: shown.length - i,
-          }}
+          className="flex rounded-full leading-none shadow-[0_0_0_1.5px_var(--color-bg)]"
+          style={{ marginLeft: i === 0 ? 0 : -5, zIndex: shown.length - i }}
         >
           <Avatar name={p.name} size={16} />
         </span>
@@ -95,24 +83,15 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
       onClick={onClick}
       aria-pressed={active}
       aria-label={`Apresiasi (${count})`}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "5px 11px",
-        border: `1px solid ${active ? T.accent : T.line}`,
-        borderRadius: 99,
-        backgroundColor: active ? T.accentTint : "transparent",
-        color: active ? T.accent : T.ink2,
-        cursor: "pointer",
-        fontFamily: T.fontBody,
-        fontSize: T.size.caption,
-        fontWeight: T.weight.medium,
-        transition: "all 0.15s",
-      }}
+      className={[
+        "inline-flex cursor-pointer items-center gap-1.5 rounded-full border px-[11px] py-[5px] font-body text-caption font-medium transition-all duration-150",
+        active
+          ? "border-accent bg-accent-tint text-accent"
+          : "border-line bg-transparent text-ink2",
+      ].join(" ")}
     >
-      <span style={{ fontSize: T.size.ui, lineHeight: 1 }}>{active ? "♥" : "♡"}</span>
-      <span style={{ fontVariantNumeric: "tabular-nums" }}>{count}</span>
+      <span className="text-ui leading-none">{active ? "♥" : "♡"}</span>
+      <span className="tabular-nums">{count}</span>
     </button>
   );
 }
@@ -124,24 +103,10 @@ function CommentCount({ count }: { count: number }) {
     <button
       type="button"
       aria-label={`${count} komentar`}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "5px 11px",
-        border: `1px solid ${T.line}`,
-        borderRadius: 99,
-        backgroundColor: "transparent",
-        color: T.ink2,
-        cursor: "pointer",
-        fontFamily: T.fontBody,
-        fontSize: T.size.caption,
-        fontWeight: T.weight.medium,
-        transition: "all 0.15s",
-      }}
+      className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2 transition-all duration-150"
     >
       <MessageCircle size={13} strokeWidth={2} aria-hidden="true" />
-      <span style={{ fontVariantNumeric: "tabular-nums" }}>{count}</span>
+      <span className="tabular-nums">{count}</span>
     </button>
   );
 }
@@ -159,31 +124,20 @@ function voiceSummary(voices: Member[]): string {
 // A glimpse, not a composer: the feed still has nowhere to type. "Balas" is a
 // doorway into the thread on the karya's page, where the conversation lives.
 function CommentPreview({ author, latest }: { author: Member; latest: LatestMessage }) {
-  const action = {
-    background: "none",
-    border: "none",
-    padding: 0,
-    fontFamily: T.fontBody,
-    fontSize: T.size.micro,
-    fontWeight: T.weight.medium,
-    color: T.ink3,
-    cursor: "pointer",
-  } as const;
-
   return (
-    <div style={{ display: "flex", gap: 10, marginTop: 13, paddingTop: 13, borderTop: `1px solid ${T.line}` }}>
+    <div className="mt-[13px] flex gap-2.5 border-t border-line pt-[13px]">
       <Avatar name={author.name} size={28} />
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 7 }}>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{author.name}</span>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{relativeMinutes(latest.minutesAgo, true)}</span>
+      <div className="min-w-0 flex-1">
+        <div className="flex items-baseline gap-[7px]">
+          <span className="font-body text-ui font-medium text-ink">{author.name}</span>
+          <span className="font-body text-micro text-ink3">{relativeMinutes(latest.minutesAgo, true)}</span>
         </div>
-        <p style={{ margin: "2px 0 0", fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, lineHeight: T.lh.body }}>
+        <p className="mt-0.5 font-body text-ui leading-body text-ink2">
           {latest.body}
         </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: 7 }}>
-          <button type="button" style={action}>Suka · {latest.likes}</button>
-          <button type="button" style={action}>Balas</button>
+        <div className="mt-[7px] flex items-center gap-3.5">
+          <button type="button" className="border-none bg-none p-0 font-body text-micro font-medium text-ink3 cursor-pointer">Suka · {latest.likes}</button>
+          <button type="button" className="border-none bg-none p-0 font-body text-micro font-medium text-ink3 cursor-pointer">Balas</button>
         </div>
       </div>
     </div>
@@ -202,70 +156,52 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
   const discussion = update.discussion;
 
   return (
-    <article className="bn-post" style={{
-      // Block only: the inline padding is the class's, and a shorthand here would
-      // reset it — taking the row's bleed out to the column rules with it.
-      paddingBlock: 18,
-      borderBottom: `1px solid ${T.line}`,
-      display: "flex",
-      gap: 14,
-    }}>
+    <article
+      className="bn-post flex gap-3.5 border-b border-line py-[18px]"
+    >
       <PostIdentity cover={cover} karyaTitle={karya.title} authorName={author.name} />
 
-      <div style={{ flex: 1, minWidth: 0 }}>
+      <div className="min-w-0 flex-1">
         {/* Byline: the karya. Who typed it and when sit quietly underneath. */}
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading }}>
+        <div className="font-display text-title font-normal leading-heading text-ink">
           {karya.title}
         </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginTop: 1 }}>
+        <div className="mt-px font-body text-micro text-ink3">
           diposting {author.name} · {relativeTime(update.hoursAgo)}
         </div>
 
         {/* The headline carries the news; the body carries the detail */}
-        <h3 style={{ margin: "10px 0 0", fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
+        <h3 className="mt-2.5 font-body text-body font-medium text-ink">
           {update.title}
         </h3>
-        <p style={{ margin: "4px 0 0", fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
+        <p className="mt-1 font-body text-body leading-body text-ink2">
           {update.body}
         </p>
 
         {/* Ajakan — the open role, made concrete */}
         {update.role && (
-          <div style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            marginTop: 10,
-            padding: "6px 12px",
-            borderRadius: T.radiusCard,
-            border: `1px solid ${T.accentLine}`,
-            background: T.accentTint,
-          }}>
-            <span style={{ ...eyebrow, color: T.accentMid }}>Butuh</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.accent }}>{update.role}</span>
+          <div className="mt-2.5 inline-flex items-center gap-2 rounded-card border border-accent-line bg-accent-tint px-3 py-1.5">
+            <Eyebrow as="span" className="!text-accent-mid">Butuh</Eyebrow>
+            <span className="font-body text-ui font-medium text-accent">{update.role}</span>
           </div>
         )}
 
         {/* Screenshots */}
         {shots.length > 0 && (
-          <div style={{ display: "flex", gap: 8, marginTop: 12, overflowX: "auto" as const }}>
+          <div className="mt-3 flex gap-2 overflow-x-auto">
             {shots.map((src, i) => (
               <img
                 key={src}
                 src={src}
                 alt={`${karya.title} — layar ${i + 1}`}
-                style={{ height: 128, width: "auto", flexShrink: 0, borderRadius: 10, border: `1px solid ${T.lineDark}`, background: T.bg }}
+                className="h-32 w-auto shrink-0 rounded-[10px] border border-line-dark bg-bg"
               />
             ))}
           </div>
         )}
 
-        {/* Footer — appreciate, and the thread. No "lihat karya" link: the karya is
-            already the post's byline and its cover, so the way in was said three
-            times. No interest tags either: they describe the karya's standing
-            state, which is the karya page's job; a feed carries what just
-            happened. */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginTop: 14 }}>
+        {/* Footer — appreciate, and the thread. */}
+        <div className="mt-3.5 flex items-center gap-2.5">
           <AppreciateButton
             count={karya.appreciations + (appreciated ? 1 : 0)}
             active={appreciated}
@@ -277,9 +213,9 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
         {/* Who's in there, then the newest thing said — the thread, seen through a window */}
         {discussion && voices.length > 0 && (
           <>
-            <div style={{ display: "flex", alignItems: "center", gap: 7, marginTop: 12 }}>
+            <div className="mt-3 flex items-center gap-[7px]">
               <Facepile people={voices} />
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+              <span className="font-body text-micro text-ink3">
                 {voiceSummary(voices)} berkomentar
               </span>
             </div>
@@ -293,9 +229,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
 
 // ─── Diskusi aktif — the threads burning right now ──────────────────────────────
 // A pointer to where the talking is, never a place to talk: a thread's home is the
-// update it hangs off, and this block just says which ones are hot. Membership is
-// earned, not curated — a burst inside the window (data/updates.ts) puts a thread
-// here and cooling takes it out, so the block turns over on its own.
+// update it hangs off, and this block just says which ones are hot.
 
 function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] }) {
   if (discussions.length === 0) return null;
@@ -303,96 +237,49 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
   return (
     <div>
       {/* The dot carries the "live" claim for the whole block; the arrow is the way in */}
-      <div style={{ display: "flex", alignItems: "center", gap: 7, marginBottom: 10 }}>
+      <div className="mb-2.5 flex items-center gap-[7px]">
         <span className="bn-live-dot" aria-hidden="true" />
-        <div style={eyebrow}>Diskusi aktif</div>
+        <Eyebrow as="div">Diskusi aktif</Eyebrow>
         <button
           type="button"
           aria-label={`Lihat semua diskusi aktif (${ACTIVE_WINDOW_MIN} menit terakhir)`}
-          style={{
-            marginLeft: "auto",
-            background: "none",
-            border: "none",
-            padding: 0,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            color: T.accentMid,
-            cursor: "pointer",
-            lineHeight: 1,
-          }}
+          className="ml-auto cursor-pointer border-none bg-none p-0 font-body text-ui leading-none text-accent-mid"
         >
           →
         </button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+      <div className="flex flex-col gap-0">
         {discussions.map(({ resolved: { update, karya, voices }, discussion }, idx) => (
           <div
             key={update.id}
-            style={{
-              display: "flex",
-              gap: 10,
-              padding: "11px 0",
-              borderBottom: idx < discussions.length - 1 ? `1px solid ${T.line}` : "none",
-              alignItems: "flex-start",
-            }}
+            className="flex items-start gap-2.5 py-[11px]"
+            style={{ borderBottom: idx < discussions.length - 1 ? "1px solid var(--color-line)" : "none" }}
           >
             <KaryaCover src={coverFor(karya.interests)} size={32} radius={9} alt={karya.title} />
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="min-w-0 flex-1">
               {/* The byline is the karya — the people are in the facepile below */}
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{
-                  fontFamily: T.fontBody,
-                  fontSize: T.size.ui,
-                  fontWeight: T.weight.medium,
-                  color: T.ink,
-                  whiteSpace: "nowrap" as const,
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                }}>
+              <div className="flex items-baseline gap-1.5">
+                <span className="overflow-hidden text-ellipsis whitespace-nowrap font-body text-ui font-medium text-ink">
                   {karya.title}
                 </span>
-                <span style={{
-                  marginLeft: "auto",
-                  whiteSpace: "nowrap" as const,
-                  fontFamily: T.fontBody,
-                  fontSize: T.size.micro,
-                  color: T.ink3,
-                  fontVariantNumeric: "tabular-nums",
-                }}>
+                <span className="ml-auto shrink-0 whitespace-nowrap font-body text-micro tabular-nums text-ink3">
                   {relativeMinutes(discussion.latest.minutesAgo, true)}
                 </span>
               </div>
 
-              {/* The post they're talking under — clamped; the thread is the point, not the post */}
-              <p style={{
-                margin: "3px 0 0",
-                fontFamily: T.fontBody,
-                fontSize: T.size.micro,
-                color: T.ink2,
-                lineHeight: T.lh.body,
-                display: "-webkit-box",
-                WebkitBoxOrient: "vertical" as const,
-                WebkitLineClamp: 2,
-                overflow: "hidden",
-              }}>
+              {/* The post they're talking under — clamped */}
+              <p className="mt-[3px] line-clamp-2 font-body text-micro leading-body text-ink2">
                 {update.body}
               </p>
 
               {voices.length > 0 && (
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 7 }}>
+                <div className="mt-[7px] flex items-center gap-1.5">
                   <Facepile people={voices} />
-                  <span style={{
-                    fontFamily: T.fontBody,
-                    fontSize: T.size.micro,
-                    color: T.ink3,
-                    whiteSpace: "nowrap" as const,
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                  }}>
+                  <span className="overflow-hidden text-ellipsis whitespace-nowrap font-body text-micro text-ink3">
                     {voices[0].name.split(" ")[0]} berkomentar
                   </span>
-                  <span aria-hidden="true" style={{ marginLeft: "auto", color: T.accentMid, fontSize: T.size.micro }}>→</span>
+                  <span aria-hidden="true" className="ml-auto text-micro text-accent-mid">→</span>
                 </div>
               )}
             </div>
@@ -409,41 +296,30 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
 function BuildersToMeet() {
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-        <div style={eyebrow}>Kenalan dengan builder</div>
-        <button type="button" style={{ background: "none", border: "none", padding: 0, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.accentMid, cursor: "pointer" }}>Lihat semua</button>
+      <div className="mb-2.5 flex items-center justify-between">
+        <Eyebrow as="div">Kenalan dengan builder</Eyebrow>
+        <button type="button" className="cursor-pointer border-none bg-none p-0 font-body text-micro text-accent-mid">Lihat semua</button>
       </div>
 
-      <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+      <div className="flex flex-col gap-0">
         {MEMBERS.map((m, idx) => (
           <div
             key={m.id}
-            style={{
-              display: "flex",
-              gap: 10,
-              padding: "10px 0",
-              borderBottom: idx < MEMBERS.length - 1 ? `1px solid ${T.line}` : "none",
-              alignItems: "flex-start",
-            }}
+            className="flex items-start gap-2.5 py-2.5"
+            style={{ borderBottom: idx < MEMBERS.length - 1 ? "1px solid var(--color-line)" : "none" }}
           >
             <Avatar name={m.name} size={32} />
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{m.name}</span>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{m.karya} karya</span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline gap-1.5">
+                <span className="font-body text-ui font-medium text-ink">{m.name}</span>
+                <span className="font-body text-micro text-ink3">{m.karya} karya</span>
               </div>
-              <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginBottom: 4 }}>{m.handle} · Tkt {m.year}</div>
-              <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+              <div className="mb-1 font-body text-micro text-ink3">{m.handle} · Tkt {m.year}</div>
+              <div className="flex flex-wrap gap-1">
                 {m.skills.slice(0, 3).map((s) => (
-                  <span key={s} style={{
-                    fontFamily: T.fontBody,
-                    fontSize: T.size.micro,
-                    color: T.ink2,
-                    backgroundColor: T.bg,
-                    border: `1px solid ${T.line}`,
-                    padding: "1px 5px",
-                    borderRadius: "3px",
-                  }}>{s}</span>
+                  <span key={s} className="rounded-[3px] border border-line bg-bg px-[5px] py-px font-body text-micro text-ink2">
+                    {s}
+                  </span>
                 ))}
               </div>
             </div>
@@ -461,24 +337,18 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
   const discussions = useMemo(() => activeDiscussions(feed), [feed]);
 
   return (
-    <aside className="bn-rail" style={{ display: "flex", flexDirection: "column" as const, gap: 20 }}>
+    <RailColumn className="flex flex-col gap-5">
       {/* Open collaborator slots — surfaced from ajakan updates */}
       {openAsks.length > 0 && (
         <div>
-          <div style={{ ...eyebrow, marginBottom: 10 }}>Slot kolaborasi terbuka</div>
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
+          <Eyebrow as="div" className="mb-2.5">Slot kolaborasi terbuka</Eyebrow>
+          <div className="flex flex-col gap-0">
             {openAsks.map(({ update, karya }, idx) => (
-              <div key={update.id} style={{
-                display: "flex",
-                gap: 10,
-                padding: "10px 0",
-                borderBottom: idx < openAsks.length - 1 ? `1px solid ${T.line}` : "none",
-                alignItems: "center",
-              }}>
+              <div key={update.id} className="flex items-center gap-2.5 py-2.5" style={{ borderBottom: idx < openAsks.length - 1 ? "1px solid var(--color-line)" : "none" }}>
                 <KaryaCover src={coverFor(karya.interests)} size={30} radius={9} alt={karya.title} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>{update.role}</div>
-                  <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>{karya.title}</div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-body text-ui font-medium text-ink">{update.role}</div>
+                  <div className="font-body text-micro text-ink3">{karya.title}</div>
                 </div>
               </div>
             ))}
@@ -491,7 +361,7 @@ function RightRail({ feed }: { feed: ResolvedUpdate[] }) {
 
       {/* Meet the builders behind the karya — relocated from People's rail */}
       <BuildersToMeet />
-    </aside>
+    </RailColumn>
   );
 }
 
@@ -511,27 +381,24 @@ export default function ScrollScreen() {
 
   return (
     <Shell active="scroll">
-      <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const }}>
+      <MainColumn className="flex flex-col">
         {/* Header */}
-        <div style={{ marginBottom: 6 }}>
-          <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-            <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Scroll</h1>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Kabar progres dari karya yang kamu ikuti</span>
+        <div className="mb-1.5">
+          <div className="flex items-baseline gap-2.5">
+            <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Scroll</h1>
+            <span className="font-body text-caption text-ink3">Kabar progres dari karya yang kamu ikuti</span>
           </div>
         </div>
 
-        {/* The one place in Scroll you can type. It is not a contradiction of the
-            "nowhere to type" rule above so much as its point restated: what it
-            takes is a kabar from one of your karya, posted as that karya. There is
-            still no reply box, and still nowhere to say something to nobody. */}
-        <div style={{ marginTop: 16 }}>
+        {/* The one place in Scroll you can type. */}
+        <div className="mt-4">
           <Composer />
         </div>
 
         {/* Feed */}
-        <div style={{ display: "flex", flexDirection: "column" as const }}>
+        <div className="flex flex-col">
           {feed.length === 0 ? (
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+            <div className="py-8 text-center font-body text-body text-ink3">
               Belum ada kabar progres.
             </div>
           ) : (
@@ -545,7 +412,7 @@ export default function ScrollScreen() {
             ))
           )}
         </div>
-      </main>
+      </MainColumn>
 
       <RightRail feed={feed} />
     </Shell>

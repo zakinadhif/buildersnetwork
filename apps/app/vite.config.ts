@@ -1,4 +1,3 @@
-import path from "node:path";
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig, loadEnv } from "vite";
@@ -15,9 +14,7 @@ export default defineConfig(({ mode, command }) => {
     base: command === "build" ? "/app/" : "/",
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
+      tsconfigPaths: true,
     },
     server: {
       proxy: {

@@ -6,14 +6,14 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "@myapp/ui";
+import { Avatar, MainColumn, RailColumn, Tag } from "@myapp/ui";
+import { cn } from "@myapp/ui";
 import { Shell } from "../../components/Shell";
-import { Tag } from "@myapp/ui";
 import { ASKS, TOP_SKILLS, type Ask } from "../../data/asks";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import { relativeTime } from "../../lib/format";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Eyebrow } from "@myapp/ui";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -42,28 +42,13 @@ function TypeChip({ type }: { type: LookingFor }) {
   // hackathon: solid terracotta (urgent, event-bound)
   // project:   near-black outline (substantive, longer-term)
   // gig:       tinted wash (casual, lighter commitment)
-  const cfg = {
-    hackathon: { bg: T.accent,      color: T.accentFg,  border: "none" },
-    project:   { bg: "transparent", color: T.ink,       border: `1px solid ${T.lineDark}` },
-    gig:       { bg: T.accentTint,  color: T.accentMid, border: `1px solid ${T.accentLine}` },
-  }[type];
-
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 3,
-      fontFamily: T.fontBody,
-      fontSize: T.size.micro,
-      fontWeight: T.weight.medium,
-      letterSpacing: T.track.tag,
-      padding: "2px 8px",
-      borderRadius: "3px",
-      backgroundColor: cfg.bg,
-      color: cfg.color,
-      border: cfg.border,
-      whiteSpace: "nowrap" as const,
-    }}>
+    <span className={cn(
+      "inline-flex items-center gap-[3px] rounded-[3px] px-2 py-[2px] font-body text-micro font-medium tracking-tag whitespace-nowrap",
+      type === "hackathon" && "bg-accent text-accent-fg border-none",
+      type === "project"   && "bg-transparent text-ink border border-line-dark",
+      type === "gig"       && "bg-accent-tint text-accent-mid border border-accent-line",
+    )}>
       <span aria-hidden="true">{BADGE_ICON[type]}</span>
       {BADGE_LABEL[type]}
     </span>
@@ -73,21 +58,16 @@ function TypeChip({ type }: { type: LookingFor }) {
 // ─── Karya Cover — small square thumbnail for karya-sourced asks ──────────────
 function KaryaCover({ interests, size = 34 }: { interests: string[]; size?: number }) {
   return (
-    // `size` is the art; the box carries the 1px ring, which the border-box base
-    // otherwise absorbs inward and shrinks the tile by 2px (#91).
-    <div style={{
-      width: size + 2,
-      height: size + 2,
-      borderRadius: 9,
-      overflow: "hidden",
-      border: `1px solid ${T.line}`,
-      flexShrink: 0,
-    }}>
+    // `size` is the art; the box carries the 1px ring
+    <div
+      className="shrink-0 overflow-hidden rounded-[9px] border border-line"
+      style={{ width: size + 2, height: size + 2 }}
+    >
       <img
         src={coverFor(interests)}
         alt=""
         aria-hidden="true"
-        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+        className="block h-full w-full object-cover"
       />
     </div>
   );
@@ -97,40 +77,19 @@ function KaryaCover({ interests, size = 34 }: { interests: string[]; size?: numb
 // Sits above the composer as an ambient awareness strip for the current hot event.
 function HackathonBanner() {
   return (
-    <section aria-label="Event hackathon aktif" style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 14,
-      padding: "12px 16px",
-      marginBottom: 16,
-      background: T.accentTint,
-      border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusPanel,
-    }}>
-      <span aria-hidden="true" style={{ fontSize: 20, flexShrink: 0, lineHeight: 1 }}>⚡</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink, marginBottom: 2 }}>
+    <section aria-label="Event hackathon aktif" className="mb-4 flex items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint p-3.5">
+      <span aria-hidden="true" className="shrink-0 text-[20px] leading-none">⚡</span>
+      <div className="min-w-0 flex-1">
+        <div className="mb-0.5 font-body text-ui font-medium text-ink">
           Lagi rame:{" "}
-          <span style={{ color: T.accent }}>GEMASTIK 2026</span>{" "}
+          <span className="text-accent">GEMASTIK 2026</span>{" "}
           — pendaftaran tim terbuka sampai 12 Juli
         </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+        <div className="font-body text-micro text-ink3">
           4 ajakan hackathon aktif · Kategori: Sistem Informasi, Kecerdasan Buatan, Keamanan Siber
         </div>
       </div>
-      <button style={{
-        flexShrink: 0,
-        background: "transparent",
-        color: T.accent,
-        border: `1px solid ${T.accent}`,
-        borderRadius: T.radiusCard,
-        padding: "6px 14px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.ui,
-        fontWeight: T.weight.semibold,
-        cursor: "pointer",
-        whiteSpace: "nowrap" as const,
-      }}>
+      <button className="shrink-0 cursor-pointer whitespace-nowrap rounded-card border border-accent bg-transparent px-3.5 py-1.5 font-body text-ui font-semibold text-accent">
         Cari Rekan →
       </button>
     </section>
@@ -143,35 +102,18 @@ function Composer() {
   const [selectedType, setSelectedType] = useState<LookingFor | null>(null);
 
   return (
-    <div style={{
-      backgroundColor: T.surface,
-      border: `1.5px solid ${T.lineDark}`,
-      borderRadius: T.radiusPanel,
-      padding: "14px 16px",
-      marginBottom: 20,
-    }}>
+    <div className="mb-5 rounded-panel border-[1.5px] border-line-dark bg-surface p-3.5">
       {/* Input row */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", marginBottom: 10 }}>
+      <div className="mb-2.5 flex items-center gap-2.5">
         <Avatar name="Zaki Nadhif" size={32} />
-        <div style={{
-          flex: 1,
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink3,
-          backgroundColor: T.bg,
-          border: `1px solid ${T.line}`,
-          borderRadius: T.radiusCard,
-          padding: "9px 12px",
-          cursor: "text",
-          lineHeight: T.lh.heading,
-        }}>
+        <div className="flex-1 cursor-text rounded-card border border-line bg-bg px-3 py-[9px] font-body text-body leading-heading text-ink3">
           Tulis ajakan kamu — siapa atau apa yang lagi kamu cari?
         </div>
       </div>
 
       {/* Type selector + post button */}
-      <div style={{ display: "flex", alignItems: "center", gap: 6, paddingLeft: 42 }}>
-        <span style={{ ...eyebrow, marginRight: 4 }}>Cari:</span>
+      <div className="flex items-center gap-1.5 pl-[42px]">
+        <Eyebrow as="span" className="mr-1">Cari:</Eyebrow>
         {LOOKING_FOR.map((type) => {
           const active = selectedType === type;
           return (
@@ -180,40 +122,19 @@ function Composer() {
               type="button"
               onClick={() => setSelectedType(active ? null : type)}
               aria-pressed={active}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: 4,
-                padding: "4px 10px",
-                borderRadius: 99,
-                border: `1px solid ${active ? T.accent : T.line}`,
-                backgroundColor: active ? T.accentTint : "transparent",
-                color: active ? T.accent : T.ink2,
-                fontFamily: T.fontBody,
-                fontSize: T.size.micro,
-                fontWeight: active ? T.weight.medium : T.weight.regular,
-                cursor: "pointer",
-                transition: "all 0.12s",
-              }}
+              className={cn(
+                "inline-flex cursor-pointer items-center gap-1 rounded-full border px-2.5 py-1 font-body text-micro transition-all duration-[120ms]",
+                active
+                  ? "border-accent bg-accent-tint font-medium text-accent"
+                  : "border-line bg-transparent font-normal text-ink2",
+              )}
             >
               <span aria-hidden="true">{BADGE_ICON[type]}</span>
               {SHORT_LABEL[type]}
             </button>
           );
         })}
-        <button style={{
-          marginLeft: "auto",
-          backgroundColor: T.accent,
-          color: T.accentFg,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "6px 18px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          whiteSpace: "nowrap" as const,
-        }}>
+        <button className="ml-auto shrink-0 cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-4.5 py-1.5 font-body text-ui font-semibold text-accent-fg">
           Posting
         </button>
       </div>
@@ -233,40 +154,31 @@ const PRIMARY_ACTION: Record<LookingFor, string> = {
 
 function AskCard({ ask }: { ask: Ask }) {
   return (
-    <article style={{
-      padding: "20px 0",
-      borderBottom: `1px solid ${T.line}`,
-    }}>
+    <article className="border-b border-line py-5">
       {/* Header: identity left, type+time right */}
-      <div style={{
-        display: "flex",
-        alignItems: "flex-start",
-        justifyContent: "space-between",
-        gap: 10,
-        marginBottom: 12,
-      }}>
+      <div className="mb-3 flex items-start justify-between gap-2.5">
         {/* Identity block */}
-        <div style={{ display: "flex", alignItems: "center", gap: 9, minWidth: 0 }}>
+        <div className="flex min-w-0 items-center gap-[9px]">
           {ask.from === "person"
             ? <Avatar name={ask.name!} size={34} />
             : <KaryaCover interests={ask.karyaInterests!} size={34} />
           }
-          <div style={{ minWidth: 0 }}>
+          <div className="min-w-0">
             {ask.from === "person" ? (
-              <div style={{ display: "flex", alignItems: "baseline", gap: 6, flexWrap: "wrap" as const }}>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
+              <div className="flex flex-wrap items-baseline gap-1.5">
+                <span className="font-body text-body font-medium text-ink">
                   {ask.name}
                 </span>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+                <span className="font-body text-micro text-ink3">
                   {ask.handle}
                 </span>
               </div>
             ) : (
               <>
-                <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.body, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading }}>
+                <div className="font-display text-body font-normal leading-heading text-ink">
                   {ask.karyaTitle}
                 </div>
-                <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+                <div className="font-body text-micro text-ink3">
                   {ask.karyaRoster}
                 </div>
               </>
@@ -275,36 +187,23 @@ function AskCard({ ask }: { ask: Ask }) {
         </div>
 
         {/* Type chip + timestamp */}
-        <div style={{ display: "flex", alignItems: "center", gap: 6, flexShrink: 0, paddingTop: 2 }}>
+        <div className="flex shrink-0 items-center gap-1.5 pt-0.5">
           <TypeChip type={ask.type} />
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+          <span className="font-body text-micro text-ink3">
             {relativeTime(ask.hoursAgo)}
           </span>
         </div>
       </div>
 
       {/* Hero note — the free-text ask written in the community's voice */}
-      <p style={{
-        margin: "0 0 12px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.stat,
-        fontWeight: T.weight.regular,
-        color: T.ink,
-        lineHeight: T.lh.body,
-      }}>
+      <p className="mb-3 mt-0 font-body text-stat font-normal leading-body text-ink">
         {ask.note}
       </p>
 
       {/* Skills / open roles sought */}
       {ask.seeking.length > 0 && (
-        <div style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-          flexWrap: "wrap" as const,
-          marginBottom: 14,
-        }}>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, letterSpacing: T.track.tag, textTransform: "uppercase" as const }}>
+        <div className="mb-3.5 flex flex-wrap items-center gap-1.5">
+          <span className="font-body text-micro tracking-tag uppercase text-ink3">
             butuh:
           </span>
           {ask.seeking.map((s) => <Tag key={s} label={s} accent />)}
@@ -312,33 +211,11 @@ function AskCard({ ask }: { ask: Ask }) {
       )}
 
       {/* Two inline connect actions */}
-      <div style={{ display: "flex", gap: 8 }}>
-        <button style={{
-          backgroundColor: T.accent,
-          color: T.accentFg,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "7px 18px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          whiteSpace: "nowrap" as const,
-        }}>
+      <div className="flex gap-2">
+        <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-4.5 py-[7px] font-body text-ui font-semibold text-accent-fg">
           {PRIMARY_ACTION[ask.type]}
         </button>
-        <button style={{
-          backgroundColor: "transparent",
-          color: T.ink2,
-          border: `1px solid ${T.line}`,
-          borderRadius: T.radiusCard,
-          padding: "7px 16px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.regular,
-          cursor: "pointer",
-          whiteSpace: "nowrap" as const,
-        }}>
+        <button className="cursor-pointer whitespace-nowrap rounded-card border border-line bg-transparent px-4 py-[7px] font-body text-ui font-normal text-ink2">
           Kirim Pesan
         </button>
       </div>
@@ -353,26 +230,14 @@ function BulletinBoard({ filterType }: { filterType: Filter }) {
     : ASKS.filter((a) => a.type === filterType);
 
   return (
-    <main className="bn-main" style={{
-      flex: 1,
-      minWidth: 0,
-      display: "flex",
-      flexDirection: "column" as const,
-    }}>
+    <MainColumn className="flex flex-col">
       {/* Page heading */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{
-            margin: 0,
-            fontFamily: T.fontDisplay,
-            fontSize: T.size.display,
-            fontWeight: T.weight.regular,
-            letterSpacing: T.track.heading,
-            color: T.ink,
-          }}>
+      <div className="mb-[18px]">
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
             Cari Kolaborator
           </h1>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>
+          <span className="font-body text-caption text-ink3">
             Siapa butuh siapa, tertulis di sini
           </span>
         </div>
@@ -386,24 +251,18 @@ function BulletinBoard({ filterType }: { filterType: Filter }) {
 
       {/* Wall of asks — reverse-chronological (ASKS array is already ordered) */}
       <div>
-        <div style={{ ...eyebrow, marginBottom: 2 }}>
+        <Eyebrow as="div" className="mb-0.5">
           {filtered.length} ajakan · terbaru dulu
-        </div>
+        </Eyebrow>
         {filtered.length === 0 ? (
-          <div style={{
-            fontFamily: T.fontBody,
-            fontSize: T.size.body,
-            color: T.ink3,
-            padding: "40px 0",
-            textAlign: "center" as const,
-          }}>
+          <div className="py-10 text-center font-body text-body text-ink3">
             Belum ada ajakan untuk jenis ini — atau jadilah yang pertama 🙂
           </div>
         ) : (
           filtered.map((ask) => <AskCard key={ask.id} ask={ask} />)
         )}
       </div>
-    </main>
+    </MainColumn>
   );
 }
 
@@ -426,20 +285,11 @@ function FilterRail({ filterType, onFilter }: {
   ];
 
   return (
-    <aside className="bn-rail" style={{
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: 20,
-    }}>
+    <RailColumn className="flex flex-col gap-5">
       {/* Filter by type */}
-      <div style={{
-        backgroundColor: T.surface,
-        border: `1px solid ${T.line}`,
-        borderRadius: T.radiusPanel,
-        padding: "12px 14px",
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Filter Ajakan</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
+      <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
+        <Eyebrow as="div" className="mb-2.5">Filter Ajakan</Eyebrow>
+        <div className="flex flex-col gap-0.5">
           {filterOpts.map(({ key, icon, label }) => {
             const active = filterType === key;
             return (
@@ -448,27 +298,21 @@ function FilterRail({ filterType, onFilter }: {
                 type="button"
                 onClick={() => onFilter(key)}
                 aria-pressed={active}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  textAlign: "left" as const,
-                  background: active ? T.accentTint : "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontFamily: T.fontBody,
-                  fontSize: T.size.ui,
-                  color: active ? T.accent : T.ink2,
-                  fontWeight: active ? T.weight.medium : T.weight.regular,
-                  padding: "5px 8px",
-                  borderRadius: "4px",
-                }}
+                className={cn(
+                  "flex cursor-pointer items-center justify-between rounded-[4px] border-none p-1.5 px-2 text-left font-body text-ui transition-[background,color] duration-[120ms]",
+                  active
+                    ? "bg-accent-tint font-medium text-accent"
+                    : "bg-transparent font-normal text-ink2",
+                )}
               >
-                <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <span aria-hidden="true" style={{ fontSize: T.size.caption }}>{icon}</span>
+                <span className="flex items-center gap-1.5">
+                  <span aria-hidden="true" className="text-caption">{icon}</span>
                   {label}
                 </span>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: active ? T.accentMid : T.ink3 }}>
+                <span className={cn(
+                  "font-body text-caption",
+                  active ? "text-accent-mid" : "text-ink3",
+                )}>
                   {counts[key]}
                 </span>
               </button>
@@ -478,22 +322,17 @@ function FilterRail({ filterType, onFilter }: {
       </div>
 
       {/* Community pulse */}
-      <div style={{
-        backgroundColor: T.surface,
-        border: `1px solid ${T.line}`,
-        borderRadius: T.radiusPanel,
-        padding: "12px 14px",
-      }}>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Denyut Papan</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+      <div className="rounded-panel border border-line bg-surface p-3 py-3.5">
+        <Eyebrow as="div" className="mb-2.5">Denyut Papan</Eyebrow>
+        <div className="flex flex-col gap-2">
           {[
             { label: "Ajakan aktif", value: ASKS.length },
             { label: "Dari orang",   value: ASKS.filter((a) => a.from === "person").length },
             { label: "Dari karya",   value: ASKS.filter((a) => a.from === "karya").length },
           ].map((stat) => (
-            <div key={stat.label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{stat.label}</span>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
+            <div key={stat.label} className="flex items-baseline justify-between">
+              <span className="font-body text-ui text-ink2">{stat.label}</span>
+              <span className="font-body text-body font-medium text-ink">
                 {stat.value}
               </span>
             </div>
@@ -503,24 +342,22 @@ function FilterRail({ filterType, onFilter }: {
 
       {/* Top skills currently sought — aggregated from ASKS data */}
       <div>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Paling Dicari</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 7 }}>
+        <Eyebrow as="div" className="mb-2.5">Paling Dicari</Eyebrow>
+        <div className="flex flex-col gap-1.5">
           {TOP_SKILLS.map(([skill, count]) => (
-            <div key={skill} style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2, flex: 1, minWidth: 0 }}>
+            <div key={skill} className="flex items-center gap-2">
+              <span className="flex-1 min-w-0 font-body text-ui text-ink2">
                 {skill}
               </span>
               {/* Proportional bar. The 1px outline is part of the bar's drawn
-                  size, so the box carries it — 4px of fill reads as 6px (#91). */}
-              <div style={{
-                height: 6,
-                width: `${Math.max(8, Math.round((count / ASKS.length) * 64)) + 2}px`,
-                backgroundColor: T.accentTint,
-                border: `1px solid ${T.accentLine}`,
-                borderRadius: 2,
-                flexShrink: 0,
-              }} />
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, minWidth: 10, textAlign: "right" as const }}>
+                  size, so the box carries it */}
+              <div
+                className="h-1.5 rounded-[2px] border border-accent-line bg-accent-tint shrink-0"
+                style={{
+                  width: `${Math.max(8, Math.round((count / ASKS.length) * 64)) + 2}px`,
+                }}
+              />
+              <span className="min-w-[10px] text-right font-body text-micro text-ink3">
                 {count}
               </span>
             </div>
@@ -529,37 +366,29 @@ function FilterRail({ filterType, onFilter }: {
       </div>
 
       {/* CTA — mirrors Launchpad's right rail accent block */}
-      <div style={{
-        backgroundColor: T.accent,
-        borderRadius: T.radiusPanel,
-        padding: "14px 16px",
-      }}>
-        <div style={{
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          fontWeight: T.weight.light,
-          color: T.accentFg,
-          lineHeight: T.lh.compact,
-          marginBottom: 10,
-        }}>
+      <div className="bg-accent rounded-panel p-3.5 py-4">
+        <div className="font-body text-body font-light leading-compact text-accent-fg mb-2.5">
           Punya ajakan? Tulis di papan — komunitas siap merespons.
         </div>
-        <button style={{
-          backgroundColor: T.accentFg,
-          color: T.accent,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "6px 14px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          width: "100%",
-        }}>
+        <button className="w-full cursor-pointer rounded-card border-none bg-accent-fg px-3.5 py-1.5 font-body text-ui font-semibold text-accent">
           Tulis Ajakan
         </button>
       </div>
-    </aside>
+
+      {/* ── GEMASTIK quick link ───────────────────────────────────────── */}
+      <div className="flex items-center gap-2.5 rounded-panel border border-accent-line bg-accent-tint p-3.5">
+        <span aria-hidden="true" className="text-body text-accent">◈</span>
+        <div className="min-w-0 flex-1">
+          <div className="font-body text-ui font-medium text-ink">
+            GEMASTIK 2026
+          </div>
+          <div className="font-body text-micro text-accent-mid">
+            12 tim sedang terbentuk
+          </div>
+        </div>
+        <span className="font-body text-micro text-accent-mid">→</span>
+      </div>
+    </RailColumn>
   );
 }
 

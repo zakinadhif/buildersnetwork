@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
-import { KaryaCover } from "@myapp/ui";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { cn, KaryaCover, Button, Textarea, Card, CardTitle, CardDescription } from "@myapp/ui";
 import { useNavigate } from "../gallery";
 import { ME, MY_KARYA, type Karya } from "../data/karya";
 import { coverFor } from "../lib/images";
+import { Eyebrow } from "@myapp/ui";
 
 /**
  * Tulis kabar — the composer, embedded at the head of the two surfaces a kabar
@@ -26,17 +26,6 @@ import { coverFor } from "../lib/images";
  * a field; you are looking at who is about to speak.
  */
 
-const field = {
-  width: "100%",
-  boxSizing: "border-box" as const,
-  border: `1px solid ${T.line}`,
-  borderRadius: T.radiusCard,
-  padding: "9px 11px",
-  background: T.bg,
-  fontFamily: T.fontBody,
-  color: T.ink,
-} as const;
-
 // ─── No karya yet — the principle at the door ────────────────────────────────
 // An invitation, never a disabled composer. The reason there is nothing to post
 // is not a permission problem: a kabar is *about* work, and there is no work
@@ -46,42 +35,23 @@ function NoKarya() {
   const navigate = useNavigate();
 
   return (
-    <div style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 14,
-      padding: "14px 16px",
-      background: T.surface,
-      border: `1px solid ${T.line}`,
-      borderRadius: T.radiusPanel,
-    }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
+    <Card className="flex flex-row items-center gap-3.5 border-line bg-surface p-4 shadow-none">
+      <div className="min-w-0 flex-1">
+        <CardTitle className="font-body text-body font-medium text-ink mb-0.5">
           Kabar selalu punya karya
-        </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3, marginTop: 2, lineHeight: T.lh.compact }}>
+        </CardTitle>
+        <CardDescription className="font-body text-caption leading-compact text-ink3">
           Yang tayang di sini kemajuan sebuah karya, dan karyanya yang jadi penulis.
-        </div>
+        </CardDescription>
       </div>
-      <button
-        type="button"
+      <Button
         onClick={() => navigate("karya-new")}
-        style={{
-          flexShrink: 0,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "8px 14px",
-          background: T.accent,
-          color: T.accentFg,
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.medium,
-          cursor: "pointer",
-        }}
+        variant="primary"
+        className="shrink-0 font-medium px-3.5 py-2 h-auto"
       >
         Bikin karya
-      </button>
-    </div>
+      </Button>
+    </Card>
   );
 }
 
@@ -93,38 +63,25 @@ function NoKarya() {
 // quiet.
 function Byline({ karya, onSwitch }: { karya: Karya; onSwitch?: () => void }) {
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+    <div className="flex items-center gap-3">
       <KaryaCover src={coverFor(karya.interests)} size={40} radius={11} alt={`Logo ${karya.title}`} />
-      <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, color: T.ink, lineHeight: T.lh.heading }}>
+      <div className="min-w-0 flex-1">
+        <div className="font-display text-title leading-heading text-ink">
           {karya.title}
         </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginTop: 1 }}>
+        <div className="mt-px font-body text-micro text-ink3">
           diposting {ME.name}
         </div>
       </div>
       {onSwitch && (
-        <button
-          type="button"
+        <Button
+          variant="outline"
           onClick={onSwitch}
-          style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-            border: `1px solid ${T.line}`,
-            borderRadius: 99,
-            padding: "5px 11px",
-            background: "transparent",
-            color: T.ink2,
-            fontFamily: T.fontBody,
-            fontSize: T.size.caption,
-            fontWeight: T.weight.medium,
-            cursor: "pointer",
-          }}
+          className="inline-flex h-auto items-center gap-1 rounded-full border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2 hover:bg-transparent hover:text-ink"
         >
           Ganti
           <ChevronDown size={13} strokeWidth={2} aria-hidden="true" />
-        </button>
+        </Button>
       )}
     </div>
   );
@@ -148,26 +105,22 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
   const ready = Boolean(body.trim());
 
   return (
-    <div style={{
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: 12,
-      paddingBottom: 16,
-      paddingLeft: T.shellGutter,
-      paddingRight: T.shellGutter,
-      marginLeft: `calc(-1 * ${T.shellGutter})`,
-      marginRight: `calc(-1 * ${T.shellGutter})`,
-      borderBottom: `1px solid ${T.line}`,
-    }}>
+    <div
+      className={cn(
+        "flex flex-col gap-3 border-b border-line pb-4",
+        // Bleed to column rules on both sides — same logic as .bn-post (GlobalStyles).
+        "mx-[calc(-1*var(--shell-gutter))] px-[var(--shell-gutter)]",
+      )}
+    >
       <Byline
         karya={karya}
         onSwitch={!pinned && MY_KARYA.length > 1 ? () => setSwitching((v) => !v) : undefined}
       />
 
       {switching && (
-        <div style={{ borderTop: `1px solid ${T.line}`, paddingTop: 12 }}>
-          <div style={{ ...eyebrow, marginBottom: 8 }}>Posting sebagai</div>
-          <div style={{ display: "flex", flexDirection: "column" as const, gap: 2 }}>
+        <div className="border-t border-line pt-3">
+          <Eyebrow as="div" className="mb-2">Posting sebagai</Eyebrow>
+          <div className="flex flex-col gap-0.5">
             {MY_KARYA.map((k) => {
               const on = k.id === karya.id;
               return (
@@ -176,21 +129,12 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
                   type="button"
                   onClick={() => { setChosen(k); setSwitching(false); }}
                   aria-pressed={on}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 9,
-                    textAlign: "left" as const,
-                    border: "none",
-                    borderRadius: T.radiusCard,
-                    padding: "6px 8px",
-                    background: on ? T.accentTint : "transparent",
-                    color: on ? T.accent : T.ink2,
-                    fontFamily: T.fontBody,
-                    fontSize: T.size.ui,
-                    fontWeight: on ? T.weight.medium : T.weight.regular,
-                    cursor: "pointer",
-                  }}
+                  className={cn(
+                    "flex cursor-pointer items-center gap-[9px] rounded-card border-none px-2 py-1.5 text-left font-body text-ui",
+                    on
+                      ? "bg-accent-tint text-accent font-medium"
+                      : "bg-transparent text-ink2 font-normal",
+                  )}
                 >
                   <KaryaCover src={coverFor(k.interests)} size={22} radius={7} alt="" />
                   {k.title}
@@ -201,41 +145,28 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
         </div>
       )}
 
-      <textarea
+      <Textarea
         value={body}
         onChange={(e) => setBody(e.target.value)}
         rows={3}
         placeholder="Ceritakan secukupnya. Yang paling berguna biasanya bagian yang tidak terduga."
         aria-label="Isi kabar"
-        style={{ ...field, fontSize: T.size.body, lineHeight: T.lh.body, resize: "vertical" as const }}
+        className="w-full resize-y font-body text-body leading-body text-ink"
       />
 
-      <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div className="flex items-center gap-3">
         {/* Says where the thing goes, because the surface you are on is not where
             it lives — the post's home is the karya, and Scroll is a view of it. */}
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, lineHeight: T.lh.compact }}>
+        <div className="font-body text-micro leading-compact text-ink3">
           Tayang di halaman {karya.title}, lalu muncul di Scroll orang yang mengikutinya.
         </div>
-        <button
-          type="button"
+        <Button
           disabled={!ready}
-          style={{
-            marginLeft: "auto",
-            flexShrink: 0,
-            border: "none",
-            borderRadius: T.radiusCard,
-            padding: "8px 16px",
-            background: ready ? T.accent : T.line,
-            color: ready ? T.accentFg : T.ink3,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            fontWeight: T.weight.medium,
-            cursor: ready ? "pointer" : "default",
-            transition: "background 0.12s, color 0.12s",
-          }}
+          variant="primary"
+          className="ml-auto shrink-0 font-medium px-4 h-auto py-2"
         >
           Posting
-        </button>
+        </Button>
       </div>
     </div>
   );

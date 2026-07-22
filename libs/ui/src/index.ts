@@ -12,9 +12,11 @@
  * freedom to move fast; that is what the gallery is for. See the graduation rule
  * in plans/how-to/parallel-ui-exploration.md.
  *
- * Consumers must import `@myapp/ui/ui.css` once, alongside the design tokens.
+ * Consumers compose the shell with `ShellColumns`, `LeftNav`, `MainColumn`, and
+ * `RailColumn`; the styling lives with those source components now.
  */
 export { Avatar, avatarColor, initials, RING } from "./Avatar";
+export { Eyebrow } from "./Eyebrow";
 export {
   KaryaCard,
   type KaryaCardActivity,
@@ -23,5 +25,13 @@ export {
   type KaryaCardStage,
 } from "./KaryaCard";
 export { KaryaCover } from "./KaryaCover";
-export { LeftNav, type NavItem, ShellColumns } from "./Shell";
+export { cn } from "./lib/cn";
+export * from "./primitives";
+export {
+  LeftNav,
+  MainColumn,
+  type NavItem,
+  RailColumn,
+  ShellColumns,
+} from "./Shell";
 export { Tag } from "./Tag";

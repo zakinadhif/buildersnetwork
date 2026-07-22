@@ -1,20 +1,7 @@
 import { useState } from "react";
+import { cn } from "@myapp/ui";
 import { SCREEN_META, type Screen } from "./nav";
-
-// ─── Screen switcher chrome ─────────────────────────────────────────────────────
-// Gallery chrome, independent of any mockup's tokens — brand values inlined, same
-// as the font switcher. Fixed bottom-left (the font controls own bottom-right), it
-// is the way to reach flow mockups that carry no product sidebar of their own.
-// Screens the product has retired are kept but folded away behind the footer
-// toggle, so the default menu is the live surface set.
-const C = {
-  surface: "oklch(100% 0 0)",
-  bg: "oklch(98% 0 0)",
-  ink: "oklch(18% 0 0)",
-  ink3: "oklch(53% 0 0)",
-  lineDark: "oklch(85% 0 0)",
-  body: "'Plus Jakarta Sans', sans-serif",
-};
+import { Eyebrow } from "@myapp/ui";
 
 const GROUP_ORDER = ["Surface", "Alur", "Funnel"] as const;
 
@@ -26,53 +13,28 @@ function Toggle({ label, on, onToggle }: { label: string; on: boolean; onToggle:
       role="switch"
       aria-checked={on}
       onClick={onToggle}
-      style={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 8,
-        width: "100%",
-        border: "none",
-        borderRadius: 8,
-        padding: "4px 5px",
-        background: "transparent",
-        cursor: "pointer",
-      }}
+      className="flex w-full cursor-pointer items-center justify-between gap-2 border-none bg-transparent p-1 px-1.25 rounded-card"
     >
       <span
-        style={{
-          fontFamily: C.body,
-          fontSize: 11,
-          fontWeight: on ? 500 : 400,
-          color: on ? C.ink : C.ink3,
-          transition: "color 0.12s",
-        }}
+        className={cn(
+          "font-body text-caption transition-colors duration-[120ms]",
+          on ? "font-medium text-ink" : "font-normal text-ink3",
+        )}
       >
         {label}
       </span>
       <span
         aria-hidden
-        style={{
-          position: "relative",
-          flexShrink: 0,
-          width: 26,
-          height: 15,
-          borderRadius: 99,
-          background: on ? C.ink : C.lineDark,
-          transition: "background 0.12s",
-        }}
+        className={cn(
+          "relative h-[15px] w-[26px] shrink-0 rounded-full transition-colors duration-[120ms]",
+          on ? "bg-ink" : "bg-line-dark",
+        )}
       >
         <span
-          style={{
-            position: "absolute",
-            top: 2,
-            left: on ? 13 : 2,
-            width: 11,
-            height: 11,
-            borderRadius: 99,
-            background: C.surface,
-            transition: "left 0.12s",
-          }}
+          className={cn(
+            "absolute top-[2px] h-[11px] w-[11px] rounded-full bg-surface transition-all duration-[120ms]",
+            on ? "left-[13px]" : "left-[2px]",
+          )}
         />
       </span>
     </button>
@@ -94,41 +56,17 @@ export function ScreenSwitcher({ active, onChange }: {
     <div
       role="group"
       aria-label="Pilih layar"
-      style={{
-        position: "fixed",
-        bottom: 20,
-        left: 20,
-        zIndex: 100,
-        background: C.surface,
-        border: `1px solid ${C.lineDark}`,
-        borderRadius: 14,
-        boxShadow: "0 4px 16px oklch(0% 0 0 / 10%)",
-        padding: 8,
-        display: "flex",
-        flexDirection: "column",
-        gap: 8,
-        maxWidth: 210,
-      }}
+      className="fixed bottom-5 left-5 z-[100] flex max-w-[210px] flex-col gap-2 rounded-[14px] border border-line-dark bg-surface p-2 shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
     >
       {GROUP_ORDER.map((group) => {
         const items = visible.filter((s) => s.group === group);
         if (items.length === 0) return null;
         return (
-          <div key={group} style={{ display: "flex", flexDirection: "column", gap: 3 }}>
-            <span
-              style={{
-                fontFamily: C.body,
-                fontSize: 9,
-                fontWeight: 600,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: C.ink3,
-                padding: "0 4px",
-              }}
-            >
+          <div key={group} className="flex flex-col gap-1">
+            <Eyebrow as="span" className="px-1 tracking-[0.12em] font-semibold text-ink3">
               {group}
-            </span>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 3 }}>
+            </Eyebrow>
+            <div className="flex flex-wrap gap-[3px]">
               {items.map((s) => {
                 const on = s.key === active;
                 return (
@@ -137,24 +75,14 @@ export function ScreenSwitcher({ active, onChange }: {
                     onClick={() => onChange(s.key)}
                     aria-pressed={on}
                     title={s.retired ? "Layar tidak dipakai — bukan bagian produk lagi" : undefined}
-                    style={{
-                      // Dashed outline is what reads "retired" at a glance; every
-                      // button carries the border so the two sit the same size.
-                      border: s.retired && !on
-                        ? `1px dashed ${C.lineDark}`
-                        : "1px solid transparent",
-                      borderRadius: 8,
-                      padding: "4px 9px",
-                      background: on ? C.ink : "transparent",
-                      color: on ? C.bg : C.ink3,
-                      fontFamily: C.body,
-                      fontSize: 11,
-                      fontWeight: on ? 500 : 400,
-                      fontStyle: s.retired ? "italic" : "normal",
-                      cursor: "pointer",
-                      whiteSpace: "nowrap",
-                      transition: "background 0.12s, color 0.12s",
-                    }}
+                    className={cn(
+                      "cursor-pointer rounded-card px-2.25 py-1 font-body text-caption whitespace-nowrap transition-all duration-[120ms]",
+                      s.retired && !on
+                        ? "border border-dashed border-line-dark"
+                        : "border border-transparent",
+                      on ? "bg-ink font-medium text-bg" : "bg-transparent font-normal text-ink3",
+                      s.retired ? "italic" : "normal",
+                    )}
                   >
                     {s.label}
                   </button>
@@ -165,7 +93,7 @@ export function ScreenSwitcher({ active, onChange }: {
         );
       })}
       {retiredCount > 0 && (
-        <div style={{ borderTop: `1px solid ${C.lineDark}`, paddingTop: 5, marginTop: 1 }}>
+        <div className="mt-0.25 border-t border-line-dark pt-1.25">
           <Toggle
             label={`Layar tidak dipakai (${retiredCount})`}
             on={showRetired}

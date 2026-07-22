@@ -4,11 +4,13 @@ import {
   saveProfile,
   useListMembers,
 } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Redirect, useLocation } from "wouter";
 import {
   EditField,
+  Eyebrow,
   InterestsEditor,
   Loading,
   SkillsEditor,
@@ -95,57 +97,61 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
   if (busy) return <Loading label="lagi nyariin orang-orangnya" />;
 
   return (
-    <div className="screen" style={{ overflowY: "auto" }}>
-      <div className="wrap" style={{ paddingTop: 52, paddingBottom: 80 }}>
-        <p className="eyebrow mb8">Al-Fath Berkarya</p>
-        <h1 className="h1">Ini yang aku tangkap.</h1>
-        <p className="sub mt8 mb32">Kalau ada yang meleset, ketuk langsung.</p>
-        <hr className="hr" style={{ margin: "0 0 32px" }} />
+    <div className="fixed inset-0 animate-up overflow-y-auto">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
+        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
+        <h1 className="text-feature font-light tracking-heading leading-heading">
+          Ini yang aku tangkap.
+        </h1>
+        <p className="text-body text-ink2 leading-body mt-2 mb-8">
+          Kalau ada yang meleset, ketuk langsung.
+        </p>
+        <hr className="border-none border-b border-line m-0 mb-8" />
 
-        <div className="pf">
-          <p className="eyebrow mb6">Nama</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Nama</Eyebrow>
           <EditField value={p.name} onChange={(v) => set("name", v)} />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Handle</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Handle</Eyebrow>
           <EditField
             value={p.handle ?? ""}
             onChange={(v) => set("handle", v)}
           />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Angkatan</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Angkatan</Eyebrow>
           <EditField value={p.year} onChange={(v) => set("year", v)} />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Jurusan</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Jurusan</Eyebrow>
           <EditField value={p.major} onChange={(v) => set("major", v)} />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Bio</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Bio</Eyebrow>
           <EditField
             value={p.bio ?? ""}
             onChange={(v) => set("bio", v)}
             multiline
           />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Skills</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Skills</Eyebrow>
           <SkillsEditor skills={p.skills} onChange={(v) => set("skills", v)} />
         </div>
-        <div className="pf">
-          <p className="eyebrow mb6">Minat</p>
+        <div className="pf mb-7">
+          <Eyebrow className="mb-1.5">Minat</Eyebrow>
           <InterestsEditor
             interests={p.interests}
             onChange={(v) => set("interests", v)}
           />
         </div>
 
-        <hr className="hr" />
-        <div className="row-end">
-          <button type="button" className="btn btn-dark" onClick={publish}>
+        <hr className="border-none border-b border-line my-8" />
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="primary" onClick={publish}>
             Publish profil →
-          </button>
+          </Button>
         </div>
       </div>
     </div>

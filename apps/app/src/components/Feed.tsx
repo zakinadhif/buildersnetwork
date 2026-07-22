@@ -19,14 +19,17 @@ export default function Feed({ items }: { items: FeedItem[] }) {
   const [, navigate] = useLocation();
 
   return (
-    <div className="feed">
+    <div className="feed flex flex-col gap-5">
       {items.map((it) =>
         it.type === "post" ? (
-          <article key={`post-${it.id}`} className="post-card">
-            <div className="post-card-head">
+          <article
+            key={`post-${it.id}`}
+            className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+          >
+            <div className="flex justify-between items-center">
               <button
                 type="button"
-                className="post-author"
+                className="bg-transparent border-none p-0 flex items-center gap-2 cursor-pointer text-left group"
                 onClick={() => navigate(`/member/${it.author.id}`)}
               >
                 <Avatar
@@ -34,22 +37,30 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                   image={it.author.image}
                   size={28}
                 />
-                <span className="post-author-name">{it.author.name}</span>
+                <span className="text-ui font-medium text-ink group-hover:underline">
+                  {it.author.name}
+                </span>
               </button>
-              <span className={`kind-chip kind-${it.kind}`}>
+              <span
+                className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${it.kind}`}
+              >
                 {POST_KIND_LABELS[it.kind]}
               </span>
             </div>
-            <p className="post-body">{it.body}</p>
-            <div className="post-card-foot">
+            <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
+              {it.body}
+            </p>
+            <div className="flex justify-between items-center mt-1">
               <button
                 type="button"
-                className="post-karya-link"
+                className="post-karya-link bg-transparent border-none p-0 font-ui text-ui font-medium text-ink2 cursor-pointer hover:text-ink hover:underline"
                 onClick={() => navigate(`/karya/${it.karya.id}`)}
               >
                 {it.karya.title}
               </button>
-              <span className="post-time">{timeAgo(it.createdAt)}</span>
+              <span className="text-micro text-ink3">
+                {timeAgo(it.createdAt)}
+              </span>
             </div>
           </article>
         ) : (

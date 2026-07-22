@@ -9,9 +9,11 @@ import {
   useGetKarya,
   useGetKaryaPosts,
 } from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
 import { useState } from "react";
 import {
   Avatar,
+  Eyebrow,
   KaryaCover,
   Loading,
   POST_KIND_LABELS,
@@ -31,17 +33,19 @@ export default function Karya({ id }: { id: string }) {
   if (isLoading) return <Loading />;
   if (!karya) {
     return (
-      <div className="screen" style={{ display: "flex", alignItems: "center" }}>
-        <div className="wrap">
-          <p className="sub">karya tidak ditemukan.</p>
-          <button
+      <div className="fixed inset-0 animate-up flex items-center">
+        <div className="max-w-[var(--container-page)] mx-auto px-7">
+          <p className="text-body text-ink2 leading-body">
+            karya tidak ditemukan.
+          </p>
+          <Button
             type="button"
-            className="btn btn-outline"
-            style={{ marginTop: 24 }}
+            variant="secondary"
+            className="mt-6"
             onClick={() => window.history.back()}
           >
             ← balik
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -82,48 +86,37 @@ export default function Karya({ id }: { id: string }) {
   }
 
   return (
-    <div className="screen" style={{ overflowY: "auto" }}>
-      <div className="wrap" style={{ paddingTop: 40, paddingBottom: 80 }}>
+    <div className="fixed inset-0 animate-up overflow-y-auto">
+      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-10 pb-[80px]">
         <button
           type="button"
           onClick={() => window.history.back()}
-          style={{
-            background: "none",
-            border: "none",
-            cursor: "pointer",
-            color: "var(--color-ink2)",
-            fontSize: 13,
-            padding: 0,
-            marginBottom: 40,
-          }}
+          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0 mb-10 flex items-center gap-1.5"
         >
           ← balik
         </button>
 
-        <KaryaCover
-          src={karya.coverUrl}
-          size={72}
-          radius={16}
-          className="karya-cover-lg"
-        />
+        <KaryaCover src={karya.coverUrl} size={72} radius={16} />
 
-        <h1 className="h1" style={{ marginBottom: 12 }}>
+        <h1 className="text-feature font-light tracking-heading leading-heading mt-4 mb-3">
           {karya.title}
         </h1>
 
-        <div className="skills-wrap" style={{ marginBottom: 24 }}>
+        <div className="flex flex-wrap items-center gap-1.5 mb-6">
           {karya.stages.map((s) => (
             <Tag key={s} label={STAGE_LABELS[s]} />
           ))}
         </div>
 
-        <p style={{ marginBottom: 32 }}>{karya.description}</p>
+        <p className="text-body text-ink leading-body mb-8">
+          {karya.description}
+        </p>
 
         {/* Portrait screenshot gallery (issue #19) — no screenshots, no
             gallery, never an empty slot. */}
         {portraitScreenshots.length > 0 && (
           <section
-            className="screenshot-gallery"
+            className="flex gap-2 overflow-x-auto pb-4 mb-4 snap-x snap-mandatory hide-scrollbar"
             aria-label={`Tangkapan layar ${karya.title}`}
           >
             {portraitScreenshots.map((s, i) => (
@@ -132,7 +125,7 @@ export default function Karya({ id }: { id: string }) {
                 src={s.url}
                 alt={`${karya.title} — tangkapan layar ${i + 1}`}
                 loading="lazy"
-                className="screenshot-gallery-img"
+                className="w-[280px] h-[400px] object-cover rounded-panel border border-line snap-center shrink-0"
               />
             ))}
           </section>
@@ -140,24 +133,25 @@ export default function Karya({ id }: { id: string }) {
 
         {/* CTA driven by viewer membership */}
         {!membership && (
-          <button
+          <Button
             type="button"
-            className="btn btn-dark"
+            variant="primary"
             disabled={busy}
             onClick={() => act(() => joinKarya(id))}
+            className="w-full justify-center"
           >
             Minta gabung
-          </button>
+          </Button>
         )}
         {membership?.status === "pending" && (
-          <button
+          <Button
             type="button"
-            className="btn btn-outline"
+            variant="secondary"
             disabled
-            style={{ opacity: 0.6, cursor: "default" }}
+            className="w-full justify-center opacity-60 cursor-default"
           >
             Menunggu persetujuan
-          </button>
+          </Button>
         )}
 
         {/* Admin-only feature toggle (S3.12a, DECISION-A). Server is the real
@@ -165,7 +159,11 @@ export default function Karya({ id }: { id: string }) {
         {karya.viewerIsAdmin && (
           <button
             type="button"
-            className={`btn feature-toggle${karya.featured ? " on" : ""}`}
+            className={`w-full px-3.5 py-[7px] font-semibold text-ui rounded-card border transition-colors ${
+              karya.featured
+                ? "bg-accent text-bg border-accent"
+                : "bg-accent-tint text-accent border-accent-line hover:bg-accent hover:text-bg hover:border-accent"
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
             disabled={busy}
             onClick={() =>
               act(() =>
@@ -177,12 +175,12 @@ export default function Karya({ id }: { id: string }) {
           </button>
         )}
 
-        <hr className="hr" />
+        <hr className="border-none border-b border-line my-8" />
 
         {karya.interests.length > 0 && (
-          <div className="pf">
-            <p className="eyebrow mb6">Minat / tag</p>
-            <div className="skills-wrap">
+          <div className="mb-7">
+            <Eyebrow className="mb-1.5">Minat / tag</Eyebrow>
+            <div className="flex flex-wrap items-center gap-1.5">
               {karya.interests.map((s) => (
                 <Tag key={s} label={s} />
               ))}
@@ -190,9 +188,11 @@ export default function Karya({ id }: { id: string }) {
           </div>
         )}
 
-        <div className="pf">
-          <p className="eyebrow mb6">Kontributor ({karya.roster.length})</p>
-          <div className="roster">
+        <div className="mb-7">
+          <Eyebrow className="mb-1.5">
+            Kontributor ({karya.roster.length})
+          </Eyebrow>
+          <div className="flex flex-wrap gap-2">
             {karya.roster.map((m) => (
               <Avatar key={m.id} name={m.name} image={m.image} />
             ))}
@@ -201,52 +201,57 @@ export default function Karya({ id }: { id: string }) {
 
         {/* Owner-only: pending join requests */}
         {isOwner && karya.pendingRequests.length > 0 && (
-          <div className="pf">
-            <p className="eyebrow mb6">Permintaan gabung</p>
+          <div className="mb-7">
+            <Eyebrow className="mb-1.5">Permintaan gabung</Eyebrow>
             {karya.pendingRequests.map((m) => (
-              <div key={m.id} className="pending-row">
-                <div className="pending-id">
+              <div
+                key={m.id}
+                className="pending-row flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2"
+              >
+                <div className="flex items-center gap-3 text-body font-medium text-ink">
                   <Avatar name={m.name} image={m.image} size={28} />
                   <span>{m.name}</span>
                 </div>
-                <div className="pending-actions">
-                  <button
+                <div className="flex gap-2">
+                  <Button
                     type="button"
-                    className="btn btn-dark"
+                    variant="primary"
                     disabled={busy}
                     onClick={() => act(() => approveKaryaMember(id, m.id))}
                   >
                     Terima
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
-                    className="btn btn-outline"
+                    variant="secondary"
                     disabled={busy}
                     onClick={() => act(() => declineKaryaMember(id, m.id))}
                   >
                     Tolak
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
 
-        <hr className="hr" />
+        <hr className="border-none border-b border-line my-8" />
 
         {/* Post stream — Sprint 3 (FR-18/19). Members compose; everyone reads. */}
-        <div className="pf">
-          <p className="eyebrow mb6">Update</p>
+        <div className="mb-7">
+          <Eyebrow className="mb-1.5">Update</Eyebrow>
 
           {isMember && (
-            <div className="composer">
-              <div className="kind-select">
+            <div className="composer bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">
+              <div className="flex flex-wrap gap-1.5">
                 {POST_KIND_ORDER.map((k) => (
                   <button
                     key={k}
                     type="button"
-                    className={`kind-chip kind-${k} kind-pick${
-                      postKind === k ? " on" : ""
+                    className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${k} cursor-pointer transition-opacity hover:opacity-100 ${
+                      postKind === k
+                        ? "opacity-100 ring-2 ring-ink ring-offset-1"
+                        : "opacity-70"
                     }`}
                     aria-pressed={postKind === k}
                     onClick={() => setPostKind(k)}
@@ -256,45 +261,60 @@ export default function Karya({ id }: { id: string }) {
                 ))}
               </div>
               <textarea
-                className="composer-input"
+                className="composer-input bg-transparent border-none font-body text-body text-ink resize-none outline-none min-h-[60px] placeholder:text-ink3"
                 rows={3}
                 placeholder="bagikan progres, tantangan, atau capaian…"
                 value={postBody}
                 onChange={(e) => setPostBody(e.target.value)}
               />
-              <button
-                type="button"
-                className="btn btn-dark"
-                disabled={busy || !postBody.trim()}
-                onClick={submitPost}
-              >
-                Posting
-              </button>
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="primary"
+                  disabled={busy || !postBody.trim()}
+                  onClick={submitPost}
+                >
+                  Posting
+                </Button>
+              </div>
             </div>
           )}
 
           {posts.length === 0 ? (
-            <p className="empty-state">belum ada update.</p>
+            <p className="font-mono text-ui text-ink3 py-5">
+              belum ada update.
+            </p>
           ) : (
-            <div className="stream">
+            <div className="flex flex-col gap-3">
               {posts.map((p) => (
-                <article key={p.id} className="post-card">
-                  <div className="post-card-head">
-                    <div className="post-author">
+                <article
+                  key={p.id}
+                  className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
                       <Avatar
                         name={p.author.name}
                         image={p.author.image}
                         size={28}
                       />
-                      <span className="post-author-name">{p.author.name}</span>
+                      <span className="text-ui font-medium text-ink">
+                        {p.author.name}
+                      </span>
                     </div>
-                    <span className={`kind-chip kind-${p.kind}`}>
+                    <span
+                      className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${p.kind}`}
+                    >
                       {POST_KIND_LABELS[p.kind]}
                     </span>
                   </div>
-                  <p className="post-body">{p.body}</p>
-                  <div className="post-card-foot">
-                    <span className="post-time">{timeAgo(p.createdAt)}</span>
+                  <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
+                    {p.body}
+                  </p>
+                  <div className="flex justify-end">
+                    <span className="text-micro text-ink3">
+                      {timeAgo(p.createdAt)}
+                    </span>
                   </div>
                 </article>
               ))}

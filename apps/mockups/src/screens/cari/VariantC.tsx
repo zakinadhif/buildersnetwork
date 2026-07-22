@@ -7,9 +7,9 @@
  */
 
 import { useState } from "react";
-import { Avatar } from "@myapp/ui";
+import { Avatar, MainColumn, RailColumn, Tag } from "@myapp/ui";
+import { cn } from "@myapp/ui";
 import { Shell } from "../../components/Shell";
-import { Tag } from "@myapp/ui";
 import { LOOKING_FOR, type LookingFor } from "../../data/looking-for";
 import {
   KARYA_MATCHES,
@@ -20,7 +20,7 @@ import {
   type PersonMatch,
 } from "../../data/matches";
 import { coverFor } from "../../lib/images";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { Eyebrow } from "@myapp/ui";
 
 /** This variant's wording for the three FR-29 categories. */
 const BADGE_LABEL: Record<LookingFor, string> = {
@@ -40,25 +40,14 @@ const BADGE_ICON: Record<LookingFor, string> = {
 };
 
 function LookingForBadge({ type }: { type: LookingFor }) {
-  const isEvent = type === "hackathon";
-  const isGig   = type === "gig";
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
-      padding: "2px 8px",
-      borderRadius: 99,
-      border: `1px solid ${isEvent ? T.accent : isGig ? T.lineDark : T.accentLine}`,
-      backgroundColor: isEvent ? T.accent : isGig ? T.line : T.accentTint,
-      color: isEvent ? T.accentFg : isGig ? T.ink2 : T.accent,
-      fontFamily: T.fontBody,
-      fontSize: T.size.micro,
-      fontWeight: T.weight.medium,
-      letterSpacing: T.track.tag,
-      whiteSpace: "nowrap" as const,
-    }}>
-      <span aria-hidden="true" style={{ fontSize: 9 }}>{BADGE_ICON[type]}</span>
+    <span className={cn(
+      "inline-flex items-center gap-1 whitespace-nowrap rounded-full border px-2 py-[2px] font-body text-micro font-medium tracking-tag",
+      type === "hackathon" && "border-accent bg-accent text-accent-fg",
+      type === "project"   && "border-accent-line bg-accent-tint text-accent",
+      type === "gig"       && "border-line-dark bg-line text-ink2",
+    )}>
+      <span aria-hidden="true" className="text-[9px]">{BADGE_ICON[type]}</span>
       {BADGE_LABEL[type]}
     </span>
   );
@@ -69,73 +58,23 @@ function LookingForBadge({ type }: { type: LookingFor }) {
 // for GEMASTIK. Dismissible so it doesn't clutter the session.
 function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
   return (
-    <section style={{
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 14,
-      padding: "14px 18px",
-      marginBottom: 22,
-      background: T.accentTint,
-      border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusPanel,
-    }}>
-      <div aria-hidden="true" style={{
-        fontFamily: T.fontDisplay,
-        fontSize: 28,
-        color: T.accent,
-        lineHeight: 1,
-        flexShrink: 0,
-        marginTop: 2,
-      }}>✦</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontFamily: T.fontDisplay,
-          fontSize: T.size.title,
-          fontWeight: T.weight.regular,
-          color: T.ink,
-          lineHeight: T.lh.heading,
-          marginBottom: 4,
-        }}>
+    <section className="mb-[22px] flex items-start gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5">
+      <div aria-hidden="true" className="mt-0.5 shrink-0 font-display text-[28px] leading-none text-accent">✦</div>
+      <div className="min-w-0 flex-1">
+        <div className="mb-1 font-display text-title font-normal leading-heading text-ink">
           Kamu di GEMASTIK 2026? Lagi cari tim.
         </div>
-        <div style={{
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink2,
-          lineHeight: T.lh.body,
-          marginBottom: 12,
-        }}>
+        <div className="mb-3 font-body text-body leading-body text-ink2">
           Beberapa tim kompetisi butuh React dan TypeScript persis seperti skill-mu.
           Pendaftaran tutup 3 minggu lagi — masih ada waktu.
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}>
-          <button style={{
-            backgroundColor: T.accent,
-            color: T.accentFg,
-            border: "none",
-            borderRadius: T.radiusCard,
-            padding: "7px 14px",
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            fontWeight: T.weight.semibold,
-            cursor: "pointer",
-            whiteSpace: "nowrap" as const,
-          }}>
+        <div className="flex flex-wrap gap-2">
+          <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-3.5 py-[7px] font-body text-ui font-semibold text-accent-fg">
             Lihat Tim GEMASTIK →
           </button>
           <button
             onClick={onDismiss}
-            style={{
-              background: "transparent",
-              color: T.ink3,
-              border: `1px solid ${T.lineDark}`,
-              borderRadius: T.radiusCard,
-              padding: "7px 14px",
-              fontFamily: T.fontBody,
-              fontSize: T.size.ui,
-              cursor: "pointer",
-              whiteSpace: "nowrap" as const,
-            }}
+            className="cursor-pointer whitespace-nowrap rounded-card border border-line-dark bg-transparent px-3.5 py-[7px] font-body text-ui text-ink3"
           >
             Lewati
           </button>
@@ -154,135 +93,79 @@ function KaryaMatchCard({ karya, requested, onRequest, dmed, onDm }: {
   onDm: () => void;
 }) {
   return (
-    <article style={{
-      padding: "16px 0",
-      borderBottom: `1px solid ${T.line}`,
-    }}>
+    <article className="border-b border-line py-4">
       {/* Header: cover + title + badge */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
-        {/* 52px of art + a 1px ring, now inside the box (#91). */}
-        <div style={{
-          width: 54,
-          height: 54,
-          flexShrink: 0,
-          borderRadius: 13,
-          overflow: "hidden",
-          border: `1px solid ${T.line}`,
-        }}>
+      <div className="mb-2.5 flex items-start gap-3">
+        {/* 52px of art + a 1px ring */}
+        <div className="h-[54px] w-[54px] shrink-0 overflow-hidden rounded-[13px] border border-line">
           <img
             src={coverFor(karya.interests)}
             alt={karya.title}
             loading="lazy"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            className="block h-full w-full object-cover"
           />
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 5 }}>
-            <h3 style={{
-              margin: 0,
-              fontFamily: T.fontDisplay,
-              fontSize: T.size.title,
-              fontWeight: T.weight.regular,
-              color: T.ink,
-              lineHeight: T.lh.heading,
-            }}>{karya.title}</h3>
+        <div className="min-w-0 flex-1">
+          <div className="mb-[5px] flex items-start justify-between gap-2">
+            <h3 className="m-0 font-display text-title font-normal leading-heading text-ink">{karya.title}</h3>
             <LookingForBadge type={karya.lookingFor} />
           </div>
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+          <div className="flex flex-wrap gap-1">
             {karya.stages.map((s) => <Tag key={s} label={s} />)}
           </div>
         </div>
       </div>
 
       {/* Description */}
-      <p style={{
-        margin: "0 0 10px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.body,
-        color: T.ink2,
-        lineHeight: T.lh.body,
-      }}>{karya.description}</p>
+      <p className="mb-2.5 mt-0 font-body text-body leading-body text-ink2">{karya.description}</p>
 
       {/* Open roles pill */}
-      <div style={{
-        display: "flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "7px 11px",
-        borderRadius: T.radiusCard,
-        backgroundColor: T.surface,
-        border: `1px solid ${T.line}`,
-        marginBottom: 10,
-      }}>
-        <span style={{ ...eyebrow, marginRight: 2 }}>Butuh</span>
-        <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>
-          {karya.openRoles.join(" · ")}
-        </span>
+      <div className="mb-2.5 flex items-center gap-1.5 rounded-card border border-line bg-surface px-[11px] py-[7px]">
+        <Eyebrow as="span" className="mr-0.5">Butuh</Eyebrow>
+        <span className="font-body text-ui text-ink2">{karya.openRoles.join(" · ")}</span>
       </div>
 
       {/* Interest tags */}
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginBottom: 10 }}>
+      <div className="mb-2.5 flex flex-wrap gap-1">
         {karya.interests.map((i) => <Tag key={i} label={i} />)}
       </div>
 
       {/* Match reason — warm, not a score */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14 }}>
-        <span aria-hidden="true" style={{ color: T.accentMid, fontSize: T.size.body, lineHeight: 1 }}>✦</span>
-        <span style={{
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          color: T.accentMid,
-          fontWeight: T.weight.medium,
-        }}>
+      <div className="mb-3.5 flex items-center gap-[5px]">
+        <span aria-hidden="true" className="leading-none text-body text-accent-mid">✦</span>
+        <span className="font-body text-ui font-medium text-accent-mid">
           cocok: {karya.matchReason.join(", ")}
         </span>
       </div>
 
       {/* Footer: roster avatars + actions */}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" as const }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center">
           {karya.roster.slice(0, 5).map((r, idx) => (
             <span key={r.handle} style={{ marginLeft: idx === 0 ? 0 : -8, zIndex: karya.roster.length - idx }}>
               <Avatar name={r.name} size={22} />
             </span>
           ))}
-          <span style={{ marginLeft: 8, fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
-            {karya.roster.length} builder
-          </span>
+          <span className="ml-2 font-body text-micro text-ink3">{karya.roster.length} builder</span>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div className="flex gap-2">
           <button
             onClick={onDm}
-            style={{
-              padding: "6px 12px",
-              borderRadius: T.radiusCard,
-              border: `1px solid ${T.lineDark}`,
-              backgroundColor: "transparent",
-              color: dmed ? T.ink3 : T.ink2,
-              fontFamily: T.fontBody,
-              fontSize: T.size.ui,
-              cursor: "pointer",
-              whiteSpace: "nowrap" as const,
-              transition: "color 0.15s",
-            }}
+            className={cn(
+              "cursor-pointer whitespace-nowrap rounded-card border border-line-dark bg-transparent px-3 py-1.5 font-body text-ui transition-colors duration-150",
+              dmed ? "text-ink3" : "text-ink2",
+            )}
           >
             {dmed ? "Pesan Terkirim ✓" : "Tanya dulu"}
           </button>
           <button
             onClick={onRequest}
-            style={{
-              padding: "6px 14px",
-              borderRadius: T.radiusCard,
-              border: `1px solid ${requested ? T.accentLine : "transparent"}`,
-              backgroundColor: requested ? T.accentTint : T.accent,
-              color: requested ? T.accent : T.accentFg,
-              fontFamily: T.fontBody,
-              fontSize: T.size.ui,
-              fontWeight: T.weight.semibold,
-              cursor: "pointer",
-              whiteSpace: "nowrap" as const,
-              transition: "background 0.15s, color 0.15s",
-            }}
+            className={cn(
+              "cursor-pointer whitespace-nowrap rounded-card border px-3.5 py-1.5 font-body text-ui font-semibold transition-[background,color] duration-150",
+              requested
+                ? "border-accent-line bg-accent-tint text-accent"
+                : "border-transparent bg-accent text-accent-fg",
+            )}
           >
             {requested ? "Permintaan Dikirim ✓" : "Minta Gabung"}
           </button>
@@ -301,102 +184,69 @@ function PersonMatchCard({ person, invited, onInvite, dmed, onDm }: {
   onDm: () => void;
 }) {
   return (
-    <article style={{
-      padding: "16px 0",
-      borderBottom: `1px solid ${T.line}`,
-    }}>
+    <article className="border-b border-line py-4">
       {/* Header: avatar + name + badge */}
-      <div style={{ display: "flex", gap: 12, alignItems: "flex-start", marginBottom: 10 }}>
+      <div className="mb-2.5 flex items-start gap-3">
         <Avatar name={person.name} size={40} />
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 2 }}>
-            <div style={{ minWidth: 0 }}>
-              <span style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink }}>
-                {person.name}
-              </span>
-              <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginLeft: 8 }}>
-                {person.handle}
-              </span>
+        <div className="min-w-0 flex-1">
+          <div className="mb-0.5 flex items-start justify-between gap-2">
+            <div className="min-w-0">
+              <span className="font-display text-title font-normal text-ink">{person.name}</span>
+              <span className="ml-2 font-body text-micro text-ink3">{person.handle}</span>
             </div>
             <LookingForBadge type={person.lookingFor} />
           </div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
+          <div className="font-body text-micro text-ink3">
             Tkt {person.tingkat} · {person.jurusan}
           </div>
         </div>
       </div>
 
       {/* Bio */}
-      <p style={{
-        margin: "0 0 10px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.body,
-        color: T.ink2,
-        lineHeight: T.lh.body,
-      }}>{person.bio}</p>
+      <p className="mb-2.5 mt-0 font-body text-body leading-body text-ink2">{person.bio}</p>
 
       {/* Skills chips (accent = they're offering these) */}
-      <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const, marginBottom: 8 }}>
+      <div className="mb-2 flex flex-wrap gap-1">
         {person.skills.map((s) => <Tag key={s} label={s} accent />)}
       </div>
 
       {/* Current karya */}
       {person.currentKarya && (
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3, marginBottom: 10 }}>
+        <div className="mb-2.5 font-body text-ui text-ink3">
           karya saat ini:{" "}
-          <span style={{ color: T.ink2, fontWeight: T.weight.medium }}>{person.currentKarya}</span>
+          <span className="font-medium text-ink2">{person.currentKarya}</span>
         </div>
       )}
 
       {/* Match reason */}
-      <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 14 }}>
-        <span aria-hidden="true" style={{ color: T.accentMid, fontSize: T.size.body, lineHeight: 1 }}>✦</span>
-        <span style={{
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          color: T.accentMid,
-          fontWeight: T.weight.medium,
-        }}>
+      <div className="mb-3.5 flex items-center gap-[5px]">
+        <span aria-hidden="true" className="leading-none text-body text-accent-mid">✦</span>
+        <span className="font-body text-ui font-medium text-accent-mid">
           cocok buat{" "}
-          <span style={{ fontWeight: T.weight.semibold }}>{person.fitsMyKarya}</span>
+          <span className="font-semibold">{person.fitsMyKarya}</span>
           {" · "}butuh {person.fitsRole}
         </span>
       </div>
 
       {/* Actions */}
-      <div style={{ display: "flex", gap: 8, justifyContent: "flex-end" }}>
+      <div className="flex justify-end gap-2">
         <button
           onClick={onDm}
-          style={{
-            padding: "6px 12px",
-            borderRadius: T.radiusCard,
-            border: `1px solid ${T.lineDark}`,
-            backgroundColor: "transparent",
-            color: dmed ? T.ink3 : T.ink2,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            cursor: "pointer",
-            whiteSpace: "nowrap" as const,
-            transition: "color 0.15s",
-          }}
+          className={cn(
+            "cursor-pointer whitespace-nowrap rounded-card border border-line-dark bg-transparent px-3 py-1.5 font-body text-ui transition-colors duration-150",
+            dmed ? "text-ink3" : "text-ink2",
+          )}
         >
           {dmed ? "Pesan Terkirim ✓" : "Kirim Pesan"}
         </button>
         <button
           onClick={onInvite}
-          style={{
-            padding: "6px 14px",
-            borderRadius: T.radiusCard,
-            border: `1px solid ${invited ? T.accentLine : "transparent"}`,
-            backgroundColor: invited ? T.accentTint : T.accent,
-            color: invited ? T.accent : T.accentFg,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            fontWeight: T.weight.semibold,
-            cursor: "pointer",
-            whiteSpace: "nowrap" as const,
-            transition: "background 0.15s, color 0.15s",
-          }}
+          className={cn(
+            "cursor-pointer whitespace-nowrap rounded-card border px-3.5 py-1.5 font-body text-ui font-semibold transition-[background,color] duration-150",
+            invited
+              ? "border-accent-line bg-accent-tint text-accent"
+              : "border-transparent bg-accent text-accent-fg",
+          )}
         >
           {invited ? "Undangan Dikirim ✓" : "Ajak ke Karya"}
         </button>
@@ -430,26 +280,13 @@ function CariCenter({
   onDmPerson: (id: number) => void;
 }) {
   return (
-    <main className="bn-main" style={{ flex: 1, minWidth: 0 }}>
+    <MainColumn>
       {/* Page header */}
-      <div style={{ marginBottom: 20 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10, marginBottom: 4 }}>
-          <h1 style={{
-            margin: 0,
-            fontFamily: T.fontDisplay,
-            fontSize: T.size.display,
-            fontWeight: T.weight.regular,
-            letterSpacing: T.track.heading,
-            color: T.ink,
-          }}>Cari Kolaborator</h1>
+      <div className="mb-5">
+        <div className="mb-1 flex items-baseline gap-2.5">
+          <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Cari Kolaborator</h1>
         </div>
-        <p style={{
-          margin: 0,
-          fontFamily: T.fontBody,
-          fontSize: T.size.body,
-          color: T.ink2,
-          lineHeight: T.lh.body,
-        }}>
+        <p className="m-0 font-body text-body leading-body text-ink2">
           Rekomendasi buat kamu, Zaki — berdasarkan skill dan karya yang kamu bawa.
         </p>
       </div>
@@ -458,22 +295,13 @@ function CariCenter({
       {showHackathon && <HackathonBanner onDismiss={onDismissHackathon} />}
 
       {/* ── Section 1: Karya yang cocok buat kamu ── */}
-      <section style={{ marginBottom: 36 }}>
-        <div style={{ marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${T.line}` }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-            <h2 style={{
-              margin: "0 0 4px",
-              fontFamily: T.fontDisplay,
-              fontSize: T.size.feature,
-              fontWeight: T.weight.regular,
-              color: T.ink,
-              lineHeight: T.lh.heading,
-            }}>Karya yang cocok buat kamu</h2>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3, flexShrink: 0 }}>
-              {KARYA_MATCHES.length} karya
-            </span>
+      <section className="mb-9">
+        <div className="mb-4 border-b border-line pb-3">
+          <div className="mb-1 flex items-baseline justify-between gap-2">
+            <h2 className="m-0 font-display text-feature font-normal leading-heading text-ink">Karya yang cocok buat kamu</h2>
+            <span className="shrink-0 font-body text-caption text-ink3">{KARYA_MATCHES.length} karya</span>
           </div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3 }}>
+          <div className="font-body text-ui text-ink3">
             Berdasarkan skill-mu: {ZAKI.skills.join(", ")}
           </div>
         </div>
@@ -492,21 +320,12 @@ function CariCenter({
 
       {/* ── Section 2: Orang yang cocok buat karyamu ── */}
       <section>
-        <div style={{ marginBottom: 16, paddingBottom: 12, borderBottom: `1px solid ${T.line}` }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 8 }}>
-            <h2 style={{
-              margin: "0 0 4px",
-              fontFamily: T.fontDisplay,
-              fontSize: T.size.feature,
-              fontWeight: T.weight.regular,
-              color: T.ink,
-              lineHeight: T.lh.heading,
-            }}>Orang yang cocok buat karyamu</h2>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3, flexShrink: 0 }}>
-              {PERSON_MATCHES.length} orang
-            </span>
+        <div className="mb-4 border-b border-line pb-3">
+          <div className="mb-1 flex items-baseline justify-between gap-2">
+            <h2 className="m-0 font-display text-feature font-normal leading-heading text-ink">Orang yang cocok buat karyamu</h2>
+            <span className="shrink-0 font-body text-caption text-ink3">{PERSON_MATCHES.length} orang</span>
           </div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink3 }}>
+          <div className="font-body text-ui text-ink3">
             Bisa mengisi posisi terbuka di {ZAKI_KARYA.map((k) => k.title).join(" dan ")}
           </div>
         </div>
@@ -522,7 +341,7 @@ function CariCenter({
           />
         ))}
       </section>
-    </main>
+    </MainColumn>
   );
 }
 
@@ -539,65 +358,39 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
   }
 
   return (
-    <aside className="bn-rail" style={{
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: 16,
-    }}>
+    <RailColumn className="flex flex-col gap-4">
       {/* Profile card */}
-      <div style={{
-        backgroundColor: T.surface,
-        border: `1px solid ${T.line}`,
-        borderRadius: T.radiusPanel,
-        padding: "14px 16px",
-        display: "flex",
-        flexDirection: "column" as const,
-        gap: 14,
-      }}>
+      <div className="flex flex-col gap-3.5 rounded-panel border border-line bg-surface px-4 py-3.5">
         {/* Avatar + name */}
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="flex items-center gap-2.5">
           <Avatar name={ZAKI.name} size={40} />
           <div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink }}>
-              {ZAKI.name}
-            </div>
-            <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>
-              {ZAKI.handle} · Tkt {ZAKI.tingkat}
-            </div>
+            <div className="font-body text-body font-medium text-ink">{ZAKI.name}</div>
+            <div className="font-body text-micro text-ink3">{ZAKI.handle} · Tkt {ZAKI.tingkat}</div>
           </div>
         </div>
 
-        <div style={{ width: "100%", height: 1, backgroundColor: T.line }} />
+        <div className="h-px w-full bg-line" />
 
         {/* Status / looking-for badge — editable */}
         <div>
-          <div style={{ ...eyebrow, marginBottom: 6 }}>Status kamu</div>
+          <Eyebrow as="div" className="mb-1.5">Status kamu</Eyebrow>
           <button
             onClick={cycleStatus}
             title="Klik untuk ganti status"
             aria-label={`Status: ${BADGE_LABEL[lookingFor]}. Klik untuk ganti.`}
-            style={{
-              background: "none",
-              border: "none",
-              padding: 0,
-              cursor: "pointer",
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 6,
-            }}
+            className="inline-flex cursor-pointer items-center gap-1.5 border-none bg-none p-0"
           >
             <LookingForBadge type={lookingFor} />
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>▾</span>
+            <span className="font-body text-micro text-ink3">▾</span>
           </button>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, marginTop: 4 }}>
-            Klik badge untuk ganti
-          </div>
+          <div className="mt-1 font-body text-micro text-ink3">Klik badge untuk ganti</div>
         </div>
 
         {/* Skills */}
         <div>
-          <div style={{ ...eyebrow, marginBottom: 6 }}>Keahlian kamu</div>
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+          <Eyebrow as="div" className="mb-1.5">Keahlian kamu</Eyebrow>
+          <div className="flex flex-wrap gap-1">
             {ZAKI.skills.map((s) => <Tag key={s} label={s} accent />)}
           </div>
         </div>
@@ -605,43 +398,29 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
       {/* Karya Saya — with open roles that drive Section 2 matches */}
       <div>
-        <div style={{ ...eyebrow, marginBottom: 10 }}>Karya kamu</div>
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+        <Eyebrow as="div" className="mb-2.5">Karya kamu</Eyebrow>
+        <div className="flex flex-col gap-2">
           {ZAKI_KARYA.map((k) => (
-            <div key={k.id} style={{
-              backgroundColor: T.surface,
-              border: `1px solid ${T.line}`,
-              borderRadius: T.radiusCard,
-              padding: "10px 12px",
-            }}>
+            <div key={k.id} className="rounded-card border border-line bg-surface px-3 py-2.5">
               {/* Cover + title */}
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 8 }}>
-                {/* 28px of art + a 1px ring, now inside the box (#91). */}
-                <div style={{
-                  width: 30,
-                  height: 30,
-                  borderRadius: 7,
-                  overflow: "hidden",
-                  flexShrink: 0,
-                  border: `1px solid ${T.line}`,
-                }}>
+              <div className="mb-2 flex items-center gap-2">
+                {/* 28px of art + a 1px ring */}
+                <div className="h-[30px] w-[30px] shrink-0 overflow-hidden rounded-[7px] border border-line">
                   <img
                     src={coverFor(k.interests)}
                     alt={k.title}
-                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+                    className="block h-full w-full object-cover"
                   />
                 </div>
-                <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, fontWeight: T.weight.medium, color: T.ink }}>
-                  {k.title}
-                </span>
+                <span className="font-body text-ui font-medium text-ink">{k.title}</span>
               </div>
               {/* Open roles */}
-              <div style={{ ...eyebrow, marginBottom: 5 }}>Butuh</div>
-              <div style={{ display: "flex", flexDirection: "column" as const, gap: 3 }}>
+              <Eyebrow as="div" className="mb-[5px]">Butuh</Eyebrow>
+              <div className="flex flex-col gap-[3px]">
                 {k.openRoles.map((r) => (
-                  <div key={r} style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <span aria-hidden="true" style={{ color: T.accentMid, fontSize: 8 }}>◉</span>
-                    <span style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>{r}</span>
+                  <div key={r} className="flex items-center gap-1.5">
+                    <span aria-hidden="true" className="text-[8px] text-accent-mid">◉</span>
+                    <span className="font-body text-ui text-ink2">{r}</span>
                   </div>
                 ))}
               </div>
@@ -651,20 +430,10 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
       </div>
 
       {/* Edit CTA */}
-      <button style={{
-        background: "none",
-        border: `1px solid ${T.line}`,
-        borderRadius: T.radiusCard,
-        padding: "8px 14px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.ui,
-        color: T.ink2,
-        cursor: "pointer",
-        textAlign: "center" as const,
-      }}>
+      <button className="cursor-pointer rounded-card border border-line bg-none px-3.5 py-2 text-center font-body text-ui text-ink2">
         Edit profil &amp; keahlian →
       </button>
-    </aside>
+    </RailColumn>
   );
 }
 

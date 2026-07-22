@@ -44,7 +44,7 @@ export function Avatar({
   if (image) {
     return (
       <img
-        className="avatar"
+        className="inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border border-line object-cover font-body font-medium leading-none text-ink uppercase"
         src={image}
         alt={name}
         style={{ width: box, height: box }}
@@ -53,7 +53,7 @@ export function Avatar({
   }
   return (
     <span
-      className="avatar"
+      className="inline-flex shrink-0 select-none items-center justify-center overflow-hidden rounded-full border border-line font-body font-medium leading-none text-ink uppercase"
       role="img"
       aria-label={name}
       title={name}

@@ -12,13 +12,15 @@
  */
 
 import { useState } from "react";
-import { KaryaCard, Tag } from "@myapp/ui";
+import { KaryaCard, Tag, MainColumn, RailColumn, Input, Button, Toggle, cn, Card, CardHeader, CardTitle, CardDescription, CardContent, Carousel, CarouselContent, CarouselItem } from "@myapp/ui";
+import { WheelGesturesPlugin } from "embla-carousel-wheel-gestures";
 import { NavFilterList } from "../components/LeftNav";
 import { Shell } from "../components/Shell";
 import { KARYA, type Karya } from "../data/karya";
 import { relativeTime } from "../lib/format";
 import { coverFor, screenshots } from "../lib/images";
-import { T, eyebrow } from "@myapp/design-tokens";
+import { T } from "@myapp/design-tokens";
+import { Eyebrow } from "@myapp/ui";
 
 const INTEREST_FILTERS = ["Semua", "Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"] as const;
 type Interest = (typeof INTEREST_FILTERS)[number];
@@ -26,29 +28,20 @@ type Interest = (typeof INTEREST_FILTERS)[number];
 // ─── Quiet appreciation toggle — a warm signal, never a ranking input ───────────
 function AppreciateButton({ count, active, onClick }: { count: number; active: boolean; onClick: () => void }) {
   return (
-    <button
-      onClick={onClick}
-      aria-pressed={active}
+    <Toggle
+      pressed={active}
+      onPressedChange={onClick}
       aria-label={`Apresiasi (${count})`}
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
-        padding: "5px 11px",
-        border: `1px solid ${active ? T.accent : T.line}`,
-        borderRadius: 99,
-        backgroundColor: active ? T.accentTint : "transparent",
-        color: active ? T.accent : T.ink2,
-        cursor: "pointer",
-        fontFamily: T.fontBody,
-        fontSize: T.size.caption,
-        fontWeight: T.weight.medium,
-        transition: "all 0.15s",
-      }}
+      className={cn(
+        "inline-flex h-auto items-center gap-1.5 rounded-full border px-[11px] py-[5px] font-body text-caption font-medium transition-all duration-150",
+        active
+          ? "border-accent bg-accent-tint text-accent hover:bg-accent-tint hover:text-accent"
+          : "border-line bg-transparent text-ink2 hover:bg-transparent hover:text-ink"
+      )}
     >
-      <span style={{ fontSize: T.size.ui, lineHeight: 1 }}>{active ? "♥" : "♡"}</span>
+      <span className="text-ui leading-none">{active ? "♥" : "♡"}</span>
       <span>{count}</span>
-    </button>
+    </Toggle>
   );
 }
 
@@ -84,16 +77,11 @@ function CatalogCard({ karya, appreciated, onAppreciate }: { karya: Karya; appre
 // ─── Spotlight (Play-Store-style featured listing) ─────────────────────────────
 function SpotlightMetric({ value, label, accent }: { value: string; label: string; accent?: boolean }) {
   return (
-    <div style={{ flex: 1, textAlign: "center" as const, padding: "0 4px" }}>
-      <div style={{
-        fontFamily: T.fontBody,
-        fontSize: T.size.stat,
-        fontWeight: T.weight.medium,
-        color: accent ? T.accent : T.ink,
-        lineHeight: T.lh.heading,
-        marginBottom: 3,
-      }}>{value}</div>
-      <div style={eyebrow}>{label}</div>
+    <div className="flex-1 px-1 text-center">
+      <div className={["font-body text-stat font-medium leading-heading mb-[3px]", accent ? "text-accent" : "text-ink"].join(" ")}>
+        {value}
+      </div>
+      <Eyebrow as="div">{label}</Eyebrow>
     </div>
   );
 }
@@ -103,133 +91,72 @@ function Spotlight({ karya }: { karya: Karya }) {
   const latestStage = karya.stages[karya.stages.length - 1];
 
   return (
-    <section style={{
-      marginBottom: 18,
-      background: T.surface,
-      border: `1px solid ${T.accent}`,
-      borderRadius: T.radiusPanel,
-      overflow: "hidden",
-      boxShadow: `0 0 0 1px ${T.accent}22, 0 4px 16px #0f0e0b10`,
-    }}>
+    <Card className="mb-[18px] overflow-hidden rounded-panel border-accent bg-surface shadow-[0_0_0_1px_oklch(39%_0.085_62_/_0.133),0_4px_16px_#0f0e0b10]">
       {/* Accent header band */}
-      <div style={{
-        ...eyebrow,
-        color: T.accentFg,
-        backgroundColor: T.accent,
-        padding: "4px 18px",
-      }}>
+      <Eyebrow as="div" className="bg-accent px-[18px] py-1 !text-accent-fg">
         <span aria-hidden="true">◈</span> Pilihan Minggu Ini
-      </div>
+      </Eyebrow>
 
       {/* App header */}
-      <div style={{ display: "flex", gap: 14, alignItems: "center", padding: "16px 18px 14px" }}>
+      <CardHeader className="flex flex-row items-center gap-3.5 px-[18px] pb-3.5 pt-4 space-y-0">
         {/* App icon */}
-        <div aria-hidden="true" style={{
-          width: 60,
-          height: 60,
-          borderRadius: 15,
-          flexShrink: 0,
-          background: `linear-gradient(145deg, ${T.accentMid}, ${T.accent})`,
-          color: T.accentFg,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontFamily: T.fontBody,
-          fontSize: 26,
-          fontWeight: T.weight.medium,
-          boxShadow: `0 2px 8px ${T.accent}33`,
-        }}>
+        <div
+          aria-hidden="true"
+          className="flex h-[60px] w-[60px] shrink-0 items-center justify-center rounded-[15px] font-body text-[26px] font-medium text-accent-fg shadow-[0_2px_8px_var(--color-accent)_/_0.2]"
+          style={{ background: `linear-gradient(145deg, ${T.accentMid}, ${T.accent})` }}
+        >
           {karya.title.charAt(0)}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h2 style={{ margin: "0 0 3px", fontFamily: T.fontDisplay, fontSize: T.size.feature, fontWeight: T.weight.regular, lineHeight: T.lh.heading, color: T.ink }}>{karya.title}</h2>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.accentMid, fontWeight: T.weight.medium, marginBottom: 5 }}>
+        <div className="min-w-0 flex-1">
+          <CardTitle className="mb-[3px] font-display text-feature font-normal leading-heading text-ink">{karya.title}</CardTitle>
+          <CardDescription className="mb-[5px] font-body text-ui font-medium text-accent-mid">
             oleh {builders}
-          </div>
-          <div style={{ display: "flex", gap: 4, flexWrap: "wrap" as const }}>
+          </CardDescription>
+          <div className="flex flex-wrap gap-1">
             {karya.interests.map((i) => <Tag key={i} label={i} />)}
           </div>
         </div>
-        <button style={{
-          backgroundColor: T.accent,
-          color: T.accentFg,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "9px 20px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          whiteSpace: "nowrap" as const,
-          alignSelf: "flex-start",
-        }}>
+        <Button className="self-start bg-accent text-accent-fg hover:bg-accent-mid font-semibold px-5">
           Lihat Karya
-        </button>
-      </div>
+        </Button>
+      </CardHeader>
 
       {/* Play-Store-style metrics strip */}
-      <div style={{
-        display: "flex",
-        alignItems: "stretch",
-        borderTop: `1px solid ${T.line}`,
-        borderBottom: `1px solid ${T.line}`,
-        padding: "11px 12px",
-        margin: "0 18px",
-      }}>
+      <div className="mx-[18px] flex items-stretch border-y border-line px-3 py-[11px]">
         <SpotlightMetric value={`♥ ${karya.appreciations}`} label="Apresiasi" accent />
-        <div style={{ width: 1, backgroundColor: T.line }} />
+        <div className="w-px bg-line" />
         <SpotlightMetric value={`${karya.roster.length}`} label="Builder" />
-        <div style={{ width: 1, backgroundColor: T.line }} />
+        <div className="w-px bg-line" />
         <SpotlightMetric value={latestStage} label="Tahap" />
       </div>
 
-      {/* Tagline */}
-      <p style={{
-        margin: 0,
-        padding: "14px 18px 12px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.body,
-        color: T.ink2,
-        lineHeight: T.lh.body,
-      }}>{karya.description}</p>
+      <CardContent className="p-0">
+        {/* Tagline */}
+        <p className="m-0 px-[18px] pb-3 pt-3.5 font-body text-body leading-body text-ink2">
+          {karya.description}
+        </p>
 
-      {/* Screenshot gallery */}
-      <div style={{
-        display: "flex",
-        alignItems: "baseline",
-        justifyContent: "space-between",
-        padding: "0 18px 8px",
-      }}>
-        <span style={eyebrow}>Tangkapan Layar</span>
-        <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3 }}>← geser →</span>
-      </div>
-      <div className="spotlight-carousel" style={{
-        display: "flex",
-        gap: 12,
-        overflowX: "auto" as const,
-        padding: "0 18px 18px",
-        scrollSnapType: "x mandatory",
-        scrollPaddingLeft: 18,
-      }}>
-        {screenshots.map((src, i) => (
-          <img
-            key={src}
-            src={src}
-            alt={`${karya.title} — tangkapan layar ${i + 1}`}
-            style={{
-              height: 364,
-              width: "auto",
-              flexShrink: 0,
-              borderRadius: 18,
-              border: `2px solid ${T.lineDark}`,
-              scrollSnapAlign: "start",
-              background: T.bg,
-              boxShadow: "0 2px 10px #0f0e0b14",
-            }}
-          />
-        ))}
-      </div>
-    </section>
+        {/* Screenshot gallery */}
+        <div className="flex items-baseline justify-between px-[18px] pb-2">
+          <Eyebrow as="span">Tangkapan Layar</Eyebrow>
+          <span className="font-body text-micro text-ink3">← geser →</span>
+        </div>
+        
+        <Carousel className="w-full px-[18px] pb-[18px]" opts={{ align: "start" }} plugins={[WheelGesturesPlugin()]}>
+          <CarouselContent className="-ml-3">
+            {screenshots.map((src, i) => (
+              <CarouselItem key={src} className="pl-3 basis-auto">
+                <img
+                  src={src}
+                  alt={`${karya.title} — tangkapan layar ${i + 1}`}
+                  className="h-[364px] w-auto rounded-[18px] border-2 border-line-dark bg-bg shadow-[0_2px_10px_#0f0e0b14]"
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -238,41 +165,20 @@ function Spotlight({ karya }: { karya: Karya }) {
 // when the surfaces settle.
 function SeekerRamp() {
   return (
-    <section style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 14,
-      padding: "14px 18px",
-      marginBottom: 18,
-      background: T.accentTint,
-      border: `1px solid ${T.accentLine}`,
-      borderRadius: T.radiusPanel,
-    }}>
-      <div aria-hidden="true" style={{ fontFamily: T.fontDisplay, fontSize: 28, color: T.accent, lineHeight: 1, flexShrink: 0 }}>✦</div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontFamily: T.fontDisplay, fontSize: T.size.title, fontWeight: T.weight.regular, color: T.ink, lineHeight: T.lh.heading, marginBottom: 2 }}>
+    <Card className="mb-[18px] flex flex-row items-center gap-3.5 rounded-panel border-accent-line bg-accent-tint px-[18px] py-3.5">
+      <div aria-hidden="true" className="shrink-0 font-display text-[28px] leading-none text-accent">✦</div>
+      <div className="min-w-0 flex-1">
+        <CardTitle className="font-display text-title font-normal leading-heading text-ink mb-0.5">
           Belum tahu mau bikin apa?
-        </div>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink2, lineHeight: T.lh.body }}>
+        </CardTitle>
+        <CardDescription className="font-body text-body leading-body text-ink2">
           Ngobrol sebentar sama asisten — kita cari arah yang pas buat kamu.
-        </div>
+        </CardDescription>
       </div>
-      <button style={{
-        flexShrink: 0,
-        background: "transparent",
-        color: T.accent,
-        border: `1px solid ${T.accent}`,
-        borderRadius: T.radiusCard,
-        padding: "8px 16px",
-        fontFamily: T.fontBody,
-        fontSize: T.size.ui,
-        fontWeight: T.weight.semibold,
-        cursor: "pointer",
-        whiteSpace: "nowrap" as const,
-      }}>
+      <Button variant="outline" className="shrink-0 border-accent bg-transparent text-accent hover:bg-accent-tint hover:text-accent font-semibold px-4 py-2 h-auto">
         Mulai cari arah →
-      </button>
-    </section>
+      </Button>
+    </Card>
   );
 }
 
@@ -302,12 +208,12 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
     .sort((a, b) => a.lastActivity.hoursAgo - b.lastActivity.hoursAgo);
 
   return (
-    <main className="bn-main" style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column" as const, gap: 0 }}>
+    <MainColumn className="flex flex-col gap-0">
       {/* Header */}
-      <div style={{ marginBottom: 18 }}>
-        <div style={{ display: "flex", alignItems: "baseline", gap: 10 }}>
-          <h1 style={{ margin: 0, fontFamily: T.fontDisplay, fontSize: T.size.display, fontWeight: T.weight.regular, letterSpacing: T.track.heading, color: T.ink }}>Karya</h1>
-          <span style={{ fontFamily: T.fontBody, fontSize: T.size.caption, color: T.ink3 }}>Katalog karya komunitas — temukan yang menarik buat kamu</span>
+      <div className="mb-[18px]">
+        <div className="flex items-baseline gap-2.5">
+          <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">Karya</h1>
+          <span className="font-body text-caption text-ink3">Katalog karya komunitas — temukan yang menarik buat kamu</span>
         </div>
       </div>
 
@@ -319,14 +225,14 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
 
       {/* Full catalog */}
       {matched.length === 0 ? (
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, color: T.ink3, padding: "32px 0", textAlign: "center" as const }}>
+        <div className="py-8 text-center font-body text-body text-ink3">
           Tidak ada karya yang cocok — coba minat lain atau kata kunci berbeda.
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column" as const, gap: 0 }}>
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", margin: "4px 0 2px" }}>
-            <span style={eyebrow}>Semua karya</span>
-            <span style={{ fontFamily: T.fontBody, fontSize: T.size.micro, color: T.ink3, fontVariantNumeric: "tabular-nums" }}>{matched.length} karya</span>
+        <div className="flex flex-col gap-0">
+          <div className="mb-0.5 mt-1 flex items-baseline justify-between">
+            <Eyebrow as="span">Semua karya</Eyebrow>
+            <span className="font-body text-micro tabular-nums text-ink3">{matched.length} karya</span>
           </div>
           {rest.map((k) => (
             <CatalogCard key={k.id} karya={k} appreciated={appreciated.has(k.id)} onAppreciate={onAppreciate} />
@@ -335,36 +241,16 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
       )}
 
       {/* Submit CTA — making a karya belongs on the karya surface */}
-      <div style={{
-        marginTop: 20,
-        padding: "16px 20px",
-        borderRadius: T.radiusPanel,
-        border: `1.5px dashed ${T.lineDark}`,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 12,
-      }}>
+      <div className="mt-5 flex items-center justify-between gap-3 rounded-panel border-[1.5px] border-dashed border-line-dark px-5 py-4">
         <div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.medium, color: T.ink, marginBottom: 2 }}>Punya karya baru?</div>
-          <div style={{ fontFamily: T.fontBody, fontSize: T.size.ui, color: T.ink2 }}>Tambahkan ke katalog — komunitas senang lihat progresmu, sekecil apa pun.</div>
+          <div className="mb-0.5 font-body text-body font-medium text-ink">Punya karya baru?</div>
+          <div className="font-body text-ui text-ink2">Tambahkan ke katalog — komunitas senang lihat progresmu, sekecil apa pun.</div>
         </div>
-        <button style={{
-          backgroundColor: T.accent,
-          color: T.accentFg,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "8px 16px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          whiteSpace: "nowrap" as const,
-        }}>
+        <Button className="whitespace-nowrap bg-accent text-accent-fg hover:bg-accent-mid font-semibold px-4 h-auto py-2">
           Bikin Karya
-        </button>
+        </Button>
       </div>
-    </main>
+    </MainColumn>
   );
 }
 
@@ -376,31 +262,17 @@ function RightRail({ query, onQuery, filter, onFilter }: {
   onFilter: (f: Interest) => void;
 }) {
   return (
-    <aside className="bn-rail" style={{
-      display: "flex",
-      flexDirection: "column" as const,
-      gap: 20,
-    }}>
+    <RailColumn className="flex flex-col gap-5">
       {/* Directory search — the catalog's own search, moved out of the reading column */}
       <div>
-        <div style={{ ...eyebrow, marginBottom: 8 }}>Cari karya</div>
-        <input
+        <Eyebrow as="div" className="mb-2">Cari karya</Eyebrow>
+        <Input
           type="text"
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder="Nama, deskripsi, minat…"
           aria-label="Cari karya"
-          style={{
-            width: "100%",
-            boxSizing: "border-box" as const,
-            fontFamily: T.fontBody,
-            fontSize: T.size.ui,
-            color: T.ink,
-            backgroundColor: T.surface,
-            border: `1px solid ${T.line}`,
-            borderRadius: T.radiusCard,
-            padding: "7px 11px",
-          }}
+          className="w-full"
         />
       </div>
 
@@ -416,30 +288,15 @@ function RightRail({ query, onQuery, filter, onFilter }: {
           while we rethink what the rail should carry. */}
 
       {/* Call to join */}
-      <div style={{
-        backgroundColor: T.accent,
-        borderRadius: T.radiusPanel,
-        padding: "14px 16px",
-      }}>
-        <div style={{ fontFamily: T.fontBody, fontSize: T.size.body, fontWeight: T.weight.light, color: T.accentFg, lineHeight: T.lh.compact, marginBottom: 10 }}>
+      <div className="rounded-panel bg-accent px-4 py-3.5">
+        <div className="mb-2.5 font-body text-body font-light leading-compact text-accent-fg">
           Bergabung sebagai builder Telkom University.
         </div>
-        <button style={{
-          backgroundColor: T.accentFg,
-          color: T.accent,
-          border: "none",
-          borderRadius: T.radiusCard,
-          padding: "6px 14px",
-          fontFamily: T.fontBody,
-          fontSize: T.size.ui,
-          fontWeight: T.weight.semibold,
-          cursor: "pointer",
-          width: "100%",
-        }}>
+        <Button className="w-full bg-accent-fg text-accent hover:bg-accent-fg/90 font-semibold px-3.5 h-auto py-1.5 mt-2.5">
           Daftar Sekarang
-        </button>
+        </Button>
       </div>
-    </aside>
+    </RailColumn>
   );
 }
 
