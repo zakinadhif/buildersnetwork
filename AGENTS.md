@@ -11,3 +11,7 @@ Treat the `plans/` directory as a loose collection of vision documents, copy dra
 ## Team workflow
 
 Follow `plans/how-to/build-workflow.md`: milestone documents in `plans/milestones/` hold intent (why, decisions, exit criteria); GitHub Issues hold task contracts; the GitHub Project board holds live status. Use the workspace skills `project-status`, `pick-task`, and `ship-task` for the normal task loop.
+
+## Claude Code compatibility
+
+`AGENTS.md` and `.agents/skills/` are the canonical agent configuration. Run `pnpm sync:agent-config` (also run by `pnpm install`) to generate the equivalent Claude Code files. Do not edit `CLAUDE.md` or `.claude/skills/` directly.
