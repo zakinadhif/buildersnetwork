@@ -21,14 +21,14 @@ Two consequences worth internalizing:
 
 **Rail** *(standard)* — a narrow vertical column flanking the main content. There are two: the **left rail** (`.bn-nav`, 200px, navigation) and the **right rail** (`.bn-rail`, 232px, contextual side content). The left rail is shared chrome; the right rail's contents are each route's own business.
 
-**Gutter** *(standard)* — padding between content and the edge of its container: `--shell-pad-x`, 24px each side. Distinct from **gap**, the space *between* columns.
+**Gutter** *(standard)* — padding between content and the edge of its container: `--shell-gutter`, 32px at each column edge. Distinct from **gap**, the space *between* columns.
 
 **Measure** *(standard)* — the width of a column of content. There are exactly two:
 
-- `--container-shell` (1100px), the three-column browsing shell.
+- `--container-shell` (1052px), the three-column browsing shell.
 - `--container-page` (580px), the single reading column — auth, welcome, chat.
 
-**`--container-shell` vs `--container-shell-outer`** — the distinction that caused the system's most expensive bug. `--container-shell` measures the **content the columns divide up**; `--container-shell-outer` derives from it by adding both gutters. Under the shared `border-box` base, `max-width` sets the **outer** box, so a shell wanting 1100px of content must ask for `--container-shell-outer`. The same declaration once meant content in the gallery and outer width in the app, and the app's centre column was 48px short for months (#91). `outer` is derived, never written down twice.
+**`--container-shell` vs `--container-shell-outer`** — the distinction that caused the system's most expensive bug. `--container-shell` measures the **content the columns divide up**; `--container-shell-outer` derives from it by adding the six column-edge gutters and two rules. Under the shared `border-box` base, `max-width` sets the **outer** box, so a shell wanting 1052px of content must ask for `--container-shell-outer`. The same declaration once meant content in the gallery and outer width in the app, and the app's centre column was 48px short for months (#91). `outer` is derived, never written down twice.
 
 **Chrome** *(standard)* — the persistent UI frame around content: nav, shell, rails. As opposed to the content itself. `libs/ui` describes itself as "the chrome that has stopped moving."
 
