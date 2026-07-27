@@ -44,6 +44,8 @@ Review the mockups side by side in the gallery, decide, and pull the winning ide
 
 ## Graduation: when a mockup's chrome moves into `libs/ui`
 
+*The words this section uses — chrome, drift, north star, rail, hairline, eyebrow — are defined in [reference/design-glossary.md](../reference/design-glossary.md).*
+
 The gallery's inline-style idiom is a **feature**, not debt. A screen you can rewrite in one file, with no CSS to name and no component to keep in sync, is what makes five directions in a day possible. Exploration keeps it.
 
 But two implementations of one design **always** drift, and the record is unambiguous: #26 gave the app and the gallery one set of token *values*; #87 still found the type had drifted; #91 found the box model had too, and the app's centre column had been 48px narrow for months. Tokens pin the leaves. They cannot pin the tree.

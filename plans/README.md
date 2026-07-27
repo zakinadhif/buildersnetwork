@@ -11,7 +11,7 @@ When two sources disagree, the higher rung is right. State it once here so no in
 3. **[Milestone docs](milestones/)** — truth for why a chunk of work exists, what was decided, and its exit criterion.
 4. **[Roadmap](roadmap.md)** — truth for the order of milestones, and therefore the schedule.
 5. **[Vision](vision.md)** — truth for the product's why.
-6. **[Reference](reference/)** ([requirements](reference/requirements.md), [content-model](reference/content-model.md), [user-flow](reference/user-flow.md)) — stable definitions and IDs, cited by everything above.
+6. **[Reference](reference/)** ([requirements](reference/requirements.md), [content-model](reference/content-model.md), [user-flow](reference/user-flow.md), [design-glossary](reference/design-glossary.md)) — stable definitions and IDs, cited by everything above.
 
 Rungs 1–2 are **live truth**; rungs 3–6 are non-authoritative working knowledge, maintained informally and quick to fall stale. **When a doc disagrees with the code, the code is right.**
 
@@ -25,6 +25,7 @@ Rungs 1–2 are **live truth**; rungs 3–6 are non-authoritative working knowle
 | What *is* capability FR-22 / NFR-1 / AI-3? | [reference/requirements.md](reference/requirements.md) |
 | How does the domain work? | [reference/content-model.md](reference/content-model.md) |
 | What does a user actually walk through? | [reference/user-flow.md](reference/user-flow.md) — the screens, routes, and the karya → post → feed loop |
+| What does *eyebrow* / *hairline* / *graduation* mean? | [reference/design-glossary.md](reference/design-glossary.md) — the design system's vocabulary |
 | What do I build right now? | GitHub issues + the [project board](https://github.com/users/zakinadhif/projects/8) |
 | How do we operate (workflow, previews, email)? | [how-to/](how-to/) |
 | How do I add an API endpoint? | [how-to/adding-an-endpoint.md](how-to/adding-an-endpoint.md) — the OpenAPI-first contract and its two exceptions |
