@@ -13,11 +13,11 @@ Create the issue and add it to the board in the same workflow. Write issue title
    - A non-trivial UI `[Fitur]` also needs Gate B: a matching mockup in `apps/mockups/`. If absent, recommend `[Desain]` first. Only an explicit maintainer override may bypass a gate; record it in the issue.
 2. Choose the tag and initial Status: `[Fitur]` for one vertical, shippable deliverable; `[Diskusi]` for an undecided question (Proposed); `[Desain]` for a reviewable design exploration; `[Bug]` for a reproducible defect; `[Security]` for hardening without a known defect. Use Ready only for unblocked, current, maintainer-curated work; otherwise use Backlog, Proposed, or Blocked.
 3. Author the cold-completable contract in this order: `## Kenapa`, `## Ruang lingkup`, `## Batas (touch / don't touch)`, `## Kriteria terima`, optional `## Dependensi`, and `## Di luar lingkup`. Include relevant treatment/milestone and required Vitest or Playwright validation. Split by vertical deliverable, not DB/API/UI layers.
-4. Create the issue, then add it to project 8 and set Status. Get current board IDs and status option IDs from the Board reference in `plans/how-to/build-workflow.md`; do not hard-code assumptions.
+4. Create the issue, then place it idempotently through the repository workflow command. If issue creation succeeds but placement fails, rerun only `place`; it will add or repair the existing board item without duplication.
 
 ```bash
 gh issue create --title "[Tag] <Area>: <brief>" --milestone "<milestone>" --body "<body>"
-gh project item-add 8 --owner zakinadhif --url <issue-url> --format json --jq '.id'
+pnpm workflow place <number> <Backlog|Proposed|Ready|Blocked>
 ```
 
 5. For a batch, complete creation, board addition, and status setting for every issue. Report `#number — title — Status`, including dependency status.

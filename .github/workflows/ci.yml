@@ -71,6 +71,9 @@ jobs:
       - name: Unit tests — preview reaper
         run: node --test .github/scripts/preview-reaper.test.mjs
 
+      - name: Unit tests — workflow engine
+        run: pnpm test:workflow
+
       - name: Unit tests — api
         run: pnpm test:api
 

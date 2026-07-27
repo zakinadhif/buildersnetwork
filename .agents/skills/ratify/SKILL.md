@@ -22,7 +22,7 @@ Only an explicit request such as `$ratify #N` or “ratify #N” satisfies this 
    - Create UI `[Fitur]` placeholders in Backlog with a minimal `Kenapa`, the document PR citation, and “menunggu desain #N; jangan di-groom/mulai sebelum desain merge.” These are intentionally ungroomed, not Blocked.
    - Create backend-only `[Fitur]` items as complete contracts.
    - Use real `Depends on #N` only between deliverables; update existing issues when appropriate.
-   - Link every spawned issue as a flat sub-issue of the `[Diskusi]` using the GitHub GraphQL `addSubIssue` mutation documented in `plans/how-to/build-workflow.md`.
+   - Link every spawned issue as a flat sub-issue of the `[Diskusi]` with `pnpm workflow link-subissue <diskusi-number> <child-number>`. It checks the existing relationship before mutating and is safe to rerun.
 4. Keep every spawned item in Backlog while the documentation PR is open. Comment on the discussion with links to the PR and child issues, but leave it open and Proposed. After the PR merges and GitHub closes the discussion, the maintainer may curate immediately buildable design/backend items into Ready; UI feature placeholders awaiting design stay Backlog. Leave the discussion's board item unarchived.
 
 Report the docs PR, each created or updated issue and Status, and that the discussion remains open until the PR merges. When a linked design later merges, groom its feature placeholder from the mockup before moving it toward Ready.

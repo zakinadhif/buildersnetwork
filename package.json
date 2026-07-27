@@ -15,6 +15,8 @@
     "db:check": "pnpm run --filter @myapp/db db:check",
     "db:seed": "pnpm --filter api run db:seed",
     "codegen": "pnpm --filter @myapp/api-spec run codegen",
+    "workflow": "node scripts/workflow.mjs",
+    "test:workflow": "node --test scripts/workflow.test.mjs",
     "sync:agent-config": "node scripts/sync-agent-config.mjs",
     "check:agent-config": "node scripts/sync-agent-config.mjs --check",
     "prepare": "pnpm sync:agent-config",

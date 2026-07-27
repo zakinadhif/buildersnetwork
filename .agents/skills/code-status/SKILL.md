@@ -14,7 +14,7 @@ Perform a read-only audit. Never edit code, plans, issues, or the project board;
 gh issue list --milestone "<title>" --state all --json number,title,state --jq '.[] | "\(.state)\t#\(.number)\t\(.title)"'
 ```
 
-3. Map the route-to-surface critical path from `apps/app/src/App.tsx` before evaluating scope bullets. For each reachable surface on the milestone's exit path or hero funnel, inspect mockup grounding, shared design-system use, rapid-development drift (off-scale literals, missing shell, missing empty/error states), and relevant code.
+3. Discover the current app entry and router from `apps/app/package.json` and `apps/app/src/`, then map the route-to-surface critical path before evaluating scope bullets. Do not assume a fixed router filename. For each reachable surface on the milestone's exit path or hero funnel, inspect mockup grounding, shared design-system use, rapid-development drift (off-scale literals, missing shell, missing empty/error states), and relevant code.
 4. Classify every Scope item, every Decision with a code consequence, and every flagged surface as:
 
 | Class | Meaning |
