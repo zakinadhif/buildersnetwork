@@ -30,6 +30,10 @@ dist-mockups/
 .claude/settings.local.json
 .claude/worktrees/
 
+# Generated from AGENTS.md and .agents/skills/ by pnpm sync:agent-config.
+/CLAUDE.md
+/.claude/skills/
+
 # Impeccable tool cache (per-machine / transient)
 .impeccable/
 

@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install
 
+      - name: Verify generated agent configuration
+        run: pnpm check:agent-config
+
       # Generate the API client before type-checking — the app imports generated hooks
       - name: Generate API client (Orval)
         run: pnpm codegen
