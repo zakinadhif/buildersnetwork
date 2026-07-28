@@ -3,8 +3,8 @@ import { authed, expect } from "./fixtures";
 
 // Acceptance for Sprint 3 (S3.17): a karya member composes a post → it lands in
 // the stream and the POST payload carries kind/body; a non-member sees the
-// stream but no compose box; the homepage renders curated "Top picked" + a feed
-// mixing a post and a new-karya item that link out; the admin feature toggle
+// stream but no compose box; Scroll renders a feed mixing a post and a new-karya
+// item that link out; the admin feature toggle
 // shows only for admins and fires POST .../feature. Mirrors karya.spec mocking.
 
 const PROFILE = {
@@ -159,7 +159,7 @@ authed("non-member: sees the stream but no compose box", async ({ page }) => {
 });
 
 authed(
-  "homepage: renders Top picked + a feed mixing a post and a new karya, linking out",
+  "Scroll renders a karya-first feed mixing a post and a new karya",
   async ({ page }) => {
     await mockMe(page);
 
@@ -219,18 +219,15 @@ authed(
 
     await page.goto("/home");
 
-    // Top picked (featured) renders.
-    await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
-    await expect(
-      page.locator(".featured .karya-card", { hasText: "Rasa" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
 
-    // Feed: the post item renders (author + body + kind).
+    // Feed: the post is led by its karya, with author as metadata.
     const postCard = page.locator(".post-card", {
       hasText: "rekomendasi pertama tembus",
     });
     await expect(postCard).toBeVisible();
-    await expect(postCard.getByText("Fatimah Zahra")).toBeVisible();
+    await expect(postCard.getByText("Rasa")).toBeVisible();
+    await expect(postCard.getByText(/diposting Fatimah Zahra/)).toBeVisible();
     await expect(postCard.getByText("capaian")).toBeVisible();
 
     // Feed: the new-karya item renders with its tag.
@@ -238,7 +235,7 @@ authed(
     await expect(karyaItem).toBeVisible();
     await expect(karyaItem.getByText("karya baru")).toBeVisible();
 
-    // The post's parent-karya title links out to the karya page.
+    // The post's primary karya identity links out to the karya page.
     await page.route("**/api/karya/kf", (route) =>
       route.fulfill({
         status: 200,
@@ -253,13 +250,13 @@ authed(
         body: "[]",
       }),
     );
-    await postCard.locator(".post-karya-link").click();
+    await postCard.getByRole("button", { name: /Rasa/ }).click();
     await expect(page).toHaveURL(/\/karya\/kf/);
   },
 );
 
 authed(
-  "launchpad rail: real pulse counts + builders to meet (self excluded) + CTA",
+  "Scroll rail: builders to meet (self excluded) + karya CTA",
   async ({ page }) => {
     await mockMe(page);
 
@@ -273,15 +270,6 @@ authed(
         }),
       );
     }
-
-    // Live pulse counts — the rail must reflect these, not hardcoded numbers.
-    await page.route("**/api/stats", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ karya: 7, builders: 3, updatesThisWeek: 5 }),
-      }),
-    );
 
     // Members: the viewer (test-user-id) plus two others — the viewer is never
     // surfaced to themselves in "kenalan dengan builder".
@@ -316,15 +304,9 @@ authed(
 
     await page.goto("/home");
 
-    // The third column renders with the pulse strip and its live values.
+    // The third column renders without inventing new discussion/feedback data.
     const rail = page.locator(".bn-rail");
     await expect(rail).toBeVisible();
-    const karyaRow = rail.locator(".bn-pulse-row", { hasText: "Karya aktif" });
-    await expect(karyaRow.locator(".bn-pulse-value")).toHaveText("7");
-    const updateRow = rail.locator(".bn-pulse-row", {
-      hasText: "Update minggu ini",
-    });
-    await expect(updateRow.locator(".bn-pulse-value")).toHaveText("5");
 
     // A builder to meet shows; the viewer themselves does not.
     await expect(rail.getByText("Fatimah Zahra")).toBeVisible();

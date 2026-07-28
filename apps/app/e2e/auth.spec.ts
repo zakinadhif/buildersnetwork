@@ -49,7 +49,7 @@ authed(
     await page.goto("/");
     await expect(page).toHaveURL(/\/home/);
     await expect(page).not.toHaveURL(/\/welcome/);
-    await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
   },
 );
 

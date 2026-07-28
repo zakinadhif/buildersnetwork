@@ -3,7 +3,7 @@ import { authed, expect } from "./fixtures";
 
 // Exit criterion for the Launchpad milestone (issue #8): a new verified member
 // (no profile) lands on the Launchpad home *inside the shell* without being
-// forced through the AI chat; opens the AI assistant tab from the rail, runs one
+// forced through the AI chat; opens the optional AI assistant tool, runs one
 // turn, applies the extracted draft, and the profile updates. Feed/featured mocked.
 
 /** Stateful profile: null until the minimal-start (or assistant) saves one. */
@@ -97,15 +97,13 @@ authed(
     await page.getByRole("button", { name: /Masuk ke Launchpad/ }).click();
 
     await expect(page).toHaveURL(/\/home/);
-    await expect(
-      page.getByRole("heading", { name: "Launchpad" }),
-    ).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
     await expect(
       page.locator(".bn-nav-user", { hasText: "Test User" }),
     ).toBeVisible();
 
-    // 3) Open the AI assistant tab from the rail.
-    await page.getByRole("button", { name: /Asisten AI/ }).click();
+    // 3) Open the optional AI assistant from Scroll (not primary navigation).
+    await page.getByRole("button", { name: /Butuh teman berpikir/ }).click();
     await expect(page).toHaveURL(/\/assistant/);
 
     // 4) Run one turn — the reply carries the end signal, so a draft is built.

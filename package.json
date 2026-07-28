@@ -38,13 +38,7 @@
   "keywords": [],
   "author": "",
   "license": "MIT",
-  "packageManager": "pnpm@10.18.1",
-  "pnpm": {
-    "overrides": {
-      "@biomejs/biome": "2.4.15",
-      "orval": "8.11.0"
-    }
-  },
+  "packageManager": "pnpm@11.9.0",
   "devDependencies": {
     "@biomejs/biome": "^2.4.7",
     "typescript": "~5.9.3",

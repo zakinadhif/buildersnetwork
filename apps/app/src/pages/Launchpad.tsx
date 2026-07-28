@@ -1,258 +1,124 @@
-import {
-  type KaryaListItem,
-  useGetFeatured,
-  useGetFeed,
-  useGetStats,
-  useListMembers,
-} from "@myapp/api-client-react";
-import { useMemo, useState } from "react";
+import { useGetFeed, useListMembers } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import {
-  Avatar,
-  Eyebrow,
-  KaryaCard,
-  STAGE_LABELS,
-} from "@/components/ui-atoms";
+import { Avatar, Eyebrow } from "@/components/ui-atoms";
 import { firstName, type Member } from "@/lib/members";
 
 /**
- * The Launchpad home (issue #8) — the Launchpad-mockup treatment of the feed-first
- * community home: a calm curated "Pilihan inspiratif" strip over a reverse-chron
- * feed of recent posts + new karya. **No ranking, no leaderboard** (FR-22) — the
- * karya leads, nothing is "winning". Reuses `useGetFeatured()` / `useGetFeed()`
- * (no new endpoints) and the existing `Feed` / karya-card visual language.
- *
- * A minat-filter strip filters the curated + new-karya items client-side by
- * interest (posts carry no interest in the feed payload, so a specific filter
- * narrows to karya). `interests` seeds the strip; an empty union hides it.
+ * Scroll is the Launchpad hero: a calm, reverse-chronological river of real
+ * karya events. It deliberately has no ranking, leaderboard, composer,
+ * comments, or appreciation controls.
  */
-export default function Launchpad({ user }: { user: Member }) {
+export default function Scroll({ user }: { user: Member }) {
   const [, navigate] = useLocation();
-  const { data: featured = [] } = useGetFeatured();
   const { data: feed = [] } = useGetFeed();
-  const [filter, setFilter] = useState("Semua");
-
-  // Interest chips are derived from what's actually on screen (curated + new
-  // karya), not a hardcoded list — so the strip never offers an empty filter.
-  const interests = useMemo(() => {
-    const seen = new Set<string>();
-    for (const k of featured) for (const i of k.interests) seen.add(i);
-    for (const it of feed)
-      if (it.type === "karya") for (const i of it.interests) seen.add(i);
-    return Array.from(seen);
-  }, [featured, feed]);
-
-  const active = filter !== "Semua";
-  const featuredShown = active
-    ? featured.filter((k) => k.interests.includes(filter))
-    : featured;
-  const feedShown = active
-    ? feed.filter((it) => it.type === "karya" && it.interests.includes(filter))
-    : feed;
 
   return (
     <>
-      <div className="flex items-baseline gap-2.5 mb-6">
+      <div className="mb-1.5 flex items-baseline gap-2.5">
         <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
-          Launchpad
+          Scroll
         </h1>
         <span className="font-body text-caption text-ink3">
-          Apa yang lagi dikerjakan komunitas
+          Kabar progres dari karya di komunitas
         </span>
       </div>
 
-      {/* Calm on-ramp to the AI assistant (opt-in, never a gate) */}
       <button
         type="button"
-        className="w-full flex items-center gap-3.5 px-[18px] py-3.5 mb-6 bg-accent-tint border border-accent-line rounded-panel text-left cursor-pointer transition-opacity hover:opacity-85"
+        className="my-4 flex w-full cursor-pointer items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5 text-left transition-opacity hover:opacity-85"
         onClick={() => navigate("/assistant")}
       >
         <span
-          className="font-display text-[28px] text-accent leading-none shrink-0"
+          className="shrink-0 font-display text-[28px] leading-none text-accent"
           aria-hidden="true"
         >
           ✦
         </span>
-        <span className="flex-1 min-w-0">
-          <span className="block font-display text-title text-ink leading-heading mb-0.5">
+        <span className="min-w-0 flex-1">
+          <span className="mb-0.5 block font-display text-title leading-heading text-ink">
             hei {firstName(user.name)} 👋
           </span>
-          <span className="block font-body text-body text-ink2 leading-body">
-            Belum tahu mau mulai dari mana? Ngobrol sebentar sama asisten — kita
-            rapiin profil & cari arahmu.
+          <span className="block font-body text-body leading-body text-ink2">
+            Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
           </span>
         </span>
         <span
-          className="shrink-0 text-accent text-ui font-semibold"
+          className="shrink-0 text-ui font-semibold text-accent"
           aria-hidden="true"
         >
-          Mulai →
+          Buka →
         </span>
       </button>
 
-      {/* Interest filter strip (client-side) */}
-      {interests.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 mb-6">
-          {["Semua", ...interests].map((f) => {
-            const isOn = filter === f;
-            return (
-              <button
-                key={f}
-                type="button"
-                className={`inline-flex items-center px-2.5 py-[3px] text-ui tracking-tag border cursor-pointer pointer:min-h-[44px] ${isOn ? "bg-ink border-ink text-bg" : "border-line text-ink2"}`}
-                aria-pressed={isOn}
-                onClick={() => setFilter(f)}
-              >
-                {f}
-              </button>
-            );
-          })}
-        </div>
-      )}
-
-      <Eyebrow className="pb-2.5 border-b border-line">
-        Pilihan inspiratif
-      </Eyebrow>
-      {featuredShown.length === 0 ? (
-        <p className="font-mono text-ui text-ink3 py-5">belum ada pilihan.</p>
+      <Eyebrow className="border-b border-line pb-2.5">Kabar terbaru</Eyebrow>
+      {feed.length === 0 ? (
+        <p className="py-8 text-center font-body text-body text-ink3">
+          Belum ada kabar progres.
+        </p>
       ) : (
-        <div className="featured flex flex-col">
-          {featuredShown.map((k) => (
-            <FeaturedCard
-              key={k.id}
-              karya={k}
-              onOpen={() => navigate(`/karya/${k.id}`)}
-            />
-          ))}
-        </div>
-      )}
-
-      <Eyebrow className="mt-10 mb-1">Kabar terbaru</Eyebrow>
-      {feedShown.length === 0 ? (
-        <p className="font-mono text-ui text-ink3 py-5">belum ada aktivitas.</p>
-      ) : (
-        <Feed items={feedShown} />
+        <Feed items={feed} />
       )}
     </>
   );
 }
 
-/** A curated karya card — the shared `KaryaCard` (#92), no activity line (a
- * featured pick is not a chronological event) and no scores (FR-22). */
-function FeaturedCard({
-  karya,
-  onOpen,
-}: {
-  karya: KaryaListItem;
-  onOpen: () => void;
-}) {
-  return (
-    <KaryaCard
-      cover={karya.coverUrl}
-      title={karya.title}
-      description={karya.description}
-      stages={karya.stages.map((s) => ({ label: STAGE_LABELS[s] }))}
-      interests={karya.interests}
-      roster={karya.roster.map((m) => ({
-        key: m.id,
-        name: m.name,
-        image: m.image,
-      }))}
-      memberCount={karya.memberCount}
-      onOpen={onOpen}
-    />
-  );
-}
-
 /**
- * The Launchpad right rail (issue #20) — the third shell column that makes the
- * home feel alive: a community pulse strip, a few builders to meet, and a CTA.
- * Rendered only on `/home` (App.tsx passes it to the shell), so other pages
- * carry no empty rail.
- *
- * All three pulse figures are real: `GET /api/stats` returns live counts. The
- * mockup's "cari kolaborator" stat has no data model (stages are a fixed
- * lifecycle vocabulary, none "seeking"), so it's honestly replaced by
- * "Update minggu ini" — karya updates in the last 7 days. Builder search by
- * skill/interest is deferred to Matchmaking; this is a plain "kenalan" list.
+ * Uses only the member data already available today. Full People browsing is a
+ * separate task; this rail is a small doorway into existing member pages.
  */
-export function LaunchpadRail({ user }: { user: Member }) {
+export function ScrollRail({ user }: { user: Member }) {
   const [, navigate] = useLocation();
-  const { data: stats } = useGetStats();
   const { data: members = [] } = useListMembers();
-
-  // A handful of *other* builders to meet — never surface the viewer to
-  // themselves. Full browsing/search lives in Jelajahi + Matchmaking.
-  const toMeet = members.filter((m) => m.id !== user.id).slice(0, 5);
-
-  const pulse = [
-    { label: "Karya aktif", value: stats?.karya },
-    { label: "Builder aktif", value: stats?.builders },
-    { label: "Update minggu ini", value: stats?.updatesThisWeek },
-  ];
+  const toMeet = members.filter((member) => member.id !== user.id).slice(0, 5);
 
   return (
     <>
-      <section className="bg-surface border border-line rounded-panel px-4 py-3.5">
-        <Eyebrow className="mb-2.5">Denyut komunitas</Eyebrow>
-        <div className="flex flex-col gap-2">
-          {pulse.map((s) => (
-            <div
-              key={s.label}
-              className="bn-pulse-row flex justify-between items-baseline gap-3"
-            >
-              <span className="text-ui text-ink2">{s.label}</span>
-              <span className="bn-pulse-value text-body font-medium text-ink tabular-nums">
-                {s.value ?? "—"}
-              </span>
-            </div>
-          ))}
-        </div>
-      </section>
-
       <section className="flex flex-col">
-        <div className="flex items-center justify-between gap-3 mb-2.5">
+        <div className="mb-2.5 flex items-center justify-between gap-3">
           <Eyebrow>Kenalan dengan builder</Eyebrow>
           <button
             type="button"
-            className="bg-transparent border-none p-0 cursor-pointer font-body text-micro text-accent-mid transition-colors hover:text-accent"
-            onClick={() => navigate("/jelajahi")}
+            className="border-none bg-transparent p-0 font-body text-micro text-accent-mid"
+            onClick={() => navigate("/people")}
           >
             Lihat semua
           </button>
         </div>
         {toMeet.length === 0 ? (
-          <p className="font-mono text-ui text-ink3 py-5">
+          <p className="py-5 font-mono text-ui text-ink3">
             belum ada builder lain.
           </p>
         ) : (
-          <ul className="list-none flex flex-col">
-            {toMeet.map((m) => (
-              <li key={m.id} className="border-b border-line last:border-none">
+          <ul className="flex list-none flex-col">
+            {toMeet.map((member) => (
+              <li
+                key={member.id}
+                className="border-b border-line last:border-none"
+              >
                 <button
                   type="button"
-                  className="group w-full flex gap-2.5 items-start text-left bg-transparent border-none py-2.5 cursor-pointer"
-                  onClick={() => navigate(`/member/${m.id}`)}
+                  className="group flex w-full cursor-pointer items-start gap-2.5 border-none bg-transparent py-2.5 text-left"
+                  onClick={() => navigate(`/member/${member.id}`)}
                 >
-                  <Avatar name={m.name} size={34} />
-                  <span className="flex-1 min-w-0 flex flex-col gap-[3px]">
-                    <span className="bn-builder-name text-ui font-medium text-ink transition-colors group-hover:text-accent">
-                      {m.name}
+                  <Avatar name={member.name} size={34} />
+                  <span className="flex min-w-0 flex-1 flex-col gap-[3px]">
+                    <span className="bn-builder-name text-ui font-medium text-ink group-hover:text-accent">
+                      {member.name}
                     </span>
                     <span className="text-micro text-ink3">
-                      {[m.handle && `@${m.handle}`, m.year]
+                      {[member.handle && `@${member.handle}`, member.year]
                         .filter(Boolean)
                         .join(" · ")}
                     </span>
-                    {m.skills.length > 0 && (
-                      <span className="flex flex-wrap gap-1 mt-0.5">
-                        {m.skills.slice(0, 3).map((s) => (
+                    {member.skills.length > 0 && (
+                      <span className="mt-0.5 flex flex-wrap gap-1">
+                        {member.skills.slice(0, 3).map((skill) => (
                           <span
-                            key={s}
-                            className="text-micro text-ink2 bg-bg border border-line px-1.5 py-[1px] rounded-[3px]"
+                            key={skill}
+                            className="rounded-[3px] border border-line bg-bg px-1.5 py-[1px] text-micro text-ink2"
                           >
-                            {s}
+                            {skill}
                           </span>
                         ))}
                       </span>
@@ -265,14 +131,14 @@ export function LaunchpadRail({ user }: { user: Member }) {
         )}
       </section>
 
-      <section className="bg-accent rounded-panel p-4">
-        <p className="text-body text-accent-fg leading-compact mb-3">
-          Punya ide atau progres baru? Bagikan sebagai karya — komunitas senang
-          lihat apa yang lagi kamu garap.
+      <section className="rounded-panel bg-accent p-4">
+        <p className="mb-3 text-body leading-compact text-accent-fg">
+          Punya progres baru? Bagikan dari halaman karya tempat progres itu
+          hidup.
         </p>
         <button
           type="button"
-          className="w-full bg-accent-fg text-accent border-none rounded-card px-3.5 py-[7px] font-body text-ui font-semibold cursor-pointer transition-opacity hover:opacity-85"
+          className="w-full cursor-pointer rounded-card border-none bg-accent-fg px-3.5 py-[7px] font-body text-ui font-semibold text-accent"
           onClick={() => navigate("/karya/new")}
         >
           Mulai karya baru

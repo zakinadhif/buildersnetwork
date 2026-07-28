@@ -10,8 +10,8 @@ import {
 
 /**
  * The reverse-chron global feed (FR-22). Renders a `FeedItem[]` union as
- * delivered by the API (no client re-sort): a **post** item as a card (author
- * face → member, kind chip, body, parent-karya title → karya, relative time);
+ * delivered by the API (no client re-sort): a **post** item led by its parent
+ * karya, with the author kept as quiet metadata;
  * a **new-karya** item as the shared `KaryaCard` (#92), where "karya baru" is the
  * activity line and the whole card links into the karya.
  */
@@ -24,21 +24,19 @@ export default function Feed({ items }: { items: FeedItem[] }) {
         it.type === "post" ? (
           <article
             key={`post-${it.id}`}
-            className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
+            className="post-card border-b border-line py-[18px]"
           >
-            <div className="flex justify-between items-center">
+            <div className="flex items-start justify-between gap-3">
               <button
                 type="button"
-                className="bg-transparent border-none p-0 flex items-center gap-2 cursor-pointer text-left group"
-                onClick={() => navigate(`/member/${it.author.id}`)}
+                className="post-karya-link group min-w-0 cursor-pointer border-none bg-transparent p-0 text-left"
+                onClick={() => navigate(`/karya/${it.karya.id}`)}
               >
-                <Avatar
-                  name={it.author.name}
-                  image={it.author.image}
-                  size={28}
-                />
-                <span className="text-ui font-medium text-ink group-hover:underline">
-                  {it.author.name}
+                <span className="block font-display text-title leading-heading text-ink group-hover:text-accent">
+                  {it.karya.title}
+                </span>
+                <span className="mt-px block font-body text-micro text-ink3">
+                  diposting {it.author.name} · {timeAgo(it.createdAt)}
                 </span>
               </button>
               <span
@@ -47,20 +45,24 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                 {POST_KIND_LABELS[it.kind]}
               </span>
             </div>
-            <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
+            <p className="mt-2.5 whitespace-pre-wrap text-body leading-body text-ink2">
               {it.body}
             </p>
-            <div className="flex justify-between items-center mt-1">
+            <div className="mt-3 flex items-center">
               <button
                 type="button"
-                className="post-karya-link bg-transparent border-none p-0 font-ui text-ui font-medium text-ink2 cursor-pointer hover:text-ink hover:underline"
-                onClick={() => navigate(`/karya/${it.karya.id}`)}
+                className="group flex cursor-pointer items-center gap-2 border-none bg-transparent p-0 text-left"
+                onClick={() => navigate(`/member/${it.author.id}`)}
               >
-                {it.karya.title}
+                <Avatar
+                  name={it.author.name}
+                  image={it.author.image}
+                  size={24}
+                />
+                <span className="text-micro text-ink3 group-hover:text-ink">
+                  Lihat profil {it.author.name}
+                </span>
               </button>
-              <span className="text-micro text-ink3">
-                {timeAgo(it.createdAt)}
-              </span>
             </div>
           </article>
         ) : (
