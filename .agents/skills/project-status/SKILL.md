@@ -12,7 +12,7 @@ Gather milestones (including closed), project items, and open PRs, preferably in
 ```bash
 gh api "repos/zakinadhif/buildersnetwork/milestones?state=all&per_page=100"
 gh project item-list 8 --owner zakinadhif --format json
-gh pr list --json number,title,author,isDraft
+gh pr list --json number,title,author,isDraft,url,closingIssuesReferences
 ```
 
 Read the roadmap for phase (P0/P1), treatment, and order. Calculate `due date - today` using the real current date.
@@ -25,3 +25,4 @@ Render:
 4. One highest-leverage next action. When issue counts imply completion, recommend `$code-status <milestone>` before closing; only a code audit verifies exit criteria.
 
 If `gh project` lacks scope, tell the user to run `gh auth refresh -s project,read:project` once and retry. For a named milestone's time remaining, include its open issues. For “what am I on,” filter In Progress by `gh api user --jq .login`.
+For a suspicious named item, use `pnpm workflow doctor <number>` to gather its issue, board, dependency, branch, and PR state without mutation.

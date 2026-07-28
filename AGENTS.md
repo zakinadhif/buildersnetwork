@@ -10,7 +10,7 @@ Treat the `plans/` directory as a loose collection of vision documents, copy dra
 
 ## Team workflow
 
-Follow `plans/how-to/build-workflow.md`: milestone documents in `plans/milestones/` hold intent (why, decisions, exit criteria); GitHub Issues hold task contracts; the GitHub Project board holds live status. Use the workspace skills `project-status`, `pick-task`, and `ship-task` for the normal task loop.
+Follow `plans/how-to/build-workflow.md`: milestone documents in `plans/milestones/` hold intent (why, decisions, exit criteria); GitHub Issues hold task contracts; the GitHub Project board holds live status. Use `open-discussion` and `ratify` for the decision loop; use `new-task`, `project-status`, `pick-task`, and `ship-task` for the task loop.
 
 ## Claude Code compatibility
 
