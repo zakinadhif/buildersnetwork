@@ -15,7 +15,7 @@ State the concrete decision and ask whether the user wants to ratify `[Diskusi]`
 
 Only an explicit request such as `$ratify #N` or “ratify #N” satisfies this gate.
 
-1. Read issue #N and its complete thread with `gh issue view <number> --comments`. Require an **open** issue whose title starts `[Diskusi]`, whose board status is **Proposed**, and whose thread contains a concrete decision about requirements, roadmap, milestone scope, or a chosen design direction. Stop without mutation if any condition fails or debate remains open.
+1. Read issue #N and its complete thread with `gh issue view <number> --comments`. Require an **open** issue whose title starts `[Diskusi]`, whose board status is **Proposed**, and whose thread contains a concrete decision about requirements, roadmap, milestone scope, or a chosen design direction. The original issue may have been articulated through `$open-discussion`, but its draft question is not itself a decision. Stop without mutation if any condition fails or debate remains open.
 2. Put the decision in the durable source of truth first. Make a focused PR updating `plans/vision.md`, `plans/reference/requirements.md`, `plans/roadmap.md`, or the appropriate `plans/milestones/<name>.md`. A new milestone needs why, decisions, and exit criteria. Put `Closes #N` in the PR body so merging the documentation is the atomic ratification event. Never close the discussion directly.
 3. Decompose through `$new-task`:
    - Create a `[Desain]` item for each non-trivial new surface.

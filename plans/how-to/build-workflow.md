@@ -44,12 +44,13 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 **Step 0 — strategic or not?**
 
 - **Non-strategic** (`[Bug]`, `[Security]`, chores, docs) → file directly, skip the gate. These fix or harden what exists; they don't change what we build.
-- **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear the gates below: Gate A grounds all three, Gate B is `[Fitur]`-only (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
+- **Strategic** (`[Diskusi]` / `[Fitur]` / `[Desain]`) → clear Gate A using the appropriate grounding test below. Gate B is `[Fitur]`-only (a `[Diskusi]` is a question, a `[Desain]` *is* the mockup — neither needs one).
 
-**Gate A — grounding.** Does the [Vision](../vision.md), the [requirements catalog](../reference/requirements.md), or an active [milestone doc](../milestones/) actually call for this?
+**Gate A — grounding, by issue type.**
 
-- **Grounded** → cite *where* (the citation goes in `## Kenapa`), continue to Gate B.
-- **Outside the boundary of all three** → **stop and warn.** Prefer a `[Diskusi]` in **Proposed** to ratify the direction first (see [the ratification gate](#the-ratification-gate-vision--requirements--roadmap-changes)) — don't manufacture a `[Fitur]` for undecided scope. File build work only if the maintainer insists, recorded in the issue as an ungrounded exception.
+- **`[Diskusi]` — reality-grounded.** Cite the current code, documentation, supplied user feedback, or observed tension being questioned, and name the decision boundary. A discussion may challenge the Vision, requirements, roadmap, or milestone; its proposed direction does **not** need to be pre-approved. If there is not yet a concrete decision question, keep the input in the pinned Visi & Roadmap issue #12 rather than manufacturing a standalone issue.
+- **`[Fitur]` / `[Desain]` — decision-grounded.** The [Vision](../vision.md), [requirements catalog](../reference/requirements.md), an active [milestone doc](../milestones/), a ratified decision, or the active documentation PR produced by `/ratify` must actually call for the work. Work grounded only by that open PR stays Backlog until it merges. Cite *where* in `## Kenapa`, then continue to Gate B.
+- **Build work outside those boundaries** → **stop and warn.** Open a `[Diskusi]` in **Proposed** to decide the direction first (see [the ratification gate](#the-ratification-gate-vision--requirements--roadmap-changes)); do not manufacture build work for undecided scope. File it only if the maintainer explicitly insists, recorded as an ungrounded exception.
 
 **Gate B — mockup.** Only for a **non-trivial** user-facing surface.
 
@@ -118,6 +119,36 @@ Board access needs the project scope once: `gh auth refresh -s project,read:proj
 - **Only the maintainer** (@zakinadhif) may: flip anything into **Ready** (the curated ~6 shortlist); ratify a `[Diskusi]` (`/ratify`); and merge.
 
 So a contributor's *strategic* work waits in **Proposed** for ratification and their overflow sits in **Backlog** — never self-served into Ready. This keeps Ready a real, single-owner priority signal without gatekeeping *who can contribute* — the bar is only on *what gets called next-up*.
+
+## Starting a discussion — the developer's mouthpiece
+
+`/open-discussion` turns a developer's rough observation, concern, or question into a decision-ready draft without requiring them to arrive with product language. The agent inspects the repository first, asks only for meaning that evidence cannot supply, and separates verified observations from interpretation, preference, and assumptions. It **articulates; it does not decide**.
+
+Use this structure for standalone `[Diskusi]` issues:
+
+```markdown
+## Konteks
+
+## Yang diamati
+
+## Mengapa ini penting
+
+## Pertanyaan keputusan
+
+## Opsi dan trade-off
+
+## Batas keputusan
+
+## Bukti terkait
+```
+
+The body frames one answerable decision question. Options suggested by the agent are labeled as suggestions, not attributed to the developer. Implementation scope and acceptance criteria belong to the tasks created after ratification, not to the discussion.
+
+A request to **draft, articulate, explore, or review** produces text only. A request to **open, create, file, or publish the discussion** authorizes creating the issue and placing it in Proposed; if the agent would need to materially infer the developer's stance, it shows the draft and asks for confirmation first. Broad direction talk without a concrete decision question stays in pinned issue #12.
+
+```
+rough thought → /open-discussion → [Diskusi] Proposed → decision → /ratify → /new-task → /pick-task → build → /ship-task
+```
 
 ## The ratification gate (vision / requirements / roadmap changes)
 
