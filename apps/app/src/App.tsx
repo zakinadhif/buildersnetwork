@@ -1,5 +1,9 @@
-import { getGetMeQueryKey, useGetMe } from "@myapp/api-client-react";
-import type { ReactNode } from "react";
+import {
+  getGetMeQueryKey,
+  useGetMe,
+  useListKarya,
+} from "@myapp/api-client-react";
+import { type ReactNode, useMemo, useState } from "react";
 import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { Loading } from "@/components/ui-atoms";
@@ -11,6 +15,7 @@ import Assistant from "@/pages/Assistant";
 import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
+import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew from "@/pages/KaryaNew";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
 import Matches from "@/pages/Matches";
@@ -21,6 +26,36 @@ import Onboarding from "@/pages/Onboarding";
 import Review from "@/pages/Review";
 import VerifyEmail from "@/pages/VerifyEmail";
 import Welcome from "@/pages/Welcome";
+
+function KaryaCatalogRoute({ me }: { me: Member }) {
+  const [query, setQuery] = useState("");
+  const [selectedInterest, setSelectedInterest] = useState("Semua");
+  const { data: karya = [] } = useListKarya();
+  const interests = useMemo(
+    () =>
+      Array.from(new Set(karya.flatMap((item) => item.interests))).sort(
+        (a, b) => a.localeCompare(b, "id"),
+      ),
+    [karya],
+  );
+
+  return (
+    <Shell
+      me={me}
+      rail={
+        <KaryaCatalogRail
+          query={query}
+          onQueryChange={setQuery}
+          interests={interests}
+          selectedInterest={selectedInterest}
+          onInterestChange={setSelectedInterest}
+        />
+      }
+    >
+      <KaryaCatalog query={query} selectedInterest={selectedInterest} />
+    </Shell>
+  );
+}
 
 function AppRoutes() {
   const { data: session, isPending } = useSession();
@@ -101,12 +136,13 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/karya">
-        {shell(() => (
-          <ComingSoon
-            title="Karya"
-            sub="Katalog karya sedang dipindahkan ke shell baru. Untuk sekarang, buka karya dari kabar di Scroll atau mulai karya baru."
-          />
-        ))}
+        {!loggedIn ? (
+          <Redirect to="/welcome" />
+        ) : !me ? (
+          <Redirect to="/mulai" />
+        ) : (
+          <KaryaCatalogRoute me={me} />
+        )}
       </Route>
       <Route path="/people">
         {shell(() => (
