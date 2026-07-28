@@ -1,6 +1,6 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearch } from "wouter";
 import { Eyebrow } from "@/components/ui-atoms";
 
@@ -22,19 +22,9 @@ export default function VerifyEmail() {
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const autoSentEmail = useRef<string | null>(null);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional mount-only send
-  useEffect(() => {
-    if (email) handleSend();
-  }, []);
-
-  useEffect(() => {
-    if (cooldown <= 0) return;
-    const t = setTimeout(() => setCooldown((n) => n - 1), 1000);
-    return () => clearTimeout(t);
-  }, [cooldown]);
-
-  async function handleSend() {
+  const handleSend = useCallback(async () => {
     setError(null);
     try {
       await sendOtp({ email });
@@ -43,7 +33,19 @@ export default function VerifyEmail() {
     } catch (err: unknown) {
       setError(extractApiError(err, "Gagal mengirim kode."));
     }
-  }
+  }, [email]);
+
+  useEffect(() => {
+    if (!email || autoSentEmail.current === email) return;
+    autoSentEmail.current = email;
+    void handleSend();
+  }, [email, handleSend]);
+
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const t = setTimeout(() => setCooldown((n) => n - 1), 1000);
+    return () => clearTimeout(t);
+  }, [cooldown]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();

@@ -10,13 +10,14 @@ import {
   Loading,
   StageMultiSelect,
 } from "@/components/ui-atoms";
-import { type KaryaDraft, useKaryaDraft } from "@/lib/karya-draft-ctx";
+import type { KaryaDraft } from "@/lib/karya-draft-context";
 import {
   uploadKaryaCover,
   uploadKaryaScreenshot,
   validateCoverFile,
   validateScreenshotFile,
 } from "@/lib/upload";
+import { useKaryaDraft } from "@/lib/use-karya-draft";
 
 type Orientation = "landscape" | "portrait";
 interface ScreenshotDraft {
@@ -170,7 +171,10 @@ export default function KaryaNew() {
     Record<Orientation, string | null>
   >({ landscape: null, portrait: null });
   const screenshotsRef = useRef(screenshots);
-  screenshotsRef.current = screenshots;
+
+  useEffect(() => {
+    screenshotsRef.current = screenshots;
+  }, [screenshots]);
 
   // Revoke every preview URL on unmount (mirrors the cover preview cleanup).
   useEffect(() => {

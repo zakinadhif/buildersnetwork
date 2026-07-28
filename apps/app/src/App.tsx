@@ -4,9 +4,9 @@ import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
-import { KaryaDraftProvider } from "@/lib/karya-draft-ctx";
+import { KaryaDraftProvider } from "@/lib/karya-draft-provider";
 import type { Member } from "@/lib/members";
-import { OnboardingProvider } from "@/lib/onboarding-ctx";
+import { OnboardingProvider } from "@/lib/onboarding-provider";
 import Assistant from "@/pages/Assistant";
 import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
@@ -18,6 +18,7 @@ import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
 import Onboarding from "@/pages/Onboarding";
+import People from "@/pages/People";
 import Review from "@/pages/Review";
 import VerifyEmail from "@/pages/VerifyEmail";
 import Welcome from "@/pages/Welcome";
@@ -48,18 +49,21 @@ function AppRoutes() {
   // A logged-in route that lives *inside* the persistent shell. Gates on auth
   // (→ welcome) and profile (→ the minimal one-field start, not the AI chat).
   // `rail` optionally supplies the shell's right column (issue #20).
+  const withProfile = (page: (m: Member) => ReactNode) => {
+    if (!loggedIn) return <Redirect to="/welcome" />;
+    if (!me) return <Redirect to="/mulai" />;
+    return page(me);
+  };
+
   const shell = (
     page: (m: Member) => ReactNode,
     rail?: (m: Member) => ReactNode,
-  ) => {
-    if (!loggedIn) return <Redirect to="/welcome" />;
-    if (!me) return <Redirect to="/mulai" />;
-    return (
-      <Shell me={me} rail={rail?.(me)}>
-        {page(me)}
+  ) =>
+    withProfile((member) => (
+      <Shell me={member} rail={rail?.(member)}>
+        {page(member)}
       </Shell>
-    );
-  };
+    ));
 
   return (
     <Switch>
@@ -109,11 +113,8 @@ function AppRoutes() {
         ))}
       </Route>
       <Route path="/people">
-        {shell(() => (
-          <ComingSoon
-            title="People"
-            sub="Direktori builder sedang disiapkan. Profil builder yang muncul di Scroll tetap dapat dibuka."
-          />
+        {withProfile((member) => (
+          <People user={member} />
         ))}
       </Route>
       <Route path="/minat">

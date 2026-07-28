@@ -2,7 +2,7 @@ import { useLocation } from "wouter";
 import AssistantChat from "@/components/AssistantChat";
 import { Eyebrow } from "@/components/ui-atoms";
 import { INTRO_NEW } from "@/lib/assistant-copy";
-import { useOnboarding } from "@/lib/onboarding-ctx";
+import { useOnboarding } from "@/lib/use-onboarding";
 
 /**
  * The standalone onboarding flow (opt-in — no longer a gate; see issue #8). Now

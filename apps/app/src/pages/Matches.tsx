@@ -7,7 +7,7 @@ import { Button } from "@myapp/ui";
 import { useLocation } from "wouter";
 import { Eyebrow, Loading } from "@/components/ui-atoms";
 import { firstName, type MemberMatch } from "@/lib/members";
-import { useOnboarding } from "@/lib/onboarding-ctx";
+import { useOnboarding } from "@/lib/use-onboarding";
 
 export default function Matches() {
   const { matches: contextMatches } = useOnboarding();

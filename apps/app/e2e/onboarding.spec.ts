@@ -75,7 +75,7 @@ authed(
       }),
     );
 
-    // Seed the in-progress draft the way onboarding-ctx persists it.
+    // Seed the in-progress draft the way OnboardingProvider persists it.
     await page.addInitScript((draft) => {
       sessionStorage.setItem("onboarding:draft", JSON.stringify(draft));
     }, DRAFT);

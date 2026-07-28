@@ -17,7 +17,7 @@ import {
 } from "@/components/ui-atoms";
 import { groundMatches } from "@/lib/matching";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
-import { useOnboarding } from "@/lib/onboarding-ctx";
+import { useOnboarding } from "@/lib/use-onboarding";
 
 export default function Review() {
   const { draft: initialDraft, setMatches } = useOnboarding();

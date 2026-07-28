@@ -51,17 +51,17 @@ async function mockNoAuth(page: Page) {
 
 /** Fixture: page with a mocked authenticated session. */
 export const authed = base.extend<{ page: Page }>({
-  page: async ({ page }, use) => {
+  page: async ({ page }, provide) => {
     await mockAuth(page);
-    await use(page);
+    await provide(page);
   },
 });
 
 /** Fixture: page with no session (unauthenticated). */
 export const unauthed = base.extend<{ page: Page }>({
-  page: async ({ page }, use) => {
+  page: async ({ page }, provide) => {
     await mockNoAuth(page);
-    await use(page);
+    await provide(page);
   },
 });
 
