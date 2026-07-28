@@ -4,6 +4,7 @@ import { test } from "node:test";
 import {
   claimTask,
   createContext,
+  dependencyNumbers,
   findBoardItem,
   isColdCompletable,
   issueNumber,
@@ -69,6 +70,21 @@ test("parseDependencies deduplicates dependencies and cold-completable checks he
   assert.equal(
     isColdCompletable(completeBody.replace("## Kriteria terima", "## Notes")),
     false,
+  );
+});
+
+test("dependencyNumbers prefers native relationships and keeps a Markdown migration fallback", () => {
+  assert.deepEqual(
+    dependencyNumbers({
+      body: "Depends on #9",
+      blockedBy: {
+        nodes: [
+          { number: 12, state: "OPEN" },
+          { number: 9, state: "CLOSED" },
+        ],
+      },
+    }),
+    [12, 9],
   );
 });
 
@@ -216,6 +232,43 @@ test("claim refuses a second In Progress task without explicit approval", async 
   );
 });
 
+test("claim rejects an issue with an open native dependency", async () => {
+  const issue = {
+    id: "issue-42",
+    number: 42,
+    title: "[Fitur] Launchpad: Kartu aktivitas",
+    body: completeBody,
+    state: "OPEN",
+    url: "https://example.test/issues/42",
+    assignees: [],
+    blockedBy: {
+      nodes: [{ number: 7, state: "OPEN" }],
+    },
+  };
+  const item = {
+    id: "item-42",
+    status: "Ready",
+    content: { number: 42 },
+  };
+  const { ctx, calls } = fakeContext((command, args) => {
+    const line = [command, ...args].join(" ");
+    if (line.startsWith("gh issue view 42")) {
+      return response(JSON.stringify(issue));
+    }
+    if (line.startsWith("gh project item-list")) {
+      return response(JSON.stringify({ items: [item] }));
+    }
+    if (line === "gh api user --jq .login") return response("zakinadhif\n");
+    return response();
+  });
+
+  await assert.rejects(() => claimTask(ctx, 42), /open dependencies: #7/u);
+  assert.equal(
+    calls.some((call) => call.join(" ").includes("git status --porcelain")),
+    false,
+  );
+});
+
 test("ship reuses an existing closing PR and only repairs board state", async () => {
   const branch = "task/42-launchpad-kartu-aktivitas";
   const issue = {
@@ -354,6 +407,80 @@ test("reconcile repairs a missing board item only after merge is proven", async 
     calls.filter((call) => call.join(" ").includes("gh project item-edit"))
       .length,
     1,
+  );
+});
+
+test("reconcile discovers native dependents and reports remaining blockers", async () => {
+  const issue = {
+    id: "issue-42",
+    number: 42,
+    title: "[Fitur] Launchpad: Fondasi",
+    body: completeBody,
+    state: "CLOSED",
+    url: "https://example.test/issues/42",
+    assignees: [],
+    blocking: { nodes: [{ number: 50, state: "OPEN" }] },
+  };
+  const pullRequest = {
+    number: 99,
+    title: issue.title,
+    url: "https://example.test/pull/99",
+    body: "Closes #42",
+    mergedAt: "2026-07-28T00:00:00Z",
+  };
+  const dependent = {
+    number: 50,
+    title: "[Fitur] Launchpad: Lanjutan",
+    body: completeBody,
+    state: "OPEN",
+    blockedBy: {
+      nodes: [
+        { number: 42, state: "CLOSED" },
+        { number: 60, state: "OPEN" },
+      ],
+    },
+  };
+  const otherBlocker = {
+    number: 60,
+    title: "[Fitur] Launchpad: Bloker lain",
+    body: completeBody,
+    state: "OPEN",
+    blockedBy: { nodes: [] },
+  };
+  const { ctx, logs } = fakeContext((command, args) => {
+    const line = [command, ...args].join(" ");
+    if (line.startsWith("gh issue view 42")) {
+      return response(JSON.stringify(issue));
+    }
+    if (line.startsWith("gh project item-list")) {
+      return response(
+        JSON.stringify({
+          items: [
+            { id: "item-42", status: "In Review", content: { number: 42 } },
+          ],
+        }),
+      );
+    }
+    if (line.startsWith("gh pr list")) {
+      return response(JSON.stringify([pullRequest]));
+    }
+    if (line.startsWith("gh issue list")) {
+      return response(JSON.stringify([dependent, otherBlocker]));
+    }
+    return response();
+  });
+
+  const result = await reconcileTask(ctx, 42);
+  assert.deepEqual(result.dependents, [
+    {
+      number: 50,
+      title: dependent.title,
+      openDependencies: [60],
+    },
+  ]);
+  assert.equal(
+    logs.some((message) => message.includes("Still blocked: #50 (#60)")),
+    true,
   );
 });
 

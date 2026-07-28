@@ -97,6 +97,27 @@ export function parseDependencies(body) {
   return [...dependencies];
 }
 
+function relationshipNodes(value) {
+  if (Array.isArray(value)) return value;
+  return Array.isArray(value?.nodes) ? value.nodes : [];
+}
+
+export function dependencyNumbers(issue) {
+  const dependencies = new Set(
+    relationshipNodes(issue?.blockedBy)
+      .map((dependency) => Number(dependency?.number))
+      .filter(Number.isInteger),
+  );
+
+  // Migration fallback for issue contracts authored before GitHub exposed
+  // native dependencies in gh. Remove after every historical open contract
+  // has been migrated and the fallback has stayed unused.
+  for (const dependency of parseDependencies(issue?.body)) {
+    dependencies.add(dependency);
+  }
+  return [...dependencies];
+}
+
 export function isColdCompletable(body) {
   const text = String(body ?? "");
   const required = [
@@ -140,7 +161,7 @@ function getIssue(ctx, number) {
       "--repo",
       WORKFLOW.repository,
       "--json",
-      "id,number,title,body,state,url,assignees",
+      "id,number,title,body,state,url,assignees,blockedBy,blocking",
     ],
     { json: true },
   );
@@ -160,7 +181,7 @@ function getOpenIssues(ctx) {
       "--limit",
       "1000",
       "--json",
-      "number,title,body,state",
+      "number,title,body,state,blockedBy,blocking",
     ],
     { json: true },
   );
@@ -191,11 +212,10 @@ function getLogin(ctx) {
 }
 
 async function requireClosedDependencies(ctx, issue) {
-  const open = [];
-  for (const dependency of parseDependencies(issue.body)) {
-    const dependencyIssue = getIssue(ctx, dependency);
-    if (dependencyIssue.state !== "CLOSED") open.push(dependency);
-  }
+  const dependencies = resolveDependencies(ctx, issue);
+  const open = dependencies
+    .filter((dependency) => dependency.state !== "CLOSED")
+    .map((dependency) => dependency.number);
   if (open.length > 0) {
     throw new WorkflowError(
       `issue #${issue.number} has open dependencies: ${open
@@ -203,6 +223,33 @@ async function requireClosedDependencies(ctx, issue) {
         .join(", ")}`,
     );
   }
+}
+
+function resolveDependencies(ctx, issue) {
+  const dependencies = new Map(
+    relationshipNodes(issue?.blockedBy)
+      .map((dependency) => [
+        Number(dependency?.number),
+        {
+          number: Number(dependency?.number),
+          state: dependency?.state ?? null,
+          source: "native",
+        },
+      ])
+      .filter(([number]) => Number.isInteger(number)),
+  );
+
+  for (const number of dependencyNumbers(issue)) {
+    const existing = dependencies.get(number);
+    if (existing?.state) continue;
+    const dependencyIssue = getIssue(ctx, number);
+    dependencies.set(number, {
+      number,
+      state: dependencyIssue.state,
+      source: existing?.source ?? "markdown",
+    });
+  }
+  return [...dependencies.values()];
 }
 
 function requireCleanWorktree(ctx) {
@@ -571,11 +618,11 @@ export async function reconcileTask(ctx, rawNumber) {
   const openIssues = getOpenIssues(ctx);
   const openNumbers = new Set(openIssues.map((candidate) => candidate.number));
   const dependents = openIssues
-    .filter((candidate) => parseDependencies(candidate.body).includes(number))
+    .filter((candidate) => dependencyNumbers(candidate).includes(number))
     .map((candidate) => ({
       number: candidate.number,
       title: candidate.title,
-      openDependencies: parseDependencies(candidate.body).filter((dependency) =>
+      openDependencies: dependencyNumbers(candidate).filter((dependency) =>
         openNumbers.has(dependency),
       ),
     }));
@@ -691,11 +738,7 @@ export async function doctorTask(ctx, rawNumber) {
   const number = issueNumber(rawNumber);
   const issue = getIssue(ctx, number);
   const item = findBoardItem(getBoardItems(ctx), number);
-  const dependencies = [];
-  for (const dependency of parseDependencies(issue.body)) {
-    const dependencyIssue = getIssue(ctx, dependency);
-    dependencies.push({ number: dependency, state: dependencyIssue.state });
-  }
+  const dependencies = resolveDependencies(ctx, issue);
   const branches = execute(ctx, "git", [
     "branch",
     "--list",
@@ -734,8 +777,22 @@ export async function doctorTask(ctx, rawNumber) {
     ).values(),
   ];
   const findings = [];
+  const nativeDependencies = new Set(
+    relationshipNodes(issue.blockedBy).map((dependency) => dependency.number),
+  );
+  const legacyDependencies = parseDependencies(issue.body);
 
   if (!item) findings.push("missing from project board");
+  const legacyOnly = legacyDependencies.filter(
+    (dependency) => !nativeDependencies.has(dependency),
+  );
+  if (legacyOnly.length > 0) {
+    findings.push(
+      `legacy Markdown dependencies not mirrored natively: ${legacyOnly
+        .map((dependency) => `#${dependency}`)
+        .join(", ")}`,
+    );
+  }
   if (
     item?.status === "In Progress" &&
     assigneeLogins(issue.assignees).length === 0
