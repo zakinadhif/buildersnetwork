@@ -17,12 +17,17 @@ Only an explicit request such as `$ratify #N` or “ratify #N” satisfies this 
 
 1. Read issue #N and its complete thread with `gh issue view <number> --comments`. Require an **open** issue whose title starts `[Diskusi]`, whose board status is **Proposed**, and whose thread contains a concrete decision about requirements, roadmap, milestone scope, or a chosen design direction. The original issue may have been articulated through `$open-discussion`, but its draft question is not itself a decision. Stop without mutation if any condition fails or debate remains open.
 2. Put the decision in the durable source of truth first. Make a focused PR updating `plans/vision.md`, `plans/reference/requirements.md`, `plans/roadmap.md`, or the appropriate `plans/milestones/<name>.md`. A new milestone needs why, decisions, and exit criteria. Put `Closes #N` in the PR body so merging the documentation is the atomic ratification event. Never close the discussion directly.
-3. Decompose through `$new-task`:
+3. Before filing children, derive the dependency graph across the proposed tasks and relevant existing issues:
+   - Read every proposed contract together. Add a hard dependency when a downstream acceptance criterion cannot be completed against the current repository until another deliverable lands, when its boundary explicitly assumes that deliverable, or when overlapping changes would otherwise invalidate one of the contracts.
+   - Do not add a dependency for shared milestone membership, preferred ordering, or rework that can be avoided by keeping contracts independent. Keep design→feature grooming waits as `menunggu desain #N`, not native blockers.
+   - Reject cycles. Order the batch so blockers are filed before their dependents and their issue numbers are available.
+4. Decompose through `$new-task`:
    - Create a `[Desain]` item for each non-trivial new surface.
    - Create UI `[Fitur]` placeholders in Backlog with a minimal `Kenapa`, the document PR citation, and “menunggu desain #N; jangan di-groom/mulai sebelum desain merge.” These are intentionally ungroomed, not Blocked.
    - Create backend-only `[Fitur]` items as complete contracts.
-   - Use real `Depends on #N` only between deliverables; update existing issues when appropriate.
+   - Add every hard dependency during creation with `gh issue create --blocked-by <issue>[,<issue>]`; if an edge targets an issue that already exists or could not be supplied at creation, add it idempotently with `gh issue edit <dependent> --add-blocked-by <blocker>`.
    - Link every spawned issue as a flat sub-issue of the `[Diskusi]` with `pnpm workflow link-subissue <diskusi-number> <child-number>`. It checks the existing relationship before mutating and is safe to rerun.
-4. Keep every spawned item in Backlog while the documentation PR is open. Comment on the discussion with links to the PR and child issues, but leave it open and Proposed. After the PR merges and GitHub closes the discussion, the maintainer may curate immediately buildable design/backend items into Ready; UI feature placeholders awaiting design stay Backlog. Leave the discussion's board item unarchived.
+5. Verify each filed issue with `gh issue view <number> --json blockedBy,blocking` and compare the resulting graph with the contracts. Correct missing, reversed, or accidental edges before reporting the batch.
+6. Keep every spawned item in Backlog while the documentation PR is open. Comment on the discussion with links to the PR and child issues, but leave it open and Proposed. After the PR merges and GitHub closes the discussion, move tasks with open native blockers to Blocked; the maintainer may curate immediately buildable design/backend roots into Ready, while UI feature placeholders awaiting design stay Backlog. Leave the discussion's board item unarchived.
 
 Report the docs PR, each created or updated issue and Status, and that the discussion remains open until the PR merges. When a linked design later merges, groom its feature placeholder from the mockup before moving it toward Ready.
