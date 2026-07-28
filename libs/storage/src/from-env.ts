@@ -1,22 +1,45 @@
-import { loadStorageConfig } from "@myapp/config";
-import type { StorageProvider } from "./index";
+import { resolve } from "node:path";
+import { type Config, loadConfig, loadStorageConfig } from "@myapp/config";
+import { createGcsStorage } from "./gcs";
+import { createLocalStorage } from "./local";
+import type { StorageProvider } from "./provider";
 import { createS3Storage } from "./s3";
 
+const DEFAULT_LOCAL_ROOT = new URL(
+  "../../../apps/api/.data/uploads/",
+  import.meta.url,
+);
+
 /**
- * Builds an S3-compatible storage adapter from validated STORAGE_* env vars.
- *
- * One adapter, four providers — the only knobs that vary are STORAGE_ENDPOINT
- * (omit for AWS S3) and STORAGE_FORCE_PATH_STYLE (true for MinIO). See
- * deploy/docs/STORAGE_PROVIDERS.md for the per-provider table.
+ * Resolves the Node runtime's app-owned provider. Development defaults to a
+ * persistent local FlyDrive filesystem disk; production stays opt-in.
  */
-export function createStorageFromEnv(): StorageProvider {
-  const cfg = loadStorageConfig();
-  return createS3Storage({
-    bucket: cfg.bucket,
-    region: cfg.region,
-    accessKeyId: cfg.accessKey,
-    secretAccessKey: cfg.secretKey,
-    endpoint: cfg.endpoint,
-    forcePathStyle: cfg.forcePathStyle,
-  });
+export function createStorageFromEnv(
+  config: Config = loadConfig(),
+): StorageProvider | undefined {
+  const storage = loadStorageConfig(config);
+
+  switch (storage.driver) {
+    case "disabled":
+      return undefined;
+    case "fs":
+      return createLocalStorage(
+        storage.root ? resolve(storage.root) : DEFAULT_LOCAL_ROOT,
+      );
+    case "s3":
+      return createS3Storage({
+        bucket: storage.bucket,
+        region: storage.region,
+        accessKeyId: storage.accessKey,
+        secretAccessKey: storage.secretKey,
+        endpoint: storage.endpoint,
+        forcePathStyle: storage.forcePathStyle,
+      });
+    case "gcs":
+      return createGcsStorage({
+        bucket: storage.bucket,
+        projectId: storage.projectId,
+        keyFilename: storage.keyFilename,
+      });
+  }
 }

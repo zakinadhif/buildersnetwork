@@ -185,7 +185,7 @@ Sign up with university email
 
 | Layer | Technology |
 |---|---|
-| API | Hono v4 (Node.js 22) |
+| API | Hono v4 (Node.js 24) |
 | Database | PostgreSQL + Drizzle ORM |
 | Auth | Better Auth (Drizzle adapter) |
 | AI | Pluggable — Anthropic API or Cloudflare Workers AI |

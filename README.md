@@ -97,12 +97,12 @@ The same codebase runs on both targets. The runtime entry — **not** an env var
 
 | Layer | Technology |
 |---|---|
-| **Runtime** | Node.js 22 |
+| **Runtime** | Node.js 24 |
 | **API** | Hono v4 |
 | **Database ORM** | Drizzle ORM (SQLite dialect — D1 on Workers, libSQL on Node) |
 | **Auth** | Better Auth (drizzle adapter, DB-backed sessions) |
 | **AI** | Pluggable — Gemini API (Node/Docker), Anthropic API, or Cloudflare Workers AI |
-| **Storage** | Pluggable — AWS S3, Cloudflare R2, GCS, MinIO |
+| **Storage** | `@myapp/storage` port backed by FlyDrive (filesystem, S3/R2, GCS) |
 | **Frontend** | React 19 + Vite + TailwindCSS v4 |
 | **Routing** | Wouter (URL-based) |
 | **Data Fetching** | TanStack Query v5 |
@@ -136,12 +136,12 @@ buildersnetwork/
 │   ├── db/                # Drizzle schema (SQLite) + libSQL (Node) / D1 (Workers) clients
 │   ├── design-tokens/     # the ONE @theme scale — colour, type, spacing; app + mockups both consume it
 │   ├── email/             # Resend / Cloudflare email senders
-│   └── storage/           # S3-compatible / GCS storage adapters
+│   └── storage/           # app-owned port; FlyDrive providers + native Workers R2 adapter
 └── deploy/
     ├── Dockerfile            # Single-container image (API + SPA + landing)
     ├── Dockerfile.api        # API-only image for 2-tier EC2 deployment
     ├── ansible/              # 2-tier EC2 deployment (api / web VMs; DB is a SQLite file)
-    ├── docker-compose.dev.yml
+    ├── docker-compose.dev.yml # optional MinIO fixture for S3 integration tests
     ├── docker-compose.selfhost.yml
     └── docs/                 # per-target deploy guides
 ```
@@ -152,7 +152,7 @@ buildersnetwork/
 
 ## ⚡ Quick start
 
-**Prerequisites:** Node.js >= 22 · pnpm >= 10 (`npm i -g pnpm`)
+**Prerequisites:** Node.js >= 24 · pnpm >= 10 (`npm i -g pnpm`)
 
 ```bash
 pnpm install
@@ -174,7 +174,7 @@ pnpm dev:api   # Hono API on :8080
 pnpm dev:app   # React SPA on :5173 — open this one
 ```
 
-Sign in with any [seed account](#seed-accounts). Two optional extras: `docker compose -f deploy/docker-compose.dev.yml up -d` starts MinIO if you want image uploads (without it, the upload routes return 503 and nothing else changes), and `GEMINI_API_KEY` turns on the AI assistant.
+Sign in with any [seed account](#seed-accounts). Image uploads work immediately through FlyDrive's persistent local filesystem disk in `apps/api/.data/uploads/` — Docker and storage credentials are not needed. Set `GEMINI_API_KEY` only if you want to exercise the AI assistant.
 
 > `DATABASE_URL` is resolved relative to `apps/api/`, while `pnpm db:push` writes to `libs/db/local.db`. The default — `file:../../libs/db/local.db` — points them at the same file. If they diverge, the API opens an empty database and the feed renders blank.
 
@@ -234,7 +234,7 @@ The ones you need to boot:
 | `GEMINI_API_KEY` | Required for Node.js / Docker — the AI provider is picked by the runtime entry, not this var |
 | `RESEND_API_KEY` | The live email sender (the `[[send_email]]` binding needs Workers Paid and is dormant on the free tier) |
 | `ADMIN_EMAILS` | Comma-separated allowlist of team emails who can feature karya (an allowlist, not RBAC) |
-| `STORAGE_*` | S3-compatible object storage for the **Node/Docker** path — see [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md). On **Workers**, uploads use the native R2 binding `UPLOADS` instead. Absent storage → the cover/screenshot routes return 503 |
+| `STORAGE_*` | Nothing is required locally: FlyDrive defaults to `apps/api/.data/uploads/`. Node production can select S3-compatible storage or GCS; Workers use the native `UPLOADS` R2 binding. See [STORAGE_PROVIDERS.md](deploy/docs/STORAGE_PROVIDERS.md) |
 
 ---
 

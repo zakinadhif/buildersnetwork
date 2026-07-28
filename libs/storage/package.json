@@ -4,13 +4,15 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./r2": "./src/r2.ts"
   },
   "dependencies": {
-    "@aws-sdk/client-s3": "^3.750.0",
-    "@aws-sdk/s3-request-presigner": "^3.750.0",
-    "@google-cloud/storage": "^7.15.2",
-    "@myapp/config": "workspace:^"
+    "@aws-sdk/client-s3": "^3.1083.0",
+    "@aws-sdk/s3-request-presigner": "^3.1083.0",
+    "@google-cloud/storage": "^7.21.0",
+    "@myapp/config": "workspace:^",
+    "flydrive": "^2.1.0"
   },
   "devDependencies": {
     "@types/node": "catalog:"

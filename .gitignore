@@ -54,6 +54,9 @@ deploy/ansible/group_vars/all/vault.yml
 # Wrangler's local D1 / Miniflare state
 .wrangler/
 
+# FlyDrive's persistent local development uploads
+apps/api/.data/
+
 # Per-PR preview config, rendered in CI from wrangler.preview.template.toml.
 # It carries a live database_id and the preview auth secret.
 wrangler.preview.toml

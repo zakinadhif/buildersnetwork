@@ -24,8 +24,7 @@ export type AppVariables = {
   emailFrom: string;
   // Team emails allowed to feature karya (DECISION-A) — env allowlist, not RBAC.
   adminEmails: string[];
-  // Object storage for uploads (karya covers). Optional — undefined when the
-  // deploy has no STORAGE_* configured; upload/serve routes 503 in that case.
+  // Storage for uploads. The app-owned port hides FlyDrive/native R2 details.
   storage: StorageProvider | undefined;
 };
 

@@ -3,7 +3,7 @@ import { createAuth } from "@myapp/auth";
 import type { Db } from "@myapp/db";
 import * as schema from "@myapp/db/schema";
 import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
-import { createR2Storage } from "@myapp/storage";
+import { createR2Storage } from "@myapp/storage/r2";
 import { drizzle } from "drizzle-orm/d1";
 
 import { type AppServices, createApp } from "./app";

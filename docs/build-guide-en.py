@@ -206,38 +206,38 @@ para(
 table(
     ["Tool", "Version", "Required?"],
     [
-        ["Node.js", "22 or newer", "Yes"],
+        ["Node.js", "24 or newer", "Yes"],
         ["pnpm", "10 or newer", "Yes — npm and yarn will not work"],
         ["Git", "any recent", "Yes"],
-        ["Docker Desktop", "any recent", "Optional — only for image uploads (MinIO)"],
+        ["Docker Desktop", "any recent", "Optional — only for self-hosted deployment testing"],
     ],
     widths=[1.6, 1.9, 3.0],
 )
 
-doc.add_heading("Node.js 22", level=2)
+doc.add_heading("Node.js 24", level=2)
 para(
-    "The repo pins Node 22. Install it with a version manager so you can switch per-project — on "
+    "The repo pins Node 24. Install it with a version manager so you can switch per-project — on "
     "Windows use nvm-windows, on macOS/Linux use nvm or fnm."
 )
 code(
     """
 # Windows (PowerShell) — via winget
 winget install CoreyButler.NVMforWindows
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # macOS / Linux — via nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # Confirm
-node -v      # -> v22.x.x
+node -v      # -> v24.x.x
 """
 )
 para(
     "If you would rather not use a version manager, the installer from nodejs.org works fine — "
-    "just pick the 22 LTS line.",
+    "just pick the 24 LTS line.",
     muted=True,
     size=9.5,
 )
@@ -246,7 +246,7 @@ doc.add_heading("pnpm 10", level=2)
 para(
     "This is a pnpm workspace. The lockfile, the workspace catalog, and the `workspace:^` "
     "dependency links are all pnpm-specific — installing with npm or yarn will fail or, worse, "
-    "silently produce a broken tree. Node 22 ships Corepack, which is the cleanest way in:"
+    "silently produce a broken tree. Node 24 ships Corepack, which is the cleanest way in:"
 )
 code(
     """
@@ -283,13 +283,13 @@ sudo apt install git
 
 doc.add_heading("Docker Desktop — optional", level=2)
 para(
-    "You only need Docker if you want image uploads (karya covers and screenshots) to work. It "
-    "runs MinIO, an S3-compatible object store, in a container. There is no database container: "
-    "the local database is a plain SQLite file."
+    "You do not need Docker for ordinary development, including image uploads. FlyDrive stores "
+    "local uploads on the filesystem and the database is a plain SQLite file. Docker is only "
+    "useful for testing the bundled/self-hosted image or the optional MinIO S3 integration."
 )
 para(
-    "Skip it and everything else still works — the upload endpoints just return HTTP 503. You can "
-    "add it later without redoing any of this.",
+    "Skip it unless the change you are testing specifically concerns containers or the "
+    "S3-compatible driver.",
     muted=True,
     size=9.5,
 )
@@ -591,22 +591,18 @@ table(
 )
 
 # =============================================================================
-doc.add_heading("10. Optional: uploads and AI", level=1)
+doc.add_heading("10. Uploads and optional AI", level=1)
 
-doc.add_heading("Image uploads (MinIO)", level=2)
+doc.add_heading("Image uploads (no Docker)", level=2)
 para(
-    "Start Docker Desktop, wait for it to be ready, then bring up MinIO. It also creates the dev "
-    "bucket for you."
-)
-code(
-    """
-docker compose -f deploy/docker-compose.dev.yml up -d
-"""
+    "Cover and screenshot uploads work immediately. With NODE_ENV=development and no STORAGE_* "
+    "configuration, FlyDrive writes them to apps/api/.data/uploads/. The directory is persistent "
+    "across restarts and ignored by Git."
 )
 para(
-    "MinIO's S3 API is on :9000 and its web console on :9001 (login minioadmin / minioadmin). With "
-    "the STORAGE_* block from Section 5 in place, cover and screenshot uploads work. Without "
-    "storage configured, those routes return 503 and nothing else is affected."
+    "To test the S3-compatible provider specifically, start the optional MinIO fixture with "
+    "`docker compose -f deploy/docker-compose.dev.yml up -d` and use the STORAGE_DRIVER=s3 "
+    "settings documented in deploy/docs/STORAGE_PROVIDERS.md."
 )
 
 doc.add_heading("AI features", level=2)

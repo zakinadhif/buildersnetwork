@@ -41,6 +41,7 @@ services:
       # The SQLite file lives on the shared `dbdata` volume; MinIO is reached by
       # its internal service hostname. These override whatever .env had.
       DATABASE_URL: file:/data/app.db
+      STORAGE_DRIVER: s3
       STORAGE_ENDPOINT: http://minio:9000
     volumes:
       - dbdata:/data

@@ -205,38 +205,38 @@ para(
 table(
     ["Tools", "Versi", "Wajib?"],
     [
-        ["Node.js", "22 atau lebih baru", "Ya"],
+        ["Node.js", "24 atau lebih baru", "Ya"],
         ["pnpm", "10 atau lebih baru", "Ya — npm dan yarn tidak akan jalan"],
         ["Git", "versi terbaru mana pun", "Ya"],
-        ["Docker Desktop", "versi terbaru mana pun", "Opsional — hanya untuk upload gambar (MinIO)"],
+        ["Docker Desktop", "versi terbaru mana pun", "Opsional — hanya untuk menguji deployment self-hosted"],
     ],
     widths=[1.6, 1.9, 3.0],
 )
 
-doc.add_heading("Node.js 22", level=2)
+doc.add_heading("Node.js 24", level=2)
 para(
-    "Repo ini dipatok di Node 22. Install pakai version manager supaya kamu bisa berganti versi "
+    "Repo ini dipatok di Node 24. Install pakai version manager supaya kamu bisa berganti versi "
     "per-project — di Windows pakai nvm-windows, di macOS/Linux pakai nvm atau fnm."
 )
 code(
     """
 # Windows (PowerShell) — lewat winget
 winget install CoreyButler.NVMforWindows
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # macOS / Linux — lewat nvm
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # Cek hasilnya
-node -v      # -> v22.x.x
+node -v      # -> v24.x.x
 """
 )
 para(
     "Kalau kamu tidak mau pakai version manager, installer dari nodejs.org juga tidak masalah — "
-    "pastikan saja memilih jalur 22 LTS.",
+    "pastikan saja memilih jalur 24 LTS.",
     muted=True,
     size=9.5,
 )
@@ -245,7 +245,7 @@ doc.add_heading("pnpm 10", level=2)
 para(
     "Project ini adalah pnpm workspace. Lockfile, workspace catalog, dan dependency link `workspace:^` "
     "semuanya khas pnpm — meng-install dengan npm atau yarn akan gagal, atau lebih buruk lagi, "
-    "diam-diam menghasilkan dependency tree yang rusak. Node 22 sudah membawa Corepack, dan itu cara "
+    "diam-diam menghasilkan dependency tree yang rusak. Node 24 sudah membawa Corepack, dan itu cara "
     "paling bersih:"
 )
 code(
@@ -283,13 +283,13 @@ sudo apt install git
 
 doc.add_heading("Docker Desktop — opsional", level=2)
 para(
-    "Docker hanya kamu butuhkan kalau ingin fitur upload gambar (cover dan screenshot karya) "
-    "berfungsi. Docker menjalankan MinIO, object storage yang kompatibel dengan S3, di dalam "
-    "container. Tidak ada container database: database lokal cuma sebuah file SQLite biasa."
+    "Docker tidak dibutuhkan untuk development biasa, termasuk upload gambar. FlyDrive menyimpan "
+    "upload lokal ke filesystem dan database lokal hanya berupa file SQLite. Docker hanya berguna "
+    "untuk menguji image bundled/self-hosted atau integrasi S3 lewat MinIO."
 )
 para(
-    "Kalau dilewati, semua bagian lain tetap jalan — endpoint upload-nya saja yang mengembalikan "
-    "HTTP 503. Kamu bisa menambahkannya nanti tanpa perlu mengulang langkah mana pun.",
+    "Lewati saja kecuali perubahan yang kamu uji memang menyangkut container atau driver "
+    "S3-compatible.",
     muted=True,
     size=9.5,
 )
@@ -609,22 +609,18 @@ table(
 )
 
 # =============================================================================
-doc.add_heading("10. Opsional: upload dan AI", level=1)
+doc.add_heading("10. Upload dan AI opsional", level=1)
 
-doc.add_heading("Upload gambar (MinIO)", level=2)
+doc.add_heading("Upload gambar (tanpa Docker)", level=2)
 para(
-    "Jalankan Docker Desktop, tunggu sampai siap, lalu nyalakan MinIO. Perintah ini sekalian membuat "
-    "bucket untuk development."
-)
-code(
-    """
-docker compose -f deploy/docker-compose.dev.yml up -d
-"""
+    "Upload cover dan screenshot langsung berfungsi. Dengan NODE_ENV=development tanpa konfigurasi "
+    "STORAGE_*, FlyDrive menyimpannya ke apps/api/.data/uploads/. Direktori ini bertahan setelah "
+    "restart dan diabaikan oleh Git."
 )
 para(
-    "S3 API milik MinIO ada di :9000 dan konsol web-nya di :9001 (login minioadmin / minioadmin). "
-    "Dengan blok STORAGE_* dari Bagian 5 terpasang, upload cover dan screenshot akan berfungsi. Tanpa "
-    "storage yang dikonfigurasi, route tersebut mengembalikan 503 dan tidak memengaruhi bagian lain."
+    "Untuk menguji provider S3-compatible secara khusus, jalankan fixture MinIO opsional dengan "
+    "`docker compose -f deploy/docker-compose.dev.yml up -d`, lalu pakai konfigurasi "
+    "STORAGE_DRIVER=s3 dari deploy/docs/STORAGE_PROVIDERS.md."
 )
 
 doc.add_heading("Fitur AI", level=2)

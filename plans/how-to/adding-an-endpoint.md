@@ -98,4 +98,9 @@ The karya cover routes (`POST` / `DELETE` / `GET /api/karya/:id/cover`) and the 
 
 Only their **read-side effect** lives in the spec: a nullable `coverUrl` and a `screenshots[]` array on `Karya`. That's the rule for any binary route — the bytes stay out of the contract, the resulting URL goes in, so the rest of the app still reads it through generated types.
 
-Storage is pluggable (`libs/storage`): S3-compatible on the Node/Docker path, the native R2 binding `UPLOADS` on Workers. **With no storage configured these routes return 503** rather than failing at boot — object storage is optional as a group.
+Storage is pluggable behind the app-owned `StorageProvider` in `libs/storage`.
+FlyDrive supplies the local filesystem, S3-compatible, and GCS implementations;
+Workers use the native R2 binding `UPLOADS` behind the same port. Local Node
+development defaults to the persistent gitignored filesystem disk, so binary
+routes work without Docker or credentials. Production may still disable storage,
+in which case these routes return `503` rather than failing at boot.
