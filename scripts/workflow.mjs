@@ -501,7 +501,7 @@ export async function shipTask(
   }
   if (!pullRequest && !summary.trim()) {
     throw new WorkflowError(
-      "creating a PR requires --summary with 2–4 reviewer-facing sentences covering what was built and any noteworthy in-boundary decision",
+      "creating a PR requires --summary with a concise reviewer-facing implementation summary",
     );
   }
 
@@ -819,7 +819,7 @@ function usage() {
   pnpm workflow doctor <issue>
   pnpm workflow place <issue> <Backlog|Proposed|Ready|Blocked> [--dry-run]
   pnpm workflow claim <issue> [--allow-second] [--dry-run]
-  pnpm workflow ship [issue] --verified --summary "<2–4 sentence reviewer summary>" [--dry-run]
+  pnpm workflow ship [issue] --verified --summary "<reviewer summary>" [--dry-run]
   pnpm workflow reconcile <issue> [--dry-run]
   pnpm workflow link-subissue <parent> <child> [--dry-run]`;
 }

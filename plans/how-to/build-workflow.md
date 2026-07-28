@@ -103,11 +103,11 @@ The project identity and board option IDs live in `scripts/workflow-config.mjs`.
 | `pnpm workflow doctor <issue>` | Read-only diagnosis across issue, dependencies, board, local task branches, and PRs. |
 | `pnpm workflow place <issue> <Backlog\|Proposed\|Ready\|Blocked>` | Add a newly filed issue to the board or repair its initial Status. Ready enforces maintainer authority, grooming, and closed dependencies. |
 | `pnpm workflow claim <issue>` | Verify claimability, assignment, dependencies, one-task limit, and a clean worktree; assign, create/resume the task branch, then set In Progress. |
-| `pnpm workflow ship [issue] --verified --summary "<2–4 sentence reviewer summary>"` | After the skill verifies the contract and tests, push, create/reuse a closing PR, then set In Review. |
+| `pnpm workflow ship [issue] --verified --summary "<reviewer summary>"` | After the skill verifies the contract and tests, push, create/reuse a closing PR, then set In Review. |
 | `pnpm workflow reconcile <issue>` | After merge, prove the closing PR and closed issue, repair Done, and report dependents or design waiters needing maintainer action. |
 | `pnpm workflow link-subissue <parent> <child>` | Idempotently create the one sanctioned `[Diskusi]` → spawned-task relationship. |
 
-Mutation commands accept `--dry-run`. `claim` accepts `--allow-second`, but only after explicit user approval; the default enforces one In Progress item per person. There is intentionally no arbitrary “set status” command: each transition carries its own guards. `ship --verified` records that the caller completed acceptance and validation checks; it does not replace them. Its summary becomes the PR description after `Closes #N`: write 2–4 sentences covering what was built and any decision made within the issue boundary that deserves reviewer attention.
+Mutation commands accept `--dry-run`. `claim` accepts `--allow-second`, but only after explicit user approval; the default enforces one In Progress item per person. There is intentionally no arbitrary “set status” command: each transition carries its own guards. `ship --verified` records that the caller completed acceptance and validation checks; it does not replace them.
 
 Board access needs the project scope once: `gh auth refresh -s project,read:project`.
 
@@ -173,7 +173,7 @@ Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth r
 1. **`/project-status`** — where we are: the active phase & bet, each milestone's progress and target-date countdown, then today's board (Ready, who's on what, what's in review). No website needed.
 2. **`/pick-task`** — claim a Ready task: after interpreting the issue, it runs `pnpm workflow claim`, which assigns you, creates or resumes the branch, and moves the item to In Progress.
 3. Build. Stay inside the issue's **Boundary**. If you hit a blocker you can't clear in-session — or the task turns out bigger than one session — move the card to **Blocked**, comment what's stuck, and stop instead of sprawling.
-4. **`/ship-task`** — re-check the contract and validation, write the 2–4 sentence reviewer summary, then run `pnpm workflow ship --verified --summary "<reviewer summary>"`; the PR opens with `Closes #N` and the board moves to In Review.
+4. **`/ship-task`** — re-check the contract and validation, then run `pnpm workflow ship --verified --summary "<reviewer summary>"`; the PR opens with `Closes #N` and the board moves to In Review.
 5. Maintainer reviews and merges. Run `pnpm workflow reconcile <issue>` to repair Done and surface dependents; only the maintainer curates them into Ready (or Backlog if Ready is already long).
 
 **The two status views.** `/project-status` reads the **plan** side — the board and the GitHub milestones, i.e. what we *believe* is true. **`/code-status <milestone>`** reads the **code** side: it takes one milestone doc's Scope, Decisions, and Exit as the target and audits the repo against them, classifying each item Done / Partial / Missing / **Divergent** with file-path evidence. Since every doc in `plans/` is non-authoritative — *trust the code when they diverge* — this is how a divergence gets **detected** rather than assumed away, and it's the honest read on whether a milestone's exit actually passes (an issue count says only that the board is tidy). It's read-only: it proposes tasks for the gaps and hands them to `/new-task` on your say-so, but files nothing itself.
