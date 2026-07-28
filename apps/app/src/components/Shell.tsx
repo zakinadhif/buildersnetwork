@@ -5,6 +5,7 @@ import {
   ShellColumns,
   LeftNav as UiLeftNav,
 } from "@myapp/ui";
+import { LayoutGrid, Newspaper, Users } from "lucide-react";
 import { useLocation } from "wouter";
 import type { Member } from "@/lib/members";
 
@@ -19,31 +20,34 @@ import type { Member } from "@/lib/members";
  * What stays here is the only part that is genuinely the app's: *which* surfaces
  * exist and what clicking one does.
  *
- * The rail is route-aware — the active item follows `wouter`'s location and is
- * marked with `aria-current="page"`. "Cari Kolaborator" ships disabled until the
- * Matchmaking milestone; "Jelajahi Karya" / "Karya Saya" route to honestly
- * signposted "segera hadir" placeholders (no backing endpoint yet).
+ * The route-aware rail is deliberately limited to the three active product
+ * surfaces. Older routes remain reachable where existing flows still use them,
+ * but no longer compete for primary navigation.
  */
 interface Surface {
   label: string;
-  icon: string;
-  to?: string; // undefined → disabled placeholder in the rail
+  icon: React.ReactNode;
+  to: string;
   match?: (loc: string) => boolean;
-  soon?: boolean; // "segera hadir" — reachable, but a placeholder surface
 }
 
 const SURFACES: Surface[] = [
   {
-    label: "Launchpad",
-    icon: "◈",
+    label: "Scroll",
+    icon: <Newspaper size={18} strokeWidth={1.75} />,
     to: "/home",
     match: (l) => l === "/home" || l === "/",
   },
-  { label: "Jelajahi Karya", icon: "◉", to: "/jelajahi", soon: true },
-  { label: "Cari Kolaborator", icon: "◎" }, // Matchmaking milestone
-  { label: "Minat Saya", icon: "◇", to: "/minat" },
-  { label: "Karya Saya", icon: "◆", to: "/karya-saya", soon: true },
-  { label: "Asisten AI", icon: "✦", to: "/assistant" },
+  {
+    label: "Karya",
+    icon: <LayoutGrid size={18} strokeWidth={1.75} />,
+    to: "/karya",
+  },
+  {
+    label: "People",
+    icon: <Users size={18} strokeWidth={1.75} />,
+    to: "/people",
+  },
 ];
 
 export default function Shell({
@@ -60,10 +64,8 @@ export default function Shell({
   const items: NavItem[] = SURFACES.map((s) => ({
     label: s.label,
     icon: s.icon,
-    active: s.to ? (s.match ? s.match(location) : location === s.to) : false,
-    disabled: !s.to,
-    badge: s.soon ? "segera" : !s.to ? "nanti" : undefined,
-    onClick: s.to ? () => navigate(s.to as string) : undefined,
+    active: s.match ? s.match(location) : location === s.to,
+    onClick: () => navigate(s.to),
   }));
 
   return (

@@ -12,7 +12,7 @@ import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaNew from "@/pages/KaryaNew";
-import Launchpad, { LaunchpadRail } from "@/pages/Launchpad";
+import Scroll, { ScrollRail } from "@/pages/Launchpad";
 import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
@@ -93,12 +93,28 @@ function AppRoutes() {
       <Route path="/home">
         {shell(
           (m) => (
-            <Launchpad user={m} />
+            <Scroll user={m} />
           ),
           (m) => (
-            <LaunchpadRail user={m} />
+            <ScrollRail user={m} />
           ),
         )}
+      </Route>
+      <Route path="/karya">
+        {shell(() => (
+          <ComingSoon
+            title="Karya"
+            sub="Katalog karya sedang dipindahkan ke shell baru. Untuk sekarang, buka karya dari kabar di Scroll atau mulai karya baru."
+          />
+        ))}
+      </Route>
+      <Route path="/people">
+        {shell(() => (
+          <ComingSoon
+            title="People"
+            sub="Direktori builder sedang disiapkan. Profil builder yang muncul di Scroll tetap dapat dibuka."
+          />
+        ))}
       </Route>
       <Route path="/minat">
         {shell((m) => (

@@ -63,11 +63,11 @@ unauthed(
 // Authenticated members with a profile see the feed-first home
 // ---------------------------------------------------------------------------
 
-authed("/ lands on the Launchpad home with both sections", async ({ page }) => {
+authed("/ lands on Scroll", async ({ page }) => {
   await mockHome(page);
   await page.goto("/");
   await expect(page).toHaveURL(/\/home/);
-  await expect(page.getByText("Pilihan inspiratif")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
   await expect(page.getByText("Kabar terbaru")).toBeVisible();
 });
 
@@ -81,11 +81,34 @@ authed("shell rail shows the signed-in member", async ({ page }) => {
 });
 
 authed(
-  "home shows empty states when there's no featured or feed",
+  "Scroll shows an honest empty state when there is no feed",
   async ({ page }) => {
     await mockHome(page);
     await page.goto("/home");
-    await expect(page.getByText("belum ada pilihan.")).toBeVisible();
-    await expect(page.getByText("belum ada aktivitas.")).toBeVisible();
+    await expect(page.getByText("Belum ada kabar progres.")).toBeVisible();
   },
 );
+
+authed("rail exposes only Scroll, Karya, and People", async ({ page }) => {
+  await mockHome(page);
+  await page.goto("/home");
+
+  const nav = page.getByRole("navigation", { name: "Navigasi utama" });
+  await expect(nav.getByRole("button")).toHaveCount(3);
+  expect(await nav.getByRole("button").allTextContents()).toEqual([
+    "Scroll",
+    "Karya",
+    "People",
+  ]);
+
+  await nav.getByRole("button", { name: "Karya" }).click();
+  await expect(page).toHaveURL(/\/karya$/);
+  await expect(page.getByRole("heading", { name: "Karya" })).toBeVisible();
+
+  await nav.getByRole("button", { name: "People" }).click();
+  await expect(page).toHaveURL(/\/people$/);
+  await expect(page.getByRole("heading", { name: "People" })).toBeVisible();
+
+  await nav.getByRole("button", { name: "Scroll" }).click();
+  await expect(page).toHaveURL(/\/home$/);
+});
