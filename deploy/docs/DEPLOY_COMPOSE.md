@@ -3,6 +3,9 @@
 For a plain VPS with Docker installed — no PaaS. Uses
 `deploy/docker-compose.selfhost.yml` (Caddy + app + MinIO + migrate). The
 database is a SQLite file on a shared `dbdata` volume — no database container.
+Uploads use MinIO, whose `/data` directory is backed by the named `miniodata`
+volume. They are not written to the app container's filesystem, so replacing
+the app container does not remove them.
 
 ## Prerequisites
 - A VPS with Docker + Docker Compose

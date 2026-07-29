@@ -24,15 +24,26 @@ S3-compatible path against MinIO.
 
 ## Node production
 
-Production storage is opt-in. Set `STORAGE_DRIVER=s3` for Cloudflare R2 over
-S3, Backblaze B2, AWS S3, or MinIO:
+Production storage is opt-in. Do not use `STORAGE_DRIVER=fs` inside an
+otherwise-stateless Docker container: files written to the container layer are
+lost when the container is replaced. A filesystem driver is suitable only when
+`STORAGE_LOCAL_ROOT` is explicitly backed by a durable host mount or volume.
+The provided production paths instead steer toward object storage:
+
+- `docker-compose.selfhost.yml` includes MinIO backed by the named
+  `miniodata` volume.
+- The EC2/Ansible path expects an external S3-compatible service, such as AWS
+  S3 or MinIO backed by an attached persistent disk.
+
+Set `STORAGE_DRIVER=s3` for Cloudflare R2 over S3, Backblaze B2, AWS S3, or
+MinIO:
 
 | Provider | `STORAGE_ENDPOINT` | `STORAGE_REGION` | `STORAGE_FORCE_PATH_STYLE` |
 |---|---|---|---|
 | Cloudflare R2 | `https://<account_id>.r2.cloudflarestorage.com` | `auto` | `false` |
 | Backblaze B2 | `https://s3.<region>.backblazeb2.com` | provider region | `false` |
 | AWS S3 | omit | AWS region | `false` |
-| MinIO | `http://minio:9000` or its URL | `us-east-1` | `true` |
+| MinIO | `http://minio:9000` in the provided Compose network, otherwise its reachable private URL | `us-east-1` | `true` |
 
 Every S3-compatible provider also needs:
 

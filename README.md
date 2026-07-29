@@ -245,7 +245,7 @@ The ones you need to boot:
 | Target | AI | Database | Static files | Guide |
 |---|---|---|---|---|
 | **Cloudflare Workers** — production | Workers AI (free) | D1 (SQLite binding) | Workers Assets | [DEPLOY_CLOUDFLARE.md](deploy/docs/DEPLOY_CLOUDFLARE.md) |
-| **AWS EC2 2-tier (Ansible)** | Gemini API | SQLite file | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
+| **AWS EC2 2-tier (Ansible)** — self-hosted/VPS-compatible | Gemini API | SQLite file | nginx VM | [DEPLOY_EC2_ANSIBLE.md](deploy/docs/DEPLOY_EC2_ANSIBLE.md) |
 
 `deploy/docs/` also carries starter-template guides for Fly, Railway, Render, Cloud Run, App Runner, Coolify, Compose and Vagrant. They're inherited from the stack this repo was built on and **nothing in CI exercises them** — treat them as unverified starting points, not supported targets.
 
@@ -271,6 +271,11 @@ pnpm cf:deploy
 The Worker reaches the database through the D1 binding (`env.DB`), so there is no `DATABASE_URL` secret. Migrations apply via `wrangler d1 migrations apply buildersnetwork --remote` (run by `release.yml`).
 
 ### EC2 2-tier (Ansible)
+
+The API container is stateless for uploads. Configure durable S3-compatible
+storage—AWS S3, or MinIO backed by a persistent disk—before enabling uploads.
+The Ansible role rejects container-local filesystem storage because it would be
+lost when the container is replaced.
 
 ```bash
 # 1. Build and transfer the API image to the backend EC2 VM

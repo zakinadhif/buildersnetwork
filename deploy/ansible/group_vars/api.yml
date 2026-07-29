@@ -9,3 +9,13 @@ api_image: "ooflamp/buildersnetwork-api:latest"
 # into the API and migrate containers at /data (see the backend-api role).
 database_url: "file:/data/app.db"
 serve_static: "false"
+
+# Uploads are disabled until durable object storage is configured. Do not use
+# `fs`: the API container has no persistent upload mount. For AWS S3, set these
+# values and keep storage_endpoint undefined. For MinIO, also set its reachable
+# private URL and force path-style requests; put credentials in Ansible Vault.
+# storage_driver: "s3"
+# storage_bucket: "buildersnetwork-uploads"
+# storage_region: "ap-southeast-1"
+# storage_endpoint: "http://<MINIO_PRIVATE_IP>:9000"
+# storage_force_path_style: "true"
