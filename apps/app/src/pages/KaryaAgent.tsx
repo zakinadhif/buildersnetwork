@@ -1,14 +1,11 @@
 import { useStream } from "@myapp/ai/react";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import {
-  Dots,
-  Eyebrow,
-  KARYA_STAGE_ORDER,
-  Loading,
-} from "@/components/ui-atoms";
-import { type KaryaDraft, useKaryaDraft } from "@/lib/karya-draft-ctx";
+import { Dots, Eyebrow, Loading } from "@/components/ui-atoms";
+import { KARYA_STAGE_ORDER } from "@/components/ui-metadata";
+import type { KaryaDraft } from "@/lib/karya-draft-context";
 import { callClaude, cleanJSON } from "@/lib/members";
+import { useKaryaDraft } from "@/lib/use-karya-draft";
 
 const INTRO =
   "oke, ceritain karya yang mau kamu bikin. mulai dari yang paling simpel: namanya apa, atau lagi ngerjain apa?";
@@ -51,7 +48,7 @@ export default function KaryaAgent() {
   const [, navigate] = useLocation();
   const msgId = useRef(0);
   const [msgs, setMsgs] = useState<ChatMessage[]>([
-    { id: msgId.current, role: "ai", text: INTRO },
+    { id: 0, role: "ai", text: INTRO },
   ]);
   const [history, setHistory] = useState<ApiMessage[]>([]);
   const [input, setInput] = useState("");

@@ -1,11 +1,8 @@
-import {
-  KaryaStage,
-  PostKind,
-  useListInterests,
-} from "@myapp/api-client-react";
+import { type KaryaStage, useListInterests } from "@myapp/api-client-react";
 import { Input, Textarea, Toggle } from "@myapp/ui";
 import type * as React from "react";
 import { useState } from "react";
+import { KARYA_STAGE_ORDER, STAGE_LABELS } from "@/components/ui-metadata";
 
 /**
  * The avatar, the cover tile and the tag are @myapp/ui's now (#92) — one
@@ -23,45 +20,6 @@ export {
   Textarea,
   Toggle,
 } from "@myapp/ui";
-
-// Lifecycle stages in canonical order, with Indonesian labels for the UI.
-export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStage[];
-export const STAGE_LABELS: Record<KaryaStage, string> = {
-  idea: "ide",
-  validating: "validasi",
-  building: "bikin",
-  shipped: "rilis",
-  paused: "jeda",
-};
-
-// Post kinds in canonical order, with Indonesian labels for the UI (FR-18).
-export const POST_KIND_ORDER = Object.values(PostKind) as PostKind[];
-export const POST_KIND_LABELS: Record<PostKind, string> = {
-  progress: "progres",
-  challenge: "tantangan",
-  achievement: "capaian",
-};
-
-/**
- * Compact Indonesian relative-time label (e.g. "baru saja", "3j lalu"). Accepts
- * an ISO string (wire shape) or a Date. Coarse on purpose — the feed shows when,
- * not exactly when.
- */
-export function timeAgo(input: string | Date): string {
-  const then = typeof input === "string" ? new Date(input) : input;
-  const secs = Math.floor((Date.now() - then.getTime()) / 1000);
-  if (Number.isNaN(secs)) return "";
-  if (secs < 60) return "baru saja";
-  const mins = Math.floor(secs / 60);
-  if (mins < 60) return `${mins}m lalu`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}j lalu`;
-  const days = Math.floor(hours / 24);
-  if (days < 7) return `${days}h lalu`;
-  if (days < 30) return `${Math.floor(days / 7)}mg lalu`;
-  if (days < 365) return `${Math.floor(days / 30)}bln lalu`;
-  return `${Math.floor(days / 365)}th lalu`;
-}
 
 export function Dots() {
   return (

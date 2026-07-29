@@ -1,19 +1,7 @@
-import { createContext, useContext, useState } from "react";
-import type { Member, MemberMatch } from "./members";
+import { type ReactNode, useState } from "react";
+import type { Member, MemberMatch } from "@/lib/members";
+import { OnboardingContext } from "@/lib/onboarding-context";
 
-interface OnboardingCtxValue {
-  draft: Member | null;
-  matches: MemberMatch[];
-  setDraft: (m: Member) => void;
-  setMatches: (m: MemberMatch[]) => void;
-  clear: () => void;
-}
-
-const OnboardingCtx = createContext<OnboardingCtxValue | null>(null);
-
-// Persist the in-progress onboarding draft/matches to sessionStorage so a
-// reload on /review (or /matches) preserves edits instead of bouncing the user
-// back to /onboarding (NFR-7).
 const DRAFT_KEY = "onboarding:draft";
 const MATCHES_KEY = "onboarding:matches";
 
@@ -36,11 +24,7 @@ function save(key: string, value: unknown) {
   }
 }
 
-export function OnboardingProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Member | null>(() =>
     load<Member | null>(DRAFT_KEY, null),
   );
@@ -48,14 +32,14 @@ export function OnboardingProvider({
     load<MemberMatch[]>(MATCHES_KEY, []),
   );
 
-  const setDraft = (m: Member) => {
-    setDraftState(m);
-    save(DRAFT_KEY, m);
+  const setDraft = (member: Member) => {
+    setDraftState(member);
+    save(DRAFT_KEY, member);
   };
 
-  const setMatches = (m: MemberMatch[]) => {
-    setMatchesState(m);
-    save(MATCHES_KEY, m);
+  const setMatches = (nextMatches: MemberMatch[]) => {
+    setMatchesState(nextMatches);
+    save(MATCHES_KEY, nextMatches);
   };
 
   const clear = () => {
@@ -68,17 +52,10 @@ export function OnboardingProvider({
   };
 
   return (
-    <OnboardingCtx.Provider
+    <OnboardingContext.Provider
       value={{ draft, matches, setDraft, setMatches, clear }}
     >
       {children}
-    </OnboardingCtx.Provider>
+    </OnboardingContext.Provider>
   );
-}
-
-export function useOnboarding() {
-  const ctx = useContext(OnboardingCtx);
-  if (!ctx)
-    throw new Error("useOnboarding must be used within OnboardingProvider");
-  return ctx;
 }

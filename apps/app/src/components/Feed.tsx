@@ -1,12 +1,11 @@
 import type { FeedItem } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
+import { Avatar, KaryaCard } from "@/components/ui-atoms";
 import {
-  Avatar,
-  KaryaCard,
   POST_KIND_LABELS,
   STAGE_LABELS,
   timeAgo,
-} from "@/components/ui-atoms";
+} from "@/components/ui-metadata";
 
 /**
  * The reverse-chron global feed (FR-22). Renders a `FeedItem[]` union as

@@ -16,12 +16,14 @@ import {
   Eyebrow,
   KaryaCover,
   Loading,
+  Tag,
+} from "@/components/ui-atoms";
+import {
   POST_KIND_LABELS,
   POST_KIND_ORDER,
   STAGE_LABELS,
-  Tag,
   timeAgo,
-} from "@/components/ui-atoms";
+} from "@/components/ui-metadata";
 
 export default function Karya({ id }: { id: string }) {
   const { data: karya, isLoading, refetch } = useGetKarya(id);
