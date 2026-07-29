@@ -1,11 +1,20 @@
 # Deploy to AWS EC2 (2-Tier) with Ansible
 
 Two separate EC2 instances: **backend API**, **frontend nginx**. The database is
-a SQLite file on the API host — no separate database VM.
+a SQLite file on the API host — no separate database VM. This is a
+self-hosted/VPS-compatible topology automated for EC2.
 
 ```
 Browser → Frontend VM (nginx :80) → Backend VM (Hono :8080 + SQLite file)
+                                      └→ durable S3-compatible object storage
 ```
+
+The playbook intentionally does not store uploads in the API container. A
+container-local FlyDrive filesystem disappears when that container is replaced.
+Configure AWS S3 or another durable S3-compatible service. If you self-host
+MinIO, run it with `/data` on an attached persistent EBS volume and expose it
+only on a private address reachable by the API VM. Until object storage is
+configured, uploads are disabled and the upload/serve routes return `503`.
 
 ## Prerequisites
 
@@ -14,6 +23,7 @@ Browser → Frontend VM (nginx :80) → Backend VM (Hono :8080 + SQLite file)
 - Ansible installed: `pip install ansible`
 - Docker community collection: `ansible-galaxy collection install community.docker`
 - Docker Hub account (for pushing images)
+- Durable object storage: AWS S3, or a MinIO instance backed by persistent disk
 - **Windows users:** run all Ansible commands from WSL
 
 ## 1. Security groups
@@ -24,6 +34,9 @@ Browser → Frontend VM (nginx :80) → Backend VM (Hono :8080 + SQLite file)
 | `bn-api` | 8080 from `bn-frontend` security group, 22 from your IP |
 
 Port 8080 on the backend is intentionally not public — the frontend nginx proxies `/api/` to it internally. The database is a local file on this host, so there is no database port to open.
+
+For self-hosted MinIO, allow port 9000 only from the `bn-api` security group;
+never expose the MinIO API or console publicly.
 
 ## 2. Configure inventory
 
@@ -55,9 +68,32 @@ Add:
 ```yaml
 better_auth_secret: "min_32_chars_random_secret"
 gemini_api_key: "your_gemini_api_key"
+storage_access_key: "your_s3_or_minio_access_key"
+storage_secret_key: "your_s3_or_minio_secret_key"
 ```
 
 To edit later: `ansible-vault edit deploy/ansible/group_vars/all/vault.yml`
+
+Then configure the non-secret storage settings in
+`deploy/ansible/group_vars/api.yml`:
+
+```yaml
+storage_driver: "s3"
+storage_bucket: "buildersnetwork-uploads"
+storage_region: "ap-southeast-1"
+storage_force_path_style: "false"
+```
+
+For AWS S3, leave `storage_endpoint` undefined. For self-hosted MinIO, set:
+
+```yaml
+storage_endpoint: "http://<MINIO_PRIVATE_IP>:9000"
+storage_region: "us-east-1"
+storage_force_path_style: "true"
+```
+
+The Ansible role rejects `storage_driver: "fs"` because it does not mount a
+durable uploads directory into the API container.
 
 ## 4. Build and push Docker images
 
@@ -125,6 +161,9 @@ Non-secret vars live in `group_vars/api.yml` and `group_vars/all/vars.yml`. Secr
 | Variable | Source | Description |
 |---|---|---|
 | `DATABASE_URL` | `api.yml` | `file:/data/app.db` — a SQLite file on the API host, mounted into the API and migrate containers at `/data` |
+| `STORAGE_DRIVER` | `api.yml` | Use `s3` for durable uploads; defaults to `disabled`. Container-local `fs` is rejected |
+| `STORAGE_BUCKET`, `STORAGE_REGION`, `STORAGE_ENDPOINT`, `STORAGE_FORCE_PATH_STYLE` | `api.yml` | S3-compatible provider settings; omit the endpoint for AWS S3 |
+| `STORAGE_ACCESS_KEY`, `STORAGE_SECRET_KEY` | vault | S3/MinIO credentials |
 | `BETTER_AUTH_SECRET` | vault | Min 32 chars random string |
 | `BETTER_AUTH_URL` | `-e app_url=...` | Frontend public URL — used in auth email links |
 | `GEMINI_API_KEY` | vault | Gemini API key — the Node entrypoint always uses `createGeminiAI` |

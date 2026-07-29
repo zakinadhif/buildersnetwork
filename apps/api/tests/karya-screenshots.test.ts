@@ -12,6 +12,7 @@ import {
 } from "../src/lib/screenshots";
 import karyaRouter from "../src/routes/karya";
 import { createAuthMock, createDbMock, type MockUser } from "./helpers/harness";
+import { fakeStorage } from "./helpers/storage";
 
 // ── Pure helpers ────────────────────────────────────────────────────────────
 
@@ -78,33 +79,6 @@ describe("screenshot helpers", () => {
 });
 
 // ── Route behaviour ───────────────────────────────────────────────────────────
-
-/** In-memory StorageProvider that records puts/deletes for assertions. */
-function fakeStorage() {
-  const store = new Map<string, Buffer>();
-  const puts: { key: string; contentType?: string }[] = [];
-  const deletes: string[] = [];
-  const storage: StorageProvider = {
-    async put(key, body, opts) {
-      store.set(
-        key,
-        Buffer.isBuffer(body) ? body : Buffer.from(body as Uint8Array),
-      );
-      puts.push({ key, contentType: opts?.contentType });
-    },
-    async get(key) {
-      return store.get(key) ?? null;
-    },
-    async delete(key) {
-      store.delete(key);
-      deletes.push(key);
-    },
-    async getSignedUrl() {
-      return "unused";
-    },
-  };
-  return { storage, store, puts, deletes };
-}
 
 function mount(opts: {
   user?: MockUser | null;

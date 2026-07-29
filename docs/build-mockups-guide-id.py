@@ -52,7 +52,7 @@ k.para("Tiga tools. Cuma itu.")
 k.table(
     ["Tools", "Versi", "Buat apa"],
     [
-        ["Node.js", "22 atau lebih baru", "Menjalankan dev server"],
+        ["Node.js", "24 atau lebih baru", "Menjalankan dev server"],
         ["pnpm", "10 atau lebih baru", "Meng-install package — npm dan yarn tidak akan jalan"],
         ["Git", "versi terbaru mana pun", "Mengambil kode, dan mengirim balik perubahanmu"],
     ],
@@ -67,25 +67,25 @@ k.para(
     size=9.5,
 )
 
-doc.add_heading("Node.js 22", level=2)
+doc.add_heading("Node.js 24", level=2)
 k.code(
     """
 # Windows (PowerShell)
 winget install CoreyButler.NVMforWindows
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # macOS / Linux
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # Cek hasilnya
-node -v      # -> v22.x.x
+node -v      # -> v24.x.x
 """
 )
 k.para(
-    "Installer dari nodejs.org juga tidak masalah — pilih versi 22 LTS. Version manager di atas "
+    "Installer dari nodejs.org juga tidak masalah — pilih versi 24 LTS. Version manager di atas "
     "cuma lebih enak kalau kamu mengerjakan beberapa project sekaligus.",
     muted=True,
     size=9.5,
@@ -93,7 +93,7 @@ k.para(
 
 doc.add_heading("pnpm 10", level=2)
 k.para(
-    "Node 22 sudah membawa alat untuk meng-install pnpm, jadi cukup dua baris. Jangan diganti "
+    "Node 24 sudah membawa alat untuk meng-install pnpm, jadi cukup dua baris. Jangan diganti "
     "dengan npm atau yarn — project ini memakai pnpm workspace, dan yang lain akan menghasilkan "
     "install yang rusak."
 )

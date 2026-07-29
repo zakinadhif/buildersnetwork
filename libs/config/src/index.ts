@@ -32,16 +32,19 @@ const schema = z.object({
   /** Turso auth token. Only needed when DATABASE_URL is a remote `libsql://`. */
   DATABASE_AUTH_TOKEN: z.string().optional(),
 
-  // --- Storage (S3-compatible: AWS S3, Cloudflare R2, Backblaze B2, MinIO) ---
-  // Optional as a group: omit to run without object storage (e.g. local dev
-  // that doesn't touch uploads). `loadStorageConfig()` enforces completeness
-  // when storage is actually used.
+  // --- Storage (FlyDrive: local filesystem, S3-compatible, or GCS) ---
+  // When omitted, development uses a local filesystem disk and production
+  // disables storage. Existing production STORAGE_* configs still infer S3.
+  STORAGE_DRIVER: z.enum(["disabled", "fs", "s3", "gcs"]).optional(),
+  STORAGE_LOCAL_ROOT: z.string().optional(),
   STORAGE_ENDPOINT: z.string().url().optional(), // omit for AWS S3
   STORAGE_REGION: z.string().default("auto"),
   STORAGE_ACCESS_KEY: z.string().optional(),
   STORAGE_SECRET_KEY: z.string().optional(),
   STORAGE_BUCKET: z.string().optional(),
   STORAGE_FORCE_PATH_STYLE: envBool(false), // true for MinIO
+  STORAGE_GCS_PROJECT_ID: z.string().optional(),
+  STORAGE_GCS_KEY_FILENAME: z.string().optional(),
 
   // --- Auth (Better Auth) ---
   BETTER_AUTH_SECRET: z.string().min(32),
@@ -122,31 +125,67 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): Config {
   return cached;
 }
 
-export interface StorageConfig {
-  endpoint?: string;
-  region: string;
-  accessKey: string;
-  secretKey: string;
-  bucket: string;
-  forcePathStyle: boolean;
-}
+export type StorageConfig =
+  | { driver: "disabled" }
+  | { driver: "fs"; root?: string }
+  | {
+      driver: "s3";
+      endpoint?: string;
+      region: string;
+      accessKey: string;
+      secretKey: string;
+      bucket: string;
+      forcePathStyle: boolean;
+    }
+  | {
+      driver: "gcs";
+      bucket: string;
+      projectId?: string;
+      keyFilename?: string;
+    };
 
 /**
- * Returns the storage config, asserting that all required STORAGE_* vars are
- * present. Call this only from code paths that actually use object storage.
+ * Resolves the runtime storage driver and validates its required variables.
+ * Legacy configs with STORAGE_BUCKET and no explicit driver remain S3.
  */
 export function loadStorageConfig(
   config: Config = loadConfig(),
 ): StorageConfig {
+  const driver =
+    config.STORAGE_DRIVER ??
+    (config.STORAGE_BUCKET
+      ? "s3"
+      : config.NODE_ENV === "development"
+        ? "fs"
+        : "disabled");
+
+  if (driver === "disabled") return { driver };
+  if (driver === "fs") {
+    return { driver, root: config.STORAGE_LOCAL_ROOT };
+  }
+  if (driver === "gcs") {
+    if (!config.STORAGE_BUCKET) {
+      throw new Error("GCS storage is not configured. Missing: STORAGE_BUCKET");
+    }
+    return {
+      driver,
+      bucket: config.STORAGE_BUCKET,
+      projectId: config.STORAGE_GCS_PROJECT_ID,
+      keyFilename: config.STORAGE_GCS_KEY_FILENAME,
+    };
+  }
+
   const missing = (
     ["STORAGE_ACCESS_KEY", "STORAGE_SECRET_KEY", "STORAGE_BUCKET"] as const
-  ).filter((k) => !config[k]);
+  ).filter((key) => !config[key]);
   if (missing.length > 0) {
     throw new Error(
-      `Object storage is not configured. Missing: ${missing.join(", ")}`,
+      `S3 storage is not configured. Missing: ${missing.join(", ")}`,
     );
   }
+
   return {
+    driver,
     endpoint: config.STORAGE_ENDPOINT,
     region: config.STORAGE_REGION,
     accessKey: config.STORAGE_ACCESS_KEY as string,

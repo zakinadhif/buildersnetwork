@@ -3,6 +3,9 @@
 For a plain VPS with Docker installed — no PaaS. Uses
 `deploy/docker-compose.selfhost.yml` (Caddy + app + MinIO + migrate). The
 database is a SQLite file on a shared `dbdata` volume — no database container.
+Uploads use MinIO, whose `/data` directory is backed by the named `miniodata`
+volume. They are not written to the app container's filesystem, so replacing
+the app container does not remove them.
 
 ## Prerequisites
 - A VPS with Docker + Docker Compose
@@ -46,8 +49,10 @@ Check out the previous commit/tag and re-run the `up -d --build` command, or pin
 `APP_IMAGE` to a known-good `sha-<short>` tag and `up -d` without `--build`.
 
 ## Local full-stack smoke test (no domain/TLS)
-The dev compose only runs MinIO; run the app with `pnpm dev`. To test
-the **bundled image** locally, build and run it directly:
+Ordinary development, including uploads, needs no compose stack: FlyDrive uses
+the local filesystem. The dev compose exists only as an optional MinIO fixture
+for the S3-compatible driver. To test the **bundled image** locally, build and
+run it directly:
 ```bash
 docker build -f deploy/Dockerfile -t comfort-stack .
 docker run --rm -p 8080:8080 --env-file deploy/.env comfort-stack

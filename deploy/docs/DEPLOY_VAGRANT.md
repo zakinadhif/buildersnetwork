@@ -2,6 +2,12 @@
 
 Runs the same two-tier architecture as the EC2 deployment but on local Vagrant VMs. Uses the same Ansible roles and the same Docker images — only the inventory and SSH credentials differ. The database is a SQLite file on the API VM; there is no separate database VM.
 
+The shared backend role rejects container-local filesystem uploads because they
+would disappear when the API container is replaced. Uploads remain disabled
+unless the Ansible storage variables point to an S3-compatible service. For
+local topology testing, MinIO is the recommended provider; its data directory
+must live outside the API container.
+
 ## Architecture
 
 | VM | Private IP | Role |

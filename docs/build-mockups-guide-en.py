@@ -49,7 +49,7 @@ k.para("Three tools. That is the whole list.")
 k.table(
     ["Tool", "Version", "What for"],
     [
-        ["Node.js", "22 or newer", "Runs the dev server"],
+        ["Node.js", "24 or newer", "Runs the dev server"],
         ["pnpm", "10 or newer", "Installs packages — npm and yarn will not work here"],
         ["Git", "any recent", "Getting the code, and sending your changes back"],
     ],
@@ -64,25 +64,25 @@ k.para(
     size=9.5,
 )
 
-doc.add_heading("Node.js 22", level=2)
+doc.add_heading("Node.js 24", level=2)
 k.code(
     """
 # Windows (PowerShell)
 winget install CoreyButler.NVMforWindows
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # macOS / Linux
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-nvm install 22
-nvm use 22
+nvm install 24
+nvm use 24
 
 # Check it worked
-node -v      # -> v22.x.x
+node -v      # -> v24.x.x
 """
 )
 k.para(
-    "The installer from nodejs.org works too — pick the 22 LTS download. The version manager above "
+    "The installer from nodejs.org works too — pick the 24 LTS download. The version manager above "
     "is only nicer if you juggle several projects.",
     muted=True,
     size=9.5,
@@ -90,7 +90,7 @@ k.para(
 
 doc.add_heading("pnpm 10", level=2)
 k.para(
-    "Node 22 already ships the tool that installs pnpm, so this is two lines. Do not substitute "
+    "Node 24 already ships the tool that installs pnpm, so this is two lines. Do not substitute "
     "npm or yarn — this project is a pnpm workspace and the others will produce a broken install."
 )
 k.code(

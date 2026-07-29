@@ -49,10 +49,10 @@ const adminEmails = (config.ADMIN_EMAILS ?? "")
   .map((e) => e.trim())
   .filter(Boolean);
 
-// Object storage is optional: only build the adapter when STORAGE_* is
-// configured (createStorageFromEnv throws on missing vars). Deploys without it
-// run fine; the cover upload/serve routes 503 until it's set.
-const storage = config.STORAGE_BUCKET ? createStorageFromEnv() : undefined;
+// Development defaults to a persistent local FlyDrive filesystem disk, so the
+// upload flow works without Docker or credentials. Production remains
+// explicitly configurable and may leave storage disabled.
+const storage = createStorageFromEnv(config);
 
 const app = createApp({
   db,

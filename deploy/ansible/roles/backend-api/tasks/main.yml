@@ -11,6 +11,26 @@
     state: directory
     mode: "0700"
 
+- name: Reject ephemeral container-local upload storage
+  assert:
+    that:
+      - storage_driver | default('disabled') != 'fs'
+    fail_msg: >-
+      STORAGE_DRIVER=fs is not durable in this deployment because the API
+      container has no persistent upload mount. Use an S3-compatible service
+      such as AWS S3 or MinIO backed by persistent storage.
+
+- name: Validate S3-compatible upload storage
+  assert:
+    that:
+      - storage_bucket is defined
+      - storage_access_key is defined
+      - storage_secret_key is defined
+    fail_msg: >-
+      storage_bucket, storage_access_key, and storage_secret_key are required
+      when storage_driver=s3.
+  when: storage_driver | default('disabled') == 's3'
+
 - name: Template env file
   template:
     src: env.j2

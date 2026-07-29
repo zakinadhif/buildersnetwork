@@ -1,12 +1,17 @@
-# Local development backing service: MinIO (S3-compatible object storage).
-# The database is a local SQLite file — no container to run. Create it with
-# `pnpm db:migrate && pnpm db:seed`; DATABASE_URL defaults to a `file:` URL.
+# Optional S3-compatible integration fixture. Ordinary local development uses
+# FlyDrive's filesystem driver and does not need Docker. Run this only when
+# testing the S3 path against MinIO.
 #
 #   docker compose -f deploy/docker-compose.dev.yml up -d
 #
-# Then in apps/api/.env:
-#   DATABASE_URL=file:../../libs/db/local.db
+# Then override storage in apps/api/.env:
+#   STORAGE_DRIVER=s3
 #   STORAGE_ENDPOINT=http://localhost:9000  (access/secret = minioadmin)
+#   STORAGE_REGION=us-east-1
+#   STORAGE_ACCESS_KEY=minioadmin
+#   STORAGE_SECRET_KEY=minioadmin
+#   STORAGE_BUCKET=comfort-dev
+#   STORAGE_FORCE_PATH_STYLE=true
 
 name: comfort-dev
 
