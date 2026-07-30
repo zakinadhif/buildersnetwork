@@ -4,6 +4,24 @@
 
 Any pull request touching `apps/mockups/**` gets a live static preview URL posted on it. The gallery is a standalone static app — no API, no DB — which is what makes it safe to preview from forks.
 
+## Design maturity markers
+
+The gallery switcher marks every screen with one design status:
+
+- **Exploration** — incomplete, transitional, or one of several directions. It cannot ground a `[Fitur]`.
+- **In Review** — a coherent candidate under review. It still cannot ground a `[Fitur]`.
+- **Approved Reference** — the current implementation reference for the explicitly approved slice of the screen. It clears Gate B when the feature cites the mockup and its `groundedBy` issue.
+
+This is separate from product lifecycle. A screen can be an Approved Reference and later become **retired**, or remain active while its redesign is still Exploration.
+
+The source is `SCREEN_META` in `apps/mockups/src/gallery/nav.ts`. An Approved Reference records:
+
+- `groundedBy` — the GitHub design or decision issue that approved it;
+- `scopeNote` — the slice that is safe to build;
+- `excludes` — visible future-facing capabilities that are not approved by the screen.
+
+New screens start as Exploration. A design PR may mark its candidate In Review. Maintainer acceptance and merge promote it to Approved Reference; starting a later redesign does not silently invalidate the approved version on `main`.
+
 ## Fork-safe by construction — two workflows, on purpose
 
 The split is the whole security design. **A job that runs PR code never holds a secret; the job that holds the secret never runs PR code.**
