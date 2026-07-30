@@ -2,7 +2,7 @@ import { type KaryaListItem, useListKarya } from "@myapp/api-client-react";
 import { Button, Eyebrow, Input, KaryaCard } from "@myapp/ui";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
-import { STAGE_LABELS } from "@/components/ui-atoms";
+import { STAGE_LABELS } from "@/components/ui-metadata";
 
 const ALL_INTERESTS = "Semua";
 

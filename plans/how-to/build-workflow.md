@@ -52,10 +52,10 @@ Before a **strategic** issue is filed, it clears this gate. Its job is to stop t
 - **`[Fitur]` / `[Desain]` — decision-grounded.** The [Vision](../vision.md), [requirements catalog](../reference/requirements.md), an active [milestone doc](../milestones/), a ratified decision, or the active documentation PR produced by `/ratify` must actually call for the work. Work grounded only by that open PR stays Backlog until it merges. Cite *where* in `## Kenapa`, then continue to Gate B.
 - **Build work outside those boundaries** → **stop and warn.** Open a `[Diskusi]` in **Proposed** to decide the direction first (see [the ratification gate](#the-ratification-gate-vision--requirements--roadmap-changes)); do not manufacture build work for undecided scope. File it only if the maintainer explicitly insists, recorded as an ungrounded exception.
 
-**Gate B — mockup.** Only for a **non-trivial** user-facing surface.
+**Gate B — Approved Reference mockup.** Only for a **non-trivial** user-facing surface.
 
-- **A `[Desain]` mockup for this surface exists in `apps/mockups/`** → file the `[Fitur]`, cite the mockup in `## Kenapa`. It *grounds* the feature: the scope and schema follow from what the UI needs to serve.
-- **No mockup yet** → **don't groom a `[Fitur]` for a surface nobody's drawn.** File a `[Desain]` exploration first (or point at the one that should be built); the feature's contract — scope, schema — is written only *after* the design lands. (In a ratification the feature can sit meanwhile as an ungroomed **Backlog** stub under the `[Diskusi]` — see [the ratification gate](#the-ratification-gate-vision--requirements--roadmap-changes).)
+- **An `Approved Reference` mockup for this surface exists in `apps/mockups/`** → file the `[Fitur]`, cite the mockup and its `groundedBy` issue in `## Kenapa`. Its `scopeNote` and `excludes` define which visible parts actually ground the feature; the scope and schema follow that approved slice, not every future-facing control on the screen.
+- **No mockup yet, or the gallery marks it `Exploration` / `In Review`** → **don't groom a `[Fitur]` from a surface that is still moving.** File a `[Desain]` exploration first (or point at the one that should be completed); the feature's contract — scope, schema — is written only *after* the design becomes an `Approved Reference`. (In a ratification the feature can sit meanwhile as an ungroomed **Backlog** stub under the `[Diskusi]` — see [the ratification gate](#the-ratification-gate-vision--requirements--roadmap-changes).)
 - **Trivial surface** (a settings toggle, a copy tweak) **or no surface at all** (pure backend/infra) → Gate B is N/A; file the `[Fitur]`.
 
 ## Scope treatments — how much a feature gets *right now*

@@ -40,7 +40,7 @@ Write 5–6 candidate directions that genuinely diverge (calm/wide vs. dense das
 
 ## After the round
 
-Review the mockups side by side in the gallery, decide, and pull the winning ideas into the real app. The mockups are throwaway exploration — once a direction ships for real, the mockup can be deleted or kept as a reference in `apps/mockups/src/`. If the direction reshapes a milestone's scope, that's a **Proposed** issue (see [build-workflow.md](build-workflow.md)), not a silent pivot.
+Review the mockups side by side in the gallery, decide, and pull the winning ideas into the real app. Register new directions as **Exploration** in `SCREEN_META`; a coherent candidate may become **In Review**, and only a maintainer-accepted, merged direction becomes an **Approved Reference** with its grounding issue and explicit scope. The mockups are throwaway exploration — once a direction ships for real, the mockup can be deleted or kept as a reference in `apps/mockups/src/`. If the direction reshapes a milestone's scope, that's a **Proposed** issue (see [build-workflow.md](build-workflow.md)), not a silent pivot.
 
 ## Graduation: when a mockup's chrome moves into `libs/ui`
 
