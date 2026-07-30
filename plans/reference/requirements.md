@@ -45,12 +45,12 @@
 - **FR-17** Lightweight Events.
 
 ### 1.6 Posts & Collective Knowledge
-- **FR-18** Any karya member can post an update — covering **progress, challenges, or achievements**.
+- **FR-18** Any karya member can post a plain-text update — covering **progress, challenges, or achievements**. These are meanings expressed in the body, not stored post kinds; a karya update has no required title or headline.
 - **FR-19** Posts appear on the karya page and in the feed.
 - **FR-35** **Microblogging** — members can post general, beneficial short-form content (not only karya updates) to the feed (X/Threads-style, *no brainrot* — beneficial content from people you know).
 - **FR-36** **Blog** — longer-form how-tos/guides for collective knowledge (e.g. "how to code comfortably with Claude").
 - **FR-37** **Magazine** — a periodic, curated editorial compilation of the community's best work and knowledge.
-- **FR-20** Likes; **FR-21** comments.
+- **FR-20** Likes; **FR-21** first-layer comments attached to posts. Threading, replies-to-replies, and reactions are separate richness rather than part of the minimum comment entity.
 
 ### 1.7 Feed & Homepage
 - **FR-22** **Reverse-chronological** feed of recent posts and new karya. No ranking algorithm.
