@@ -2,7 +2,7 @@
 
 *Part of the [Roadmap](../roadmap.md). Requirements: [requirements.md](requirements.md) · Vision: [vision.md](../vision.md). Non-authoritative working knowledge — trust the code when they diverge.*
 
-**Status: ratified 2026-07-03** via `[Diskusi]` [#13](https://github.com/zakinadhif/buildersnetwork/issues/13). This is the architectural spine for how content surfaces relate; the milestone docs that touch content (Launchpad, karya pages, microblog, articles) inherit it.
+**Status: ratified 2026-07-03** via `[Diskusi]` [#13](https://github.com/zakinadhif/buildersnetwork/issues/13), with the P0 entity boundary refined via `[Diskusi]` [#139](https://github.com/zakinadhif/buildersnetwork/issues/139). This is the architectural spine for how content surfaces relate; the milestone docs that touch content (Launchpad, karya pages, microblog, articles) inherit it.
 
 ## The decision: A — page is the destination, feed is activity *about* it
 
@@ -26,6 +26,24 @@ Chosen over B (*everything is a post; a page is a filtered feed* — kills the r
 - **Articles** = another kind of page whose *publish* is a feed event. No separate feed machinery.
 - **Comments** (FR-21) attach to the **event** (the update) first — where conversation lands naturally — with page-level comments as a later add. **One** comment system, not two.
 - **Polls** are the heaviest creative-canvas piece (need their own votes entity: options + one-vote-per-user + tallies) → the *last* layer, not the first.
+
+## P0 entity boundary
+
+For P0, a post is deliberately closer to a tweet than to a typed content block. It has no title, headline, or `kind`; the body carries the update in the author's own words. A post remains karya-owned, so `karyaId` stays required until the separate microblog question is decided.
+
+```text
+Post = id, karyaId, authorId, body, createdAt
+```
+
+Comments are separate authored records attached to posts:
+
+```text
+Comment = id, postId, authorId, body, createdAt
+```
+
+Keeping the entities separate preserves their different authorization, query, and lifecycle rules. P0 supports only first-layer comments: no `parentCommentId`, threading, replies-to-replies, reactions, likes, or notifications. If nesting later earns scope, `Comment` can gain a nullable self-reference without turning posts and comments into one generic content table.
+
+Collaboration state is neither a post type nor a karya lifecycle stage. P0 therefore has no availability, opening, match, recommendation, or event-scope entity. The implemented `matches` persistence and routes are scope leakage to remove, while profile skills and interests remain useful profile data. The future collaboration shape and its cardinalities remain undecided in Proposed discussion [#140](https://github.com/zakinadhif/buildersnetwork/issues/140).
 
 ## Deliberately still open (not blocking A)
 

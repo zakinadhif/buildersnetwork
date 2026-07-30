@@ -25,6 +25,21 @@
 
 > **Why the feedback loop is P0.** The P0 core loop is *create karya → post → **community responds** → post again*, and "responds" needs a channel. A post is a whole object only through its first layer of response; comments are that layer, so they're in P0. Likes (FR-20), threading, replies-to-replies, and notifications are richness *above* the first layer and stay P1. This is what keeps the P0/P1 line from being re-cut later as if it were arbitrary. *(Promoted out of P1 by decision — resolves what was open priority call #1.)* Comments attach to the **post**, not the karya page, per [content-model.md](reference/content-model.md) — one comment system, not two.
 
+### Strict P0 data boundary
+
+The P0 content model stays intentionally small:
+
+```text
+Post = id, karyaId, authorId, body, createdAt
+Comment = id, postId, authorId, body, createdAt
+```
+
+`Post` has no title or `kind`, and `karyaId` remains required. `Comment` is a separate, first-layer entity with no nesting or reactions.
+
+Matchmaking is wholly P1. P0 removes the existing `matches` persistence, profile match endpoints, and `/matches` flow as scope leakage; it does not add availability, openings, recommendations, event scope, normalized matching skills, or messaging. Profile skills and interests stay because they are useful without matching. Collaboration state must never be encoded in posts or karya lifecycle stages.
+
+The active mockups are implementation references, not permission to imply deferred capabilities exist. Matchmaking, appreciation, followed-feed, or collaboration-opening cues shown by a mockup must be omitted or clearly disabled during P0. The collaboration data-model choice remains parked in Proposed discussion [#140](https://github.com/zakinadhif/buildersnetwork/issues/140).
+
 ## P1 — fast-follow (named, not scheduled)
 
 Pulled out of P0 by the ruthless shrink, plus the previously-named follow-ons. None is scheduled until the Launchpad hero is in front of real users and their behavior tells us what earns polish next.
