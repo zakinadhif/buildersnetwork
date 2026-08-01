@@ -23,6 +23,7 @@ import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
 import Onboarding from "@/pages/Onboarding";
+import OwnProfile from "@/pages/OwnProfile";
 import People from "@/pages/People";
 import Review from "@/pages/Review";
 import VerifyEmail from "@/pages/VerifyEmail";
@@ -151,6 +152,11 @@ function AppRoutes() {
       <Route path="/people">
         {withProfile((member) => (
           <People user={member} />
+        ))}
+      </Route>
+      <Route path="/profil">
+        {shell((member) => (
+          <OwnProfile me={member} />
         ))}
       </Route>
       <Route path="/minat">

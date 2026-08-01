@@ -71,7 +71,11 @@ export default function Shell({
   return (
     <div className="min-h-screen bg-bg-layer flex justify-center text-ink font-body selection:bg-accent-tint selection:text-accent">
       <ShellColumns>
-        <UiLeftNav items={items} user={{ name: me.name, handle: me.handle }} />
+        <UiLeftNav
+          items={items}
+          user={{ name: me.name, handle: me.handle }}
+          onUserClick={() => navigate("/profil")}
+        />
         <MainColumn className="flex flex-col">{children}</MainColumn>
         {rail && (
           <RailColumn className="flex flex-col gap-6">{rail}</RailColumn>
