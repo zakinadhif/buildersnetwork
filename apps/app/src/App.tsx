@@ -186,8 +186,10 @@ function AppRoutes() {
         {(params) =>
           !loggedIn ? (
             <Redirect to="/welcome" />
+          ) : !me ? (
+            <Redirect to="/mulai" />
           ) : (
-            <MemberProfilePage id={params.id ?? ""} />
+            <MemberProfilePage id={params.id ?? ""} me={me} />
           )
         }
       </Route>
