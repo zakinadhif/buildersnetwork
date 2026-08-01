@@ -1,72 +1,54 @@
 import {
+  ApiError,
   approveKaryaMember,
   createPost,
   declineKaryaMember,
   featureKarya,
   joinKarya,
+  type Member,
   type PostKind,
   unfeatureKarya,
   useGetKarya,
   useGetKaryaPosts,
 } from "@myapp/api-client-react";
-import { Button } from "@myapp/ui";
+import { Avatar, Button, Eyebrow, Tag } from "@myapp/ui";
 import { useState } from "react";
-import {
-  Avatar,
-  Eyebrow,
-  KaryaCover,
-  Loading,
-  Tag,
-} from "@/components/ui-atoms";
+import { useLocation } from "wouter";
+import Shell from "@/components/Shell";
 import {
   POST_KIND_LABELS,
   POST_KIND_ORDER,
   STAGE_LABELS,
   timeAgo,
 } from "@/components/ui-metadata";
+import { karyaDetailState, orderedScreenshots } from "@/lib/karya-detail";
 
-export default function Karya({ id }: { id: string }) {
-  const { data: karya, isLoading, refetch } = useGetKarya(id);
-  const { data: posts = [], refetch: refetchPosts } = useGetKaryaPosts(id);
+export default function Karya({ id, me }: { id: string; me: Member }) {
+  const [, navigate] = useLocation();
+  const detail = useGetKarya(id);
+  const postsQuery = useGetKaryaPosts(id);
   const [busy, setBusy] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
   const [postKind, setPostKind] = useState<PostKind>("progress");
   const [postBody, setPostBody] = useState("");
-
-  if (isLoading) return <Loading />;
-  if (!karya) {
-    return (
-      <div className="fixed inset-0 animate-up flex items-center">
-        <div className="max-w-[var(--container-page)] mx-auto px-7">
-          <p className="text-body text-ink2 leading-body">
-            karya tidak ditemukan.
-          </p>
-          <Button
-            type="button"
-            variant="secondary"
-            className="mt-6"
-            onClick={() => window.history.back()}
-          >
-            ← balik
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  const membership = karya.viewerMembership;
-  const isOwner = membership?.role === "owner";
-  const isMember = membership?.status === "member";
-  const portraitScreenshots = (karya.screenshots ?? []).filter(
-    (s) => s.orientation === "portrait",
-  );
+  const errorStatus =
+    detail.error instanceof ApiError ? detail.error.status : undefined;
+  const state = karyaDetailState({
+    loading: detail.isLoading,
+    hasData: Boolean(detail.data),
+    errorStatus,
+    failed: detail.isError,
+  });
+  const karya = detail.data;
 
   async function act(fn: () => Promise<unknown>) {
     setBusy(true);
+    setActionError(null);
     try {
       await fn();
-      await refetch();
-    } catch (e) {
-      console.error(e);
+      await detail.refetch();
+    } catch {
+      setActionError("Aksi belum berhasil. Coba lagi.");
     } finally {
       setBusy(false);
     }
@@ -76,254 +58,353 @@ export default function Karya({ id }: { id: string }) {
     const body = postBody.trim();
     if (!body || busy) return;
     setBusy(true);
+    setActionError(null);
     try {
       await createPost(id, { kind: postKind, body });
       setPostBody("");
-      await refetchPosts();
-    } catch (e) {
-      console.error(e);
+      await postsQuery.refetch();
+    } catch {
+      setActionError("Update belum terkirim. Isinya tetap aman—coba lagi.");
     } finally {
       setBusy(false);
     }
   }
 
-  return (
-    <div className="fixed inset-0 animate-up overflow-y-auto">
-      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-10 pb-[80px]">
+  if (state !== "ready" || !karya) {
+    return (
+      <Shell me={me}>
         <button
           type="button"
-          onClick={() => window.history.back()}
-          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0 mb-10 flex items-center gap-1.5"
+          className="mb-6 w-fit border-none bg-transparent p-0 text-ui text-ink2"
+          onClick={() => navigate("/karya")}
         >
-          ← balik
+          ← Kembali ke Karya
         </button>
+        {state === "loading" ? (
+          <div
+            role="status"
+            aria-label="Memuat detail karya"
+            className="space-y-4"
+          >
+            <div className="h-[220px] animate-pulse rounded-panel bg-surface" />
+            <div className="h-9 w-2/3 animate-pulse rounded-card bg-surface" />
+            <div className="h-20 animate-pulse rounded-card bg-surface" />
+          </div>
+        ) : state === "not-found" ? (
+          <div className="rounded-panel border border-line bg-surface px-6 py-10 text-center">
+            <Eyebrow as="div" className="mb-3">
+              404 · Karya tidak ditemukan
+            </Eyebrow>
+            <h1 className="mb-2 mt-0 font-display text-feature font-normal text-ink">
+              Halamannya belum bisa dibuka.
+            </h1>
+            <p className="m-0 text-body leading-body text-ink2">
+              Karya mungkin sudah dihapus atau tautannya tidak lengkap.
+            </p>
+          </div>
+        ) : (
+          <div
+            role="alert"
+            className="rounded-panel border border-line bg-surface px-6 py-10 text-center"
+          >
+            <h1 className="mb-2 mt-0 font-display text-feature font-normal text-ink">
+              Detail karya belum bisa dimuat.
+            </h1>
+            <p className="m-0 text-body leading-body text-ink2">
+              Ada gangguan saat mengambil data karya. Coba lagi.
+            </p>
+            <Button className="mt-5" onClick={() => void detail.refetch()}>
+              Coba lagi
+            </Button>
+          </div>
+        )}
+      </Shell>
+    );
+  }
 
-        <KaryaCover src={karya.coverUrl} size={72} radius={16} />
+  const membership = karya.viewerMembership;
+  const isOwner = membership?.role === "owner";
+  const isMember = membership?.status === "member";
+  const screenshots = orderedScreenshots(karya.screenshots ?? []);
+  const posts = postsQuery.data ?? [];
 
-        <h1 className="text-feature font-light tracking-heading leading-heading mt-4 mb-3">
-          {karya.title}
-        </h1>
+  const rail = (
+    <>
+      {actionError && (
+        <div
+          role="alert"
+          className="rounded-card border border-accent-line bg-accent-tint px-3.5 py-3 text-caption leading-body text-accent"
+        >
+          {actionError}
+        </div>
+      )}
+      {!membership ? (
+        <Button
+          variant="primary"
+          disabled={busy}
+          className="w-full"
+          onClick={() => act(() => joinKarya(id))}
+        >
+          Minta gabung
+        </Button>
+      ) : membership.status === "pending" ? (
+        <Button disabled className="w-full">
+          Menunggu persetujuan
+        </Button>
+      ) : (
+        <p className="m-0 rounded-card border border-line bg-surface px-3.5 py-3 text-caption leading-body text-ink2">
+          {isOwner ? "Kamu pemilik karya ini." : "Kamu anggota karya ini."}
+        </p>
+      )}
 
-        <div className="flex flex-wrap items-center gap-1.5 mb-6">
-          {karya.stages.map((s) => (
-            <Tag key={s} label={STAGE_LABELS[s]} />
+      {karya.viewerIsAdmin && (
+        <Button
+          variant="outline"
+          disabled={busy}
+          className="w-full"
+          onClick={() =>
+            act(() => (karya.featured ? unfeatureKarya(id) : featureKarya(id)))
+          }
+        >
+          {karya.featured ? "Hapus dari unggulan" : "Tandai unggulan"}
+        </Button>
+      )}
+
+      <div className="flex flex-col gap-3 border-t border-line pt-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <Eyebrow as="span">Tahap</Eyebrow>
+          <span className="text-right text-ui text-ink2">
+            {karya.stages.length
+              ? STAGE_LABELS[karya.stages[karya.stages.length - 1]]
+              : "Belum ditentukan"}
+          </span>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <Eyebrow as="span">Tim</Eyebrow>
+          <span className="text-ui text-ink2">{karya.roster.length} orang</span>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <Shell me={me} rail={rail}>
+      <button
+        type="button"
+        onClick={() => navigate("/karya")}
+        className="mb-5 w-fit border-none bg-transparent p-0 text-ui text-ink2"
+      >
+        ← Kembali ke Karya
+      </button>
+
+      {karya.coverUrl ? (
+        <img
+          src={karya.coverUrl}
+          alt={`Sampul ${karya.title}`}
+          className="block h-[220px] w-full rounded-panel border border-line object-cover"
+        />
+      ) : (
+        <div
+          role="img"
+          aria-label={`Belum ada sampul untuk ${karya.title}`}
+          className="flex h-[160px] items-center justify-center rounded-panel border border-line bg-surface"
+        >
+          <span className="font-display text-feature text-ink3">
+            {karya.title.slice(0, 1)}
+          </span>
+        </div>
+      )}
+
+      <div className="mb-2.5 mt-[22px] flex flex-wrap items-center gap-2">
+        {karya.featured && (
+          <Eyebrow as="span" className="text-accent">
+            Unggulan
+          </Eyebrow>
+        )}
+        {karya.stages.map((stage) => (
+          <Eyebrow as="span" key={stage}>
+            {STAGE_LABELS[stage]}
+          </Eyebrow>
+        ))}
+      </div>
+      <h1 className="mb-3 mt-0 font-display text-display font-normal leading-heading tracking-heading text-ink">
+        {karya.title}
+      </h1>
+
+      {karya.roster.length > 0 ? (
+        <div className="mb-4 flex flex-wrap items-center gap-2.5">
+          <div className="flex">
+            {karya.roster.map((member, index) => (
+              <button
+                key={member.id}
+                type="button"
+                aria-label={`Buka profil ${member.name}`}
+                onClick={() => navigate(`/member/${member.id}`)}
+                className="relative border-none bg-transparent p-0"
+                style={{
+                  marginLeft: index === 0 ? 0 : -8,
+                  zIndex: karya.roster.length - index,
+                }}
+              >
+                <Avatar name={member.name} image={member.image} size={30} />
+              </button>
+            ))}
+          </div>
+          <span className="text-ui text-ink2">
+            {karya.roster.map((member) => member.name).join(" · ")}
+          </span>
+        </div>
+      ) : (
+        <p className="mb-4 text-ui text-ink3">Belum ada anggota karya.</p>
+      )}
+
+      <p className="m-0 text-body leading-body text-ink2">
+        {karya.description}
+      </p>
+      <div className="mt-3.5 flex flex-wrap gap-1">
+        {karya.interests.map((interest) => (
+          <Tag key={interest} label={interest} />
+        ))}
+      </div>
+
+      <Eyebrow as="h2" className="mb-3 mt-[34px]">
+        Tangkapan layar
+      </Eyebrow>
+      {screenshots.length === 0 ? (
+        <p className="m-0 rounded-card border border-dashed border-line-dark px-4 py-5 text-body text-ink3">
+          Belum ada tangkapan layar. Update karya tetap bisa dibaca di bawah.
+        </p>
+      ) : (
+        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1.5">
+          {screenshots.map((shot, index) => (
+            <img
+              key={shot.id}
+              src={shot.url}
+              alt={`${karya.title} — layar ${index + 1}`}
+              loading="lazy"
+              className={`shrink-0 snap-start rounded-panel border border-line bg-bg object-cover ${
+                shot.orientation === "portrait"
+                  ? "h-[300px] w-auto"
+                  : "h-[220px] w-[390px]"
+              }`}
+            />
           ))}
         </div>
+      )}
 
-        <p className="text-body text-ink leading-body mb-8">
-          {karya.description}
-        </p>
-
-        {/* Portrait screenshot gallery (issue #19) — no screenshots, no
-            gallery, never an empty slot. */}
-        {portraitScreenshots.length > 0 && (
-          <section
-            className="flex gap-2 overflow-x-auto pb-4 mb-4 snap-x snap-mandatory hide-scrollbar"
-            aria-label={`Tangkapan layar ${karya.title}`}
-          >
-            {portraitScreenshots.map((s, i) => (
-              <img
-                key={s.id}
-                src={s.url}
-                alt={`${karya.title} — tangkapan layar ${i + 1}`}
-                loading="lazy"
-                className="w-[280px] h-[400px] object-cover rounded-panel border border-line snap-center shrink-0"
-              />
-            ))}
-          </section>
-        )}
-
-        {/* CTA driven by viewer membership */}
-        {!membership && (
-          <Button
-            type="button"
-            variant="primary"
-            disabled={busy}
-            onClick={() => act(() => joinKarya(id))}
-            className="w-full justify-center"
-          >
-            Minta gabung
-          </Button>
-        )}
-        {membership?.status === "pending" && (
-          <Button
-            type="button"
-            variant="secondary"
-            disabled
-            className="w-full justify-center opacity-60 cursor-default"
-          >
-            Menunggu persetujuan
-          </Button>
-        )}
-
-        {/* Admin-only feature toggle (S3.12a, DECISION-A). Server is the real
-            authority; this is only shown to allowlisted viewers. */}
-        {karya.viewerIsAdmin && (
-          <button
-            type="button"
-            className={`w-full px-3.5 py-[7px] font-semibold text-ui rounded-card border transition-colors ${
-              karya.featured
-                ? "bg-accent text-bg border-accent"
-                : "bg-accent-tint text-accent border-accent-line hover:bg-accent hover:text-bg hover:border-accent"
-            } disabled:opacity-50 disabled:cursor-not-allowed`}
-            disabled={busy}
-            onClick={() =>
-              act(() =>
-                karya.featured ? unfeatureKarya(id) : featureKarya(id),
-              )
-            }
-          >
-            {karya.featured ? "✦ Hapus dari unggulan" : "✦ Tandai unggulan"}
-          </button>
-        )}
-
-        <hr className="border-none border-b border-line my-8" />
-
-        {karya.interests.length > 0 && (
-          <div className="mb-7">
-            <Eyebrow className="mb-1.5">Minat / tag</Eyebrow>
-            <div className="flex flex-wrap items-center gap-1.5">
-              {karya.interests.map((s) => (
-                <Tag key={s} label={s} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        <div className="mb-7">
-          <Eyebrow className="mb-1.5">
-            Kontributor ({karya.roster.length})
+      {isOwner && karya.pendingRequests.length > 0 && (
+        <section className="mt-[34px]">
+          <Eyebrow as="h2" className="mb-3">
+            Permintaan gabung
           </Eyebrow>
-          <div className="flex flex-wrap gap-2">
-            {karya.roster.map((m) => (
-              <Avatar key={m.id} name={m.name} image={m.image} />
-            ))}
-          </div>
-        </div>
-
-        {/* Owner-only: pending join requests */}
-        {isOwner && karya.pendingRequests.length > 0 && (
-          <div className="mb-7">
-            <Eyebrow className="mb-1.5">Permintaan gabung</Eyebrow>
-            {karya.pendingRequests.map((m) => (
-              <div
-                key={m.id}
-                className="pending-row flex justify-between items-center bg-bg border border-line rounded-card p-3 mb-2"
-              >
-                <div className="flex items-center gap-3 text-body font-medium text-ink">
-                  <Avatar name={m.name} image={m.image} size={28} />
-                  <span>{m.name}</span>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    type="button"
-                    variant="primary"
-                    disabled={busy}
-                    onClick={() => act(() => approveKaryaMember(id, m.id))}
-                  >
-                    Terima
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    disabled={busy}
-                    onClick={() => act(() => declineKaryaMember(id, m.id))}
-                  >
-                    Tolak
-                  </Button>
-                </div>
+          {karya.pendingRequests.map((member) => (
+            <div
+              key={member.id}
+              className="pending-row mb-2 flex items-center justify-between rounded-card border border-line bg-surface p-3"
+            >
+              <div className="flex items-center gap-3 text-body font-medium text-ink">
+                <Avatar name={member.name} image={member.image} size={28} />
+                <span>{member.name}</span>
               </div>
-            ))}
-          </div>
-        )}
-
-        <hr className="border-none border-b border-line my-8" />
-
-        {/* Post stream — Sprint 3 (FR-18/19). Members compose; everyone reads. */}
-        <div className="mb-7">
-          <Eyebrow className="mb-1.5">Update</Eyebrow>
-
-          {isMember && (
-            <div className="composer bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">
-              <div className="flex flex-wrap gap-1.5">
-                {POST_KIND_ORDER.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${k} cursor-pointer transition-opacity hover:opacity-100 ${
-                      postKind === k
-                        ? "opacity-100 ring-2 ring-ink ring-offset-1"
-                        : "opacity-70"
-                    }`}
-                    aria-pressed={postKind === k}
-                    onClick={() => setPostKind(k)}
-                  >
-                    {POST_KIND_LABELS[k]}
-                  </button>
-                ))}
-              </div>
-              <textarea
-                className="composer-input bg-transparent border-none font-body text-body text-ink resize-none outline-none min-h-[60px] placeholder:text-ink3"
-                rows={3}
-                placeholder="bagikan progres, tantangan, atau capaian…"
-                value={postBody}
-                onChange={(e) => setPostBody(e.target.value)}
-              />
-              <div className="flex justify-end">
+              <div className="flex gap-2">
                 <Button
-                  type="button"
                   variant="primary"
-                  disabled={busy || !postBody.trim()}
-                  onClick={submitPost}
+                  disabled={busy}
+                  onClick={() => act(() => approveKaryaMember(id, member.id))}
                 >
-                  Posting
+                  Terima
+                </Button>
+                <Button
+                  disabled={busy}
+                  onClick={() => act(() => declineKaryaMember(id, member.id))}
+                >
+                  Tolak
                 </Button>
               </div>
             </div>
-          )}
+          ))}
+        </section>
+      )}
 
-          {posts.length === 0 ? (
-            <p className="font-mono text-ui text-ink3 py-5">
-              belum ada update.
-            </p>
-          ) : (
-            <div className="flex flex-col gap-3">
-              {posts.map((p) => (
-                <article
-                  key={p.id}
-                  className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
-                >
-                  <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-2">
-                      <Avatar
-                        name={p.author.name}
-                        image={p.author.image}
-                        size={28}
-                      />
-                      <span className="text-ui font-medium text-ink">
-                        {p.author.name}
-                      </span>
-                    </div>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${p.kind}`}
-                    >
-                      {POST_KIND_LABELS[p.kind]}
-                    </span>
-                  </div>
-                  <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
-                    {p.body}
-                  </p>
-                  <div className="flex justify-end">
-                    <span className="text-micro text-ink3">
-                      {timeAgo(p.createdAt)}
-                    </span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          )}
+      <Eyebrow as="h2" className="mb-3 mt-[34px]">
+        Update terbaru
+      </Eyebrow>
+      {isMember && (
+        <div className="composer mb-5 flex flex-col gap-3 rounded-panel border border-line bg-surface p-4 focus-within:border-accent-line">
+          <div className="flex flex-wrap gap-1.5">
+            {POST_KIND_ORDER.map((kind) => (
+              <button
+                key={kind}
+                type="button"
+                aria-pressed={postKind === kind}
+                onClick={() => setPostKind(kind)}
+                className={`kind-${kind} rounded-[4px] px-2 py-0.5 text-micro font-semibold uppercase tracking-tag ${postKind === kind ? "opacity-100 ring-2 ring-ink ring-offset-1" : "opacity-70"}`}
+              >
+                {POST_KIND_LABELS[kind]}
+              </button>
+            ))}
+          </div>
+          <textarea
+            className="composer-input min-h-[60px] resize-none border-none bg-transparent text-body text-ink outline-none placeholder:text-ink3"
+            rows={3}
+            placeholder="Bagikan progres, tantangan, atau capaian…"
+            value={postBody}
+            onChange={(event) => setPostBody(event.target.value)}
+          />
+          <div className="flex justify-end">
+            <Button
+              variant="primary"
+              disabled={busy || !postBody.trim()}
+              onClick={submitPost}
+            >
+              Posting
+            </Button>
+          </div>
         </div>
-      </div>
-    </div>
+      )}
+
+      {postsQuery.isLoading ? (
+        <p role="status" className="py-5 text-ui text-ink3">
+          Memuat update…
+        </p>
+      ) : postsQuery.isError ? (
+        <div role="alert" className="rounded-card border border-line p-4">
+          <p className="m-0 text-body text-ink2">Update belum bisa dimuat.</p>
+          <Button className="mt-3" onClick={() => void postsQuery.refetch()}>
+            Coba lagi
+          </Button>
+        </div>
+      ) : posts.length === 0 ? (
+        <p className="rounded-card border border-dashed border-line-dark px-4 py-5 text-body text-ink3">
+          Belum ada update dari tim karya ini.
+        </p>
+      ) : (
+        <div className="flex flex-col">
+          {posts.map((post) => (
+            <article
+              key={post.id}
+              className="post-card border-t border-line py-4"
+            >
+              <div className="mb-2 flex items-center gap-2">
+                <Avatar
+                  name={post.author.name}
+                  image={post.author.image}
+                  size={28}
+                />
+                <span className="text-ui font-medium text-ink">
+                  {post.author.name}
+                </span>
+                <span className="ml-auto text-micro text-ink3">
+                  {timeAgo(post.createdAt)}
+                </span>
+              </div>
+              <p className="m-0 whitespace-pre-wrap text-body leading-body text-ink">
+                {post.body}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
+    </Shell>
   );
 }
