@@ -4,19 +4,6 @@ import { authed, expect } from "./fixtures";
 // (handle/bio/interests — no building/wants/vibe), the draft survives a reload
 // on /review, and publishing sends only the new model to the API.
 
-const SEED_MEMBERS = [
-  {
-    id: "seed_m1",
-    name: "Hafiz Maulana",
-    handle: "hafiz",
-    bio: "Bikin tool sinkronisasi file peer-to-peer.",
-    interests: ["Distributed Systems"],
-    year: "Tingkat 2",
-    major: "Informatika",
-    skills: ["Go", "Rust"],
-  },
-];
-
 const DRAFT = {
   id: "user",
   name: "Budi Santoso",
@@ -32,31 +19,19 @@ authed(
   "onboarding review → edit → publish → reload persists, new model only",
   async ({ page }) => {
     let savedProfile: Record<string, unknown> | null = null;
+    let matchRequests = 0;
+    page.on("request", (request) => {
+      if (new URL(request.url()).pathname === "/api/matches")
+        matchRequests += 1;
+    });
 
     await page.route("**/api/me", (route) =>
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: "null",
-      }),
-    );
-    await page.route("**/api/members", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(SEED_MEMBERS),
-      }),
-    );
-    await page.route("**/api/ai/complete", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          text: JSON.stringify([
-            { memberId: "seed_m1", reason: "sama-sama suka bikin produk" },
-            { memberId: "seed_ghost", reason: "harusnya di-drop" },
-          ]),
-        }),
+        body: savedProfile
+          ? JSON.stringify({ id: "test-user-id", ...savedProfile })
+          : "null",
       }),
     );
     await page.route("**/api/profile", async (route) => {
@@ -67,17 +42,28 @@ authed(
         body: JSON.stringify({ ok: true }),
       });
     });
-    await page.route("**/api/matches", (route) =>
+    await page.route("**/api/feed", (route) =>
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ok: true }),
+        body: "[]",
+      }),
+    );
+    await page.route("**/api/members", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "[]",
       }),
     );
 
     // Seed the in-progress draft the way OnboardingProvider persists it.
     await page.addInitScript((draft) => {
       sessionStorage.setItem("onboarding:draft", JSON.stringify(draft));
+      sessionStorage.setItem(
+        "onboarding:matches",
+        JSON.stringify([{ id: "legacy" }]),
+      );
     }, DRAFT);
 
     await page.goto("/review");
@@ -112,7 +98,17 @@ authed(
 
     await page.getByRole("button", { name: /Publish profil/ }).click();
 
-    await expect(page).toHaveURL(/\/matches/);
+    await expect(page).toHaveURL(/\/home/);
+    await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
+    expect(matchRequests).toBe(0);
+    expect(
+      await page.evaluate(() => sessionStorage.getItem("onboarding:matches")),
+    ).toBeNull();
+
+    // The old result URL is now just an unmatched route and falls back to P0.
+    await page.goto("/matches");
+    await expect(page).not.toHaveURL(/\/matches/);
+    await expect(page.getByText(/Tiga orang yang/)).toHaveCount(0);
 
     // The published payload is the PRD model — no legacy fields.
     expect(savedProfile).not.toBeNull();

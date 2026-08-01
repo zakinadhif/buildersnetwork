@@ -9,7 +9,7 @@ const appUrl = import.meta.env.PUBLIC_APP_URL || "http://localhost:5173";
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Al-Fath Berkarya — Komunitas Builder Telkom University</title>
-    <meta name="description" content="Platform komunitas untuk builder mahasiswa Telkom University. Kenalan lewat AI, dapat match, temukan kolaborator." />
+    <meta name="description" content="Platform komunitas untuk builder mahasiswa Telkom University. Bagikan karya, ikuti progres, dan temukan builder lain." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
@@ -226,16 +226,6 @@ const appUrl = import.meta.env.PUBLIC_APP_URL || "http://localhost:5173";
         padding: 2px 8px; background: var(--bg);
       }
 
-      /* ── Match cards (03) ─────────────────────── */
-      .matches { display: flex; flex-direction: column; gap: 10px; }
-      .mc {
-        border: 1px solid var(--line); border-radius: 8px;
-        padding: 18px 22px; background: rgba(255, 255, 255, 0.44);
-      }
-      .m-name { font-size: 14px; font-weight: 700; letter-spacing: -0.01em; margin-bottom: 2px; }
-      .m-meta { font-size: 11px; font-family: var(--mono); color: var(--ink3); margin-bottom: 6px; }
-      .m-why  { font-size: 12.5px; line-height: 1.6; color: var(--ink2); font-style: italic; }
-
       /* ── Discovery (04) ───────────────────────── */
       .disc {
         border: 1px solid var(--line); border-radius: 8px;
@@ -408,40 +398,10 @@ const appUrl = import.meta.env.PUBLIC_APP_URL || "http://localhost:5173";
         </div>
       </section>
 
-      <!-- 03 — Match -->
-      <section class="feature">
-        <div>
-          <p class="fn fi">03 — match</p>
-          <h2 class="fh fi d1">Tiga orang yang perlu<br />kamu kenal.</h2>
-          <p class="fs fi d2">
-            Begitu profilmu masuk, AI langsung nyariin tiga anggota yang paling nyambung — berdasarkan skill, proyek, dan vibe kerja.
-          </p>
-        </div>
-        <div class="fv">
-          <div class="matches">
-            <div class="mc fi d1">
-              <p class="m-name">Dina Kusumawati</p>
-              <p class="m-meta">Tingkat 3 · Informatika</p>
-              <p class="m-why">"juga lagi bangun platform edukasi AI — bisa saling isi celah."</p>
-            </div>
-            <div class="mc fi d2">
-              <p class="m-name">Bima Ardiansyah</p>
-              <p class="m-meta">Tingkat 4 · Teknik Elektro</p>
-              <p class="m-why">"jago hardware dan embedded — pas banget sama minat IoT kamu."</p>
-            </div>
-            <div class="mc fi d3">
-              <p class="m-name">Nadia Permata</p>
-              <p class="m-meta">Tingkat 2 · Informatika</p>
-              <p class="m-why">"backend-heavy, suka pair dan review kode — vibe cocok."</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- 04 — Community (visual left) -->
+      <!-- 03 — Community (visual left) -->
       <section class="feature rev">
         <div>
-          <p class="fn fi">04 — komunitas</p>
+          <p class="fn fi">03 — komunitas</p>
           <h2 class="fh fi d1">Tanya langsung.<br />Temukan siapa aja.</h2>
           <p class="fs fi d2">
             Punya kebutuhan spesifik? Tanya AI komunitas — "siapa yang lagi kerja di ML?" — dapat rekomendasi dalam hitungan detik.
