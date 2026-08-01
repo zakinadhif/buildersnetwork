@@ -1,18 +1,76 @@
 import { getGetMeQueryKey, saveProfile } from "@myapp/api-client-react";
-import { Button } from "@myapp/ui";
+import { Avatar, Button, Eyebrow, Input, Textarea } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Eyebrow, Loading } from "@/components/ui-atoms";
+import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
 
-/**
- * The minimal-profile start (issue #8, grooming decision 2: a quick one-field
- * form, not an auto-stub). A newly-verified member with no profile gives just a
- * display name, which creates a minimal profile so the app renders without a
- * null-profile crash — then lands straight in the Launchpad shell. Everything
- * else (bio, skills, interests) is enriched later via inline edit or the AI
- * assistant tab. This replaces the old obligatory `/onboarding` chat gate.
- */
+const SKILLS = ["React", "Figma", "Python", "UI/UX", "Product", "Data"];
+const INTERESTS = [
+  "Web",
+  "Mobile",
+  "AI/ML",
+  "Edukasi",
+  "Komunitas",
+  "Open Source",
+];
+
+function suggestedHandle(name: string) {
+  return name
+    .trim()
+    .toLowerCase()
+    .normalize("NFKD")
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 24);
+}
+
+function ChoicePills({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <fieldset className="min-w-0 border-0 p-0">
+      <Eyebrow as="legend" className="mb-2">
+        {label}
+      </Eyebrow>
+      <div className="flex flex-wrap gap-1.5">
+        {options.map((option) => {
+          const active = selected.includes(option);
+          return (
+            <button
+              key={option}
+              type="button"
+              aria-pressed={active}
+              onClick={() =>
+                onChange(
+                  active
+                    ? selected.filter((item) => item !== option)
+                    : [...selected, option],
+                )
+              }
+              className={`rounded-full border px-3 py-1.5 text-ui transition-colors ${
+                active
+                  ? "border-ink bg-ink text-bg"
+                  : "border-line bg-bg text-ink2 hover:border-line-dark hover:text-ink"
+              }`}
+            >
+              {option}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}
+
 export default function MinimalStart({
   defaultName = "",
 }: {
@@ -21,62 +79,200 @@ export default function MinimalStart({
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(defaultName);
-  const [busy, setBusy] = useState(false);
+  const [handle, setHandle] = useState(() => suggestedHandle(defaultName));
+  const [major, setMajor] = useState("");
+  const [year, setYear] = useState("");
+  const [bio, setBio] = useState("");
+  const [skills, setSkills] = useState<string[]>([]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [busyDestination, setBusyDestination] = useState<
+    "/home" | "/assistant" | null
+  >(null);
+  const [error, setError] = useState<string | null>(null);
 
-  async function begin() {
-    const trimmed = name.trim();
-    if (!trimmed || busy) return;
-    setBusy(true);
+  const invalid = !name.trim() || handle.trim().length < 3 || !major || !year;
+
+  async function save(destination: "/home" | "/assistant") {
+    if (invalid || busyDestination) return;
+    setBusyDestination(destination);
+    setError(null);
     try {
-      // year/major are NOT NULL text; empty strings satisfy the column and are
-      // filled in later. skills defaults to [] server-side.
-      await saveProfile({ name: trimmed, year: "", major: "", skills: [] });
+      await saveProfile({
+        name: name.trim(),
+        handle: handle.trim(),
+        bio: bio.trim(),
+        year,
+        major,
+        skills,
+        interests,
+      });
       await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
-      navigate("/home");
-    } catch (e) {
-      console.error(e);
-      setBusy(false);
+      navigate(destination);
+    } catch {
+      setError("Profil belum tersimpan. Isianmu tetap aman—coba lagi.");
+      setBusyDestination(null);
     }
   }
 
-  if (busy) return <Loading label="lagi nyiapin ruangmu" />;
-
   return (
-    <div className="fixed inset-0 animate-up overflow-y-auto">
-      <div className="max-w-[440px] mx-auto px-7 py-[72px]">
-        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
-        <h1 className="text-feature font-light tracking-heading leading-heading">
-          Sebelum masuk — panggil kamu siapa?
-        </h1>
-        <p className="text-body text-ink2 leading-body mt-2">
-          Cukup ini dulu. Sisanya bisa kamu lengkapi kapan aja — sendiri atau
-          ngobrol sama asisten.
-        </p>
+    <EntryLayout
+      eyebrow="Siapkan profil"
+      title="Biar builder lain tahu siapa kamu."
+      description="Isi identitas, keahlian, dan hal yang ingin kamu eksplorasi. Semuanya bisa disunting lagi dari Profil Saya."
+      wide
+    >
+      {error && <EntryAlert>{error}</EntryAlert>}
 
-        <input
-          className="w-full bg-transparent border-none border-b-2 border-ink font-body text-feature font-light tracking-heading text-ink outline-none py-1.5 my-5 mb-2 placeholder:text-ink3"
-          placeholder="nama kamu"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") begin();
-          }}
-          // biome-ignore lint/a11y/noAutofocus: single-field entry screen
-          autoFocus
-          aria-label="Nama kamu"
-        />
-
-        <div className="flex justify-end gap-3 mt-6">
-          <Button
-            type="button"
-            variant="primary"
-            onClick={begin}
-            disabled={!name.trim()}
-          >
-            Masuk ke Launchpad →
-          </Button>
+      <div className="grid gap-5 rounded-panel border border-line bg-surface p-5 sm:grid-cols-2">
+        <div className="flex items-center gap-4 sm:col-span-2">
+          <Avatar name={name || "Profil"} size={64} />
+          <div>
+            <Eyebrow as="div" className="mb-1.5">
+              Foto profil · opsional
+            </Eyebrow>
+            <p className="m-0 text-caption leading-body text-ink3">
+              Kamu bisa menambahkan foto nanti dari Profil Saya.
+            </p>
+          </div>
         </div>
+
+        <label htmlFor="profile-name">
+          <Eyebrow as="span" className="mb-1.5 block">
+            Nama
+          </Eyebrow>
+          <Input
+            id="profile-name"
+            aria-label="Nama"
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            autoFocus
+          />
+          {!name.trim() && (
+            <span className="mt-1.5 block text-micro text-accent">
+              Nama perlu diisi.
+            </span>
+          )}
+        </label>
+
+        <label>
+          <Eyebrow as="span" className="mb-1.5 block">
+            Handle
+          </Eyebrow>
+          <div className="flex rounded-card border border-line bg-bg focus-within:ring-2 focus-within:ring-accent">
+            <span className="px-3 py-2.5 text-body text-ink3">@</span>
+            <input
+              aria-label="Handle"
+              value={handle}
+              onChange={(event) =>
+                setHandle(
+                  event.target.value
+                    .toLowerCase()
+                    .replace(/[^a-z0-9_]/g, "")
+                    .slice(0, 24),
+                )
+              }
+              className="min-w-0 flex-1 border-none bg-transparent py-2.5 pr-3 text-body text-ink outline-none"
+            />
+          </div>
+          {handle.trim().length < 3 && (
+            <span className="mt-1.5 block text-micro text-accent">
+              Minimal 3 karakter.
+            </span>
+          )}
+        </label>
+
+        <label>
+          <Eyebrow as="span" className="mb-1.5 block">
+            Program studi
+          </Eyebrow>
+          <select
+            aria-label="Program studi"
+            value={major}
+            onChange={(event) => setMajor(event.target.value)}
+            className="h-[42px] w-full rounded-card border border-line bg-bg px-3 text-body text-ink outline-none focus:ring-2 focus:ring-accent"
+          >
+            <option value="">Pilih program studi</option>
+            <option value="Teknik Informatika">S1 Teknik Informatika</option>
+            <option value="Sistem Informasi">S1 Sistem Informasi</option>
+            <option value="Desain Komunikasi Visual">
+              S1 Desain Komunikasi Visual
+            </option>
+          </select>
+        </label>
+
+        <label>
+          <Eyebrow as="span" className="mb-1.5 block">
+            Angkatan
+          </Eyebrow>
+          <select
+            aria-label="Angkatan"
+            value={year}
+            onChange={(event) => setYear(event.target.value)}
+            className="h-[42px] w-full rounded-card border border-line bg-bg px-3 text-body text-ink outline-none focus:ring-2 focus:ring-accent"
+          >
+            <option value="">Pilih angkatan</option>
+            <option value="2025">2025</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+            <option value="2022">2022</option>
+          </select>
+        </label>
+
+        <label htmlFor="profile-bio" className="sm:col-span-2">
+          <Eyebrow as="span" className="mb-1.5 block">
+            Tentang kamu · opsional
+          </Eyebrow>
+          <Textarea
+            id="profile-bio"
+            aria-label="Tentang kamu"
+            value={bio}
+            onChange={(event) => setBio(event.target.value)}
+            rows={3}
+            maxLength={180}
+            className="resize-none bg-bg"
+          />
+          <span className="mt-1 block text-right text-micro text-ink3">
+            {bio.length}/180
+          </span>
+        </label>
+
+        <ChoicePills
+          label="Keahlian · opsional"
+          options={SKILLS}
+          selected={skills}
+          onChange={setSkills}
+        />
+        <ChoicePills
+          label="Minat · opsional"
+          options={INTERESTS}
+          selected={interests}
+          onChange={setInterests}
+        />
       </div>
-    </div>
+
+      <div className="mt-5 flex flex-col-reverse items-stretch justify-between gap-3 sm:flex-row sm:items-center">
+        <Button
+          variant="ghost"
+          size="lg"
+          disabled={invalid || busyDestination !== null}
+          onClick={() => save("/assistant")}
+        >
+          {busyDestination === "/assistant"
+            ? "Menyimpan profil…"
+            : "Simpan, lalu buka asisten AI"}
+        </Button>
+        <Button
+          size="lg"
+          disabled={invalid || busyDestination !== null}
+          onClick={() => save("/home")}
+          className="bg-ink text-bg hover:bg-ink/90"
+        >
+          {busyDestination === "/home" ? "Menyimpan profil…" : "Simpan & masuk"}
+        </Button>
+      </div>
+      <p className="mt-3 text-right text-caption leading-body text-ink3">
+        Asisten AI bersifat opsional; kamu selalu bisa langsung masuk ke Scroll.
+      </p>
+    </EntryLayout>
   );
 }

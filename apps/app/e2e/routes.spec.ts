@@ -55,7 +55,7 @@ unauthed(
     // The catch-all bounces off the bogus path back to the app root (whence an
     // unauthenticated viewer continues toward /welcome) — never stranded on it.
     await expect(page).not.toHaveURL(/does-not-exist/);
-    await expect(page).toHaveURL(/localhost:5173\/(welcome)?$/);
+    expect(new URL(page.url()).pathname).toMatch(/^\/(welcome)?$/);
   },
 );
 

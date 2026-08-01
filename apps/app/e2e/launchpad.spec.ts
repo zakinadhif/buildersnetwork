@@ -1,10 +1,9 @@
 import type { Page } from "@playwright/test";
 import { authed, expect } from "./fixtures";
 
-// Exit criterion for the Launchpad milestone (issue #8): a new verified member
-// (no profile) lands on the Launchpad home *inside the shell* without being
-// forced through the AI chat; opens the optional AI assistant tool, runs one
-// turn, applies the extracted draft, and the profile updates. Feed/featured mocked.
+// Exit criterion for the Launchpad milestone: a new verified member completes
+// the bounded profile form, lands in the shell without an AI gate, and can still
+// opt into the assistant later. Feed/featured are mocked.
 
 /** Stateful profile: null until the minimal-start (or assistant) saves one. */
 function profileState(page: Page) {
@@ -54,7 +53,7 @@ async function mockFeed(page: Page) {
 }
 
 authed(
-  "new member: minimal start → Launchpad shell (no forced chat) → AI tab enriches profile",
+  "new member: profile setup → Launchpad shell (no forced chat) → AI tab enriches profile",
   async ({ page }) => {
     const state = profileState(page);
     await mockFeed(page);
@@ -91,10 +90,15 @@ authed(
     await expect(page).toHaveURL(/\/mulai/);
     await expect(page).not.toHaveURL(/\/onboarding/);
 
-    // 2) One field → into the Launchpad shell.
-    const nameField = page.getByLabel("Nama kamu");
+    // 2) The ratified bounded form → into the Launchpad shell.
+    const nameField = page.getByLabel("Nama", { exact: true });
     await expect(nameField).toHaveValue("Test User"); // prefilled from auth
-    await page.getByRole("button", { name: /Masuk ke Launchpad/ }).click();
+    await expect(page.getByLabel("Handle")).toHaveValue("test_user");
+    await page.getByLabel("Program studi").selectOption("Teknik Informatika");
+    await page.getByLabel("Angkatan").selectOption("2023");
+    await page.getByRole("button", { name: "React" }).click();
+    await page.getByRole("button", { name: "Komunitas" }).click();
+    await page.getByRole("button", { name: "Simpan & masuk" }).click();
 
     await expect(page).toHaveURL(/\/home/);
     await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
