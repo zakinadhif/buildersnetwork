@@ -7,8 +7,9 @@
  * frame. The center column is the reading surface (cover, roster, stages,
  * screenshot gallery, update stream); the sticky right rail carries the actions.
  *
- * A role toggle previews the owner affordances (tulis kabar, feature, kelola tim)
- * vs. the visitor's (gabung, apresiasi) — grounding #35's owner controls.
+ * A floating review pane previews the owner affordances (tulis kabar, feature,
+ * kelola tim) vs. the visitor's read-only P0 view, plus loading, no-media, and
+ * not-found states. Review controls never occupy the product columns.
  *
  * The composer at the stream's head is the shared one now (components/Composer),
  * handed this karya. It replaces a local box that led with a person's avatar and
@@ -16,13 +17,14 @@
  * quietly drifted: it carried its own `Kind` vocabulary, offering "Milestone" and
  * "Butuh bantuan" where updates.ts said "tonggak" and "ajakan", with no "riset" at
  * all. Two composers, two vocabularies, and nothing forcing them to agree. The
- * `KIND` map below still displays the old names on the seeded stream, so it has
- * the same drift left in it.
+ * P0 updates are body-only, so the seeded stream deliberately carries no
+ * headline or kind chip.
  */
 
 import { useState } from "react";
-import { Avatar, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
+import { Avatar, KaryaCover, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Composer } from "../components/Composer";
+import { PreviewStates } from "../components/PreviewStates";
 import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
 import { coverFor, screenshots } from "../lib/images";
@@ -31,32 +33,41 @@ import { Eyebrow } from "@myapp/ui";
 
 const KARYA_ITEM = KARYA[0]; // KampusKerja — featured, two-person roster
 
-type Kind = "launch" | "milestone" | "progress" | "ask";
-const KIND: Record<Kind, { label: string; tint: boolean }> = {
-  launch: { label: "Rilis", tint: true },
-  milestone: { label: "Milestone", tint: true },
-  progress: { label: "Progres", tint: false },
-  ask: { label: "Butuh bantuan", tint: false },
-};
-
-const POSTS: { id: number; author: string; kind: Kind; body: string; hoursAgo: number }[] = [
-  { id: 1, author: "Arief Maulana", kind: "launch", body: "Beta terbuka udah live! Mahasiswa Telkom bisa daftar & lihat lowongan magang dari alumni. Makasih yang udah nyoba versi awal 🙏", hoursAgo: 5 },
-  { id: 2, author: "Siti Rahmah", kind: "progress", body: "Rombak alur onboarding — sekarang cuma 2 langkah sebelum lihat lowongan pertama. Data awal: drop-off turun jauh.", hoursAgo: 22 },
-  { id: 3, author: "Arief Maulana", kind: "ask", body: "Lagi cari 1 orang yang kuat di data scraping buat sinkronisasi lowongan otomatis. Kalau tertarik, colek ya.", hoursAgo: 50 },
+const POSTS: { id: number; author: string; body: string; hoursAgo: number }[] = [
+  { id: 1, author: "Arief Maulana", body: "Beta terbuka udah live! Mahasiswa Telkom bisa daftar & lihat lowongan magang dari alumni. Makasih yang udah nyoba versi awal 🙏", hoursAgo: 5 },
+  { id: 2, author: "Siti Rahmah", body: "Rombak alur onboarding — sekarang cuma 2 langkah sebelum lihat lowongan pertama. Data awal: drop-off turun jauh.", hoursAgo: 22 },
+  { id: 3, author: "Arief Maulana", body: "Lagi cari 1 orang yang kuat di data scraping buat sinkronisasi lowongan otomatis. Kalau tertarik, colek ya.", hoursAgo: 50 },
 ];
 
-// ─── Kind chip ───────────────────────────────────────────────────────────────
-function KindChip({ kind }: { kind: Kind }) {
-  const k = KIND[kind];
+function KaryaUpdatePost({
+  author,
+  body,
+  hoursAgo,
+}: {
+  author: string;
+  body: string;
+  hoursAgo: number;
+}) {
+  const cover = coverFor(KARYA_ITEM.interests);
+
   return (
-    <span className={cn(
-      "rounded-full border px-[9px] py-[2px] font-body text-micro font-medium tracking-tag uppercase",
-      k.tint
-        ? "border-accent-line bg-accent-tint text-accent"
-        : "border-line bg-transparent text-ink3",
-    )}>
-      {k.label}
-    </span>
+    <article className="bn-post flex gap-3.5 border-b border-line py-[18px]">
+      <div className="relative size-12 shrink-0">
+        <KaryaCover src={cover} size={46} radius={13} alt={`Logo ${KARYA_ITEM.title}`} />
+        <span className="absolute -bottom-1.5 -right-1.5 rounded-full bg-surface leading-none shadow-[0_0_0_2px_var(--color-surface)]">
+          <Avatar name={author} size={17} />
+        </span>
+      </div>
+      <div className="min-w-0 flex-1">
+        <div className="font-display text-title font-normal leading-heading text-ink">
+          {KARYA_ITEM.title}
+        </div>
+        <div className="mt-px font-body text-micro text-ink3">
+          diposting {author} · {relativeTime(hoursAgo)}
+        </div>
+        <p className="mt-2.5 font-body text-body leading-body text-ink2">{body}</p>
+      </div>
+    </article>
   );
 }
 
@@ -89,10 +100,9 @@ function RailActions({ owner, featured, onToggleFeatured }: {
           <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">Sunting</button>
         </>
       ) : (
-        <>
-          <button type="button" className="w-full cursor-pointer rounded-card border-none bg-ink px-4 py-[9px] text-center font-body text-ui font-medium text-bg">Gabung karya →</button>
-          <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">♡ Apresiasi · {KARYA_ITEM.appreciations}</button>
-        </>
+        <p className="m-0 rounded-card border border-line bg-surface px-3.5 py-3 font-body text-caption leading-body text-ink2">
+          Karya ini dibagikan untuk dilihat komunitas. Aksi kolaborasi hadir pada milestone P1.
+        </p>
       )}
     </div>
   );
@@ -127,7 +137,53 @@ function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boo
 export default function KaryaDetailScreen() {
   const [owner, setOwner] = useState(true);
   const [featured, setFeatured] = useState(!!KARYA_ITEM.featured);
+  const [detailState, setDetailState] = useState<"ready" | "no-media" | "loading" | "not-found">("ready");
   const k = KARYA_ITEM;
+
+  if (detailState === "loading" || detailState === "not-found") {
+    return (
+      <Shell active="karya-detail">
+        <MainColumn>
+          <button type="button" className="mb-6 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">
+            ← Balik
+          </button>
+          {detailState === "loading" ? (
+            <div role="status" className="space-y-4">
+              <div className="h-[220px] animate-pulse rounded-panel bg-surface" />
+              <div className="h-9 w-2/3 animate-pulse rounded-card bg-surface" />
+              <div className="h-20 animate-pulse rounded-card bg-surface" />
+            </div>
+          ) : (
+            <div className="rounded-panel border border-line bg-surface px-6 py-10 text-center">
+              <Eyebrow as="div" className="mb-3">404 · Karya tidak ditemukan</Eyebrow>
+              <h1 className="mb-2 mt-0 font-display text-feature font-normal text-ink">
+                Halamannya belum bisa dibuka.
+              </h1>
+              <p className="m-0 font-body text-body leading-body text-ink2">
+                Karya mungkin sudah dihapus atau tautannya tidak lengkap. Kembali ke katalog untuk mencari yang lain.
+              </p>
+            </div>
+          )}
+        </MainColumn>
+        <RailColumn>
+          <PreviewStates
+            label="State halaman"
+            value={detailState}
+            onChange={setDetailState}
+            options={[
+              { value: "ready", label: "Lengkap" },
+              { value: "no-media", label: "Tanpa media" },
+              { value: "loading", label: "Loading" },
+              { value: "not-found", label: "404" },
+            ]}
+          >
+            <Eyebrow as="div" className="mb-2">Peran</Eyebrow>
+            <RoleToggle owner={owner} onChange={setOwner} />
+          </PreviewStates>
+        </RailColumn>
+      </Shell>
+    );
+  }
 
   return (
     <Shell active="karya-detail">
@@ -139,15 +195,21 @@ export default function KaryaDetailScreen() {
         </button>
 
         {/* Cover */}
-        <img
-          src={coverFor(k.interests)}
-          alt={k.title}
-          className="block h-[220px] w-full rounded-panel border border-line object-cover"
-        />
+        {detailState === "no-media" ? (
+          <div className="flex h-[160px] items-center justify-center rounded-panel border border-line bg-surface">
+            <span className="font-display text-feature text-ink3">{k.title.slice(0, 1)}</span>
+          </div>
+        ) : (
+          <img
+            src={coverFor(k.interests)}
+            alt={k.title}
+            className="block h-[220px] w-full rounded-panel border border-line object-cover"
+          />
+        )}
 
         {/* Title block */}
         <div className="my-[22px] mb-2.5 flex flex-wrap items-center gap-2">
-          {featured && <KindChip kind="launch" />}
+          {featured && <Eyebrow as="span" className="!text-accent">Unggulan</Eyebrow>}
           {k.stages.map((s) => <Eyebrow as="span" key={s}>{s}</Eyebrow>)}
         </div>
         <h1 className="mb-3 mt-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
@@ -178,20 +240,26 @@ export default function KaryaDetailScreen() {
 
         {/* Screenshots */}
         <Eyebrow className="mb-3 mt-[34px]">Tangkapan layar</Eyebrow>
-        <div
-          className="flex gap-3 overflow-x-auto pb-1.5"
-          style={{ scrollSnapType: "x mandatory" }}
-        >
-          {screenshots.map((src, i) => (
-            <img
-              key={src}
-              src={src}
-              alt={`${k.title} — layar ${i + 1}`}
-              className="h-[300px] w-auto shrink-0 rounded-[14px] border border-line bg-bg"
-              style={{ scrollSnapAlign: "start" }}
-            />
-          ))}
-        </div>
+        {detailState === "no-media" ? (
+          <p className="m-0 rounded-card border border-dashed border-line-dark px-4 py-5 font-body text-body text-ink3">
+            Belum ada tangkapan layar. Update karya tetap bisa dibaca di bawah.
+          </p>
+        ) : (
+          <div
+            className="flex gap-3 overflow-x-auto pb-1.5"
+            style={{ scrollSnapType: "x mandatory" }}
+          >
+            {screenshots.map((src, i) => (
+              <img
+                key={src}
+                src={src}
+                alt={`${k.title} — layar ${i + 1}`}
+                className="h-[300px] w-auto shrink-0 rounded-[14px] border border-line bg-bg"
+                style={{ scrollSnapAlign: "start" }}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Update stream. The composer sits at its head, where the old one did:
             this stream is the karya's progress log, and writing a kabar is adding
@@ -205,23 +273,27 @@ export default function KaryaDetailScreen() {
         )}
         <div className="flex flex-col">
           {POSTS.map((p) => (
-            <article key={p.id} className="border-t border-line py-4">
-              <div className="mb-2 flex items-center gap-2.5">
-                <Avatar name={p.author} size={28} />
-                <span className="font-body text-ui font-medium text-ink">{p.author}</span>
-                <KindChip kind={p.kind} />
-                <span className="ml-auto font-body text-micro text-ink3">{relativeTime(p.hoursAgo)}</span>
-              </div>
-              <p className="m-0 font-body text-body leading-body text-ink2">{p.body}</p>
-            </article>
+            <KaryaUpdatePost key={p.id} author={p.author} body={p.body} hoursAgo={p.hoursAgo} />
           ))}
         </div>
       </MainColumn>
 
       {/* Action rail */}
       <RailColumn className="flex flex-col gap-5">
-        {/* Role toggle — gallery affordance to preview both viewer states */}
-        <RoleToggle owner={owner} onChange={setOwner} />
+        <PreviewStates
+          label="State halaman"
+          value={detailState}
+          onChange={setDetailState}
+          options={[
+            { value: "ready", label: "Lengkap" },
+            { value: "no-media", label: "Tanpa media" },
+            { value: "loading", label: "Loading" },
+            { value: "not-found", label: "404" },
+          ]}
+        >
+          <Eyebrow as="div" className="mb-2">Peran</Eyebrow>
+          <RoleToggle owner={owner} onChange={setOwner} />
+        </PreviewStates>
 
         <RailActions owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
 
@@ -234,10 +306,6 @@ export default function KaryaDetailScreen() {
           <div className="flex items-baseline justify-between">
             <Eyebrow as="span">Tim</Eyebrow>
             <span className="font-body text-ui text-ink2">{k.roster.length} orang</span>
-          </div>
-          <div className="flex items-baseline justify-between">
-            <Eyebrow as="span">Apresiasi</Eyebrow>
-            <span className="font-body text-ui text-accent-mid">♥ {k.appreciations}</span>
           </div>
         </div>
       </RailColumn>

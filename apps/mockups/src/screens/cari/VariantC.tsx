@@ -70,7 +70,7 @@ function HackathonBanner({ onDismiss }: { onDismiss: () => void }) {
         </div>
         <div className="flex flex-wrap gap-2">
           <button className="cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-3.5 py-[7px] font-body text-ui font-semibold text-accent-fg">
-            Lihat Tim GEMASTIK →
+            Lihat Tim GEMASTIK
           </button>
           <button
             onClick={onDismiss}
@@ -431,7 +431,7 @@ function ZakiRail({ lookingFor, onChangeLookingFor }: {
 
       {/* Edit CTA */}
       <button className="cursor-pointer rounded-card border border-line bg-none px-3.5 py-2 text-center font-body text-ui text-ink2">
-        Edit profil &amp; keahlian →
+        Edit profil &amp; keahlian
       </button>
     </RailColumn>
   );

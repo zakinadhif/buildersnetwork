@@ -10,7 +10,7 @@ import {
   ScreenSwitcher,
   type Screen,
 } from "./gallery";
-import AuthScreen from "./screens/Auth";
+import DaftarScreen, { MasukScreen } from "./screens/Auth";
 import CariScreen from "./screens/cari";
 import ScrollScreen from "./screens/Scroll";
 import KaryaScreen from "./screens/Karya";
@@ -34,7 +34,8 @@ const SCREENS: Record<Screen, ComponentType> = {
   karya:     KaryaScreen,
   people:    PeopleScreen,
   cari:      CariScreen,
-  auth:      AuthScreen,
+  masuk:     MasukScreen,
+  daftar:    DaftarScreen,
   mulai:     MulaiScreen,
   "karya-detail": KaryaDetailScreen,
   "karya-new": KaryaNewScreen,
@@ -47,6 +48,7 @@ function Gallery() {
   const [screen,     setScreen]     = useState<Screen>("scroll");
   const [displayIdx, setDisplayIdx] = useState(0);
   const [bodyIdx,    setBodyIdx]    = useState(0);
+  const [pureWhite,  setPureWhite]  = useState(false);
 
   const ActiveScreen = SCREENS[screen];
 
@@ -55,12 +57,14 @@ function Gallery() {
       <FontVars
         displayFont={DISPLAY_FONTS[displayIdx].font}
         bodyFont={BODY_FONTS[bodyIdx].font}
+        pureWhite={pureWhite}
       />
       <ActiveScreen />
       <ScreenSwitcher active={screen} onChange={setScreen} />
       <FontControls
         displayIdx={displayIdx} onDisplay={setDisplayIdx}
         bodyIdx={bodyIdx}       onBody={setBodyIdx}
+        pureWhite={pureWhite}   onBackground={setPureWhite}
       />
     </NavProvider>
   );

@@ -1,29 +1,31 @@
 /**
  * Al-Fath Berkarya — Bikin Karya  ·  issue #104
  *
- * The hero's primary CTA target (`/karya/new`, `/karya/new/ai`). Now inside the
+ * The hero's primary CTA target (`/karya/new`). Now inside the
  * shared shell — same left rail as the surfaces it's launched from — so creating
- * a karya keeps the product frame. Two modes on the shared token scale: fill the
- * draft by hand, or let the assistant draft it from a chat — both landing in the
- * same publish path. The center column carries the form; the rail carries tips.
+ * a karya keeps the product frame. The form remains direct while the canonical
+ * agent surface and its ramps stay shelved until P1.
  */
 
 import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Avatar, MainColumn, RailColumn, cn, Input, Textarea, Button, Toggle, Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@myapp/ui";
+import { MainColumn, RailColumn, cn, Input, Textarea, Button, Toggle, Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@myapp/ui";
 import { Shell } from "../components/Shell";
 import { Eyebrow } from "@myapp/ui";
+import { PreviewStates } from "../components/PreviewStates";
+import { PillMultiSelect } from "../components/PillMultiSelect";
 
 const TIPS = [
   "Cover & tangkapan layar bikin karyamu lebih hidup di feed.",
   "Pilih tahap yang jujur — orang paham kamu lagi di mana.",
-  "Tandai tahap \"Cari Kolaborator\" kalau lagi butuh tim.",
+  "Media itu opsional — karya tetap bisa terbit saat upload gagal.",
 ];
 
-const STAGES = ["Ide", "Prototype", "MVP", "Beta", "Rilis", "Cari Kolaborator"];
+const STAGES = ["Ide", "Prototype", "MVP", "Beta", "Rilis"];
 const SUGGESTED = ["Web", "Mobile", "AI/ML", "Desain", "UMKM", "Edukasi", "Komunitas"];
+type PublishState = "ready" | "upload-error" | "publishing";
 
 const draftSchema = z.object({
   title: z.string().min(1, "Judul karya tidak boleh kosong."),
@@ -64,7 +66,7 @@ function Chip({ label, on, onClick }: { label: string; on: boolean; onClick: () 
 }
 
 // ─── Manual form ─────────────────────────────────────────────────────────────
-function ManualForm({ onAi }: { onAi: () => void }) {
+function ManualForm({ publishState }: { publishState: PublishState }) {
   const form = useForm<DraftValues>({
     resolver: zodResolver(draftSchema),
     defaultValues: {
@@ -85,19 +87,16 @@ function ManualForm({ onAi }: { onAi: () => void }) {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)}>
-        {/* AI shortcut */}
-        <button
-          type="button"
-          onClick={onAi}
-          className="mb-[30px] flex w-full cursor-pointer items-center gap-3 rounded-panel border border-accent-line bg-accent-tint px-4 py-[13px] text-left"
-        >
-          <span aria-hidden="true" className="text-[20px] leading-none text-accent">✦</span>
-          <span className="flex-1 font-body text-ui text-ink">
-            Males ngetik? <span className="font-medium text-accent-mid">Biar AI yang nyusun dari obrolan.</span>
-          </span>
-          <span aria-hidden="true" className="text-accent">→</span>
-        </button>
-
+        {publishState === "upload-error" && (
+          <div role="alert" className="mb-5 rounded-card border border-accent-line bg-accent-tint px-3.5 py-3 font-body text-ui leading-body text-accent">
+            Cover belum terunggah. Kamu bisa coba lagi atau tetap terbitkan karya tanpa media.
+          </div>
+        )}
+        {publishState === "publishing" && (
+          <div role="status" className="mb-5 rounded-card border border-line bg-surface px-3.5 py-3 font-body text-ui leading-body text-ink2">
+            Menyimpan data dan menyiapkan halaman karyamu…
+          </div>
+        )}
         <Labelled label="Cover" hint="opsional">
           <div className="flex h-[120px] cursor-pointer items-center justify-center gap-2 rounded-panel border-[1.5px] border-dashed border-line-dark bg-surface font-body text-ui text-ink3">
             <span aria-hidden="true" className="text-[18px]">⬆</span> Seret gambar atau pilih file
@@ -182,14 +181,13 @@ function ManualForm({ onAi }: { onAi: () => void }) {
                 <FormLabel asChild><Eyebrow as="span">Minat / tag</Eyebrow></FormLabel>
               </div>
               <FormControl>
-                <div className="flex flex-wrap gap-2">
-                  {SUGGESTED.map((s) => (
-                    <Chip key={s} label={s} on={field.value.includes(s)} onClick={() => toggle(field.value, s, field.onChange)} />
-                  ))}
-                  <button type="button" className="cursor-pointer rounded-full border border-dashed border-line-dark bg-transparent px-[13px] py-1.5 font-body text-ui text-ink3">
-                    + tag lain
-                  </button>
-                </div>
+                <PillMultiSelect
+                  selected={field.value}
+                  options={SUGGESTED}
+                  onChange={field.onChange}
+                  placeholder="Cari atau tambahkan minat"
+                  ariaLabel="minat atau tag karya"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -197,8 +195,13 @@ function ManualForm({ onAi }: { onAi: () => void }) {
         />
 
         <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
-          <Button type="submit" className="bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading px-[22px]" size="lg">
-            Terbitkan karya →
+          <Button
+            type="submit"
+            disabled={publishState === "publishing"}
+            className="bg-ink text-bg hover:bg-ink/90 font-semibold tracking-heading px-[22px]"
+            size="lg"
+          >
+            {publishState === "publishing" ? "Menerbitkan…" : "Terbitkan karya"}
           </Button>
         </div>
       </form>
@@ -206,62 +209,9 @@ function ManualForm({ onAi }: { onAi: () => void }) {
   );
 }
 
-// ─── AI mode ─────────────────────────────────────────────────────────────────
-const CHAT: { role: "ai" | "user"; text: string }[] = [
-  { role: "ai", text: "Ceritain aja karyanya — lagi bikin apa, buat siapa, udah sampai mana?" },
-  { role: "user", text: "Aggregator kost area Telkom, ada ulasan dari penghuni. Udah jalan versi beta, lagi cari kolaborator." },
-  { role: "ai", text: "Mantap. Aku susun jadi draft ya — kamu tinggal cek & terbitkan." },
-];
-
-function AiMode({ onManual }: { onManual: () => void }) {
-  return (
-    <>
-      <Button variant="ghost" onClick={onManual} className="mb-[22px] text-ink2 p-0 h-auto font-body text-ui hover:bg-transparent hover:text-ink">
-        ← Isi sendiri aja
-      </Button>
-
-      <div className="mb-5 flex flex-col gap-[18px]">
-        {CHAT.map((m, i) =>
-          m.role === "ai" ? (
-            <div key={i} className="flex items-start gap-2.5">
-              <span aria-hidden="true" className="text-[18px] leading-[1.2] text-accent">✦</span>
-              <p className="m-0 whitespace-pre-wrap font-mono text-body leading-body text-ink">{m.text}</p>
-            </div>
-          ) : (
-            <p key={i} className="m-0 ml-auto max-w-[76%] text-right font-body text-body font-medium text-ink">{m.text}</p>
-          ),
-        )}
-      </div>
-
-      {/* Draft preview being filled */}
-      <div className="mb-[18px] rounded-panel border border-accent-line bg-surface p-4">
-        <Eyebrow as="div" className="mb-2.5 !text-accent">Draft otomatis</Eyebrow>
-        <div className="mb-1 font-display text-title text-ink">Peta Kost</div>
-        <p className="mb-2.5 mt-0 font-body text-caption leading-body text-ink2">
-          Aggregator kost area Telkom University dengan ulasan jujur dari penghuni aktif.
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {["Beta", "Cari Kolaborator", "Web", "Komunitas"].map((t) => (
-            <span key={t} className="rounded-full border border-line bg-bg px-2 py-[2px] font-body text-micro text-ink2">{t}</span>
-          ))}
-        </div>
-        <Button className="mt-3.5 bg-ink text-bg hover:bg-ink/90 font-semibold px-[18px]">
-          Cek &amp; terbitkan →
-        </Button>
-      </div>
-
-      {/* Input bar */}
-      <div className="flex items-center gap-2.5 border-t border-line pt-4">
-        <Avatar name="Zaki Nadhif" size={30} />
-        <Input placeholder="Balas asisten…" className="rounded-full flex-1" />
-      </div>
-    </>
-  );
-}
-
 // ─── Screen ──────────────────────────────────────────────────────────────────
 export default function KaryaNewScreen() {
-  const [mode, setMode] = useState<"manual" | "ai">("manual");
+  const [publishState, setPublishState] = useState<PublishState>("ready");
 
   return (
     <Shell active="karya-new">
@@ -271,11 +221,22 @@ export default function KaryaNewScreen() {
           Bikin karya baru.
         </h1>
 
-        {mode === "manual" ? <ManualForm onAi={() => setMode("ai")} /> : <AiMode onManual={() => setMode("manual")} />}
+        <ManualForm publishState={publishState} />
       </MainColumn>
 
       {/* Tips rail */}
       <RailColumn>
+        <PreviewStates
+          label="State terbit"
+          value={publishState}
+          onChange={setPublishState}
+          options={[
+            { value: "ready", label: "Siap" },
+            { value: "upload-error", label: "Upload gagal" },
+            { value: "publishing", label: "Menerbitkan" },
+          ]}
+          className="mb-5"
+        />
         <Eyebrow className="mb-3">Biar makin dilirik</Eyebrow>
         <div className="flex flex-col gap-3.5">
           {TIPS.map((tip) => (

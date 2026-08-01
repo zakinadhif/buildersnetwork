@@ -109,7 +109,7 @@ export function Composer({ karya: pinned }: { karya?: Karya }) {
       className={cn(
         "flex flex-col gap-3 border-b border-line pb-4",
         // Bleed to column rules on both sides — same logic as .bn-post (GlobalStyles).
-        "mx-[calc(-1*var(--shell-gutter))] px-[var(--shell-gutter)]",
+        "mx-0 px-0 sm:mx-[calc(-1*var(--shell-gutter))] sm:px-[var(--shell-gutter)]",
       )}
     >
       <Byline
