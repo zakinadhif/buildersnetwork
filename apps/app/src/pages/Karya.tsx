@@ -4,7 +4,6 @@ import {
   declineKaryaMember,
   featureKarya,
   joinKarya,
-  type PostKind,
   unfeatureKarya,
   useGetKarya,
   useGetKaryaPosts,
@@ -18,18 +17,12 @@ import {
   Loading,
   Tag,
 } from "@/components/ui-atoms";
-import {
-  POST_KIND_LABELS,
-  POST_KIND_ORDER,
-  STAGE_LABELS,
-  timeAgo,
-} from "@/components/ui-metadata";
+import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
 
 export default function Karya({ id }: { id: string }) {
   const { data: karya, isLoading, refetch } = useGetKarya(id);
   const { data: posts = [], refetch: refetchPosts } = useGetKaryaPosts(id);
   const [busy, setBusy] = useState(false);
-  const [postKind, setPostKind] = useState<PostKind>("progress");
   const [postBody, setPostBody] = useState("");
 
   if (isLoading) return <Loading />;
@@ -77,7 +70,7 @@ export default function Karya({ id }: { id: string }) {
     if (!body || busy) return;
     setBusy(true);
     try {
-      await createPost(id, { kind: postKind, body });
+      await createPost(id, { body });
       setPostBody("");
       await refetchPosts();
     } catch (e) {
@@ -245,23 +238,6 @@ export default function Karya({ id }: { id: string }) {
 
           {isMember && (
             <div className="composer bg-bg border border-line rounded-panel p-4 flex flex-col gap-3 mb-6 focus-within:border-accent-line transition-colors">
-              <div className="flex flex-wrap gap-1.5">
-                {POST_KIND_ORDER.map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${k} cursor-pointer transition-opacity hover:opacity-100 ${
-                      postKind === k
-                        ? "opacity-100 ring-2 ring-ink ring-offset-1"
-                        : "opacity-70"
-                    }`}
-                    aria-pressed={postKind === k}
-                    onClick={() => setPostKind(k)}
-                  >
-                    {POST_KIND_LABELS[k]}
-                  </button>
-                ))}
-              </div>
               <textarea
                 className="composer-input bg-transparent border-none font-body text-body text-ink resize-none outline-none min-h-[60px] placeholder:text-ink3"
                 rows={3}
@@ -293,7 +269,7 @@ export default function Karya({ id }: { id: string }) {
                   key={p.id}
                   className="post-card bg-bg border border-line rounded-panel p-4 flex flex-col gap-3"
                 >
-                  <div className="flex justify-between items-center">
+                  <div className="flex items-center">
                     <div className="flex items-center gap-2">
                       <Avatar
                         name={p.author.name}
@@ -304,11 +280,6 @@ export default function Karya({ id }: { id: string }) {
                         {p.author.name}
                       </span>
                     </div>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${p.kind}`}
-                    >
-                      {POST_KIND_LABELS[p.kind]}
-                    </span>
                   </div>
                   <p className="text-body text-ink leading-body whitespace-pre-wrap m-0">
                     {p.body}
