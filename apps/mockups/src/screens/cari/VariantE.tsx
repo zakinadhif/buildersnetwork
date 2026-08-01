@@ -90,7 +90,7 @@ function HackathonBanner() {
         </div>
       </div>
       <button className="shrink-0 cursor-pointer whitespace-nowrap rounded-card border border-accent bg-transparent px-3.5 py-1.5 font-body text-ui font-semibold text-accent">
-        Cari Rekan →
+        Cari Rekan
       </button>
     </section>
   );
@@ -386,7 +386,6 @@ function FilterRail({ filterType, onFilter }: {
             12 tim sedang terbentuk
           </div>
         </div>
-        <span className="font-body text-micro text-accent-mid">→</span>
       </div>
     </RailColumn>
   );

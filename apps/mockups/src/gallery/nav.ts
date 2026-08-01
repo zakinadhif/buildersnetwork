@@ -3,15 +3,16 @@ import { createContext, useContext } from "react";
 /** Every screen the gallery can show. The first three are the product's sidebar
  *  surfaces, reachable from any mockup's own left nav. The funnel targets (Detail
  *  Karya, Bikin Karya, Profil Member) are drill-ins that also sit inside the shell
- *  — reached from a card or CTA, not the nav. The entry flows (auth, mulai,
- *  onboarding) carry no product nav; the screen switcher (bottom-left gallery
- *  chrome) reaches all of them. */
+ *  — reached from a card or CTA, not the nav. The entry flows (auth and mulai)
+ *  carry no product nav; the screen switcher (bottom-left gallery chrome)
+ *  reaches all of them. */
 export type Screen =
   | "scroll"
   | "karya"
   | "people"
   | "cari"
-  | "auth"
+  | "masuk"
+  | "daftar"
   | "mulai"
   | "karya-detail"
   | "karya-new"
@@ -26,6 +27,7 @@ export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
   Karya: "karya",
   People: "people",
+  "Asisten AI": "onboarding",
 };
 
 export type DesignStatus =
@@ -110,39 +112,52 @@ export const SCREEN_META: ScreenMeta[] = [
       "Historical direction only; the auxiliary screen still needs polishing",
   },
   {
-    key: "auth",
-    label: "Masuk / Daftar",
+    key: "masuk",
+    label: "Masuk",
     group: "Alur",
-    designStatus: "exploration",
+    designStatus: "approved-reference",
     productStatus: "active",
-    scopeNote: "Auxiliary entry flow still needs polishing",
+    groundedBy: 148,
+    scopeNote: "Standalone email and password entry with recovery and validation states",
+    excludes: ["social sign-in", "passwordless sign-in"],
+  },
+  {
+    key: "daftar",
+    label: "Daftar",
+    group: "Alur",
+    designStatus: "approved-reference",
+    productStatus: "active",
+    groundedBy: 148,
+    scopeNote: "Standalone account creation and email verification flow",
+    excludes: ["social sign-up", "profile fields before Mulai"],
   },
   {
     key: "mulai",
-    label: "Mulai (profil minimal)",
+    label: "Mulai (lengkapi profil)",
     group: "Alur",
-    designStatus: "exploration",
+    designStatus: "approved-reference",
     productStatus: "active",
-    scopeNote: "Auxiliary profile setup flow still needs polishing",
+    groundedBy: 148,
+    scopeNote: "Direct profile setup with identity, campus, skills, and interests",
+    excludes: ["AI conversational onboarding", "automatic profile inference"],
   },
   {
     key: "onboarding",
-    label: "Onboarding AI",
-    group: "Alur",
+    label: "Asisten AI",
+    group: "Surface",
     designStatus: "exploration",
-    productStatus: "active",
-    scopeNote:
-      "The optional assistant remains relevant, but the current review-and-matches result is outside P0",
-    excludes: ["generated matches", "match persistence"],
+    productStatus: "retired",
+    scopeNote: "Shelved P1 exploration: canonical action-capable AI chat and conversation history",
+    excludes: ["P0 implementation", "actions without explicit confirmation"],
   },
   {
     key: "karya-detail",
     label: "Detail Karya",
     group: "Funnel",
-    designStatus: "exploration",
+    designStatus: "approved-reference",
     productStatus: "active",
-    scopeNote:
-      "Peripheral funnel screen still needs polishing before it can ground implementation",
+    groundedBy: 148,
+    scopeNote: "Owner and visitor karya detail with media, activity, and recoverable states",
     excludes: [
       "post kinds",
       "appreciation",
@@ -154,20 +169,20 @@ export const SCREEN_META: ScreenMeta[] = [
     key: "karya-new",
     label: "Bikin Karya",
     group: "Funnel",
-    designStatus: "exploration",
+    designStatus: "approved-reference",
     productStatus: "active",
-    scopeNote:
-      "Peripheral creation flow still needs polishing before it can ground implementation",
-    excludes: ["collaboration opening state"],
+    groundedBy: 148,
+    scopeNote: "Direct manual karya creation with validation, optional media, and publish states",
+    excludes: ["AI-assisted authoring", "collaboration opening state"],
   },
   {
     key: "profil",
     label: "Profil Member",
     group: "Funnel",
-    designStatus: "exploration",
+    designStatus: "approved-reference",
     productStatus: "active",
-    scopeNote:
-      "Peripheral member profile still needs polishing before it can ground implementation",
+    groundedBy: 148,
+    scopeNote: "Interactive own profile and read-only visitor profile with karya and empty states",
     excludes: ["availability", "matchmaking", "messaging"],
   },
 ];

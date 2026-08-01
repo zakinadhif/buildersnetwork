@@ -384,7 +384,7 @@ function RightRail() {
           <span className="ml-1 font-body text-micro text-ink3">+3 lagi</span>
         </div>
         <button className="w-full cursor-pointer rounded-card border border-accent bg-transparent px-3 py-1.5 font-body text-ui font-medium text-accent">
-          Lihat tim GEMASTIK →
+          Lihat tim GEMASTIK
         </button>
       </div>
 

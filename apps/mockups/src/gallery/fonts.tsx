@@ -19,9 +19,21 @@ export const BODY_FONTS = [
 
 /** Publishes the chosen fonts as the CSS vars that @myapp/design-tokens points
  *  at. Unlayered, so it overrides the defaults the `@theme` block emits. */
-export function FontVars({ displayFont, bodyFont }: { displayFont: string; bodyFont: string }) {
+export function FontVars({
+  displayFont,
+  bodyFont,
+  pureWhite,
+}: {
+  displayFont: string;
+  bodyFont: string;
+  pureWhite: boolean;
+}) {
   return (
-    <style>{`:root { --font-display: ${displayFont}; --font-body: ${bodyFont}; }`}</style>
+    <style>{`:root {
+      --font-display: ${displayFont};
+      --font-body: ${bodyFont};
+      ${pureWhite ? "--color-bg: #fff;" : ""}
+    }`}</style>
   );
 }
 
@@ -33,7 +45,7 @@ function FontSwitcher({ options, activeIdx, onChange }: {
   return (
     <div
       role="group"
-      className="flex gap-0.5 rounded-full border border-line-dark bg-surface p-[3px] shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
+      className="flex max-w-full gap-0.5 overflow-x-auto rounded-full border border-line-dark bg-surface p-[3px] shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
     >
       {options.map((opt, i) => {
         const active = i === activeIdx;
@@ -58,14 +70,63 @@ function FontSwitcher({ options, activeIdx, onChange }: {
 
 /** Fixed bottom-right pair of switchers (display + body). One instance for the
  *  whole gallery — rendered by main.tsx alongside the active screen. */
-export function FontControls({ displayIdx, bodyIdx, onDisplay, onBody }: {
-  displayIdx: number;
-  bodyIdx:    number;
-  onDisplay:  (i: number) => void;
-  onBody:     (i: number) => void;
+function BackgroundSwitcher({
+  pureWhite,
+  onChange,
+}: {
+  pureWhite: boolean;
+  onChange: (pureWhite: boolean) => void;
 }) {
   return (
-    <div className="fixed bottom-5 right-5 z-[100] flex flex-col gap-2 items-end">
+    <div
+      role="group"
+      aria-label="Warna latar"
+      className="flex items-center gap-0.5 rounded-full border border-line-dark bg-surface p-[3px] shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
+    >
+      <span className="px-2 font-body text-micro font-medium uppercase tracking-eyebrow text-ink3">
+        Latar
+      </span>
+      {[
+        { value: false, label: "Gallery white" },
+        { value: true, label: "Pure white" },
+      ].map((option) => (
+        <button
+          key={option.label}
+          type="button"
+          onClick={() => onChange(option.value)}
+          aria-pressed={pureWhite === option.value}
+          className={cn(
+            "rounded-full border-none px-3 py-1.25 font-body text-micro whitespace-nowrap transition-colors duration-[120ms]",
+            pureWhite === option.value
+              ? "bg-ink font-medium text-bg"
+              : "bg-transparent font-normal text-ink3",
+          )}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function FontControls({
+  displayIdx,
+  bodyIdx,
+  pureWhite,
+  onDisplay,
+  onBody,
+  onBackground,
+}: {
+  displayIdx: number;
+  bodyIdx:    number;
+  pureWhite: boolean;
+  onDisplay:  (i: number) => void;
+  onBody:     (i: number) => void;
+  onBackground: (pureWhite: boolean) => void;
+}) {
+  return (
+    <div className="fixed right-4 bottom-4 left-4 z-[100] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 sm:right-5 sm:bottom-5 sm:left-auto">
+      <BackgroundSwitcher pureWhite={pureWhite} onChange={onBackground} />
       <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={onDisplay} />
       <FontSwitcher options={BODY_FONTS}    activeIdx={bodyIdx}    onChange={onBody}    />
     </div>

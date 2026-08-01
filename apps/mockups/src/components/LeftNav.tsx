@@ -1,20 +1,23 @@
 import type { ReactNode } from "react";
-import { LayoutGrid, Newspaper, Users } from "lucide-react";
+import { LayoutGrid, Newspaper, Sparkles, Users } from "lucide-react";
 import { NAV_SCREEN, useNavigate, type Screen } from "../gallery";
 import { cn, LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 import { Eyebrow } from "@myapp/ui";
 
-/** The three live product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
+/** The primary product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
  *  were retired from the sidebar — the first two remain reachable via the screen
  *  switcher (SCREEN_META); Karya Saya has no surface of its own yet.
  *
  *  Icons are lucide-react (rounded caps/joins → a friendly line-icon vibe): a
- *  news feed for Scroll, a catalogue grid for Karya, a group for People. */
-const NAV_ITEMS: { label: string; icon: ReactNode }[] = [
+ *  news feed for Scroll, a catalogue grid for Karya, a group for People, and a
+ *  sparkle for the canonical P1 AI workspace. */
+const P0_NAV_ITEMS: { label: string; icon: ReactNode }[] = [
   { label: "Scroll", icon: <Newspaper size={18} strokeWidth={1.75} /> },
   { label: "Karya",  icon: <LayoutGrid size={18} strokeWidth={1.75} /> },
   { label: "People", icon: <Users size={18} strokeWidth={1.75} /> },
 ];
+
+const AI_NAV_ITEM = { label: "Asisten AI", icon: <Sparkles size={18} strokeWidth={1.75} /> };
 
 /**
  * The gallery's left rail. The rail itself lives in @myapp/ui (#92) — the app
@@ -33,8 +36,9 @@ const NAV_ITEMS: { label: string; icon: ReactNode }[] = [
  */
 export function LeftNav({ active, children }: { active: Screen; children?: ReactNode }) {
   const navigate = useNavigate();
+  const navItems = active === "onboarding" ? [...P0_NAV_ITEMS, AI_NAV_ITEM] : P0_NAV_ITEMS;
 
-  const items: NavItem[] = NAV_ITEMS.map((item) => {
+  const items: NavItem[] = navItems.map((item) => {
     const target = NAV_SCREEN[item.label];
     return {
       label:    item.label,

@@ -85,7 +85,7 @@ function HackathonBanner() {
         </div>
       </div>
       <button className="shrink-0 cursor-pointer whitespace-nowrap rounded-card border-none bg-accent px-3.5 py-[7px] font-body text-ui font-semibold text-accent-fg">
-        Cari Tim →
+        Cari Tim
       </button>
     </div>
   );
@@ -393,7 +393,6 @@ function RightRail() {
                   className="flex cursor-pointer items-center justify-between rounded-card border border-line bg-bg px-2.5 py-[7px] text-left font-body text-ui text-ink2 transition-[border-color] duration-[120ms]"
                 >
                   <span>{BADGE_LABEL[b]}</span>
-                  <span className="text-ink3">→</span>
                 </button>
               ))}
             </div>
@@ -438,7 +437,6 @@ function RightRail() {
           <div className="font-body text-ui font-medium text-ink">{HACKATHON_EVENT.name}</div>
           <div className="font-body text-micro text-accent-mid">{HACKATHON_EVENT.teamsForming} tim sedang terbentuk</div>
         </div>
-        <span className="font-body text-micro text-accent-mid">→</span>
       </div>
     </RailColumn>
   );

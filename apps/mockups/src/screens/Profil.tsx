@@ -1,153 +1,282 @@
 /**
- * Al-Fath Berkarya — Profil Member  ·  issue #105
+ * Al-Fath Berkarya — Profil Member / Profil Saya · issue #105
  *
- * Reached from every feed author and the Launchpad rail's "Kenalan dengan builder"
- * list. Now inside the shared shell — same left rail as the surfaces it's reached
- * from — so opening a profile keeps the product frame. The center column is the
- * identity surface (who they are, skills & interests, the karya they build); the
- * sticky right rail carries the self/other toggle, connect actions, and stats.
- *
- * The self/other toggle previews the owner's "Sunting profil" vs. a visitor's
- * connect actions (grounds #32's own profile view + edit).
+ * Visitor and signed-in views are intentionally different product surfaces.
+ * Visitor view reads like a public identity and portfolio. Profil Saya is a
+ * working dashboard with direct profile, taxonomy, and karya management entry
+ * points. The floating pane is review chrome only.
  */
 
 import { useState } from "react";
-import { Avatar, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
+import { Avatar, Tag, MainColumn, RailColumn, cn, Eyebrow } from "@myapp/ui";
 import { Shell } from "../components/Shell";
-import { KARYA, MEMBERS } from "../data/karya";
+import { PreviewStates } from "../components/PreviewStates";
+import { KARYA, MEMBERS, ME, MY_KARYA } from "../data/karya";
 import { coverFor } from "../lib/images";
-import { Eyebrow } from "@myapp/ui";
 
-const MEMBER = MEMBERS[0]; // Arief Maulana
+const MEMBER = MEMBERS[0];
 const THEIR_KARYA = KARYA.filter((k) => k.roster.some((r) => r.name === MEMBER.name));
+type ProfileState = "complete" | "minimal" | "empty" | "loading" | "not-found";
 
-// ─── Compact karya card ──────────────────────────────────────────────────────
-function KaryaMini({ title, description, stages, interests }: {
+function KaryaMini({
+  title,
+  description,
+  stages,
+  interests,
+  manage = false,
+}: {
   title: string;
   description: string;
   stages: string[];
   interests: string[];
+  manage?: boolean;
 }) {
   return (
     <div className="flex gap-3.5 border-t border-line py-3.5">
-      <img
-        src={coverFor(interests)}
-        alt={title}
-        className="h-[60px] w-[60px] shrink-0 rounded-xl border border-line object-cover"
-      />
-      <div className="min-w-0">
+      <img src={coverFor(interests)} alt="" className="h-[60px] w-[60px] shrink-0 rounded-xl border border-line object-cover" />
+      <div className="min-w-0 flex-1">
         <div className="mb-[3px] flex flex-wrap items-baseline gap-2">
           <span className="font-display text-title text-ink">{title}</span>
           <Eyebrow as="span">{stages[stages.length - 1]}</Eyebrow>
         </div>
         <p className="m-0 font-body text-caption leading-body text-ink2">{description}</p>
       </div>
+      {manage && (
+        <button type="button" className="self-center rounded-card border border-line bg-transparent px-3 py-1.5 font-body text-caption font-medium text-ink">
+          Kelola
+        </button>
+      )}
     </div>
   );
 }
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
-export default function ProfilScreen() {
-  const [self, setSelf] = useState(false);
-  const m = MEMBER;
-
-  const metaRow = (label: string, value: number | string) => (
-    <div className="flex items-baseline justify-between">
-      <Eyebrow as="span">{label}</Eyebrow>
-      <span className="font-body text-ui text-ink2">{value}</span>
+function ReviewRoleToggle({ self, onChange }: { self: boolean; onChange: (self: boolean) => void }) {
+  return (
+    <div className="flex gap-0.5 rounded-full border border-line bg-bg p-[3px]">
+      {([["visitor", "Visitor"], ["self", "Login user"]] as const).map(([value, label]) => {
+        const active = (value === "self") === self;
+        return (
+          <button
+            key={value}
+            type="button"
+            onClick={() => onChange(value === "self")}
+            aria-pressed={active}
+            className={cn(
+              "flex-1 rounded-full border-none px-3 py-[5px] font-body text-micro",
+              active ? "bg-ink font-medium text-bg" : "bg-transparent font-normal text-ink2",
+            )}
+          >
+            {label}
+          </button>
+        );
+      })}
     </div>
   );
+}
+
+function LoadingOrMissing({ state, self }: { state: "loading" | "not-found"; self: boolean }) {
+  return (
+    <Shell active="profil">
+      <MainColumn>
+        {state === "loading" ? (
+          <div role="status" className="space-y-4">
+            <div className="h-20 w-20 animate-pulse rounded-full bg-surface" />
+            <div className="h-8 w-1/2 animate-pulse rounded-card bg-surface" />
+            <div className="h-20 animate-pulse rounded-card bg-surface" />
+          </div>
+        ) : (
+          <div className="rounded-panel border border-line bg-surface px-6 py-10 text-center">
+            <Eyebrow as="div" className="mb-3">404 · Profil tidak ditemukan</Eyebrow>
+            <h1 className="mb-2 mt-0 font-display text-feature font-normal text-ink">
+              {self ? "Profilmu belum bisa dimuat." : "Builder ini belum bisa ditemukan."}
+            </h1>
+            <p className="m-0 font-body text-body leading-body text-ink2">
+              {self ? "Coba muat ulang atau kembali ke Scroll." : "Kembali ke People untuk melihat builder lain."}
+            </p>
+          </div>
+        )}
+      </MainColumn>
+      <RailColumn />
+    </Shell>
+  );
+}
+
+function VisitorProfile({ state }: { state: Exclude<ProfileState, "loading" | "not-found"> }) {
+  const shownKarya = state === "empty" || state === "minimal" ? [] : THEIR_KARYA;
+  const m = MEMBER;
 
   return (
     <Shell active="profil">
-      {/* Identity column */}
       <MainColumn>
-        {/* Back to the surface the profile was opened from */}
-        <button type="button" className="mb-6 cursor-pointer border-none bg-none p-0 font-body text-ui text-ink2">← Balik</button>
-
-        {/* Identity */}
+        <button type="button" className="mb-6 border-none bg-transparent p-0 font-body text-ui text-ink2">← Balik</button>
         <div className="flex items-start gap-[18px]">
           <Avatar name={m.name} size={76} />
           <div className="min-w-0 flex-1">
             <h1 className="mb-[3px] mt-0 font-display text-feature font-normal tracking-heading leading-heading text-ink">{m.name}</h1>
-            <div className="mb-2.5 font-body text-ui text-ink3">
-              {m.handle} · Tkt {m.year} · {m.major}
-            </div>
-            <p className="m-0 font-body text-body leading-body text-ink2">{m.bio}</p>
+            <div className="mb-2.5 font-body text-ui text-ink3">{m.handle} · Tkt {m.year} · {m.major}</div>
+            <p className="m-0 font-body text-body leading-body text-ink2">
+              {state === "minimal" ? "Builder baru yang belum melengkapi bio." : m.bio}
+            </p>
           </div>
         </div>
 
-        {/* Skills & interests */}
         <Eyebrow className="mb-2.5 mt-[30px]">Keahlian</Eyebrow>
         <div className="mb-[22px] flex flex-wrap gap-1.5">
-          {m.skills.map((s) => <Tag key={s} label={s} accent />)}
+          {state === "minimal" ? <span className="font-body text-body text-ink3">Belum ditambahkan.</span> : m.skills.map((skill) => <Tag key={skill} label={skill} accent />)}
         </div>
         <Eyebrow className="mb-2.5">Minat</Eyebrow>
         <div className="mb-[30px] flex flex-wrap gap-1.5">
-          {m.interests.map((i) => <Tag key={i} label={i} />)}
+          {state === "minimal" ? <span className="font-body text-body text-ink3">Belum ditambahkan.</span> : m.interests.map((interest) => <Tag key={interest} label={interest} />)}
         </div>
 
-        {/* Their karya */}
         <Eyebrow className="mb-1">Karya yang digarap</Eyebrow>
-        {THEIR_KARYA.length === 0 ? (
+        {shownKarya.length === 0 ? (
           <p className="py-[18px] font-body text-body text-ink3">Belum ada karya yang dibagikan.</p>
-        ) : (
-          <div>
-            {THEIR_KARYA.map((k) => (
-              <KaryaMini key={k.id} title={k.title} description={k.description} stages={k.stages} interests={k.interests} />
-            ))}
-          </div>
-        )}
+        ) : shownKarya.map((karya) => (
+          <KaryaMini key={karya.id} title={karya.title} description={karya.description} stages={karya.stages} interests={karya.interests} />
+        ))}
       </MainColumn>
-
-      {/* Actions rail */}
       <RailColumn className="flex flex-col gap-5">
-        {/* Self/other toggle — gallery affordance to preview both viewer states */}
-        <div className="flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
-          {([["visitor", "Orang lain"], ["self", "Profil sendiri"]] as const).map(([val, label]) => {
-            const on = (val === "self") === self;
-            return (
-              <button
-                key={val}
-                type="button"
-                onClick={() => setSelf(val === "self")}
-                aria-pressed={on}
-                className={cn(
-                  "flex-1 cursor-pointer rounded-full border-none px-3 py-[5px] font-body text-micro",
-                  on ? "bg-ink text-bg font-medium" : "bg-transparent text-ink2 font-normal",
-                )}
-              >
-                {label}
-              </button>
-            );
-          })}
+        <div className="rounded-panel border border-line bg-surface p-4">
+          <Eyebrow as="div" className="mb-2">Profil publik</Eyebrow>
+          <p className="m-0 font-body text-caption leading-body text-ink2">
+            Lihat identitas, keahlian, minat, dan karya publik builder ini. Pesan dan ajakan kolaborasi hadir di P1.
+          </p>
         </div>
-
-        {/* Actions */}
-        <div className="flex flex-col gap-2">
-          {self ? (
-            <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-[18px] py-[9px] text-center font-body text-ui font-medium text-ink">
-              Sunting profil
-            </button>
-          ) : (
-            <>
-              <button type="button" className="w-full cursor-pointer rounded-card border-none bg-ink px-4 py-[9px] text-center font-body text-ui font-semibold text-bg">
-                Ajak kolaborasi
-              </button>
-              <button type="button" className="w-full cursor-pointer rounded-card border border-line bg-transparent px-4 py-[9px] text-center font-body text-ui font-medium text-ink">
-                Kirim pesan
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* Stats */}
         <div className="flex flex-col gap-3 border-t border-line pt-4">
-          {metaRow("Karya", m.karya)}
-          {metaRow("Skill", m.skills.length)}
-          {metaRow("Angkatan", `'${String(20 + m.year)}`)}
+          <div className="flex justify-between"><Eyebrow as="span">Karya</Eyebrow><span className="font-body text-ui text-ink2">{m.karya}</span></div>
+          <div className="flex justify-between"><Eyebrow as="span">Keahlian</Eyebrow><span className="font-body text-ui text-ink2">{m.skills.length}</span></div>
+          <div className="flex justify-between"><Eyebrow as="span">Angkatan</Eyebrow><span className="font-body text-ui text-ink2">'{20 + m.year}</span></div>
         </div>
       </RailColumn>
     </Shell>
+  );
+}
+
+function EditRow({ label, value, action = "Sunting" }: { label: string; value: string; action?: string }) {
+  return (
+    <div className="flex items-start justify-between gap-5 border-t border-line py-4 first:border-t-0">
+      <div className="min-w-0">
+        <Eyebrow as="div" className="mb-1">{label}</Eyebrow>
+        <p className="m-0 font-body text-body leading-body text-ink2">{value}</p>
+      </div>
+      <button type="button" className="shrink-0 rounded-card border border-line bg-transparent px-3 py-1.5 font-body text-caption font-medium text-ink">{action}</button>
+    </div>
+  );
+}
+
+function OwnProfile({ state }: { state: Exclude<ProfileState, "loading" | "not-found"> }) {
+  const shownKarya = state === "empty" || state === "minimal" ? [] : MY_KARYA;
+  const sparse = state === "minimal";
+  const skills = sparse ? [] : ["React", "Product", "TypeScript"];
+  const interests = sparse ? [] : ["AI/ML", "Web", "Produktivitas"];
+
+  return (
+    <Shell active="profil">
+      <MainColumn>
+        <div className="mb-7 flex items-start justify-between gap-5">
+          <div>
+            <Eyebrow as="div" className="mb-2">Profil Saya</Eyebrow>
+            <h1 className="m-0 font-display text-feature font-normal tracking-heading leading-heading text-ink">
+              Kelola identitas dan karyamu.
+            </h1>
+          </div>
+          <button type="button" className="rounded-card border-none bg-ink px-4 py-2.5 font-body text-ui font-semibold text-bg">+ Tambah karya</button>
+        </div>
+
+        <section className="rounded-panel border border-line bg-surface p-5">
+          <div className="mb-4 flex items-center gap-4">
+            <div className="relative">
+              <Avatar name={ME.name} size={72} />
+              <button type="button" aria-label="Ganti foto profil" className="absolute -bottom-1 -right-1 size-7 rounded-full border border-line bg-bg font-body text-caption text-ink">✎</button>
+            </div>
+            <div>
+              <h2 className="mb-1 mt-0 font-display text-title font-normal text-ink">{ME.name}</h2>
+              <span className="font-body text-ui text-ink3">{ME.handle}</span>
+            </div>
+          </div>
+          <EditRow label="Nama & username" value={`${ME.name} · ${ME.handle}`} />
+          <EditRow label="Tentang kamu" value={sparse ? "Tambahkan bio singkat agar builder lain mengenalmu." : "Membangun produk digital untuk komunitas dan pendidikan."} />
+          <EditRow label="Kampus" value="S1 Teknik Informatika · Angkatan 2023" />
+        </section>
+
+        <section className="mt-5 rounded-panel border border-line bg-surface p-5">
+          <div className="mb-2 flex items-center justify-between">
+            <Eyebrow as="h2">Keahlian & minat</Eyebrow>
+            <button type="button" className="border-none bg-transparent p-0 font-body text-caption font-medium text-accent">Sunting pilihan</button>
+          </div>
+          <div className="border-t border-line py-4">
+            <span className="mb-2 block font-body text-caption text-ink3">Keahlian</span>
+            <div className="flex flex-wrap gap-1.5">
+              {skills.length ? skills.map((skill) => <Tag key={skill} label={skill} accent />) : <span className="font-body text-body text-ink3">Belum ada keahlian. Tambahkan sekarang.</span>}
+            </div>
+          </div>
+          <div className="border-t border-line pt-4">
+            <span className="mb-2 block font-body text-caption text-ink3">Minat</span>
+            <div className="flex flex-wrap gap-1.5">
+              {interests.length ? interests.map((interest) => <Tag key={interest} label={interest} />) : <span className="font-body text-body text-ink3">Belum ada minat. Tambahkan sekarang.</span>}
+            </div>
+          </div>
+        </section>
+
+        <section className="mt-7">
+          <div className="mb-2 flex items-center justify-between">
+            <Eyebrow as="h2">Karya Saya</Eyebrow>
+            <button type="button" className="border-none bg-transparent p-0 font-body text-caption font-medium text-accent">+ Karya baru</button>
+          </div>
+          {shownKarya.length ? shownKarya.map((karya) => (
+            <KaryaMini key={karya.id} title={karya.title} description={karya.description} stages={karya.stages} interests={karya.interests} manage />
+          )) : (
+            <div className="rounded-panel border border-dashed border-line px-5 py-8 text-center">
+              <p className="mb-3 mt-0 font-body text-body text-ink2">Kamu belum punya karya yang dibagikan.</p>
+              <button type="button" className="rounded-card border border-line bg-surface px-4 py-2 font-body text-ui font-medium text-ink">Bikin karya pertama</button>
+            </div>
+          )}
+        </section>
+      </MainColumn>
+      <RailColumn className="flex flex-col gap-4">
+        <div className="rounded-panel border border-line bg-surface p-4">
+          <Eyebrow as="div" className="mb-3">Kelengkapan profil</Eyebrow>
+          <div className="mb-2 h-1.5 overflow-hidden rounded-full bg-line">
+            <div className={cn("h-full rounded-full bg-accent", sparse ? "w-2/5" : "w-full")} />
+          </div>
+          <p className="m-0 font-body text-caption leading-body text-ink2">{sparse ? "40% · Lengkapi bio, keahlian, dan minat." : "100% · Profil siap ditemukan."}</p>
+        </div>
+        <button type="button" className="w-full rounded-card border border-line bg-transparent px-4 py-2.5 font-body text-ui font-medium text-ink">Lihat profil publik ↗</button>
+        <button type="button" className="w-full border-none bg-transparent px-4 py-1 font-body text-caption text-ink3">Pengaturan akun</button>
+      </RailColumn>
+    </Shell>
+  );
+}
+
+export default function ProfilScreen() {
+  const [self, setSelf] = useState(false);
+  const [profileState, setProfileState] = useState<ProfileState>("complete");
+
+  return (
+    <>
+      <PreviewStates
+        label="Review profil"
+        value={profileState}
+        onChange={setProfileState}
+        options={[
+          { value: "complete", label: "Lengkap" },
+          { value: "minimal", label: "Minimal" },
+          { value: "empty", label: "Tanpa karya" },
+          { value: "loading", label: "Loading" },
+          { value: "not-found", label: "404" },
+        ]}
+      >
+        <Eyebrow as="div" className="mb-2">Sudut pandang</Eyebrow>
+        <ReviewRoleToggle self={self} onChange={setSelf} />
+      </PreviewStates>
+      {profileState === "loading" || profileState === "not-found" ? (
+        <LoadingOrMissing state={profileState} self={self} />
+      ) : self ? (
+        <OwnProfile state={profileState} />
+      ) : (
+        <VisitorProfile state={profileState} />
+      )}
+    </>
   );
 }

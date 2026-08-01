@@ -5,7 +5,6 @@
  * is renamed and the directory search now lives in the right pane, but the old
  * feed-only pieces are kept for now, each tagged `FEED-ONLY` so they are easy to
  * find and strip when the directory is finalised:
- *   - the seeker on-ramp (belongs to Scroll/home),
  *   - the per-card activity line (Scroll owns "what's new"),
  *   - the recency ordering (a feed trait; a directory would order neutrally).
  * (The "builders to meet" rail has already moved to People, its rightful home.)
@@ -55,7 +54,9 @@ function CatalogCard({ karya, appreciated, onAppreciate }: { karya: Karya; appre
       // FEED-ONLY: the activity line is Scroll's job; a directory entry states what
       // a karya *is*, not what's newest about it. Drop when the directory finalises.
       activity={{ text: karya.lastActivity.text, time: relativeTime(karya.lastActivity.hoursAgo) }}
-      stages={karya.stages.map((s) => ({ label: s, accent: s === "Cari Kolaborator" }))}
+      stages={karya.stages
+        .filter((stage) => stage !== "Cari Kolaborator")
+        .map((stage) => ({ label: stage }))}
       interests={karya.interests}
       roster={karya.roster.map((r) => ({ key: r.handle, name: r.name }))}
       screenshots={karya.landscapeScreenshots?.map((src, i) => ({
@@ -160,28 +161,6 @@ function Spotlight({ karya }: { karya: Karya }) {
   );
 }
 
-// ─── FEED-ONLY: Seeker on-ramp — calm entry to the onboarding agent ─────────────
-// Belongs to Scroll/home, not the project directory. Kept here for now; lift out
-// when the surfaces settle.
-function SeekerRamp() {
-  return (
-    <Card className="mb-[18px] flex flex-row items-center gap-3.5 rounded-panel border-accent-line bg-accent-tint px-[18px] py-3.5">
-      <div aria-hidden="true" className="shrink-0 font-display text-[28px] leading-none text-accent">✦</div>
-      <div className="min-w-0 flex-1">
-        <CardTitle className="font-display text-title font-normal leading-heading text-ink mb-0.5">
-          Belum tahu mau bikin apa?
-        </CardTitle>
-        <CardDescription className="font-body text-body leading-body text-ink2">
-          Ngobrol sebentar sama asisten — kita cari arah yang pas buat kamu.
-        </CardDescription>
-      </div>
-      <Button variant="outline" className="shrink-0 border-accent bg-transparent text-accent hover:bg-accent-tint hover:text-accent font-semibold px-4 py-2 h-auto">
-        Mulai cari arah →
-      </Button>
-    </Card>
-  );
-}
-
 // ─── Center — the catalog ───────────────────────────────────────────────────────
 function Catalog({ filter, query, appreciated, onAppreciate }: {
   filter: Interest;
@@ -216,9 +195,6 @@ function Catalog({ filter, query, appreciated, onAppreciate }: {
           <span className="font-body text-caption text-ink3">Katalog karya komunitas — temukan yang menarik buat kamu</span>
         </div>
       </div>
-
-      {/* FEED-ONLY: seeker on-ramp */}
-      <SeekerRamp />
 
       {/* Featured pick */}
       {spotlight && <Spotlight karya={spotlight} />}

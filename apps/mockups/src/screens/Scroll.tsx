@@ -178,14 +178,6 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
           {update.body}
         </p>
 
-        {/* Ajakan — the open role, made concrete */}
-        {update.role && (
-          <div className="mt-2.5 inline-flex items-center gap-2 rounded-card border border-accent-line bg-accent-tint px-3 py-1.5">
-            <Eyebrow as="span" className="!text-accent-mid">Butuh</Eyebrow>
-            <span className="font-body text-ui font-medium text-accent">{update.role}</span>
-          </div>
-        )}
-
         {/* Screenshots */}
         {shots.length > 0 && (
           <div className="mt-3 flex gap-2 overflow-x-auto">
@@ -236,16 +228,16 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
 
   return (
     <div>
-      {/* The dot carries the "live" claim for the whole block; the arrow is the way in */}
+      {/* The dot carries the "live" claim for the whole block. */}
       <div className="mb-2.5 flex items-center gap-[7px]">
         <span className="bn-live-dot" aria-hidden="true" />
         <Eyebrow as="div">Diskusi aktif</Eyebrow>
         <button
           type="button"
           aria-label={`Lihat semua diskusi aktif (${ACTIVE_WINDOW_MIN} menit terakhir)`}
-          className="ml-auto cursor-pointer border-none bg-none p-0 font-body text-ui leading-none text-accent-mid"
+          className="ml-auto cursor-pointer border-none bg-none p-0 font-body text-micro font-medium text-accent-mid"
         >
-          →
+          Lihat semua
         </button>
       </div>
 
@@ -279,7 +271,6 @@ function ActiveDiscussions({ discussions }: { discussions: ActiveDiscussion[] })
                   <span className="overflow-hidden text-ellipsis whitespace-nowrap font-body text-micro text-ink3">
                     {voices[0].name.split(" ")[0]} berkomentar
                   </span>
-                  <span aria-hidden="true" className="ml-auto text-micro text-accent-mid">→</span>
                 </div>
               )}
             </div>
