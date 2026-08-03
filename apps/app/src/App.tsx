@@ -213,7 +213,7 @@ function AppRoutes() {
           ) : !hasProfile ? (
             <Redirect to="/mulai" />
           ) : (
-            <Karya id={params.id ?? ""} />
+            <Karya id={params.id ?? ""} me={me} />
           )
         }
       </Route>
