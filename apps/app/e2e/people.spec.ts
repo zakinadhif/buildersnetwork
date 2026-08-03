@@ -161,6 +161,26 @@ authed(
     ).toBeVisible();
     await expect(page.getByText("Design system komunitas.")).toBeVisible();
     await expect(page.getByText("Token pertama sudah dipakai.")).toBeVisible();
+
+    const projectLink = page.getByRole("button", { name: "Buka karya Rapi" });
+    const updateLink = page.getByRole("button", { name: "Buka update Rapi" });
+    await expect(projectLink).toHaveCSS("cursor", "pointer");
+    await expect(updateLink).toHaveCSS("cursor", "pointer");
+
+    const idleBackground = await updateLink.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    await updateLink.hover();
+    await expect
+      .poll(() =>
+        updateLink.evaluate(
+          (element) => getComputedStyle(element).backgroundColor,
+        ),
+      )
+      .not.toBe(idleBackground);
+
+    await updateLink.click();
+    await expect(page).toHaveURL(/\/karya\/k1$/);
   },
 );
 

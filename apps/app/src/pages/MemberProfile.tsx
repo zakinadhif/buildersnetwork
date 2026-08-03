@@ -45,7 +45,7 @@ export default function MemberProfilePage({
         <button
           type="button"
           onClick={() => navigate("/people")}
-          className="mb-6 w-fit border-none bg-transparent p-0 text-ui text-ink2"
+          className="mb-6 w-fit cursor-pointer border-none bg-transparent p-0 text-ui text-ink2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           ← Kembali ke People
         </button>
@@ -129,7 +129,7 @@ export default function MemberProfilePage({
       <button
         type="button"
         onClick={() => navigate("/people")}
-        className="mb-6 w-fit border-none bg-transparent p-0 text-ui text-ink2"
+        className="mb-6 w-fit cursor-pointer border-none bg-transparent p-0 text-ui text-ink2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         ← Kembali ke People
       </button>
@@ -202,8 +202,9 @@ export default function MemberProfilePage({
             <button
               key={project.id}
               type="button"
+              aria-label={`Buka karya ${project.title}`}
               onClick={() => navigate(`/karya/${project.id}`)}
-              className="flex w-full gap-3.5 border-x-0 border-b-0 border-t border-line bg-transparent py-3.5 text-left"
+              className="group -mx-[var(--shell-gutter)] flex w-[calc(100%+2*var(--shell-gutter))] cursor-pointer gap-3.5 border-x-0 border-b-0 border-t border-line bg-transparent px-[var(--shell-gutter)] py-3.5 text-left transition-colors duration-150 hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent max-[900px]:mx-0 max-[900px]:w-full max-[900px]:px-0"
             >
               <KaryaCover
                 src={project.coverUrl}
@@ -213,7 +214,7 @@ export default function MemberProfilePage({
               />
               <span className="min-w-0 flex-1">
                 <span className="mb-[3px] flex flex-wrap items-baseline gap-2">
-                  <span className="font-display text-title text-ink">
+                  <span className="font-display text-title text-ink transition-colors duration-150 group-hover:text-accent">
                     {project.title}
                   </span>
                   {project.stages.length > 0 && (
@@ -254,23 +255,23 @@ export default function MemberProfilePage({
       ) : (
         <div>
           {updates.map((update) => (
-            <article key={update.id} className="border-t border-line py-4">
-              <button
-                type="button"
-                onClick={() => navigate(`/karya/${update.karya.id}`)}
-                className="border-none bg-transparent p-0 text-left"
-              >
-                <span className="font-display text-title text-ink">
-                  {update.karya.title}
-                </span>
-              </button>
-              <p className="mb-2 mt-1 whitespace-pre-wrap text-body leading-body text-ink2">
+            <button
+              key={update.id}
+              type="button"
+              aria-label={`Buka update ${update.karya.title}`}
+              onClick={() => navigate(`/karya/${update.karya.id}`)}
+              className="group -mx-[var(--shell-gutter)] block w-[calc(100%+2*var(--shell-gutter))] cursor-pointer border-x-0 border-b-0 border-t border-line bg-transparent px-[var(--shell-gutter)] py-4 text-left transition-colors duration-150 hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent max-[900px]:mx-0 max-[900px]:w-full max-[900px]:px-0"
+            >
+              <span className="font-display text-title text-ink transition-colors duration-150 group-hover:text-accent">
+                {update.karya.title}
+              </span>
+              <span className="mb-2 mt-1 block whitespace-pre-wrap text-body leading-body text-ink2">
                 {update.body}
-              </p>
-              <span className="text-micro text-ink3">
+              </span>
+              <span className="block text-micro text-ink3">
                 {timeAgo(update.createdAt)}
               </span>
-            </article>
+            </button>
           ))}
         </div>
       )}
