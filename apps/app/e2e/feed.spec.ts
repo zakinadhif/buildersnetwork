@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { authed, expect } from "./fixtures";
 
 // Acceptance for Sprint 3 (S3.17): a karya member composes a post → it lands in
-// the stream and the POST payload carries kind/body; a non-member sees the
+// the stream and the POST payload carries only body; a non-member sees the
 // stream but no compose box; Scroll renders a feed mixing a post and a new-karya
 // item that link out; the admin feature toggle
 // shows only for admins and fires POST .../feature. Mirrors karya.spec mocking.
@@ -52,7 +52,6 @@ function post(over: Record<string, unknown> = {}) {
   return {
     id: "p1",
     karyaId: "km",
-    kind: "progress",
     body: "node sinkron stabil semalaman",
     createdAt: new Date().toISOString(),
     author: {
@@ -66,7 +65,7 @@ function post(over: Record<string, unknown> = {}) {
 }
 
 authed(
-  "karya member: compose box shows; posting sends kind/body and renders it",
+  "karya member: compose box posts body-only and renders it",
   async ({ page }) => {
     await mockMe(page);
 
@@ -86,7 +85,6 @@ authed(
         savedPost = route.request().postDataJSON();
         const created = post({
           id: "p-new",
-          kind: (savedPost as { kind: string }).kind,
           body: (savedPost as { body: string }).body,
         });
         stream.unshift(created);
@@ -110,7 +108,10 @@ authed(
     const composer = page.locator(".composer");
     await expect(composer).toBeVisible();
 
-    // Default kind is "progres"; type a body and post.
+    // There is no type/title selector; type a body and post.
+    await expect(
+      composer.getByRole("button", { name: /progres|tantangan|capaian/ }),
+    ).toHaveCount(0);
     await composer
       .locator(".composer-input")
       .fill("node sinkron stabil semalaman");
@@ -121,11 +122,11 @@ authed(
       page.locator(".post-card", { hasText: "node sinkron stabil semalaman" }),
     ).toBeVisible();
 
-    // The POST payload carried kind + body.
+    // The POST payload carries body only.
     expect(savedPost).not.toBeNull();
     const p = savedPost as Record<string, unknown>;
-    expect(p.kind).toBe("progress");
     expect(p.body).toBe("node sinkron stabil semalaman");
+    expect(p).not.toHaveProperty("kind");
   },
 );
 
@@ -191,7 +192,6 @@ authed(
             type: "post",
             id: "fp1",
             karyaId: "kf",
-            kind: "achievement",
             body: "rekomendasi pertama tembus",
             createdAt: new Date().toISOString(),
             author: {
@@ -228,7 +228,9 @@ authed(
     await expect(postCard).toBeVisible();
     await expect(postCard.getByText("Rasa")).toBeVisible();
     await expect(postCard.getByText(/diposting Fatimah Zahra/)).toBeVisible();
-    await expect(postCard.getByText("capaian")).toBeVisible();
+    await expect(postCard.getByText(/progres|tantangan|capaian/)).toHaveCount(
+      0,
+    );
 
     // Feed: the new-karya item renders with its tag.
     const karyaItem = page.locator(".feed .karya-card", { hasText: "Saku" });
