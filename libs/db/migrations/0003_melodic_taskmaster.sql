@@ -1,1 +1,1 @@
-DROP TABLE `matches`;
+DROP TABLE IF EXISTS `matches`;
