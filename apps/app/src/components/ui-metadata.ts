@@ -1,8 +1,6 @@
 import {
   KaryaStage,
   type KaryaStage as KaryaStageValue,
-  PostKind,
-  type PostKind as PostKindValue,
 } from "@myapp/api-client-react";
 
 export const KARYA_STAGE_ORDER = Object.values(KaryaStage) as KaryaStageValue[];
@@ -12,13 +10,6 @@ export const STAGE_LABELS: Record<KaryaStageValue, string> = {
   building: "bikin",
   shipped: "rilis",
   paused: "jeda",
-};
-
-export const POST_KIND_ORDER = Object.values(PostKind) as PostKindValue[];
-export const POST_KIND_LABELS: Record<PostKindValue, string> = {
-  progress: "progres",
-  challenge: "tantangan",
-  achievement: "capaian",
 };
 
 /** Compact Indonesian relative-time label (e.g. "baru saja", "3j lalu"). */

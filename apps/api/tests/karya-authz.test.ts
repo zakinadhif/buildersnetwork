@@ -49,28 +49,19 @@ const json = (body: unknown) => ({
 describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
   it("401 when unauthenticated", async () => {
     const { app } = mount({ user: null });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "progress", body: "hi" }),
-    );
+    const res = await app.request("/api/karya/k1/posts", json({ body: "hi" }));
     expect(res.status).toBe(401);
   });
 
   it("404 when the karya is missing", async () => {
     const { app } = mount({ user: MEMBER, reads: [[]] });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "progress", body: "hi" }),
-    );
+    const res = await app.request("/api/karya/k1/posts", json({ body: "hi" }));
     expect(res.status).toBe(404);
   });
 
   it("403 when the viewer has no membership row", async () => {
     const { app } = mount({ user: MEMBER, reads: [KARYA_EXISTS, []] });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "progress", body: "hi" }),
-    );
+    const res = await app.request("/api/karya/k1/posts", json({ body: "hi" }));
     expect(res.status).toBe(403);
   });
 
@@ -79,10 +70,7 @@ describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
       user: MEMBER,
       reads: [KARYA_EXISTS, [{ status: "pending" }]],
     });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "progress", body: "hi" }),
-    );
+    const res = await app.request("/api/karya/k1/posts", json({ body: "hi" }));
     expect(res.status).toBe(403);
   });
 
@@ -91,22 +79,7 @@ describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
       user: MEMBER,
       reads: [KARYA_EXISTS, [{ status: "member" }]],
     });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "progress", body: "   " }),
-    );
-    expect(res.status).toBe(400);
-  });
-
-  it("400 when the kind is not a known PostKind", async () => {
-    const { app } = mount({
-      user: MEMBER,
-      reads: [KARYA_EXISTS, [{ status: "member" }]],
-    });
-    const res = await app.request(
-      "/api/karya/k1/posts",
-      json({ kind: "rambling", body: "hi" }),
-    );
+    const res = await app.request("/api/karya/k1/posts", json({ body: "   " }));
     expect(res.status).toBe(400);
   });
 
@@ -122,7 +95,6 @@ describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
           {
             id: "p-new",
             karyaId: "k1",
-            kind: "progress",
             body: "shipped it",
             createdAt,
             authorId: MEMBER.id,
@@ -137,16 +109,15 @@ describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
 
     const res = await app.request(
       "/api/karya/k1/posts",
-      json({ kind: "progress", body: "shipped it" }),
+      json({ body: "shipped it" }),
     );
     expect(res.status).toBe(200);
 
     const post = (await res.json()) as {
       id: string;
-      kind: string;
       author: { id: string };
     };
-    expect(post.kind).toBe("progress");
+    expect(post).not.toHaveProperty("kind");
     expect(post.author.id).toBe(MEMBER.id);
 
     // The post was inserted with the session user as author (not client-supplied).
@@ -154,9 +125,9 @@ describe("POST /api/karya/:id/posts — member-only (DECISION-C)", () => {
     expect(insert?.values).toMatchObject({
       karyaId: "k1",
       authorId: MEMBER.id,
-      kind: "progress",
       body: "shipped it",
     });
+    expect(insert?.values).not.toHaveProperty("kind");
   });
 });
 

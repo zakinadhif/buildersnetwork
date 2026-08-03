@@ -889,19 +889,13 @@ components:
               viewerIsAdmin,
             ]
 
-    PostKind:
-      type: string
-      enum: [progress, challenge, achievement]
-
     PostInput:
       type: object
       properties:
-        kind:
-          $ref: "#/components/schemas/PostKind"
         body:
           type: string
           minLength: 1
-      required: [kind, body]
+      required: [body]
 
     Post:
       type: object
@@ -910,8 +904,6 @@ components:
           type: string
         karyaId:
           type: string
-        kind:
-          $ref: "#/components/schemas/PostKind"
         body:
           type: string
         createdAt:
@@ -919,7 +911,7 @@ components:
           format: date-time
         author:
           $ref: "#/components/schemas/RosterMember"
-      required: [id, karyaId, kind, body, createdAt, author]
+      required: [id, karyaId, body, createdAt, author]
 
     KaryaRef:
       type: object

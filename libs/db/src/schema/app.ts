@@ -7,7 +7,6 @@ import {
   text,
 } from "drizzle-orm/sqlite-core";
 import type { KaryaStage } from "../karya";
-import type { PostKind } from "../posts";
 import { users } from "./auth";
 
 // Timestamps are Unix epoch *milliseconds* (`integer` + `mode: "timestamp_ms"`),
@@ -179,10 +178,9 @@ export const karyaInterests = sqliteTable(
   ],
 );
 
-// Karya updates — short author-only posts a member writes on a karya (FR-18).
-// `kind` is a closed 3-value vocabulary stored as plain text (DECISION-B),
-// validated by `normalizePostKind`. Read two ways (DECISION-D): the karya stream
-// (by karya_id) and the global feed (reverse-chron by created_at).
+// Karya updates — short body-only posts a member writes on a karya (FR-18).
+// Read two ways (DECISION-D): the karya stream (by karya_id) and the global
+// feed (reverse-chron by created_at).
 export const posts = sqliteTable(
   "posts",
   {
@@ -193,7 +191,6 @@ export const posts = sqliteTable(
     authorId: text("author_id")
       .notNull()
       .references(() => users.id, { onDelete: "cascade" }),
-    kind: text("kind").$type<PostKind>().notNull(), // PostKind (DECISION-B)
     body: text("body").notNull(),
     createdAt: integer("created_at", { mode: "timestamp_ms" })
       .default(now)

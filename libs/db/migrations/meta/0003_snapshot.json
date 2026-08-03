@@ -1,8 +1,8 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "13f4011b-153d-4814-b00c-2c40b66d4cfe",
-  "prevId": "b02aa70f-19c4-4b89-81d1-80c5eaf10b5f",
+  "id": "dbc19c99-be0e-4cb0-a65d-0a4161209a5f",
+  "prevId": "13f4011b-153d-4814-b00c-2c40b66d4cfe",
   "tables": {
     "featured": {
       "name": "featured",
@@ -389,77 +389,6 @@
           "tableFrom": "karya_screenshots",
           "tableTo": "karya",
           "columnsFrom": ["karya_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "matches": {
-      "name": "matches",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "matched_user_id": {
-          "name": "matched_user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "reason": {
-          "name": "reason",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
-        }
-      },
-      "indexes": {
-        "matches_userId_idx": {
-          "name": "matches_userId_idx",
-          "columns": ["user_id"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "matches_user_id_users_id_fk": {
-          "name": "matches_user_id_users_id_fk",
-          "tableFrom": "matches",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["id"],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "matches_matched_user_id_users_id_fk": {
-          "name": "matches_matched_user_id_users_id_fk",
-          "tableFrom": "matches",
-          "tableTo": "users",
-          "columnsFrom": ["matched_user_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
