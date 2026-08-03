@@ -37,14 +37,9 @@ authed(
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: "null",
-      }),
-    );
-    await page.route("**/api/members", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: "[]",
+        body: savedProfile
+          ? JSON.stringify({ id: "test-user-id", ...savedProfile })
+          : "null",
       }),
     );
     await page.route("**/api/interests", (route) =>
@@ -52,13 +47,6 @@ authed(
         status: 200,
         contentType: "application/json",
         body: JSON.stringify(CATALOG),
-      }),
-    );
-    await page.route("**/api/ai/complete", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({ text: "[]" }),
       }),
     );
     await page.route("**/api/profile", async (route) => {
@@ -69,11 +57,18 @@ authed(
         body: JSON.stringify({ ok: true }),
       });
     });
-    await page.route("**/api/matches", (route) =>
+    await page.route("**/api/feed", (route) =>
       route.fulfill({
         status: 200,
         contentType: "application/json",
-        body: JSON.stringify({ ok: true }),
+        body: "[]",
+      }),
+    );
+    await page.route("**/api/members", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "[]",
       }),
     );
 
@@ -116,7 +111,7 @@ authed(
     ).toBeVisible();
 
     await page.getByRole("button", { name: /Publish profil/ }).click();
-    await expect(page).toHaveURL(/\/matches/);
+    await expect(page).toHaveURL(/\/home/);
 
     // The published payload carries both the curated and free-text names.
     expect(savedProfile).not.toBeNull();

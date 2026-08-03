@@ -18,7 +18,7 @@ The two gates that *do* exist:
 - **Email verification.** A logged-in member without a verified email is redirected to `/verify-email` from anywhere (`App.tsx:44-47`).
 - **Auth.** Any shell or detail route redirects a logged-out visitor to `/welcome`.
 
-The old linear flow (`/onboarding` → `/review` → `/matches`) still works and is reachable for anyone who opts in — the AI onboarding chat survives as an always-available **assistant tab** (`/assistant`) that produces an editable profile draft.
+The optional enrichment flow (`/onboarding` → `/review` → `/home`) remains reachable for anyone who opts in. It saves an editable profile draft and returns to the P0 shell without generating or persisting match recommendations. The AI onboarding chat also survives as an always-available **assistant tab** (`/assistant`).
 
 ## The routes
 
@@ -34,7 +34,6 @@ Wouter, base `/app` in production (`App.tsx:195`). `/` redirects by state — lo
 | `/mulai` | MinimalStart | One-field start. Redirects to `/home` if a profile already exists |
 | `/onboarding` | Onboarding | The opt-in AI chat flow |
 | `/review` | Review | Review the AI-drafted profile |
-| `/matches` | Matches | |
 
 ### Inside the shell — the Launchpad rail
 
@@ -48,7 +47,7 @@ The persistent left-sidebar shell (`Shell` + rail, `apps/app/src/components/Shel
 | `/jelajahi` | *ComingSoon* | Placeholder — "segera hadir" |
 | `/karya-saya` | *ComingSoon* | Placeholder — "segera hadir" |
 
-The rail also shows a **disabled "Cari Kolaborator"** (`Shell.tsx:34`) — it lights up in the Matchmaking milestone, which is P1.
+Matchmaking is P1 and has no route or control in the P0 shell. Members can still browse and filter the ordinary People directory.
 
 ### Detail / creation — focused full-screen
 
@@ -79,4 +78,4 @@ Per the roadmap's [scope treatments](../how-to/build-workflow.md#scope-treatment
 
 - **Discovery** is done but frozen: search and filters exist and are thin. `/jelajahi` is the placeholder where fuller discovery will land, and that's **P1** — which is also why the discovery chat and members list no longer sit on `/home`.
 - **Posts + feed** are built; the *feed display* is absorbed into Launchpad and polished there, while the **microblog posting** concept waits for validation.
-- **Matchmaking and messaging** are P1 — hence the disabled rail entry.
+- **Matchmaking and messaging** are P1 and have no active P0 route or control.

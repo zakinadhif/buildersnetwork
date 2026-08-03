@@ -1,11 +1,9 @@
 import { createContext } from "react";
-import type { Member, MemberMatch } from "@/lib/members";
+import type { Member } from "@/lib/members";
 
 export interface OnboardingContextValue {
   draft: Member | null;
-  matches: MemberMatch[];
   setDraft: (member: Member) => void;
-  setMatches: (matches: MemberMatch[]) => void;
   clear: () => void;
 }
 

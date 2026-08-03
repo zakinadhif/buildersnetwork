@@ -18,7 +18,6 @@ import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew from "@/pages/KaryaNew";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
-import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
@@ -124,10 +123,6 @@ function AppRoutes() {
       <Route path="/review">
         {!loggedIn ? <Redirect to="/welcome" /> : <Review />}
       </Route>
-      <Route path="/matches">
-        {!loggedIn ? <Redirect to="/welcome" /> : <Matches />}
-      </Route>
-
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
         {shell(

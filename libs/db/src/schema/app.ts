@@ -224,24 +224,6 @@ export const featured = sqliteTable(
   ],
 );
 
-export const matches = sqliteTable(
-  "matches",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    matchedUserId: text("matched_user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    reason: text("reason").notNull(),
-    createdAt: integer("created_at", { mode: "timestamp_ms" })
-      .default(now)
-      .notNull(),
-  },
-  (table) => [index("matches_userId_idx").on(table.userId)],
-);
-
 export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, { fields: [profiles.userId], references: [users.id] }),
 }));
@@ -321,18 +303,5 @@ export const karyaInterestsRelations = relations(karyaInterests, ({ one }) => ({
   interest: one(interests, {
     fields: [karyaInterests.interestId],
     references: [interests.id],
-  }),
-}));
-
-export const matchesRelations = relations(matches, ({ one }) => ({
-  user: one(users, {
-    fields: [matches.userId],
-    references: [users.id],
-    relationName: "userMatches",
-  }),
-  matchedUser: one(users, {
-    fields: [matches.matchedUserId],
-    references: [users.id],
-    relationName: "receivedMatches",
   }),
 }));
