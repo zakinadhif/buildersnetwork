@@ -6,7 +6,6 @@ import {
   featureKarya,
   joinKarya,
   type Member,
-  type PostKind,
   unfeatureKarya,
   useGetKarya,
   useGetKaryaPosts,
@@ -15,12 +14,7 @@ import { Avatar, Button, Eyebrow, Tag } from "@myapp/ui";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import Shell from "@/components/Shell";
-import {
-  POST_KIND_LABELS,
-  POST_KIND_ORDER,
-  STAGE_LABELS,
-  timeAgo,
-} from "@/components/ui-metadata";
+import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
 import { karyaDetailState, orderedScreenshots } from "@/lib/karya-detail";
 
 export default function Karya({ id, me }: { id: string; me: Member }) {
@@ -29,7 +23,6 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
   const postsQuery = useGetKaryaPosts(id);
   const [busy, setBusy] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
-  const [postKind, setPostKind] = useState<PostKind>("progress");
   const [postBody, setPostBody] = useState("");
   const errorStatus =
     detail.error instanceof ApiError ? detail.error.status : undefined;
@@ -60,7 +53,7 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
     setBusy(true);
     setActionError(null);
     try {
-      await createPost(id, { kind: postKind, body });
+      await createPost(id, { body });
       setPostBody("");
       await postsQuery.refetch();
     } catch {
@@ -331,19 +324,6 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
       </Eyebrow>
       {isMember && (
         <div className="composer mb-5 flex flex-col gap-3 rounded-panel border border-line bg-surface p-4 focus-within:border-accent-line">
-          <div className="flex flex-wrap gap-1.5">
-            {POST_KIND_ORDER.map((kind) => (
-              <button
-                key={kind}
-                type="button"
-                aria-pressed={postKind === kind}
-                onClick={() => setPostKind(kind)}
-                className={`kind-${kind} rounded-[4px] px-2 py-0.5 text-micro font-semibold uppercase tracking-tag ${postKind === kind ? "opacity-100 ring-2 ring-ink ring-offset-1" : "opacity-70"}`}
-              >
-                {POST_KIND_LABELS[kind]}
-              </button>
-            ))}
-          </div>
           <textarea
             className="composer-input min-h-[60px] resize-none border-none bg-transparent text-body text-ink outline-none placeholder:text-ink3"
             rows={3}

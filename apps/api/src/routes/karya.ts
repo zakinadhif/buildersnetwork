@@ -1,10 +1,5 @@
 import { CreateKaryaBody, CreatePostBody } from "@myapp/api-zod";
-import {
-  atomicWrite,
-  normalizeOrientation,
-  normalizePostKind,
-  normalizeStages,
-} from "@myapp/db";
+import { atomicWrite, normalizeOrientation, normalizeStages } from "@myapp/db";
 import {
   featured,
   karya,
@@ -241,16 +236,14 @@ app.post("/:id/posts", async (c) => {
       400,
     );
   }
-  const kind = normalizePostKind(parsed.data.kind);
   const body = parsed.data.body.trim();
-  if (!kind || !body) return c.json({ error: "invalid post" }, 400);
+  if (!body) return c.json({ error: "invalid post" }, 400);
 
   const postId = crypto.randomUUID();
   await db.insert(posts).values({
     id: postId,
     karyaId: id,
     authorId: session.user.id,
-    kind,
     body,
   });
 
