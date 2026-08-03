@@ -46,7 +46,6 @@ describe("member profile mapping", () => {
       type: "post",
       id: "p1",
       karyaId: "k1",
-      kind: "progress",
       body: "ship",
       createdAt: new Date().toISOString(),
       author: { id: "m1", name: "Dinda", handle: "dinda", image: null },
