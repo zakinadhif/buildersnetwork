@@ -18,7 +18,6 @@ import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
-import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
@@ -124,10 +123,6 @@ function AppRoutes() {
       <Route path="/review">
         {!loggedIn ? <Redirect to="/welcome" /> : <Review />}
       </Route>
-      <Route path="/matches">
-        {!loggedIn ? <Redirect to="/welcome" /> : <Matches />}
-      </Route>
-
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
         {shell(
@@ -186,8 +181,10 @@ function AppRoutes() {
         {(params) =>
           !loggedIn ? (
             <Redirect to="/welcome" />
+          ) : !me ? (
+            <Redirect to="/mulai" />
           ) : (
-            <MemberProfilePage id={params.id ?? ""} />
+            <MemberProfilePage id={params.id ?? ""} me={me} />
           )
         }
       </Route>
@@ -217,7 +214,7 @@ function AppRoutes() {
           ) : !hasProfile ? (
             <Redirect to="/mulai" />
           ) : (
-            <Karya id={params.id ?? ""} />
+            <Karya id={params.id ?? ""} me={me} />
           )
         }
       </Route>

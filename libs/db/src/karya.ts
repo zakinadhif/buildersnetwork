@@ -44,7 +44,7 @@ export function normalizeStages(input: unknown): KaryaStage[] {
 
 /**
  * Screenshot gallery orientation (issue #19) — a closed 2-value vocabulary,
- * like {@link PostKind}. `landscape` feeds the feed-row carousel, `portrait`
+ * like karya stages. `landscape` feeds the feed-row carousel, `portrait`
  * the detail gallery. No default: an upload must declare its orientation, so
  * the API maps an unknown value to 400.
  */

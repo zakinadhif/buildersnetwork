@@ -1,7 +1,7 @@
-import type { Member, MemberMatch } from "@myapp/api-client-react";
+import type { Member } from "@myapp/api-client-react";
 import { aiComplete } from "@myapp/api-client-react";
 
-export type { Member, MemberMatch };
+export type { Member };
 
 export const SEED_MEMBERS: Member[] = [
   {

@@ -266,3 +266,91 @@ authed(
     await expect(pending.getByRole("button", { name: "Tolak" })).toBeVisible();
   },
 );
+
+authed("karya detail distinguishes loading and 404", async ({ page }) => {
+  await mockCommon(page);
+  await page.route("**/api/karya/missing/posts", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+  );
+  await page.route("**/api/karya/missing", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    await route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "not found" }),
+    });
+  });
+
+  await page.goto("/karya/missing");
+  await expect(
+    page.getByRole("status", { name: "Memuat detail karya" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Halamannya belum bisa dibuka." }),
+  ).toBeVisible();
+});
+
+authed("karya detail shows recoverable error", async ({ page }) => {
+  await mockCommon(page);
+  await page.route("**/api/karya/broken/posts", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+  );
+  await page.route("**/api/karya/broken", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "broken" }),
+    }),
+  );
+
+  await page.goto("/karya/broken");
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("Detail karya belum bisa dimuat");
+  await expect(alert.getByRole("button", { name: "Coba lagi" })).toBeVisible();
+});
+
+authed(
+  "karya detail renders honest empty media, roster, and updates",
+  async ({ page }) => {
+    await mockCommon(page);
+    await page.route("**/api/karya/empty/posts", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "[]",
+      }),
+    );
+    await page.route("**/api/karya/empty", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "empty",
+          title: "Karya Kosong",
+          description: "Baru dimulai.",
+          stages: [],
+          interests: [],
+          coverUrl: null,
+          screenshots: [],
+          createdBy: null,
+          roster: [],
+          viewerMembership: null,
+          pendingRequests: [],
+          featured: false,
+          viewerIsAdmin: false,
+        }),
+      }),
+    );
+
+    await page.goto("/karya/empty");
+    await expect(
+      page.getByRole("img", { name: "Belum ada sampul untuk Karya Kosong" }),
+    ).toBeVisible();
+    await expect(page.getByText("Belum ada anggota karya.")).toBeVisible();
+    await expect(page.getByText(/Belum ada tangkapan layar/)).toBeVisible();
+    await expect(page.getByText(/Belum ada update dari tim/)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Minta gabung" }),
+    ).toBeVisible();
+  },
+);

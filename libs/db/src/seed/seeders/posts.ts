@@ -1,4 +1,3 @@
-import type { PostKind } from "../../posts";
 import { posts } from "../../schema";
 import { insertInChunks } from "../chunk";
 import type { Seeder } from "../types";
@@ -18,7 +17,6 @@ const SEED_POSTS: {
   id: string;
   karyaId: string;
   authorId: string;
-  kind: PostKind;
   body: string;
   dayOffset: number;
 }[] = [
@@ -26,7 +24,6 @@ const SEED_POSTS: {
     id: "seed_p1",
     karyaId: "seed_k1",
     authorId: "seed_m1",
-    kind: "progress",
     body: "Protokol gossip-nya udah jalan di LAN — dua node sinkron tanpa server tengah. Selanjutnya hemat bandwidth pas koneksi kampus jelek.",
     dayOffset: 0,
   },
@@ -34,7 +31,6 @@ const SEED_POSTS: {
     id: "seed_p2",
     karyaId: "seed_k2",
     authorId: "seed_m2",
-    kind: "challenge",
     body: "Bingung nyari data kuliner lokal yang bersih buat training. Warung kebanyakan ga punya menu digital. Ada yang pernah ngumpulin dataset kayak gini?",
     dayOffset: 2,
   },
@@ -42,7 +38,6 @@ const SEED_POSTS: {
     id: "seed_p3",
     karyaId: "seed_k1",
     authorId: "seed_m3",
-    kind: "challenge",
     body: "Konflik file pas dua orang ngedit offline bareng masih bikin pusing. Lagi baca-baca soal CRDT, kayaknya ke sana arahnya.",
     dayOffset: 4,
   },
@@ -50,7 +45,6 @@ const SEED_POSTS: {
     id: "seed_p4",
     karyaId: "seed_k3",
     authorId: "seed_m4",
-    kind: "progress",
     body: "Mockup awal pencatatan pengeluaran kelar. Fokusnya kejelasan, bukan grafik ribet. Lagi nyari yang mau bareng dari awal.",
     dayOffset: 5,
   },
@@ -58,7 +52,6 @@ const SEED_POSTS: {
     id: "seed_p5",
     karyaId: "seed_k2",
     authorId: "seed_m5",
-    kind: "achievement",
     body: "Rekomendasi pertama tembus! Model nyaranin warung sate deket kampus dan ternyata emang enak. Validasi kecil tapi nyemangatin.",
     dayOffset: 7,
   },
@@ -66,7 +59,6 @@ const SEED_POSTS: {
     id: "seed_p6",
     karyaId: "seed_k1",
     authorId: "seed_m1",
-    kind: "achievement",
     body: "Sinkron tiga node sekaligus stabil semalaman tanpa drop. Pertama kali kerasa kayak tool beneran, bukan eksperimen.",
     dayOffset: 9,
   },
@@ -82,7 +74,6 @@ export const postSeeder: Seeder = {
       id: p.id,
       karyaId: p.karyaId,
       authorId: p.authorId,
-      kind: p.kind,
       body: p.body,
       createdAt: new Date(BASE + p.dayOffset * DAY),
     }));

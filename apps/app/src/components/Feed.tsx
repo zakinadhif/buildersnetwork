@@ -1,11 +1,7 @@
 import type { FeedItem } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import { Avatar, KaryaCard } from "@/components/ui-atoms";
-import {
-  POST_KIND_LABELS,
-  STAGE_LABELS,
-  timeAgo,
-} from "@/components/ui-metadata";
+import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
 
 /**
  * The reverse-chron global feed (FR-22). Renders a `FeedItem[]` union as
@@ -25,7 +21,7 @@ export default function Feed({ items }: { items: FeedItem[] }) {
             key={`post-${it.id}`}
             className="post-card border-b border-line py-[18px]"
           >
-            <div className="flex items-start justify-between gap-3">
+            <div className="flex items-start gap-3">
               <button
                 type="button"
                 className="post-karya-link group min-w-0 cursor-pointer border-none bg-transparent p-0 text-left"
@@ -38,11 +34,6 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                   diposting {it.author.name} · {timeAgo(it.createdAt)}
                 </span>
               </button>
-              <span
-                className={`inline-flex items-center px-2 py-0.5 text-micro tracking-tag font-semibold rounded-[4px] uppercase kind-${it.kind}`}
-              >
-                {POST_KIND_LABELS[it.kind]}
-              </span>
             </div>
             <p className="mt-2.5 whitespace-pre-wrap text-body leading-body text-ink2">
               {it.body}
