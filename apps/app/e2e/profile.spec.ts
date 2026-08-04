@@ -51,8 +51,11 @@ authed(
 
     await page.goto("/");
     await expect(page).toHaveURL(/\/mulai/);
-    await page.getByLabel("Nama kamu").fill("Test User");
-    await page.getByRole("button", { name: /Masuk ke Launchpad/ }).click();
+    await page
+      .getByLabel("Program studi")
+      .selectOption({ label: "S1 Teknik Informatika" });
+    await page.getByLabel("Angkatan").selectOption("2023");
+    await page.getByRole("button", { name: "Simpan & masuk" }).click();
     await expect(page).toHaveURL(/\/home/);
 
     await page.getByRole("button", { name: "Buka Profil Saya" }).click();
