@@ -25,7 +25,10 @@ export default function Welcome() {
     setError(null);
 
     const normalizedEmail = email.trim().toLowerCase();
-    if (!normalizedEmail.endsWith("@student.telkomuniversity.ac.id")) {
+    if (
+      mode === "signup" &&
+      !normalizedEmail.endsWith("@student.telkomuniversity.ac.id")
+    ) {
       setError("Gunakan email @student.telkomuniversity.ac.id.");
       return;
     }
@@ -88,12 +91,14 @@ export default function Welcome() {
       <form onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
         <label htmlFor="entry-email">
           <Eyebrow as="span" className="mb-1.5 block">
-            Email kampus
+            {isSignup ? "Email kampus" : "Email"}
           </Eyebrow>
           <Input
             id="entry-email"
             type="email"
-            placeholder="nama@student.telkomuniversity.ac.id"
+            placeholder={
+              isSignup ? "nama@student.telkomuniversity.ac.id" : "Email kamu"
+            }
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required

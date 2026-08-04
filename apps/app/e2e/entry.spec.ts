@@ -159,3 +159,36 @@ test("entry surfaces expose sign-in and an optional AI path", async ({
   ).toBeVisible();
   await expect(page.getByText(/Asisten AI bersifat opsional/)).toBeVisible();
 });
+
+test("seed accounts can submit the sign-in form", async ({ page }) => {
+  await page.route("**/api/auth/get-session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: "null",
+    }),
+  );
+  await page.route("**/api/auth/sign-in/email", (route) =>
+    route.fulfill({
+      status: 401,
+      contentType: "application/json",
+      body: JSON.stringify({ message: "Invalid credentials" }),
+    }),
+  );
+
+  await page.goto("/welcome");
+  await page.getByRole("button", { name: "Buka halaman Masuk" }).click();
+  await page.getByLabel("Email", { exact: true }).fill("hafiz@seed.local");
+  await page.getByLabel("Password").fill("seedpassword123");
+
+  const signInRequest = page.waitForRequest("**/api/auth/sign-in/email");
+  await page.getByRole("button", { name: "Masuk", exact: true }).click();
+
+  expect((await signInRequest).postDataJSON()).toMatchObject({
+    email: "hafiz@seed.local",
+    password: "seedpassword123",
+  });
+  await expect(page.getByRole("alert")).not.toContainText(
+    "@student.telkomuniversity.ac.id",
+  );
+});
