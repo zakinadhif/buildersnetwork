@@ -1,9 +1,9 @@
-import { type ReactNode, useState } from "react";
-import type { Member, MemberMatch } from "@/lib/members";
+import { type ReactNode, useEffect, useState } from "react";
+import type { Member } from "@/lib/members";
 import { OnboardingContext } from "@/lib/onboarding-context";
 
 const DRAFT_KEY = "onboarding:draft";
-const MATCHES_KEY = "onboarding:matches";
+const LEGACY_MATCHES_KEY = "onboarding:matches";
 
 function load<T>(key: string, fallback: T): T {
   if (typeof sessionStorage === "undefined") return fallback;
@@ -28,33 +28,27 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
   const [draft, setDraftState] = useState<Member | null>(() =>
     load<Member | null>(DRAFT_KEY, null),
   );
-  const [matches, setMatchesState] = useState<MemberMatch[]>(() =>
-    load<MemberMatch[]>(MATCHES_KEY, []),
-  );
 
+  useEffect(() => {
+    // Match results left by pre-P0 builds are inert and must not survive as a
+    // hidden local capability after the route and API have been removed.
+    sessionStorage.removeItem(LEGACY_MATCHES_KEY);
+  }, []);
   const setDraft = (member: Member) => {
     setDraftState(member);
     save(DRAFT_KEY, member);
   };
 
-  const setMatches = (nextMatches: MemberMatch[]) => {
-    setMatchesState(nextMatches);
-    save(MATCHES_KEY, nextMatches);
-  };
-
   const clear = () => {
     setDraftState(null);
-    setMatchesState([]);
     if (typeof sessionStorage !== "undefined") {
       sessionStorage.removeItem(DRAFT_KEY);
-      sessionStorage.removeItem(MATCHES_KEY);
+      sessionStorage.removeItem(LEGACY_MATCHES_KEY);
     }
   };
 
   return (
-    <OnboardingContext.Provider
-      value={{ draft, matches, setDraft, setMatches, clear }}
-    >
+    <OnboardingContext.Provider value={{ draft, setDraft, clear }}>
       {children}
     </OnboardingContext.Provider>
   );

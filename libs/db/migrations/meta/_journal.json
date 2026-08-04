@@ -15,6 +15,20 @@
       "when": 1783745994801,
       "tag": "0001_serious_human_robot",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785578619725,
+      "tag": "0002_hot_hydra",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1785719820277,
+      "tag": "0003_melodic_taskmaster",
+      "breakpoints": true
     }
   ]
 }

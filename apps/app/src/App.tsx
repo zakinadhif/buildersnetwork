@@ -16,9 +16,8 @@ import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
-import KaryaNew from "@/pages/KaryaNew";
+import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
-import Matches from "@/pages/Matches";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
@@ -125,10 +124,6 @@ function AppRoutes() {
       <Route path="/review">
         {!loggedIn ? <Redirect to="/welcome" /> : <Review />}
       </Route>
-      <Route path="/matches">
-        {!loggedIn ? <Redirect to="/welcome" /> : <Matches />}
-      </Route>
-
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
         {shell(
@@ -186,14 +181,16 @@ function AppRoutes() {
         ))}
       </Route>
 
-      {/* ── Detail / creation flows: focused full-screen, reachable from the
-           shell (their fixed-layout pages aren't shell-hosted yet) ── */}
+      {/* ── Detail and AI flows remain focused full-screen. The approved manual
+           creation surface below stays inside the persistent shell. ── */}
       <Route path="/member/:id">
         {(params) =>
           !loggedIn ? (
             <Redirect to="/welcome" />
+          ) : !me ? (
+            <Redirect to="/mulai" />
           ) : (
-            <MemberProfilePage id={params.id ?? ""} />
+            <MemberProfilePage id={params.id ?? ""} me={me} />
           )
         }
       </Route>
@@ -207,12 +204,13 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/karya/new">
-        {!loggedIn ? (
-          <Redirect to="/welcome" />
-        ) : !hasProfile ? (
-          <Redirect to="/mulai" />
-        ) : (
-          <KaryaNew />
+        {shell(
+          () => (
+            <KaryaNew />
+          ),
+          () => (
+            <KaryaNewRail />
+          ),
         )}
       </Route>
       <Route path="/karya/:id">
@@ -222,7 +220,7 @@ function AppRoutes() {
           ) : !hasProfile ? (
             <Redirect to="/mulai" />
           ) : (
-            <Karya id={params.id ?? ""} />
+            <Karya id={params.id ?? ""} me={me} />
           )
         }
       </Route>

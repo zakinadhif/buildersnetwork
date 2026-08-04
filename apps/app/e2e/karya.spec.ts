@@ -47,7 +47,7 @@ async function mockCommon(page: Page) {
 }
 
 authed(
-  "direct form: fill draft → publish sends title/description/stages/interests",
+  "Karya CTA → manual create → publish → created detail",
   async ({ page }) => {
     await mockCommon(page);
 
@@ -94,19 +94,18 @@ authed(
       }),
     );
 
-    await page.goto("/karya/new");
+    await page.goto("/karya");
+    await page
+      .getByRole("main")
+      .getByRole("button", { name: "Bikin karya" })
+      .click();
+    await expect(page).toHaveURL(/\/karya\/new$/);
+    await expect(
+      page.getByRole("button", { name: /Bantu susun pakai AI/ }),
+    ).toBeVisible();
 
-    // Title (inline edit).
-    const titleField = page.locator(".pf", { hasText: "Judul" });
-    await titleField.locator(".field-val").click();
-    await titleField.locator(".field-in").fill("Sync Tool");
-    await titleField.locator(".field-in").blur();
-
-    // Description (multiline inline edit).
-    const descField = page.locator(".pf", { hasText: "Deskripsi" });
-    await descField.locator(".field-val").click();
-    await descField.locator(".field-ta").fill("offline-first file sync");
-    await descField.locator(".field-ta").blur();
+    await page.getByLabel("Judul").fill("Sync Tool");
+    await page.getByLabel("Deskripsi").fill("offline-first file sync");
 
     // Stage multi-select: "ide" is on by default; add "bikin" (building).
     const stageField = page.locator(".pf", { hasText: "Tahap" });
@@ -120,7 +119,7 @@ authed(
       minat.locator(".chip", { hasText: "Open Source" }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /Publish karya/ }).click();
+    await page.getByRole("button", { name: "Terbitkan karya" }).click();
     await expect(page).toHaveURL(/\/karya\/k-new/);
 
     expect(savedKarya).not.toBeNull();
@@ -169,12 +168,10 @@ authed(
 
     // The agent hands the extracted draft to the editable form (DECISION-D).
     await expect(page).toHaveURL(/\/karya\/new$/);
-    const titleField = page.locator(".pf", { hasText: "Judul" });
-    await expect(titleField.getByText("Rasa")).toBeVisible();
-    const descField = page.locator(".pf", { hasText: "Deskripsi" });
-    await expect(
-      descField.getByText("rekomendasi kuliner lokal berbasis ML"),
-    ).toBeVisible();
+    await expect(page.getByLabel("Judul")).toHaveValue("Rasa");
+    await expect(page.getByLabel("Deskripsi")).toHaveValue(
+      "rekomendasi kuliner lokal berbasis ML",
+    );
     // The extracted stage is reflected in the multi-select.
     const stageField = page.locator(".pf", { hasText: "Tahap" });
     await expect(
@@ -267,5 +264,93 @@ authed(
     await expect(pending).toBeVisible();
     await expect(pending.getByRole("button", { name: "Terima" })).toBeVisible();
     await expect(pending.getByRole("button", { name: "Tolak" })).toBeVisible();
+  },
+);
+
+authed("karya detail distinguishes loading and 404", async ({ page }) => {
+  await mockCommon(page);
+  await page.route("**/api/karya/missing/posts", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+  );
+  await page.route("**/api/karya/missing", async (route) => {
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    await route.fulfill({
+      status: 404,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "not found" }),
+    });
+  });
+
+  await page.goto("/karya/missing");
+  await expect(
+    page.getByRole("status", { name: "Memuat detail karya" }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("heading", { name: "Halamannya belum bisa dibuka." }),
+  ).toBeVisible();
+});
+
+authed("karya detail shows recoverable error", async ({ page }) => {
+  await mockCommon(page);
+  await page.route("**/api/karya/broken/posts", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+  );
+  await page.route("**/api/karya/broken", (route) =>
+    route.fulfill({
+      status: 500,
+      contentType: "application/json",
+      body: JSON.stringify({ error: "broken" }),
+    }),
+  );
+
+  await page.goto("/karya/broken");
+  const alert = page.getByRole("alert");
+  await expect(alert).toContainText("Detail karya belum bisa dimuat");
+  await expect(alert.getByRole("button", { name: "Coba lagi" })).toBeVisible();
+});
+
+authed(
+  "karya detail renders honest empty media, roster, and updates",
+  async ({ page }) => {
+    await mockCommon(page);
+    await page.route("**/api/karya/empty/posts", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: "[]",
+      }),
+    );
+    await page.route("**/api/karya/empty", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({
+          id: "empty",
+          title: "Karya Kosong",
+          description: "Baru dimulai.",
+          stages: [],
+          interests: [],
+          coverUrl: null,
+          screenshots: [],
+          createdBy: null,
+          roster: [],
+          viewerMembership: null,
+          pendingRequests: [],
+          featured: false,
+          viewerIsAdmin: false,
+        }),
+      }),
+    );
+
+    await page.goto("/karya/empty");
+    await expect(
+      page.getByRole("img", { name: "Belum ada sampul untuk Karya Kosong" }),
+    ).toBeVisible();
+    await expect(page.getByText("Belum ada anggota karya.")).toBeVisible();
+    await expect(page.getByText(/Belum ada tangkapan layar/)).toBeVisible();
+    await expect(page.getByText(/Belum ada update dari tim/)).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Minta gabung" }),
+    ).toBeVisible();
   },
 );

@@ -1,8 +1,8 @@
 import { ApiError, sendOtp, verifyOtp } from "@myapp/api-client-react";
-import { Button } from "@myapp/ui";
+import { Button, InputOTP, InputOTPGroup, InputOTPSlot } from "@myapp/ui";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearch } from "wouter";
-import { Eyebrow } from "@/components/ui-atoms";
+import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
 
 function extractApiError(err: unknown, fallback: string): string {
   if (err instanceof ApiError) {
@@ -16,12 +16,13 @@ export default function VerifyEmail() {
   const search = useSearch();
   const params = new URLSearchParams(search);
   const email = params.get("email") ?? "";
+  const wasSent = params.get("sent") === "1";
 
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [sent, setSent] = useState(false);
-  const [cooldown, setCooldown] = useState(0);
+  const [sent, setSent] = useState(wasSent);
+  const [cooldown, setCooldown] = useState(wasSent ? 60 : 0);
   const autoSentEmail = useRef<string | null>(null);
 
   const handleSend = useCallback(async () => {
@@ -36,10 +37,10 @@ export default function VerifyEmail() {
   }, [email]);
 
   useEffect(() => {
-    if (!email || autoSentEmail.current === email) return;
+    if (wasSent || !email || autoSentEmail.current === email) return;
     autoSentEmail.current = email;
     void handleSend();
-  }, [email, handleSend]);
+  }, [email, handleSend, wasSent]);
 
   useEffect(() => {
     if (cooldown <= 0) return;
@@ -62,63 +63,63 @@ export default function VerifyEmail() {
   }
 
   return (
-    <div className="fixed inset-0 animate-up flex items-center">
-      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-0">
-        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
-        <h1 className="text-feature font-light tracking-heading leading-heading mb-4">
-          Cek email kamu.
-        </h1>
-        <p className="text-body text-ink2 leading-body mb-10 max-w-[360px]">
-          {sent
-            ? `Kode 6 digit dikirim ke ${email}.`
-            : `Mengirim kode ke ${email}…`}
-        </p>
-
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <input
-              type="text"
-              inputMode="numeric"
-              pattern="[0-9]{6}"
-              maxLength={6}
-              placeholder="123456"
-              value={code}
-              onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-              required
-              // biome-ignore lint/a11y/noAutofocus: intentional focus on OTP input
-              autoFocus
-              className="w-full bg-transparent border-none border-b border-line font-body text-feature tracking-[0.3em] text-ink outline-none resize-none px-3.5 py-2.5 leading-body max-h-[100px] overflow-y-auto transition-colors focus:border-accent placeholder:text-ink3"
-            />
-          </div>
-
-          {error && <p className="text-[13px] text-ink2 mb-3">{error}</p>}
-
-          <Button
-            type="submit"
-            disabled={loading || code.length !== 6}
-            variant="primary"
-            className="w-full"
-          >
-            {loading ? "…" : "Verifikasi →"}
-          </Button>
-        </form>
-
-        <p className="text-[13px] text-ink2 mt-5">
-          Tidak menerima kode?{" "}
-          <button
-            type="button"
-            onClick={handleSend}
-            disabled={cooldown > 0}
-            className={`bg-transparent border-none p-0 text-[13px] ${
-              cooldown > 0
-                ? "cursor-default text-ink no-underline"
-                : "cursor-pointer text-ink underline"
-            }`}
-          >
-            {cooldown > 0 ? `kirim ulang dalam ${cooldown}s` : "kirim ulang ↗"}
-          </button>
-        </p>
+    <EntryLayout
+      eyebrow="Al-Fath Berkarya"
+      title="Verifikasi email kamu."
+      description={
+        sent ? (
+          <>
+            Kode 6-digit sudah dikirim ke{" "}
+            <span className="font-medium text-ink">{email}</span>.
+          </>
+        ) : (
+          <>Mengirim kode ke {email}…</>
+        )
+      }
+    >
+      {error && <EntryAlert>{error}</EntryAlert>}
+      <form onSubmit={handleSubmit}>
+        <InputOTP
+          maxLength={6}
+          value={code}
+          onChange={setCode}
+          autoFocus
+          aria-label="Kode verifikasi"
+        >
+          <InputOTPGroup className="mb-5 gap-2 sm:gap-3">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <InputOTPSlot
+                key={index}
+                index={index}
+                className="h-[52px] w-[42px] rounded-card border bg-surface text-title font-medium text-ink sm:h-[56px] sm:w-[46px]"
+              />
+            ))}
+          </InputOTPGroup>
+        </InputOTP>
+        <Button
+          type="submit"
+          disabled={loading || code.length !== 6}
+          className="w-full bg-ink text-bg hover:bg-ink/90"
+          size="lg"
+        >
+          {loading ? "Memverifikasi…" : "Verifikasi & lanjut"}
+        </Button>
+      </form>
+      <div className="mt-5 flex items-center justify-between text-ui">
+        <span className="text-ink3">Tidak menerima kode?</span>
+        <button
+          type="button"
+          onClick={handleSend}
+          disabled={cooldown > 0}
+          className={`border-none bg-transparent p-0 text-ui font-medium ${
+            cooldown > 0
+              ? "cursor-default text-ink3"
+              : "cursor-pointer text-accent"
+          }`}
+        >
+          {cooldown > 0 ? `Kirim ulang dalam ${cooldown}s` : "Kirim ulang"}
+        </button>
       </div>
-    </div>
+    </EntryLayout>
   );
 }

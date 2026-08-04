@@ -15,8 +15,6 @@ tags:
     description: Health check
   - name: members
     description: Community member profiles
-  - name: matches
-    description: Member matches
   - name: interests
     description: Shared interest vocabulary
   - name: karya
@@ -174,50 +172,6 @@ paths:
                 $ref: "#/components/schemas/Member"
         "404":
           description: Member not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-
-  /matches:
-    get:
-      operationId: getMatches
-      tags: [matches]
-      summary: Get the current user's matches
-      responses:
-        "200":
-          description: Array of matched member profiles with match reasons
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/MemberMatch"
-        "401":
-          description: Not authenticated
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ErrorResponse"
-    post:
-      operationId: saveMatches
-      tags: [matches]
-      summary: Save the current user's matches
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/SaveMatchesRequest"
-      responses:
-        "200":
-          description: Matches saved
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OkResponse"
-        "401":
-          description: Not authenticated
           content:
             application/json:
               schema:
@@ -753,15 +707,6 @@ components:
             type: string
       required: [id, name, handle, bio, interests, year, major, skills]
 
-    MemberMatch:
-      allOf:
-        - $ref: "#/components/schemas/Member"
-        - type: object
-          properties:
-            reason:
-              type: string
-          required: [reason]
-
     ProfileInput:
       type: object
       properties:
@@ -944,19 +889,13 @@ components:
               viewerIsAdmin,
             ]
 
-    PostKind:
-      type: string
-      enum: [progress, challenge, achievement]
-
     PostInput:
       type: object
       properties:
-        kind:
-          $ref: "#/components/schemas/PostKind"
         body:
           type: string
           minLength: 1
-      required: [kind, body]
+      required: [body]
 
     Post:
       type: object
@@ -965,8 +904,6 @@ components:
           type: string
         karyaId:
           type: string
-        kind:
-          $ref: "#/components/schemas/PostKind"
         body:
           type: string
         createdAt:
@@ -974,7 +911,7 @@ components:
           format: date-time
         author:
           $ref: "#/components/schemas/RosterMember"
-      required: [id, karyaId, kind, body, createdAt, author]
+      required: [id, karyaId, body, createdAt, author]
 
     KaryaRef:
       type: object
@@ -1025,24 +962,6 @@ components:
       properties:
         rank:
           type: integer
-
-    MatchEntry:
-      type: object
-      properties:
-        memberId:
-          type: string
-        reason:
-          type: string
-      required: [memberId, reason]
-
-    SaveMatchesRequest:
-      type: object
-      properties:
-        matches:
-          type: array
-          items:
-            $ref: "#/components/schemas/MatchEntry"
-      required: [matches]
 
     OtpSendRequest:
       type: object

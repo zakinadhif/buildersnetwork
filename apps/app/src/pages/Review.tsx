@@ -1,9 +1,4 @@
-import {
-  getGetMeQueryKey,
-  saveMatches,
-  saveProfile,
-  useListMembers,
-} from "@myapp/api-client-react";
+import { getGetMeQueryKey, saveProfile } from "@myapp/api-client-react";
 import { Button } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
@@ -15,12 +10,11 @@ import {
   Loading,
   SkillsEditor,
 } from "@/components/ui-atoms";
-import { groundMatches } from "@/lib/matching";
-import { callClaude, cleanJSON, type Member } from "@/lib/members";
+import type { Member } from "@/lib/members";
 import { useOnboarding } from "@/lib/use-onboarding";
 
 export default function Review() {
-  const { draft: initialDraft, setMatches } = useOnboarding();
+  const { draft: initialDraft, clear } = useOnboarding();
   const queryClient = useQueryClient();
   const [, navigate] = useLocation();
   const [p, setP] = useState<Member>(() => ({
@@ -41,32 +35,9 @@ export default function Review() {
   const set = <K extends keyof Member>(k: K, v: Member[K]) =>
     setP((x) => ({ ...x, [k]: v }));
 
-  const { data: members = [] } = useListMembers();
-
   async function publish() {
     setBusy(true);
-    const membersCtx = members
-      .map(
-        (m) =>
-          `[${m.id}] ${m.name} (${m.year}, ${m.major}). Skills: ${m.skills.join(", ")}. Minat: ${m.interests.join(", ")}. Bio: ${m.bio ?? "-"}`,
-      )
-      .join("\n");
-    const prompt = `Anggota baru:
-Nama: ${p.name} | ${p.year} ${p.major}
-Skills: ${p.skills.join(", ")}
-Minat: ${p.interests.join(", ")}
-Bio: ${p.bio ?? "-"}
-
-Anggota komunitas:
-${membersCtx}
-
-Pilih 3 anggota yang paling mungkin connect atau kolaborasi dengan anggota baru ini.
-Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka cocok — spesifik, dalam bahasa Indonesia kasual"}]`;
     try {
-      const raw = await callClaude([{ role: "user", content: prompt }]);
-      const parsed = cleanJSON(raw) as { memberId: string; reason: string }[];
-      const matched = groundMatches(parsed, members);
-
       await saveProfile({
         name: p.name,
         handle: p.handle ?? undefined,
@@ -76,16 +47,11 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
         major: p.major,
         skills: p.skills,
       });
-      await saveMatches({
-        // Persist only grounded matches — hallucinated IDs are dropped so the
-        // insert can't trip the matched_user_id foreign key.
-        matches: matched.map((m) => ({ memberId: m.id, reason: m.reason })),
-      });
       await queryClient.invalidateQueries({ queryKey: getGetMeQueryKey() });
 
-      setMatches(matched);
+      clear();
       setBusy(false);
-      navigate("/matches");
+      navigate("/home");
     } catch (e) {
       console.error(e);
       setBusy(false);
@@ -94,7 +60,7 @@ Return JSON array: [{"memberId":"seed_m1","reason":"2-3 kalimat kenapa mereka co
 
   if (!initialDraft) return <Redirect to="/onboarding" />;
 
-  if (busy) return <Loading label="lagi nyariin orang-orangnya" />;
+  if (busy) return <Loading label="lagi menyimpan profil kamu" />;
 
   return (
     <div className="fixed inset-0 animate-up overflow-y-auto">

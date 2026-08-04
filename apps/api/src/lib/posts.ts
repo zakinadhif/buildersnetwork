@@ -1,4 +1,4 @@
-import type { createDb, PostKind } from "@myapp/db";
+import type { createDb } from "@myapp/db";
 import { karya, posts, profiles, users } from "@myapp/db/schema";
 import { desc, eq } from "drizzle-orm";
 
@@ -9,7 +9,6 @@ type Db = ReturnType<typeof createDb>;
 export interface PostRow {
   id: string;
   karyaId: string;
-  kind: PostKind;
   body: string;
   createdAt: Date;
   authorId: string;
@@ -26,7 +25,6 @@ export interface PostRow {
 const postSelect = {
   id: posts.id,
   karyaId: posts.karyaId,
-  kind: posts.kind,
   body: posts.body,
   createdAt: posts.createdAt,
   authorId: posts.authorId,
@@ -50,7 +48,6 @@ export function toPost(r: PostRow) {
   return {
     id: r.id,
     karyaId: r.karyaId,
-    kind: r.kind,
     body: r.body,
     createdAt: r.createdAt.toISOString(),
     author: {
