@@ -1,16 +1,16 @@
 import { createKarya } from "@myapp/api-client-react";
-import { Button } from "@myapp/ui";
+import { Button, Eyebrow, Input, KaryaCover, Textarea } from "@myapp/ui";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
-import {
-  EditField,
-  Eyebrow,
-  InterestsEditor,
-  KaryaCover,
-  Loading,
-  StageMultiSelect,
-} from "@/components/ui-atoms";
+import { InterestsEditor, StageMultiSelect } from "@/components/ui-atoms";
 import type { KaryaDraft } from "@/lib/karya-draft-context";
+import {
+  failedUploadCount,
+  hasKaryaDraftErrors,
+  type KaryaDraftErrors,
+  karyaPublishErrorMessage,
+  validateKaryaDraft,
+} from "@/lib/karya-publish";
 import {
   uploadKaryaCover,
   uploadKaryaScreenshot,
@@ -20,16 +20,28 @@ import {
 import { useKaryaDraft } from "@/lib/use-karya-draft";
 
 type Orientation = "landscape" | "portrait";
+type SubmitState = "idle" | "publishing" | "uploading";
+
 interface ScreenshotDraft {
   file: File;
   preview: string;
 }
 
-/**
- * One orientation's screenshot picker (issue #19) — landscape feeds the feed
- * carousel, portrait the detail gallery. Order here becomes upload order,
- * which becomes `position` (the server appends each upload to the end).
- */
+const TIPS = [
+  "Cover dan tangkapan layar bikin karyamu lebih hidup di Scroll.",
+  "Pilih tahap yang jujur — orang jadi paham kamu sedang di mana.",
+  "Media itu opsional; karya tetap bisa terbit saat unggahan gagal.",
+];
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return (
+    <p className="mt-1.5 text-micro text-danger" role="alert">
+      {message}
+    </p>
+  );
+}
+
 function ScreenshotGroup({
   label,
   hint,
@@ -45,61 +57,65 @@ function ScreenshotGroup({
   error: string | null;
   onAdd: (files: FileList | null) => void;
   onRemove: (index: number) => void;
-  onMove: (index: number, dir: -1 | 1) => void;
+  onMove: (index: number, direction: -1 | 1) => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   return (
-    <div className="mb-[18px]">
-      <div className="flex items-baseline gap-2.5 mb-2">
-        <span className="text-[13px] font-semibold text-ink">{label}</span>
-        <span className="text-[12px] text-ink3">{hint}</span>
+    <div className="mb-3">
+      <div className="mb-2 flex items-baseline gap-2.5">
+        <span className="font-body text-ui font-medium text-ink">{label}</span>
+        <span className="font-body text-micro text-ink3">{hint}</span>
       </div>
       <input
         ref={inputRef}
         type="file"
         accept="image/png,image/jpeg,image/webp"
         multiple
-        onChange={(e) => {
-          onAdd(e.target.files);
-          e.target.value = "";
+        aria-label={`Tambah tangkapan layar ${label.toLowerCase()}`}
+        className="hidden"
+        onChange={(event) => {
+          onAdd(event.target.files);
+          event.target.value = "";
         }}
-        style={{ display: "none" }}
       />
       <div className="flex flex-wrap gap-2">
-        {items.map((it, i) => (
-          <div key={it.preview} className="flex flex-col gap-1">
+        {items.map((item, index) => (
+          <div key={item.preview} className="flex flex-col gap-1">
             <img
-              src={it.preview}
-              alt=""
-              className="w-24 h-[72px] object-cover rounded-card border border-line block"
+              src={item.preview}
+              alt={`Pratinjau ${label.toLowerCase()} ${index + 1}`}
+              className="h-[68px] w-[92px] rounded-card border border-line object-cover"
             />
             <div className="flex justify-center gap-1">
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="px-1.5 py-0.5 text-[11px]"
-                disabled={i === 0}
-                onClick={() => onMove(i, -1)}
+                className="h-6 px-1.5 text-micro"
+                disabled={index === 0}
+                aria-label={`Geser ${label.toLowerCase()} ${index + 1} ke awal`}
+                onClick={() => onMove(index, -1)}
               >
-                ↑
+                ←
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="px-1.5 py-0.5 text-[11px]"
-                disabled={i === items.length - 1}
-                onClick={() => onMove(i, 1)}
+                className="h-6 px-1.5 text-micro"
+                disabled={index === items.length - 1}
+                aria-label={`Geser ${label.toLowerCase()} ${index + 1} ke akhir`}
+                onClick={() => onMove(index, 1)}
               >
-                ↓
+                →
               </Button>
               <Button
                 type="button"
                 variant="secondary"
                 size="sm"
-                className="px-1.5 py-0.5 text-[11px]"
-                onClick={() => onRemove(i)}
+                className="h-6 px-1.5 text-micro"
+                aria-label={`Hapus ${label.toLowerCase()} ${index + 1}`}
+                onClick={() => onRemove(index)}
               >
                 ×
               </Button>
@@ -109,61 +125,70 @@ function ScreenshotGroup({
         <Button
           type="button"
           variant="secondary"
-          className="w-24 h-[72px] shrink-0"
+          className="h-[68px] w-[92px] shrink-0 border-dashed text-micro"
           onClick={() => inputRef.current?.click()}
         >
           + tambah
         </Button>
       </div>
-      {error && <p className="m-0 mt-1.5 text-[12px] text-danger">{error}</p>}
+      <FieldError message={error ?? undefined} />
     </div>
   );
 }
 
-// The direct (non-AI) draft surface and the shared publish path (DECISION-D).
-// Whether the draft was typed here or pre-filled by the agent, this screen is
-// the single source of the `POST /api/karya` request. A member can create a
-// karya here without ever touching the agent.
+export function KaryaNewRail() {
+  const [, navigate] = useLocation();
+  return (
+    <>
+      <section>
+        <Eyebrow className="mb-3">Pilih jalur</Eyebrow>
+        <div className="rounded-panel border border-line bg-surface p-3.5">
+          <p className="font-body text-ui font-medium text-ink">Isi manual</p>
+          <p className="mt-1 font-body text-micro leading-body text-ink2">
+            Kamu memegang kendali penuh dan bisa langsung menerbitkan.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          className="mt-2 w-full"
+          onClick={() => navigate("/karya/new/ai")}
+        >
+          Bantu susun pakai AI ✨
+        </Button>
+      </section>
+      <section>
+        <Eyebrow className="mb-3">Biar makin dilirik</Eyebrow>
+        <div className="flex flex-col gap-3.5">
+          {TIPS.map((tip) => (
+            <div key={tip} className="flex items-start gap-2.5">
+              <span aria-hidden="true" className="leading-body text-accent">
+                ◆
+              </span>
+              <p className="font-body text-ui leading-body text-ink2">{tip}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </>
+  );
+}
+
 export default function KaryaNew() {
   const { draft, setDraft, clear } = useKaryaDraft();
   const [, navigate] = useLocation();
-  const [busy, setBusy] = useState(false);
+  const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [errors, setErrors] = useState<KaryaDraftErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [publishedWithMediaError, setPublishedWithMediaError] = useState<{
+    id: string;
+    failedUploads: number;
+  } | null>(null);
 
-  // Cover lives in local state, not the sessionStorage draft — a File can't
-  // serialize. It's uploaded after the karya is created (which mints the id).
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [coverError, setCoverError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Revoke the previous object URL when the preview changes or on unmount.
-  useEffect(() => {
-    if (!coverPreview) return;
-    return () => URL.revokeObjectURL(coverPreview);
-  }, [coverPreview]);
-
-  function pickCover(file: File | undefined) {
-    if (!file) return;
-    const err = validateCoverFile(file);
-    if (err) {
-      setCoverError(err);
-      return;
-    }
-    setCoverError(null);
-    setCoverFile(file);
-    setCoverPreview(URL.createObjectURL(file));
-  }
-
-  function clearCover() {
-    setCoverFile(null);
-    setCoverError(null);
-    setCoverPreview(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
-  }
-
-  // Screenshot gallery (issue #19), same "local state, uploaded after create"
-  // pattern as the cover. Kept per-orientation since landscape (feed carousel)
-  // and portrait (detail gallery) are independently ordered.
+  const coverInputRef = useRef<HTMLInputElement>(null);
   const [screenshots, setScreenshots] = useState<
     Record<Orientation, ScreenshotDraft[]>
   >({ landscape: [], portrait: [] });
@@ -176,67 +201,93 @@ export default function KaryaNew() {
     screenshotsRef.current = screenshots;
   }, [screenshots]);
 
-  // Revoke every preview URL on unmount (mirrors the cover preview cleanup).
-  useEffect(() => {
-    return () => {
+  useEffect(
+    () => () => {
+      if (coverPreview) URL.revokeObjectURL(coverPreview);
       for (const list of Object.values(screenshotsRef.current)) {
-        for (const d of list) URL.revokeObjectURL(d.preview);
+        for (const item of list) URL.revokeObjectURL(item.preview);
       }
-    };
-  }, []);
+    },
+    [coverPreview],
+  );
+
+  const set = <K extends keyof KaryaDraft>(key: K, value: KaryaDraft[K]) => {
+    setDraft({ ...draft, [key]: value });
+    setErrors((current) => ({ ...current, [key]: undefined }));
+    setSubmitError(null);
+  };
+
+  function pickCover(file: File | undefined) {
+    if (!file) return;
+    const error = validateCoverFile(file);
+    if (error) {
+      setCoverError(error);
+      return;
+    }
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    setCoverError(null);
+    setCoverFile(file);
+    setCoverPreview(URL.createObjectURL(file));
+  }
+
+  function clearCover() {
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    setCoverFile(null);
+    setCoverPreview(null);
+    setCoverError(null);
+    if (coverInputRef.current) coverInputRef.current.value = "";
+  }
 
   function addScreenshots(orientation: Orientation, files: FileList | null) {
-    if (!files || files.length === 0) return;
+    if (!files?.length) return;
     const accepted: ScreenshotDraft[] = [];
-    let err: string | null = null;
+    let error: string | null = null;
     for (const file of Array.from(files)) {
-      const msg = validateScreenshotFile(file);
-      if (msg) {
-        err = msg;
-        continue;
-      }
-      accepted.push({ file, preview: URL.createObjectURL(file) });
+      const message = validateScreenshotFile(file);
+      if (message) error = message;
+      else accepted.push({ file, preview: URL.createObjectURL(file) });
     }
-    setScreenshotError((p) => ({ ...p, [orientation]: err }));
-    if (accepted.length > 0) {
-      setScreenshots((p) => ({
-        ...p,
-        [orientation]: [...p[orientation], ...accepted],
+    setScreenshotError((current) => ({ ...current, [orientation]: error }));
+    if (accepted.length) {
+      setScreenshots((current) => ({
+        ...current,
+        [orientation]: [...current[orientation], ...accepted],
       }));
     }
   }
 
   function removeScreenshot(orientation: Orientation, index: number) {
-    setScreenshots((p) => {
-      const list = p[orientation];
-      URL.revokeObjectURL(list[index].preview);
-      return { ...p, [orientation]: list.filter((_, i) => i !== index) };
+    setScreenshots((current) => {
+      URL.revokeObjectURL(current[orientation][index].preview);
+      return {
+        ...current,
+        [orientation]: current[orientation].filter((_, item) => item !== index),
+      };
     });
   }
 
   function moveScreenshot(
     orientation: Orientation,
     index: number,
-    dir: -1 | 1,
+    direction: -1 | 1,
   ) {
-    setScreenshots((p) => {
-      const list = [...p[orientation]];
-      const j = index + dir;
-      if (j < 0 || j >= list.length) return p;
-      [list[index], list[j]] = [list[j], list[index]];
-      return { ...p, [orientation]: list };
+    setScreenshots((current) => {
+      const next = [...current[orientation]];
+      const target = index + direction;
+      if (target < 0 || target >= next.length) return current;
+      [next[index], next[target]] = [next[target], next[index]];
+      return { ...current, [orientation]: next };
     });
   }
 
-  const set = <K extends keyof KaryaDraft>(k: K, v: KaryaDraft[K]) =>
-    setDraft({ ...draft, [k]: v });
+  async function publish(event: React.FormEvent) {
+    event.preventDefault();
+    const nextErrors = validateKaryaDraft(draft);
+    setErrors(nextErrors);
+    if (hasKaryaDraftErrors(nextErrors)) return;
 
-  const canPublish =
-    draft.title.trim() !== "" && draft.description.trim() !== "";
-
-  async function publish() {
-    if (!canPublish) return;
-    setBusy(true);
+    setSubmitError(null);
+    setSubmitState("publishing");
     try {
       const { id } = await createKarya({
         title: draft.title.trim(),
@@ -244,119 +295,156 @@ export default function KaryaNew() {
         stages: draft.stages,
         interests: draft.interests,
       });
-      // Cover and screenshots are optional: if an upload fails, the karya
-      // still exists and the owner can add images later — don't block the
-      // redirect on them. Sequential per orientation so `position` (server-
-      // assigned as upload order) matches what the owner arranged.
-      if (coverFile) {
-        try {
-          await uploadKaryaCover(id, coverFile);
-        } catch (e) {
-          console.error("cover upload failed", e);
-        }
-      }
+
+      const mediaCount =
+        (coverFile ? 1 : 0) +
+        screenshots.landscape.length +
+        screenshots.portrait.length;
+      if (mediaCount) setSubmitState("uploading");
+      const uploads: Promise<unknown>[] = [];
+      if (coverFile) uploads.push(uploadKaryaCover(id, coverFile));
       for (const orientation of ["landscape", "portrait"] as const) {
-        for (const draft of screenshots[orientation]) {
-          try {
-            await uploadKaryaScreenshot(id, draft.file, orientation);
-          } catch (e) {
-            console.error("screenshot upload failed", e);
-          }
+        for (const item of screenshots[orientation]) {
+          uploads.push(uploadKaryaScreenshot(id, item.file, orientation));
         }
       }
+      const results = await Promise.allSettled(uploads);
+      const failedUploads = failedUploadCount(results);
+
       clear();
+      if (failedUploads) {
+        setSubmitState("idle");
+        setPublishedWithMediaError({
+          id,
+          failedUploads,
+        });
+        return;
+      }
       navigate(`/karya/${id}`);
-    } catch (e) {
-      console.error(e);
-      setBusy(false);
+    } catch (error) {
+      setSubmitState("idle");
+      setSubmitError(karyaPublishErrorMessage(error));
     }
   }
 
-  if (busy) return <Loading label="lagi nerbitin karya kamu" />;
+  const busy = submitState !== "idle";
 
-  return (
-    <div className="fixed inset-0 animate-up overflow-y-auto">
-      <div className="max-w-[var(--container-page)] mx-auto px-7 pt-[52px] pb-[80px]">
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="bg-transparent border-none cursor-pointer text-ink2 text-[13px] p-0 mb-8"
-        >
-          ← balik
-        </button>
-
-        <Eyebrow className="mb-2">Al-Fath Berkarya</Eyebrow>
-        <h1 className="text-feature font-light tracking-heading leading-heading">
-          Bikin karya baru.
+  if (publishedWithMediaError) {
+    return (
+      <section
+        className="rounded-panel border border-accent-line bg-accent-tint px-6 py-8"
+        role="status"
+      >
+        <Eyebrow className="mb-2 text-accent">Karya sudah terbit</Eyebrow>
+        <h1 className="font-display text-title font-normal text-ink">
+          Ada media yang belum terunggah.
         </h1>
-        <p className="text-body text-ink2 leading-body mt-2 mb-4">
-          Isi sendiri, atau biar AI yang bantu nyusun dari obrolan.
+        <p className="mt-2 max-w-prose font-body text-body leading-body text-ink2">
+          {publishedWithMediaError.failedUploads} media gagal diunggah, tetapi
+          halaman karyamu sudah aman. Buka halaman karya untuk melanjutkan tanpa
+          media dan mengaturnya lagi nanti.
         </p>
         <Button
           type="button"
-          variant="secondary"
-          onClick={() => navigate("/karya/new/ai")}
+          className="mt-5"
+          onClick={() => navigate(`/karya/${publishedWithMediaError.id}`)}
         >
-          isi pakai AI ✨
+          Buka karya tanpa media
         </Button>
-        <hr className="border-none border-b border-line my-7 mb-8" />
+      </section>
+    );
+  }
 
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Cover (opsional)</Eyebrow>
+  return (
+    <>
+      <header className="mb-[26px]">
+        <h1 className="m-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
+          Bikin karya baru.
+        </h1>
+        <p className="mt-2 font-body text-body leading-body text-ink2">
+          Isi langsung di sini, atau minta AI membantu menyusun draft yang tetap
+          bisa kamu edit.
+        </p>
+      </header>
+
+      <form onSubmit={publish} noValidate>
+        {submitError && (
+          <div
+            className="mb-5 rounded-card border border-danger/30 bg-danger/5 px-3.5 py-3 text-ui leading-body text-danger"
+            role="alert"
+          >
+            {submitError}
+          </div>
+        )}
+        {busy && (
+          <div
+            className="mb-5 rounded-card border border-line bg-surface px-3.5 py-3 text-ui leading-body text-ink2"
+            role="status"
+          >
+            {submitState === "publishing"
+              ? "Menerbitkan halaman karyamu…"
+              : "Karya sudah dibuat. Mengunggah media…"}
+          </div>
+        )}
+
+        <section className="pf mb-[22px]">
+          <div className="mb-2 flex items-baseline gap-2.5">
+            <Eyebrow as="label" htmlFor="karya-cover">
+              Cover
+            </Eyebrow>
+            <span className="text-micro text-ink3">opsional</span>
+          </div>
           <input
-            ref={fileInputRef}
+            ref={coverInputRef}
+            id="karya-cover"
             type="file"
             accept="image/png,image/jpeg,image/webp"
-            onChange={(e) => pickCover(e.target.files?.[0])}
-            style={{ display: "none" }}
+            className="hidden"
+            onChange={(event) => pickCover(event.target.files?.[0])}
           />
-          <div className="flex items-center gap-3.5">
-            {coverPreview ? (
-              <KaryaCover src={coverPreview} size={72} />
-            ) : (
-              <div
-                aria-hidden="true"
-                className="w-[72px] h-[72px] rounded-[16px] border border-dashed border-line shrink-0"
-              />
-            )}
-            <div className="flex flex-col gap-2">
-              <div className="flex gap-2">
+          <div className="flex min-h-[120px] items-center justify-center gap-3 rounded-panel border-[1.5px] border-dashed border-line-dark bg-surface px-4">
+            {coverPreview && <KaryaCover src={coverPreview} size={76} />}
+            <div className="flex flex-col items-start gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => coverInputRef.current?.click()}
+              >
+                {coverFile ? "Ganti gambar" : "Pilih cover"}
+              </Button>
+              {coverFile && (
                 <Button
                   type="button"
-                  variant="secondary"
-                  onClick={() => fileInputRef.current?.click()}
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearCover}
                 >
-                  {coverFile ? "Ganti gambar" : "Pilih gambar"}
+                  Hapus cover
                 </Button>
-                {coverFile && (
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    onClick={clearCover}
-                  >
-                    Hapus
-                  </Button>
-                )}
-              </div>
-              <p className="text-body text-ink2 leading-body m-0 text-[12px]">
-                PNG, JPG, atau WebP — maks 2 MB.
-              </p>
-              {coverError && (
-                <p className="m-0 text-[12px] text-danger">{coverError}</p>
               )}
+              <span className="text-micro text-ink3">
+                PNG, JPG, atau WebP · maks 2 MB
+              </span>
             </div>
           </div>
-        </div>
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Tangkapan layar (opsional)</Eyebrow>
+          <FieldError message={coverError ?? undefined} />
+        </section>
+
+        <section className="pf mb-[22px]">
+          <div className="mb-2 flex items-baseline gap-2.5">
+            <Eyebrow>Tangkapan layar</Eyebrow>
+            <span className="text-micro text-ink3">opsional</span>
+          </div>
           <ScreenshotGroup
             label="Landscape"
-            hint="muncul di baris feed"
+            hint="muncul di Scroll"
             items={screenshots.landscape}
             error={screenshotError.landscape}
             onAdd={(files) => addScreenshots("landscape", files)}
-            onRemove={(i) => removeScreenshot("landscape", i)}
-            onMove={(i, dir) => moveScreenshot("landscape", i, dir)}
+            onRemove={(index) => removeScreenshot("landscape", index)}
+            onMove={(index, direction) =>
+              moveScreenshot("landscape", index, direction)
+            }
           />
           <ScreenshotGroup
             label="Potret"
@@ -364,52 +452,72 @@ export default function KaryaNew() {
             items={screenshots.portrait}
             error={screenshotError.portrait}
             onAdd={(files) => addScreenshots("portrait", files)}
-            onRemove={(i) => removeScreenshot("portrait", i)}
-            onMove={(i, dir) => moveScreenshot("portrait", i, dir)}
+            onRemove={(index) => removeScreenshot("portrait", index)}
+            onMove={(index, direction) =>
+              moveScreenshot("portrait", index, direction)
+            }
           />
-        </div>
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Judul</Eyebrow>
-          <EditField value={draft.title} onChange={(v) => set("title", v)} />
-        </div>
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Deskripsi</Eyebrow>
-          <EditField
+        </section>
+
+        <section className="pf mb-[22px]">
+          <Eyebrow as="label" htmlFor="karya-title" className="mb-2">
+            Judul
+          </Eyebrow>
+          <Input
+            id="karya-title"
+            value={draft.title}
+            aria-invalid={!!errors.title}
+            placeholder="Nama karya kamu"
+            onChange={(event) => set("title", event.target.value)}
+          />
+          <FieldError message={errors.title} />
+        </section>
+
+        <section className="pf mb-[22px]">
+          <Eyebrow as="label" htmlFor="karya-description" className="mb-2">
+            Deskripsi
+          </Eyebrow>
+          <Textarea
+            id="karya-description"
+            rows={3}
             value={draft.description}
-            onChange={(v) => set("description", v)}
-            multiline
+            aria-invalid={!!errors.description}
+            placeholder="Ceritakan karyanya dalam satu-dua kalimat."
+            className="resize-y leading-body"
+            onChange={(event) => set("description", event.target.value)}
           />
-        </div>
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Tahap</Eyebrow>
+          <FieldError message={errors.description} />
+        </section>
+
+        <section className="pf mb-[22px]">
+          <Eyebrow className="mb-2">Tahap</Eyebrow>
           <StageMultiSelect
             stages={draft.stages}
-            onChange={(v) => set("stages", v)}
+            onChange={(value) => set("stages", value)}
           />
-        </div>
-        <div className="pf mb-7">
-          <Eyebrow className="mb-1.5">Minat / tag</Eyebrow>
+          <FieldError message={errors.stages} />
+        </section>
+
+        <section className="pf mb-[22px]">
+          <Eyebrow className="mb-2">Minat / tag</Eyebrow>
           <InterestsEditor
             interests={draft.interests}
-            onChange={(v) => set("interests", v)}
+            onChange={(value) => set("interests", value)}
           />
-        </div>
+          <FieldError message={errors.interests} />
+        </section>
 
-        <hr className="border-none border-b border-line my-8" />
-        <div className="flex justify-end gap-3">
+        <div className="mt-2 flex justify-end border-t border-line pt-[22px]">
           <Button
-            type="button"
-            variant="primary"
-            onClick={publish}
-            disabled={!canPublish}
-            style={
-              canPublish ? undefined : { opacity: 0.35, cursor: "default" }
-            }
+            type="submit"
+            size="lg"
+            disabled={busy}
+            className="px-[22px] font-semibold tracking-heading"
           >
-            Publish karya →
+            {busy ? "Menerbitkan…" : "Terbitkan karya"}
           </Button>
         </div>
-      </div>
-    </div>
+      </form>
+    </>
   );
 }

@@ -47,7 +47,7 @@ async function mockCommon(page: Page) {
 }
 
 authed(
-  "direct form: fill draft → publish sends title/description/stages/interests",
+  "Karya CTA → manual create → publish → created detail",
   async ({ page }) => {
     await mockCommon(page);
 
@@ -94,19 +94,18 @@ authed(
       }),
     );
 
-    await page.goto("/karya/new");
+    await page.goto("/karya");
+    await page
+      .getByRole("main")
+      .getByRole("button", { name: "Bikin karya" })
+      .click();
+    await expect(page).toHaveURL(/\/karya\/new$/);
+    await expect(
+      page.getByRole("button", { name: /Bantu susun pakai AI/ }),
+    ).toBeVisible();
 
-    // Title (inline edit).
-    const titleField = page.locator(".pf", { hasText: "Judul" });
-    await titleField.locator(".field-val").click();
-    await titleField.locator(".field-in").fill("Sync Tool");
-    await titleField.locator(".field-in").blur();
-
-    // Description (multiline inline edit).
-    const descField = page.locator(".pf", { hasText: "Deskripsi" });
-    await descField.locator(".field-val").click();
-    await descField.locator(".field-ta").fill("offline-first file sync");
-    await descField.locator(".field-ta").blur();
+    await page.getByLabel("Judul").fill("Sync Tool");
+    await page.getByLabel("Deskripsi").fill("offline-first file sync");
 
     // Stage multi-select: "ide" is on by default; add "bikin" (building).
     const stageField = page.locator(".pf", { hasText: "Tahap" });
@@ -120,7 +119,7 @@ authed(
       minat.locator(".chip", { hasText: "Open Source" }),
     ).toBeVisible();
 
-    await page.getByRole("button", { name: /Publish karya/ }).click();
+    await page.getByRole("button", { name: "Terbitkan karya" }).click();
     await expect(page).toHaveURL(/\/karya\/k-new/);
 
     expect(savedKarya).not.toBeNull();
@@ -169,12 +168,10 @@ authed(
 
     // The agent hands the extracted draft to the editable form (DECISION-D).
     await expect(page).toHaveURL(/\/karya\/new$/);
-    const titleField = page.locator(".pf", { hasText: "Judul" });
-    await expect(titleField.getByText("Rasa")).toBeVisible();
-    const descField = page.locator(".pf", { hasText: "Deskripsi" });
-    await expect(
-      descField.getByText("rekomendasi kuliner lokal berbasis ML"),
-    ).toBeVisible();
+    await expect(page.getByLabel("Judul")).toHaveValue("Rasa");
+    await expect(page.getByLabel("Deskripsi")).toHaveValue(
+      "rekomendasi kuliner lokal berbasis ML",
+    );
     // The extracted stage is reflected in the multi-select.
     const stageField = page.locator(".pf", { hasText: "Tahap" });
     await expect(

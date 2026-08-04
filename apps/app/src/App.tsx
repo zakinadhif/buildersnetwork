@@ -16,7 +16,7 @@ import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
-import KaryaNew from "@/pages/KaryaNew";
+import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
@@ -175,8 +175,8 @@ function AppRoutes() {
         ))}
       </Route>
 
-      {/* ── Detail / creation flows: focused full-screen, reachable from the
-           shell (their fixed-layout pages aren't shell-hosted yet) ── */}
+      {/* ── Detail and AI flows remain focused full-screen. The approved manual
+           creation surface below stays inside the persistent shell. ── */}
       <Route path="/member/:id">
         {(params) =>
           !loggedIn ? (
@@ -198,12 +198,13 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/karya/new">
-        {!loggedIn ? (
-          <Redirect to="/welcome" />
-        ) : !hasProfile ? (
-          <Redirect to="/mulai" />
-        ) : (
-          <KaryaNew />
+        {shell(
+          () => (
+            <KaryaNew />
+          ),
+          () => (
+            <KaryaNewRail />
+          ),
         )}
       </Route>
       <Route path="/karya/:id">
