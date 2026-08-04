@@ -81,10 +81,12 @@ export function LeftNav({
   items,
   user,
   filters,
+  onUserClick,
 }: {
   items: NavItem[];
   user: { name: string; handle?: string | null };
   filters?: ReactNode;
+  onUserClick?: () => void;
 }) {
   return (
     <aside className="bn-nav sticky top-0 flex h-screen w-[calc(var(--shell-nav)+2*var(--shell-gutter)+1px)] shrink-0 flex-col border-r border-line px-[var(--shell-gutter)] pb-6 pt-8 max-[900px]:static max-[900px]:h-auto max-[900px]:w-full max-[900px]:overflow-visible max-[900px]:border-r-0 max-[900px]:p-0">
@@ -129,7 +131,13 @@ export function LeftNav({
         </div>
       )}
 
-      <div className="bn-nav-user mt-auto flex items-center gap-2 border-t border-line px-3 pt-4">
+      <button
+        type="button"
+        onClick={onUserClick}
+        disabled={!onUserClick}
+        aria-label={onUserClick ? "Buka Profil Saya" : undefined}
+        className="bn-nav-user mt-auto flex w-full items-center gap-2 border-x-0 border-b-0 border-t border-line bg-transparent px-3 pt-4 text-left disabled:cursor-default"
+      >
         <Avatar name={user.name} size={28} />
         <div className="min-w-0">
           <div className="font-body text-ui font-medium text-ink">
@@ -139,7 +147,7 @@ export function LeftNav({
             <div className="font-body text-micro text-ink3">@{user.handle}</div>
           )}
         </div>
-      </div>
+      </button>
     </aside>
   );
 }
