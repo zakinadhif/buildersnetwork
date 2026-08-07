@@ -1,17 +1,19 @@
 ---
 name: open-discussion
-description: Turn a developer's rough concern, observation, product tension, or unanswered question into a clear Bahasa Indonesia discussion draft or an open Proposed [Diskusi] GitHub issue. Use when someone needs help articulating reasoning, exploring trade-offs, challenging current direction, drafting a decision question, or opening/publishing a discussion before ratification.
+description: Open a Bahasa Indonesia Proposed [Diskusi] GitHub issue for an unresolved product, architecture, scope, sequencing, or design decision. Invoke only when the user explicitly asks to open, create, file, or publish a discussion, or explicitly invokes `$open-discussion` with publication intent. Do not invoke for advice, brainstorming, trade-off exploration, rough concerns, drafting, articulation, review, or ordinary questions.
 ---
 
-# Articulate and open a discussion
+# Open a discussion
 
 Act as the developer's mouthpiece, not the decision-maker. Preserve uncertainty and intent; never invent agreement, evidence, or a preferred option.
 
+Before doing anything else, confirm that the user explicitly requested publication of a discussion. If that authority is absent, stop using this skill and handle the request as ordinary conversation. Do not produce a formal discussion draft merely because the subject is unresolved.
+
 1. Read `plans/how-to/build-workflow.md`, then inspect the relevant plans, code, Git history, issues, or mockups before asking the developer to explain context the repository can answer.
-2. Route the input before drafting:
-   - Reproducible defect → recommend `$new-task` as `[Bug]`.
-   - Already-decided, grounded deliverable → recommend `$new-task` as `[Fitur]` or `[Desain]`.
-   - Broad vision input without a concrete decision question → draft a comment for pinned issue #12; publish it only on explicit request.
+2. Route the publication request before drafting:
+   - Reproducible defect → explain that it belongs in `$new-task` as `[Bug]`; do not open a discussion unless the user explicitly maintains that request after the distinction.
+   - Already-decided, grounded deliverable → explain that it belongs in `$new-task` as `[Fitur]` or `[Desain]`; do not open a discussion unless the user explicitly maintains that request after the distinction.
+   - Broad vision input without a concrete decision question → propose a comment for pinned issue #12 and obtain confirmation before publishing it.
    - Concrete unresolved product, architecture, scope, sequencing, or design question → continue as `[Diskusi]`.
 3. Ground the discussion in current reality. Cite affected code, current documentation, user feedback supplied by the developer, or a visible mismatch. A `[Diskusi]` may challenge existing plans; the proposed direction does not need prior approval.
 4. Elicit only meaning that evidence cannot supply. Ask at most one focused question at a time. Separate:
@@ -40,12 +42,8 @@ Act as the developer's mouthpiece, not the decision-maker. Preserve uncertainty 
 
 Frame one answerable decision question. Include only supported options; label agent-suggested alternatives as suggestions rather than the developer's position. Keep implementation tasks and acceptance criteria out of the discussion.
 
-6. Respect publication authority:
-   - “Help articulate,” “draft,” “explore,” or “review” → return a draft only; mutate nothing.
-   - “Open,” “create,” “file,” or “publish the discussion” → authorization to create the issue and place it in Proposed.
-   - If publication would require materially inferring the developer's stance, show the draft and obtain confirmation first.
-   - Never ratify, create implementation tasks, or move the item to Ready from this skill.
-7. When authorized, create and place the issue:
+6. Treat the explicit request to open, create, file, or publish as authority to create the issue and place it in Proposed. If publication would require materially inferring the developer's stance, show the draft and obtain confirmation first. Never ratify, create implementation tasks, or move the item to Ready from this skill.
+7. Create and place the issue:
 
 ```bash
 gh issue create --title "[Diskusi] <Area>: <brief>" --body "<body>"
