@@ -1,0 +1,4 @@
+interface:
+  display_name: "Set Up Project"
+  short_description: "Set up and verify a fresh contributor clone"
+  default_prompt: "Use $setup-project to set up this repository for local development and verify it is running."

@@ -340,10 +340,13 @@ flowchart LR
 
 Team workflow (milestones → task issues → project board) is defined in [plans/how-to/build-workflow.md](plans/how-to/build-workflow.md); roadmap in [plans/roadmap.md](plans/roadmap.md). One-time setup beyond Quick start: `gh auth login`, then `gh auth refresh -s project,read:project`.
 
+Coding-agent users can run `/setup-project` from a fresh clone to check prerequisites, configure local development without exposing secrets, start the API and app, and verify the full contributor toolchain.
+
 Claude Code users get the loop as repo skills:
 
 | Skill | What it does |
 |---|---|
+| `/setup-project` | Set up and verify a fresh contributor clone |
 | `/project-status` | Where we are — phase, milestone countdowns, board |
 | `/pick-task` | Claim a task + load its full context |
 | `/ship-task` | Open the PR + update the board |

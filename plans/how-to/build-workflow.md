@@ -170,7 +170,7 @@ GitHub's **sub-issues** give a parent issue a live checklist of children and a p
 
 ## The loop (human + agent)
 
-Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth refresh -s project,read:project` (board access). Claude Code picks up the repo skills automatically.
+Contributor setup, once: clone, `pnpm install`, `gh auth login`, then `gh auth refresh -s project,read:project` (board access). `/setup-project` walks through and verifies the complete local setup. Claude Code picks up the repo skills automatically.
 
 1. **`/project-status`** — where we are: the active phase & bet, each milestone's progress and target-date countdown, then today's board (Ready, who's on what, what's in review). No website needed.
 2. **`/pick-task`** — claim a Ready task: after interpreting the issue, it runs `pnpm workflow claim`, which assigns you, creates or resumes the branch, and moves the item to In Progress.
