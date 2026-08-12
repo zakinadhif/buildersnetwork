@@ -444,6 +444,161 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /karya/{id}/posts/{postId}:
+    get:
+      operationId: getKaryaPost
+      tags: [karya]
+      summary: Read one post and its comment summary
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The post with its latest-comment summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Post"
+        "404":
+          description: Karya or post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /karya/{id}/posts/{postId}/comments:
+    get:
+      operationId: getPostComments
+      tags: [karya]
+      summary: List a post's first-layer comments chronologically
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Flat chronological comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Comment"
+        "404":
+          description: Karya or post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createComment
+      tags: [karya]
+      summary: Comment on a post (any authenticated community member)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CommentInput"
+      responses:
+        "200":
+          description: The created comment
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Comment"
+        "400":
+          description: Empty comment body
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Karya or post not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /karya/{id}/posts/{postId}/comments/{commentId}:
+    delete:
+      operationId: deleteComment
+      tags: [karya]
+      summary: Delete a comment as its author or the karya owner
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: postId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: commentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Comment deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Not the comment author or karya owner
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Karya, post, or comment not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /karya/{id}/feature:
     post:
       operationId: featureKarya
@@ -897,6 +1052,30 @@ components:
           minLength: 1
       required: [body]
 
+    CommentInput:
+      type: object
+      properties:
+        body:
+          type: string
+          minLength: 1
+      required: [body]
+
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+        postId:
+          type: string
+        body:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        author:
+          $ref: "#/components/schemas/RosterMember"
+      required: [id, postId, body, createdAt, author]
+
     Post:
       type: object
       properties:
@@ -911,7 +1090,14 @@ components:
           format: date-time
         author:
           $ref: "#/components/schemas/RosterMember"
-      required: [id, karyaId, body, createdAt, author]
+        commentCount:
+          type: integer
+          minimum: 0
+        latestComment:
+          anyOf:
+            - $ref: "#/components/schemas/Comment"
+            - type: "null"
+      required: [id, karyaId, body, createdAt, author, commentCount, latestComment]
 
     KaryaRef:
       type: object

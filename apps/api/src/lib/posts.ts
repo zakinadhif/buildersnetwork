@@ -1,6 +1,7 @@
 import type { createDb } from "@myapp/db";
 import { karya, posts, profiles, users } from "@myapp/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { type CommentRow, commentsByPostIds, toComment } from "./comments";
 
 type Db = ReturnType<typeof createDb>;
 
@@ -16,6 +17,11 @@ export interface PostRow {
   authorHandle: string | null;
   authorImage: string | null;
   karyaTitle: string;
+}
+
+export interface PostCommentSummary {
+  count: number;
+  latest: CommentRow | null;
 }
 
 // Shared select shape: posts → author profile (name/handle) + user (image) +
@@ -44,7 +50,10 @@ function baseQuery(db: Db) {
 }
 
 /** Shape a {@link PostRow} into the wire `Post` (author face + ISO timestamp). */
-export function toPost(r: PostRow) {
+export function toPost(
+  r: PostRow,
+  summary: PostCommentSummary = { count: 0, latest: null },
+) {
   return {
     id: r.id,
     karyaId: r.karyaId,
@@ -56,7 +65,23 @@ export function toPost(r: PostRow) {
       handle: r.authorHandle,
       image: r.authorImage,
     },
+    commentCount: summary.count,
+    latestComment: summary.latest ? toComment(summary.latest) : null,
   };
+}
+
+/** Batch the count and newest comment used by feed/karya teasers. */
+export async function commentSummariesForPosts(
+  db: Db,
+  postIds: string[],
+): Promise<Map<string, PostCommentSummary>> {
+  const grouped = await commentsByPostIds(db, postIds);
+  return new Map(
+    postIds.map((postId) => {
+      const rows = grouped.get(postId) ?? [];
+      return [postId, { count: rows.length, latest: rows.at(-1) ?? null }];
+    }),
+  );
 }
 
 /** The N most-recent posts across all karya, reverse-chron — drives the feed. */

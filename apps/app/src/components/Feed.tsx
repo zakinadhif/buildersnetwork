@@ -1,4 +1,5 @@
 import type { FeedItem } from "@myapp/api-client-react";
+import { MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
 import { Avatar, KaryaCard } from "@/components/ui-atoms";
 import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
@@ -54,6 +55,37 @@ export default function Feed({ items }: { items: FeedItem[] }) {
                 </span>
               </button>
             </div>
+            <button
+              type="button"
+              className="mt-3 inline-flex cursor-pointer items-center gap-1.5 border-none bg-transparent p-0 text-left text-caption font-medium text-accent-mid"
+              onClick={() => navigate(`/karya/${it.karya.id}/posts/${it.id}`)}
+            >
+              <MessageCircle size={13} strokeWidth={2} aria-hidden="true" />
+              {it.commentCount > 0
+                ? `${it.commentCount} komentar · Lihat percakapan →`
+                : "Beri komentar →"}
+            </button>
+            {it.latestComment && (
+              <button
+                type="button"
+                className="mt-3 flex w-full gap-2.5 border-t border-line bg-transparent pt-3 text-left"
+                onClick={() => navigate(`/karya/${it.karya.id}/posts/${it.id}`)}
+              >
+                <Avatar
+                  name={it.latestComment.author.name}
+                  image={it.latestComment.author.image}
+                  size={28}
+                />
+                <span className="min-w-0 flex-1">
+                  <span className="block text-ui font-medium text-ink">
+                    {it.latestComment.author.name}
+                  </span>
+                  <span className="mt-0.5 block line-clamp-2 text-ui leading-body text-ink2">
+                    {it.latestComment.body}
+                  </span>
+                </span>
+              </button>
+            )}
           </article>
         ) : (
           <KaryaCard

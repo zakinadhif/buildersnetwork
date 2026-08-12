@@ -381,6 +381,36 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
               <p className="m-0 whitespace-pre-wrap text-body leading-body text-ink">
                 {post.body}
               </p>
+              <button
+                type="button"
+                className="mt-3 cursor-pointer border-none bg-transparent p-0 text-left text-caption font-medium text-accent-mid"
+                onClick={() => navigate(`/karya/${id}/posts/${post.id}`)}
+              >
+                {post.commentCount > 0
+                  ? `${post.commentCount} komentar · Lihat percakapan →`
+                  : "Beri komentar →"}
+              </button>
+              {post.latestComment && (
+                <button
+                  type="button"
+                  className="mt-3 flex w-full gap-2.5 border-t border-line bg-transparent pt-3 text-left"
+                  onClick={() => navigate(`/karya/${id}/posts/${post.id}`)}
+                >
+                  <Avatar
+                    name={post.latestComment.author.name}
+                    image={post.latestComment.author.image}
+                    size={28}
+                  />
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-ui font-medium text-ink">
+                      {post.latestComment.author.name}
+                    </span>
+                    <span className="mt-0.5 block line-clamp-2 text-ui leading-body text-ink2">
+                      {post.latestComment.body}
+                    </span>
+                  </span>
+                </button>
+              )}
             </article>
           ))}
         </div>
