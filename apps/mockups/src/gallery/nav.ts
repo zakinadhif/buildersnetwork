@@ -15,6 +15,7 @@ export type Screen =
   | "daftar"
   | "mulai"
   | "karya-detail"
+  | "post-detail"
   | "karya-new"
   | "profil"
   | "minat"
@@ -63,14 +64,12 @@ export const SCREEN_META: ScreenMeta[] = [
     key: "scroll",
     label: "Scroll",
     group: "Surface",
-    designStatus: "approved-reference",
+    designStatus: "in-review",
     productStatus: "active",
-    groundedBy: 98,
-    scopeNote: "Shell, hierarchy, and the karya-update feed",
+    scopeNote: "Shell, karya-update feed, and newest-comment teaser that routes to each post detail",
     excludes: [
       "post headlines and kinds",
       "appreciation",
-      "comment summaries",
       "collaboration openings",
     ],
   },
@@ -154,16 +153,24 @@ export const SCREEN_META: ScreenMeta[] = [
     key: "karya-detail",
     label: "Detail Karya",
     group: "Funnel",
-    designStatus: "approved-reference",
+    designStatus: "in-review",
     productStatus: "active",
-    groundedBy: 148,
-    scopeNote: "Owner and visitor karya detail with media, activity, and recoverable states",
+    scopeNote: "Karya detail with compact comment previews that open each post permalink",
     excludes: [
       "post kinds",
       "appreciation",
       "collaboration requests",
-      "comments until #144 lands",
+      "nested replies, reactions, notifications, and page-level comments",
     ],
+  },
+  {
+    key: "post-detail",
+    label: "Detail Post",
+    group: "Funnel",
+    designStatus: "in-review",
+    productStatus: "active",
+    scopeNote: "X-like expanded post thread: original post, inline composer, then flat chronological comments",
+    excludes: ["nested replies", "reactions", "notifications", "page-level comments", "moderation dashboard"],
   },
   {
     key: "karya-new",

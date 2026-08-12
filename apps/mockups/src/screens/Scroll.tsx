@@ -39,6 +39,7 @@ import {
 import { coverFor, screenshots as fallbackShots } from "../lib/images";
 import { relativeMinutes, relativeTime } from "../lib/format";
 import { Eyebrow } from "@myapp/ui";
+import { useNavigate } from "../gallery";
 
 // ─── Post identity — the karya leads, the author dips into its corner ────────────
 // This is the platform's signature: the post is authored by the *project*, not the
@@ -98,10 +99,11 @@ function AppreciateButton({ count, active, onClick }: { count: number; active: b
 
 // ─── Comment count — the thread's size, beside the only reaction ────────────────
 // Appreciation stays the sole *reaction*; this is a doorway, not a second verdict.
-function CommentCount({ count }: { count: number }) {
+function CommentCount({ count, onOpen }: { count: number; onOpen: () => void }) {
   return (
     <button
       type="button"
+      onClick={onOpen}
       aria-label={`${count} komentar`}
       className="inline-flex cursor-pointer items-center gap-1.5 rounded-full border border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2 transition-all duration-150"
     >
@@ -121,9 +123,9 @@ function voiceSummary(voices: Member[]): string {
 }
 
 // ─── The thread's newest message, shown under the post ──────────────────────────
-// A glimpse, not a composer: the feed still has nowhere to type. "Balas" is a
-// doorway into the thread on the karya's page, where the conversation lives.
-function CommentPreview({ author, latest }: { author: Member; latest: LatestMessage }) {
+// A glimpse, not a composer: the whole teaser is a doorway into the thread on
+// the karya page. P0 deliberately exposes no reply or reaction control here.
+function CommentPreview({ author, latest, onOpen }: { author: Member; latest: LatestMessage; onOpen: () => void }) {
   return (
     <div className="mt-[13px] flex gap-2.5 border-t border-line pt-[13px]">
       <Avatar name={author.name} size={28} />
@@ -135,10 +137,7 @@ function CommentPreview({ author, latest }: { author: Member; latest: LatestMess
         <p className="mt-0.5 font-body text-ui leading-body text-ink2">
           {latest.body}
         </p>
-        <div className="mt-[7px] flex items-center gap-3.5">
-          <button type="button" className="border-none bg-none p-0 font-body text-micro font-medium text-ink3 cursor-pointer">Suka · {latest.likes}</button>
-          <button type="button" className="border-none bg-none p-0 font-body text-micro font-medium text-ink3 cursor-pointer">Balas</button>
-        </div>
+        <button type="button" onClick={onOpen} className="mt-[7px] cursor-pointer border-none bg-transparent p-0 font-body text-micro font-medium text-accent-mid">Lihat percakapan →</button>
       </div>
     </div>
   );
@@ -150,6 +149,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
   appreciated: boolean;
   onAppreciate: (id: number) => void;
 }) {
+  const navigate = useNavigate();
   const { update, karya, author, voices } = resolved;
   const cover = coverFor(karya.interests);
   const shots = update.shots ? (karya.landscapeScreenshots ?? fallbackShots).slice(0, 2) : [];
@@ -199,7 +199,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
             active={appreciated}
             onClick={() => onAppreciate(update.id)}
           />
-          <CommentCount count={discussion?.total ?? 0} />
+          <CommentCount count={discussion?.total ?? 0} onOpen={() => navigate("post-detail")} />
         </div>
 
         {/* Who's in there, then the newest thing said — the thread, seen through a window */}
@@ -211,7 +211,7 @@ function ScrollPost({ resolved, appreciated, onAppreciate }: {
                 {voiceSummary(voices)} berkomentar
               </span>
             </div>
-            <CommentPreview author={voices[0]} latest={discussion.latest} />
+            <CommentPreview author={voices[0]} latest={discussion.latest} onOpen={() => navigate("post-detail")} />
           </>
         )}
       </div>

@@ -22,33 +22,37 @@
  */
 
 import { useState } from "react";
+import { MessageCircle } from "lucide-react";
 import { Avatar, KaryaCover, Tag, MainColumn, RailColumn, cn } from "@myapp/ui";
 import { Composer } from "../components/Composer";
 import { PreviewStates } from "../components/PreviewStates";
 import { Shell } from "../components/Shell";
 import { KARYA } from "../data/karya";
+import { COMMENTS, COMMENT_AUTHORS, POSTS } from "../data/comments";
+import { useNavigate } from "../gallery";
 import { coverFor, screenshots } from "../lib/images";
 import { relativeTime } from "../lib/format";
 import { Eyebrow } from "@myapp/ui";
 
 const KARYA_ITEM = KARYA[0]; // KampusKerja — featured, two-person roster
-
-const POSTS: { id: number; author: string; body: string; hoursAgo: number }[] = [
-  { id: 1, author: "Arief Maulana", body: "Beta terbuka udah live! Mahasiswa Telkom bisa daftar & lihat lowongan magang dari alumni. Makasih yang udah nyoba versi awal 🙏", hoursAgo: 5 },
-  { id: 2, author: "Siti Rahmah", body: "Rombak alur onboarding — sekarang cuma 2 langkah sebelum lihat lowongan pertama. Data awal: drop-off turun jauh.", hoursAgo: 22 },
-  { id: 3, author: "Arief Maulana", body: "Lagi cari 1 orang yang kuat di data scraping buat sinkronisasi lowongan otomatis. Kalau tertarik, colek ya.", hoursAgo: 50 },
-];
+type ViewerRole = "owner" | "community" | "signed-out";
 
 function KaryaUpdatePost({
+  id,
   author,
   body,
   hoursAgo,
+  onOpen,
 }: {
+  id: number;
   author: string;
   body: string;
   hoursAgo: number;
+  onOpen: () => void;
 }) {
   const cover = coverFor(KARYA_ITEM.interests);
+  const comments = COMMENTS.filter((comment) => comment.postId === id);
+  const latest = comments[comments.length - 1];
 
   return (
     <article className="bn-post flex gap-3.5 border-b border-line py-[18px]">
@@ -66,6 +70,26 @@ function KaryaUpdatePost({
           diposting {author} · {relativeTime(hoursAgo)}
         </div>
         <p className="mt-2.5 font-body text-body leading-body text-ink2">{body}</p>
+        <button
+          type="button"
+          onClick={onOpen}
+          className="mt-3 flex w-full cursor-pointer items-start gap-2.5 border-none border-t border-line bg-transparent pt-3 text-left"
+        >
+          <MessageCircle size={13} className="mt-0.5 shrink-0 text-ink3" aria-hidden="true" />
+          <span className="min-w-0 flex-1">
+            <span className="block font-body text-caption font-medium text-ink2">
+              {comments.length > 0 ? `${comments.length} komentar` : "Belum ada komentar"}
+            </span>
+            {latest && (
+              <span className="mt-1 block font-body text-ui leading-body text-ink3">
+                <strong className="font-medium text-ink2">{COMMENT_AUTHORS[latest.authorId]}</strong> · {latest.body}
+              </span>
+            )}
+            <span className="mt-1.5 block font-body text-micro font-medium text-accent-mid">
+              {comments.length > 0 ? "Lihat percakapan →" : "Beri komentar →"}
+            </span>
+          </span>
+        </button>
       </div>
     </article>
   );
@@ -109,16 +133,16 @@ function RailActions({ owner, featured, onToggleFeatured }: {
 }
 
 // ─── Role toggle (gallery affordance) ────────────────────────────────────────
-function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boolean) => void }) {
+function RoleToggle({ role, onChange }: { role: ViewerRole; onChange: (role: ViewerRole) => void }) {
   return (
     <div className="flex gap-0.5 rounded-full border border-line bg-surface p-[3px]">
-      {([["owner", "Owner"], ["visitor", "Pengunjung"]] as const).map(([val, label]) => {
-        const on = (val === "owner") === owner;
+      {([["owner", "Owner"], ["community", "Komunitas"], ["signed-out", "Tamu"]] as const).map(([val, label]) => {
+        const on = val === role;
         return (
           <button
             key={val}
             type="button"
-            onClick={() => onChange(val === "owner")}
+            onClick={() => onChange(val)}
             aria-pressed={on}
             className={cn(
               "flex-1 cursor-pointer rounded-full border-none px-3 py-[5px] font-body text-micro",
@@ -135,9 +159,11 @@ function RoleToggle({ owner, onChange }: { owner: boolean; onChange: (owner: boo
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 export default function KaryaDetailScreen() {
-  const [owner, setOwner] = useState(true);
+  const navigate = useNavigate();
+  const [role, setRole] = useState<ViewerRole>("community");
   const [featured, setFeatured] = useState(!!KARYA_ITEM.featured);
   const [detailState, setDetailState] = useState<"ready" | "no-media" | "loading" | "not-found">("ready");
+  const owner = role === "owner";
   const k = KARYA_ITEM;
 
   if (detailState === "loading" || detailState === "not-found") {
@@ -178,7 +204,7 @@ export default function KaryaDetailScreen() {
             ]}
           >
             <Eyebrow as="div" className="mb-2">Peran</Eyebrow>
-            <RoleToggle owner={owner} onChange={setOwner} />
+            <RoleToggle role={role} onChange={setRole} />
           </PreviewStates>
         </RailColumn>
       </Shell>
@@ -273,7 +299,7 @@ export default function KaryaDetailScreen() {
         )}
         <div className="flex flex-col">
           {POSTS.map((p) => (
-            <KaryaUpdatePost key={p.id} author={p.author} body={p.body} hoursAgo={p.hoursAgo} />
+            <KaryaUpdatePost key={p.id} id={p.id} author={p.author} body={p.body} hoursAgo={p.hoursAgo} onOpen={() => navigate("post-detail")} />
           ))}
         </div>
       </MainColumn>
@@ -292,7 +318,7 @@ export default function KaryaDetailScreen() {
           ]}
         >
           <Eyebrow as="div" className="mb-2">Peran</Eyebrow>
-          <RoleToggle owner={owner} onChange={setOwner} />
+          <RoleToggle role={role} onChange={setRole} />
         </PreviewStates>
 
         <RailActions owner={owner} featured={featured} onToggleFeatured={() => setFeatured((f) => !f)} />
