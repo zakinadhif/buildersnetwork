@@ -42,7 +42,6 @@ export type UpdateKind =
 export interface LatestMessage {
   body: string;
   minutesAgo: number; // doubles as the thread's recency — nothing is newer
-  likes: number;
 }
 
 /**
@@ -99,17 +98,17 @@ export const UPDATES: Update[] = [
     body: "Tiga UMKM depan kampus sekarang terima order lewat WhatsApp, langsung dari katalog. Yang paling makan waktu ternyata foto produk, bukan setup tokonya.",
     // Fresh, but only a trickle — under the threshold, so the rail leaves it out.
     discussion: { total: 9, recent: 3, voices: ["@rizalh"],
-      latest: { body: "Ini nolong banget buat warung yang belum punya katalog. Alurnya boleh dicontek?", minutesAgo: 4, likes: 2 } } },
+      latest: { body: "Ini nolong banget buat warung yang belum punya katalog. Alurnya boleh dicontek?", minutesAgo: 4 } } },
   { id: 2, karyaId: 1, authorHandle: "@arief_dev",   kind: "rilis",   hoursAgo: 5,
     title: "Beta terbuka untuk semua",
     body: "40 lowongan magang dari alumni sudah tayang. Coba dan kirim masukan ya — terutama soal filter dan alur lamarannya.", shots: ["shot"],
     discussion: { total: 34, recent: 12, voices: ["@dianp", "@nadiaku", "@eko_s"],
-      latest: { body: "Baru coba — filter lokasinya ngebantu. Ada rencana tambah filter remote?", minutesAgo: 2, likes: 3 } } },
+      latest: { body: "Baru coba — filter lokasinya ngebantu. Ada rencana tambah filter remote?", minutesAgo: 2 } } },
   { id: 3, karyaId: 3, authorHandle: "@rizalh",      kind: "riset",   hoursAgo: 9,
     title: "Tokenizer Sunda–Jawa tembus 92%",
     body: "Naik dari 87% bulan lalu. Notebook dan catatan lengkapnya sudah di repo, termasuk split datanya.",
     discussion: { total: 19, recent: 8, voices: ["@eko_s", "@rizalh"],
-      latest: { body: "92% itu lewat baseline yang mana? Penasaran sama split datanya.", minutesAgo: 6, likes: 1 } } },
+      latest: { body: "92% itu lewat baseline yang mana? Penasaran sama split datanya.", minutesAgo: 6 } } },
   { id: 4, karyaId: 1, authorHandle: "@arief_dev",   kind: "tonggak", hoursAgo: 14,
     title: "Naik kelas dari MVP ke Beta",
     body: "Terima kasih 30+ builder yang ikut uji coba versi tertutup — masukan kalian yang bikin naik kelas." },
@@ -119,13 +118,13 @@ export const UPDATES: Update[] = [
     // Was busy, has gone quiet — the newest message sits outside the window, so it
     // drops out of the rail. Activity is measured, not accumulated.
     discussion: { total: 22, recent: 9, voices: ["@arief_dev", "@eko_s"],
-      latest: { body: "Kartu Struktur Data-nya rapi. Ada rencana ekspor ke Anki?", minutesAgo: 140, likes: 4 } } },
+      latest: { body: "Kartu Struktur Data-nya rapi. Ada rencana ekspor ke Anki?", minutesAgo: 140 } } },
   { id: 6, karyaId: 5, authorHandle: "@farhan_a",    kind: "ajakan",  hoursAgo: 26, role: "Desainer UI",
     title: "Butuh desainer UI untuk halaman detail kost",
     body: "Buka slot buat rombak halaman detail kost. Sistem desain & komponennya sudah ada, tinggal dipakai.",
     // A day old, and only now catching fire — recency of the *post* is irrelevant.
     discussion: { total: 15, recent: 7, voices: ["@nadiaku", "@dianp", "@arief_dev"],
-      latest: { body: "Tertarik! Aku pernah rombak halaman detail yang mirip. Boleh lihat sistem desainnya?", minutesAgo: 11, likes: 5 } } },
+      latest: { body: "Tertarik! Aku pernah rombak halaman detail yang mirip. Boleh lihat sistem desainnya?", minutesAgo: 11 } } },
   { id: 7, karyaId: 6, authorHandle: "@megaw",       kind: "progres", hoursAgo: 38,
     title: "Kalender akademik sinkron otomatis",
     body: "Jadwal ketarik sendiri dari kalender akademik Telkom — nggak ada input manual lagi." },

@@ -16,6 +16,7 @@ import ScrollScreen from "./screens/Scroll";
 import KaryaScreen from "./screens/Karya";
 import PeopleScreen from "./screens/People";
 import KaryaDetailScreen from "./screens/KaryaDetail";
+import PostDetailScreen from "./screens/PostDetail";
 import KaryaNewScreen from "./screens/KaryaNew";
 import MinatSayaScreen from "./screens/MinatSaya";
 import MulaiScreen from "./screens/Mulai";
@@ -38,6 +39,7 @@ const SCREENS: Record<Screen, ComponentType> = {
   daftar:    DaftarScreen,
   mulai:     MulaiScreen,
   "karya-detail": KaryaDetailScreen,
+  "post-detail": PostDetailScreen,
   "karya-new": KaryaNewScreen,
   profil:    ProfilScreen,
   minat:     MinatSayaScreen,
