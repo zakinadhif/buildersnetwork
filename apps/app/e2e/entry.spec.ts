@@ -10,6 +10,16 @@ const USER = {
   updatedAt: new Date().toISOString(),
 };
 
+test.beforeEach(async ({ page }) => {
+  await page.route("**/api/features", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ aiAssistant: true }),
+    }),
+  );
+});
+
 test("daftar → verifikasi → profil → Scroll works without real email", async ({
   page,
 }) => {
