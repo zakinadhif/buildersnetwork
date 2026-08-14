@@ -15,13 +15,13 @@ This is also the [vision](../vision.md)'s validation promise: a karya page is wh
 - **Comments attach to the post (the event), not the karya page.** This follows the ratified [content-model](../reference/content-model.md): *the feed carries events that point at pages*, and conversation lands naturally on the update. **One** comment system, not two. Page-level (whole-karya) feedback is a later add on the same system — not a second one.
 - **The first layer only.** Comments on a post, visible on the karya page's timeline and on the feed teaser. Deliberately *above* the line and therefore **P1**: likes (FR-20), threading, replies-to-replies, notifications, reactions. This is what keeps the P0/P1 boundary principled rather than re-cut later as if it were arbitrary.
 - **Any community member can respond**, not just karya members (FR-42) — unlike posting, which stays member-only (FR-18). The authz asymmetry is the point: the channel exists to bring the *wider* community in.
+- **The post permalink is the conversation home.** The karya timeline and Scroll expose the comment count and newest-comment teaser, then route to the post detail for reading and composing a flat chronological thread.
+- **Moderation stays deliberately small.** A comment author may delete their own comment; the karya owner may remove any comment on that karya. There is no moderation dashboard or broader admin surface.
 - **Post and Comment stay separate.** The minimum records are `Post = id, karyaId, authorId, body, createdAt` and `Comment = id, postId, authorId, body, createdAt`. P0 does not add `parentCommentId`; if nesting later earns scope, it is a nullable self-reference on `Comment`, not a reason to merge both entities.
 
 ## Open decisions (settle at grooming)
 
-- **Surface treatment** — needs a `[Desain]` before the `[Fitur]` is groomed (Gate B): how first-layer comments render on the karya timeline, and what (if anything) the feed teaser shows about them.
 - **Page-level feedback** — whether the "validation channel" needs a whole-karya entry point in P0, or whether comments-on-posts alone satisfy FR-42's early-user loop. Lean: posts alone; revisit after real use.
-- **Moderation** — the repo has no moderation surface at all (see [retro](../archive/retro.txt), *Admin / moderation UI*). A comment channel is the first place that gap bites, since it's the first content non-members can author. Decide the minimum (author-delete? owner-remove?) at grooming; don't build a moderation system.
 
 ## Exit
 

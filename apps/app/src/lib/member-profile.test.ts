@@ -49,6 +49,8 @@ describe("member profile mapping", () => {
       body: "ship",
       createdAt: new Date().toISOString(),
       author: { id: "m1", name: "Dinda", handle: "dinda", image: null },
+      commentCount: 0,
+      latestComment: null,
       karya: { id: "k1", title: "Loom" },
     } satisfies FeedItem;
     expect(memberUpdates([post], "m1")).toHaveLength(1);

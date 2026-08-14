@@ -1,11 +1,11 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "fee4ac9e-046e-48d2-9cdb-3ee861c6726f",
+  "id": "e130b009-a243-4a69-af8f-11a90534b93b",
   "prevId": "dbc19c99-be0e-4cb0-a65d-0a4161209a5f",
   "tables": {
-    "assistant_conversations": {
-      "name": "assistant_conversations",
+    "comments": {
+      "name": "comments",
       "columns": {
         "id": {
           "name": "id",
@@ -14,28 +14,26 @@
           "notNull": true,
           "autoincrement": false
         },
-        "user_id": {
-          "name": "user_id",
+        "post_id": {
+          "name": "post_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "title": {
-          "name": "title",
+        "author_id": {
+          "name": "author_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'Percakapan baru'"
+          "autoincrement": false
         },
-        "intent": {
-          "name": "intent",
+        "body": {
+          "name": "body",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'general'"
+          "autoincrement": false
         },
         "created_at": {
           "name": "created_at",
@@ -44,98 +42,30 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
         }
       },
       "indexes": {
-        "assistant_conversations_userId_updatedAt_idx": {
-          "name": "assistant_conversations_userId_updatedAt_idx",
-          "columns": ["user_id", "updated_at"],
+        "comments_postId_createdAt_idx": {
+          "name": "comments_postId_createdAt_idx",
+          "columns": ["post_id", "created_at"],
           "isUnique": false
         }
       },
       "foreignKeys": {
-        "assistant_conversations_user_id_users_id_fk": {
-          "name": "assistant_conversations_user_id_users_id_fk",
-          "tableFrom": "assistant_conversations",
-          "tableTo": "users",
-          "columnsFrom": ["user_id"],
+        "comments_post_id_posts_id_fk": {
+          "name": "comments_post_id_posts_id_fk",
+          "tableFrom": "comments",
+          "tableTo": "posts",
+          "columnsFrom": ["post_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "assistant_messages": {
-      "name": "assistant_messages",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
         },
-        "conversation_id": {
-          "name": "conversation_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "role": {
-          "name": "role",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "action": {
-          "name": "action",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(cast(unixepoch('subsecond') * 1000 as integer))"
-        }
-      },
-      "indexes": {
-        "assistant_messages_conversationId_createdAt_idx": {
-          "name": "assistant_messages_conversationId_createdAt_idx",
-          "columns": ["conversation_id", "created_at"],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {
-        "assistant_messages_conversation_id_assistant_conversations_id_fk": {
-          "name": "assistant_messages_conversation_id_assistant_conversations_id_fk",
-          "tableFrom": "assistant_messages",
-          "tableTo": "assistant_conversations",
-          "columnsFrom": ["conversation_id"],
+        "comments_author_id_users_id_fk": {
+          "name": "comments_author_id_users_id_fk",
+          "tableFrom": "comments",
+          "tableTo": "users",
+          "columnsFrom": ["author_id"],
           "columnsTo": ["id"],
           "onDelete": "cascade",
           "onUpdate": "no action"

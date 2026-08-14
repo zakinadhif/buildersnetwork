@@ -15,6 +15,7 @@ CREATE TABLE `assistant_messages` (
 	`role` text NOT NULL,
 	`content` text NOT NULL,
 	`action` text,
+	`parts` text,
 	`created_at` integer DEFAULT (cast(unixepoch('subsecond') * 1000 as integer)) NOT NULL,
 	FOREIGN KEY (`conversation_id`) REFERENCES `assistant_conversations`(`id`) ON UPDATE no action ON DELETE cascade
 );

@@ -17,6 +17,7 @@ import Karya from "@/pages/Karya";
 import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
+import KaryaPost from "@/pages/KaryaPost";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
@@ -212,6 +213,21 @@ function AppRoutes() {
             <KaryaNewRail />
           ),
         )}
+      </Route>
+      <Route path="/karya/:karyaId/posts/:postId">
+        {(params) =>
+          !loggedIn ? (
+            <Redirect to="/welcome" />
+          ) : !hasProfile ? (
+            <Redirect to="/mulai" />
+          ) : (
+            <KaryaPost
+              karyaId={params.karyaId ?? ""}
+              postId={params.postId ?? ""}
+              me={me}
+            />
+          )
+        }
       </Route>
       <Route path="/karya/:id">
         {(params) =>

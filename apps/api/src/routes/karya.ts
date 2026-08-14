@@ -1,6 +1,11 @@
-import { CreateKaryaBody, CreatePostBody } from "@myapp/api-zod";
+import {
+  CreateCommentBody,
+  CreateKaryaBody,
+  CreatePostBody,
+} from "@myapp/api-zod";
 import { atomicWrite, normalizeOrientation, normalizeStages } from "@myapp/db";
 import {
+  comments,
   featured,
   karya,
   karyaMembers,
@@ -11,6 +16,7 @@ import { and, desc, eq } from "drizzle-orm";
 import type { Context } from "hono";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
+import { commentsForPost, getCommentById, toComment } from "../lib/comments";
 import {
   contentTypeForKey,
   coverKeyFor,
@@ -31,7 +37,12 @@ import {
   toKaryaScreenshot,
   toRosterMember,
 } from "../lib/karya";
-import { getPostById, postsForKarya, toPost } from "../lib/posts";
+import {
+  commentSummariesForPosts,
+  getPostById,
+  postsForKarya,
+  toPost,
+} from "../lib/posts";
 import {
   contentTypeForKey as contentTypeForScreenshotKey,
   extForContentType as extForScreenshotContentType,
@@ -197,7 +208,11 @@ app.get("/:id/posts", async (c) => {
   if (!k) return c.json({ error: "not found" }, 404);
 
   const rows = await postsForKarya(db, id);
-  return c.json(rows.map(toPost));
+  const commentSummaries = await commentSummariesForPosts(
+    db,
+    rows.map((row) => row.id),
+  );
+  return c.json(rows.map((row) => toPost(row, commentSummaries.get(row.id))));
 });
 
 // Post an update (FR-18). Authenticated; only an approved member of the karya
@@ -250,6 +265,103 @@ app.post("/:id/posts", async (c) => {
   const created = await getPostById(db, postId);
   if (!created) return c.json({ error: "not found" }, 404);
   return c.json(toPost(created));
+});
+
+// Read one post's canonical conversation home. The parent karya id is checked
+// explicitly so a post cannot be reached through an unrelated karya URL.
+app.get("/:id/posts/:postId", async (c) => {
+  const db = c.get("db");
+  const karyaId = c.req.param("id");
+  const postId = c.req.param("postId");
+  const post = await getPostById(db, postId);
+  if (!post || post.karyaId !== karyaId) {
+    return c.json({ error: "not found" }, 404);
+  }
+
+  const summaries = await commentSummariesForPosts(db, [post.id]);
+  return c.json(toPost(post, summaries.get(post.id)));
+});
+
+// Any authenticated community member may respond to a post. Unlike post
+// creation, this intentionally does not check karya membership (FR-42).
+app.get("/:id/posts/:postId/comments", async (c) => {
+  const db = c.get("db");
+  const karyaId = c.req.param("id");
+  const postId = c.req.param("postId");
+  const post = await getPostById(db, postId);
+  if (!post || post.karyaId !== karyaId) {
+    return c.json({ error: "not found" }, 404);
+  }
+
+  const rows = await commentsForPost(db, postId);
+  return c.json(rows.map(toComment));
+});
+
+app.post("/:id/posts/:postId/comments", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const db = c.get("db");
+  const karyaId = c.req.param("id");
+  const postId = c.req.param("postId");
+  const post = await getPostById(db, postId);
+  if (!post || post.karyaId !== karyaId) {
+    return c.json({ error: "not found" }, 404);
+  }
+
+  const parsed = CreateCommentBody.safeParse(await c.req.json());
+  if (!parsed.success) {
+    return c.json(
+      { error: parsed.error.issues[0]?.message ?? "invalid request" },
+      400,
+    );
+  }
+  const body = parsed.data.body.trim();
+  if (!body) return c.json({ error: "invalid comment" }, 400);
+
+  const commentId = crypto.randomUUID();
+  await db.insert(comments).values({
+    id: commentId,
+    postId,
+    authorId: session.user.id,
+    body,
+  });
+
+  const created = await getCommentById(db, commentId);
+  if (!created) return c.json({ error: "not found" }, 404);
+  return c.json(toComment(created));
+});
+
+// The author may remove their own comment; the karya owner may remove any
+// comment in the karya. There is deliberately no broader moderation surface.
+app.delete("/:id/posts/:postId/comments/:commentId", async (c) => {
+  const session = await getSession(c);
+  if (!session) return c.json({ error: "unauthorized" }, 401);
+  const db = c.get("db");
+  const karyaId = c.req.param("id");
+  const postId = c.req.param("postId");
+  const commentId = c.req.param("commentId");
+  const post = await getPostById(db, postId);
+  if (!post || post.karyaId !== karyaId) {
+    return c.json({ error: "not found" }, 404);
+  }
+
+  const comment = await getCommentById(db, commentId);
+  if (!comment || comment.postId !== postId) {
+    return c.json({ error: "not found" }, 404);
+  }
+
+  const [k] = await db
+    .select({ createdBy: karya.createdBy })
+    .from(karya)
+    .where(eq(karya.id, karyaId))
+    .limit(1);
+  if (!k) return c.json({ error: "not found" }, 404);
+  if (comment.authorId !== session.user.id && k.createdBy !== session.user.id) {
+    return c.json({ error: "forbidden" }, 403);
+  }
+
+  await db.delete(comments).where(eq(comments.id, commentId));
+  return c.json({ ok: true });
 });
 
 /** Resolve the karya and verify the session user owns it (403 otherwise). */
