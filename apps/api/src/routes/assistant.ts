@@ -271,6 +271,7 @@ app.post("/conversations/:id/messages", async (c) => {
   });
 
   return result.toUIMessageStreamResponse({
+    generateMessageId: () => crypto.randomUUID(),
     onFinish: async ({ responseMessage }) => {
       const typedMessage = responseMessage as UIMessage;
       const reply = textFromUIMessage(typedMessage);

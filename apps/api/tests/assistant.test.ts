@@ -145,6 +145,16 @@ describe("persistent assistant routes", () => {
     const streamed = await response.text();
     expect(streamed).toContain('"delta":"halo "');
     expect(streamed).toContain('"delta":"dari asisten"');
+    const assistantWrite = writes.find(
+      (write) =>
+        write.op === "insert" &&
+        (write.values as { role?: string } | undefined)?.role === "assistant",
+    );
+    expect(assistantWrite?.values).toMatchObject({
+      id: expect.stringMatching(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/,
+      ),
+    });
     expect(writes).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
