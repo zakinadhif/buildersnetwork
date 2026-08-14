@@ -18,6 +18,7 @@
     "@myapp/ai": "workspace:^",
     "@myapp/api-client-react": "workspace:*",
     "@myapp/design-tokens": "workspace:*",
+    "@myapp/feature-flags": "workspace:*",
     "@myapp/ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "@tanstack/react-query": "catalog:",

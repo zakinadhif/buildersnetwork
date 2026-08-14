@@ -14,6 +14,7 @@ import {
 import { createStorageFromEnv } from "@myapp/storage";
 
 import { createApp } from "./app";
+import { createAppFeatureFlagProvider } from "./lib/feature-flags";
 
 const config = loadConfig();
 
@@ -54,6 +55,11 @@ const adminEmails = (config.ADMIN_EMAILS ?? "")
 // upload flow works without Docker or credentials. Production remains
 // explicitly configurable and may leave storage disabled.
 const storage = createStorageFromEnv(config);
+const featureFlags = createAppFeatureFlagProvider({
+  kind: config.FEATURE_FLAG_PROVIDER,
+  db,
+  aiAssistant: config.FEATURE_AI_ASSISTANT,
+});
 
 const app = createApp({
   db,
@@ -65,6 +71,7 @@ const app = createApp({
   allowedOrigins,
   adminEmails,
   storage,
+  featureFlags,
   gitSha: process.env.GIT_SHA,
 });
 

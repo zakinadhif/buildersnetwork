@@ -8,6 +8,7 @@ import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
+import { useFeatureFlags } from "@/lib/feature-flags";
 import { KaryaDraftProvider } from "@/lib/karya-draft-provider";
 import type { Member } from "@/lib/members";
 import { OnboardingProvider } from "@/lib/onboarding-provider";
@@ -61,6 +62,7 @@ function KaryaCatalogRoute({ me }: { me: Member }) {
 
 function AppRoutes() {
   const { data: session, isPending } = useSession();
+  const { enabled, isLoading: featuresLoading } = useFeatureFlags();
   const [location] = useLocation();
   const { data: me, isLoading: meLoading } = useGetMe({
     query: {
@@ -69,7 +71,11 @@ function AppRoutes() {
     },
   });
 
-  if (isPending || (!!session?.user?.emailVerified && meLoading)) {
+  if (
+    isPending ||
+    featuresLoading ||
+    (!!session?.user?.emailVerified && meLoading)
+  ) {
     return <Loading />;
   }
 
@@ -161,9 +167,11 @@ function AppRoutes() {
         ))}
       </Route>
       <Route path="/assistant">
-        {withProfile((m) => (
-          <Assistant user={m} />
-        ))}
+        {enabled("aiAssistant") ? (
+          withProfile((m) => <Assistant user={m} />)
+        ) : (
+          <Redirect to="/home" />
+        )}
       </Route>
       <Route path="/jelajahi">
         {shell(() => (

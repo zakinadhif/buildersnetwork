@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
+import { useFeatureFlags } from "@/lib/feature-flags";
 
 const SKILLS = ["React", "Figma", "Python", "UI/UX", "Product", "Data"];
 const INTERESTS = [
@@ -76,6 +77,7 @@ export default function MinimalStart({
 }: {
   defaultName?: string;
 }) {
+  const { enabled } = useFeatureFlags();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(defaultName);
@@ -251,16 +253,18 @@ export default function MinimalStart({
       </div>
 
       <div className="mt-5 flex flex-col-reverse items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-        <Button
-          variant="ghost"
-          size="lg"
-          disabled={invalid || busyDestination !== null}
-          onClick={() => save("/assistant")}
-        >
-          {busyDestination === "/assistant"
-            ? "Menyimpan profil…"
-            : "Simpan, lalu buka asisten AI"}
-        </Button>
+        {enabled("aiAssistant") && (
+          <Button
+            variant="ghost"
+            size="lg"
+            disabled={invalid || busyDestination !== null}
+            onClick={() => save("/assistant")}
+          >
+            {busyDestination === "/assistant"
+              ? "Menyimpan profil…"
+              : "Simpan, lalu buka asisten AI"}
+          </Button>
+        )}
         <Button
           size="lg"
           disabled={invalid || busyDestination !== null}

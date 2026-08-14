@@ -26,6 +26,7 @@ const MOCK_SESSION = {
  * Use with the `authed` fixture to test authenticated routes.
  */
 async function mockAuth(page: Page) {
+  await mockFeatureFlags(page);
   await page.route("**/api/auth/get-session", (route) =>
     route.fulfill({
       status: 200,
@@ -40,11 +41,22 @@ async function mockAuth(page: Page) {
  * Use with the `unauthed` fixture to test redirect behaviour.
  */
 async function mockNoAuth(page: Page) {
+  await mockFeatureFlags(page);
   await page.route("**/api/auth/get-session", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
       body: "null",
+    }),
+  );
+}
+
+async function mockFeatureFlags(page: Page) {
+  await page.route("**/api/features", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ aiAssistant: true }),
     }),
   );
 }

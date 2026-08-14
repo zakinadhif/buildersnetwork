@@ -332,6 +332,17 @@ export const featured = sqliteTable(
   ],
 );
 
+// Global product release switches. Valid keys and safe fallback values live in
+// @myapp/feature-flags; this table only persists production boolean overrides.
+export const featureFlags = sqliteTable("feature_flags", {
+  key: text("key").primaryKey(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .default(now)
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
 export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, { fields: [profiles.userId], references: [users.id] }),
 }));

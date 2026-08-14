@@ -2,6 +2,7 @@ import { useGetFeed, useListMembers } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
 import { Avatar, Eyebrow } from "@/components/ui-atoms";
+import { useFeatureFlags } from "@/lib/feature-flags";
 import { firstName, type Member } from "@/lib/members";
 
 /**
@@ -11,6 +12,7 @@ import { firstName, type Member } from "@/lib/members";
  */
 export default function Scroll({ user }: { user: Member }) {
   const [, navigate] = useLocation();
+  const { enabled } = useFeatureFlags();
   const { data: feed = [] } = useGetFeed();
 
   return (
@@ -24,32 +26,34 @@ export default function Scroll({ user }: { user: Member }) {
         </span>
       </div>
 
-      <button
-        type="button"
-        className="my-4 flex w-full cursor-pointer items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5 text-left transition-opacity hover:opacity-85"
-        onClick={() => navigate("/assistant")}
-      >
-        <span
-          className="shrink-0 font-display text-[28px] leading-none text-accent"
-          aria-hidden="true"
+      {enabled("aiAssistant") && (
+        <button
+          type="button"
+          className="my-4 flex w-full cursor-pointer items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5 text-left transition-opacity hover:opacity-85"
+          onClick={() => navigate("/assistant")}
         >
-          ✦
-        </span>
-        <span className="min-w-0 flex-1">
-          <span className="mb-0.5 block font-display text-title leading-heading text-ink">
-            hei {firstName(user.name)} 👋
+          <span
+            className="shrink-0 font-display text-[28px] leading-none text-accent"
+            aria-hidden="true"
+          >
+            ✦
           </span>
-          <span className="block font-body text-body leading-body text-ink2">
-            Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
+          <span className="min-w-0 flex-1">
+            <span className="mb-0.5 block font-display text-title leading-heading text-ink">
+              hei {firstName(user.name)} 👋
+            </span>
+            <span className="block font-body text-body leading-body text-ink2">
+              Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
+            </span>
           </span>
-        </span>
-        <span
-          className="shrink-0 text-ui font-semibold text-accent"
-          aria-hidden="true"
-        >
-          Buka →
-        </span>
-      </button>
+          <span
+            className="shrink-0 text-ui font-semibold text-accent"
+            aria-hidden="true"
+          >
+            Buka →
+          </span>
+        </button>
+      )}
 
       <Eyebrow className="border-b border-line pb-2.5">Kabar terbaru</Eyebrow>
       {feed.length === 0 ? (

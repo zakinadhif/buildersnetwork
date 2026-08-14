@@ -9,6 +9,11 @@ import { createWorkersAI as createWorkersAIProvider } from "workers-ai-provider"
 
 import { type AppServices, createApp } from "./app";
 import { selectEmail } from "./lib/email";
+import {
+  createAppFeatureFlagProvider,
+  parseFeatureFlagBoolean,
+  parseFeatureFlagProviderKind,
+} from "./lib/feature-flags";
 
 // Cloudflare Workers environment bindings + secrets.
 // Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
@@ -38,6 +43,8 @@ interface Env {
   ALLOWED_ORIGINS?: string;
   ADMIN_EMAILS?: string;
   AI_WORKERS_MODEL?: string;
+  FEATURE_FLAG_PROVIDER?: string;
+  FEATURE_AI_ASSISTANT?: string;
   // R2 bucket binding for uploads (karya covers). Configured in wrangler.toml as
   // an [[r2_buckets]] entry. Optional — absent → the upload/serve routes 503.
   UPLOADS?: R2Bucket;
@@ -62,7 +69,9 @@ function getServices(env: Env): AppServices {
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
   const assistantModel = createWorkersAIProvider({
-    binding: env.AI as Parameters<typeof createWorkersAIProvider>[0]["binding"],
+    binding: env.AI as NonNullable<
+      Parameters<typeof createWorkersAIProvider>[0]["binding"]
+    >,
   })(env.AI_WORKERS_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct");
   const email = selectEmail(env);
 
@@ -82,6 +91,11 @@ function getServices(env: Env): AppServices {
   // Only build the storage adapter when the R2 binding is present; deploys
   // without it run fine and the cover upload/serve routes 503 until it's set.
   const storage = env.UPLOADS ? createR2Storage(env.UPLOADS) : undefined;
+  const featureFlags = createAppFeatureFlagProvider({
+    kind: parseFeatureFlagProviderKind(env.FEATURE_FLAG_PROVIDER),
+    db,
+    aiAssistant: parseFeatureFlagBoolean(env.FEATURE_AI_ASSISTANT),
+  });
 
   services = {
     db,
@@ -93,6 +107,7 @@ function getServices(env: Env): AppServices {
     allowedOrigins,
     adminEmails,
     storage,
+    featureFlags,
   };
   return services;
 }

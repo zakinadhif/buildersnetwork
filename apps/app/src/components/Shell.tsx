@@ -1,3 +1,4 @@
+import type { FeatureKey } from "@myapp/feature-flags";
 import {
   MainColumn,
   type NavItem,
@@ -7,6 +8,7 @@ import {
 } from "@myapp/ui";
 import { LayoutGrid, Newspaper, Sparkles, Users } from "lucide-react";
 import { useLocation } from "wouter";
+import { useFeatureFlags } from "@/lib/feature-flags";
 import type { Member } from "@/lib/members";
 
 /**
@@ -29,6 +31,7 @@ interface Surface {
   icon: React.ReactNode;
   to: string;
   match?: (loc: string) => boolean;
+  feature?: FeatureKey;
 }
 
 const SURFACES: Surface[] = [
@@ -53,6 +56,7 @@ const SURFACES: Surface[] = [
     icon: <Sparkles size={18} strokeWidth={1.75} />,
     to: "/assistant",
     match: (l) => l === "/assistant",
+    feature: "aiAssistant",
   },
 ];
 
@@ -68,12 +72,15 @@ export default function Shell({
   children: React.ReactNode;
 }) {
   const [location, navigate] = useLocation();
+  const { enabled } = useFeatureFlags();
 
-  const items: NavItem[] = SURFACES.map((s) => ({
-    label: s.label,
-    icon: s.icon,
-    active: s.match ? s.match(location) : location === s.to,
-    onClick: () => navigate(s.to),
+  const items: NavItem[] = SURFACES.filter(
+    (surface) => !surface.feature || enabled(surface.feature),
+  ).map((surface) => ({
+    label: surface.label,
+    icon: surface.icon,
+    active: surface.match ? surface.match(location) : location === surface.to,
+    onClick: () => navigate(surface.to),
   }));
 
   return (

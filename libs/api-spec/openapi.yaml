@@ -12,7 +12,11 @@ tags:
   - name: ai
     description: AI completion
   - name: assistant
-    description: Persistent, user-owned Asisten AI workspace
+    description: >
+      Persistent, user-owned Asisten AI workspace. Routes return 404 while the
+      aiAssistant feature flag is disabled.
+  - name: features
+    description: Evaluated product feature availability
   - name: health
     description: Health check
   - name: members
@@ -39,6 +43,19 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /features:
+    get:
+      operationId: getFeatureFlags
+      tags: [features]
+      summary: Get the active product feature flags
+      responses:
+        "200":
+          description: Evaluated global feature flags
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FeatureFlags"
 
   /ai/stream:
     post:
@@ -1090,6 +1107,13 @@ components:
         error:
           type: string
       required: [error]
+
+    FeatureFlags:
+      type: object
+      properties:
+        aiAssistant:
+          type: boolean
+      required: [aiAssistant]
 
     OkResponse:
       type: object

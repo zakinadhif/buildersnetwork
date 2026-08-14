@@ -282,6 +282,9 @@ jobs:
           node -e '
             const fs = require("node:fs");
             const tpl = fs.readFileSync("wrangler.preview.template.toml", "utf8");
+            // Only live per-deploy values are substituted. Literal, non-secret
+            // FEATURE_* settings stay reviewable in the tracked template and
+            // pass through to the rendered, gitignored config unchanged.
             const subs = {
               __PR_NUMBER__: process.env.PR,
               __DATABASE_ID__: process.env.DATABASE_ID,

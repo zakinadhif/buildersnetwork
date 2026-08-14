@@ -19,6 +19,7 @@
     "@myapp/config": "workspace:^",
     "@myapp/db": "workspace:^",
     "@myapp/email": "workspace:^",
+    "@myapp/feature-flags": "workspace:^",
     "@myapp/storage": "workspace:^",
     "ai": "^6.0.250",
     "dotenv": "^16.5.0",

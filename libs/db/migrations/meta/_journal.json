@@ -43,6 +43,13 @@
       "when": 1786678535177,
       "tag": "0005_swift_blindfold",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1786690749397,
+      "tag": "0006_loud_the_leader",
+      "breakpoints": true
     }
   ]
 }

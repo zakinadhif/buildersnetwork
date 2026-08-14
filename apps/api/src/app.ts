@@ -2,13 +2,15 @@ import type { AIProvider } from "@myapp/ai";
 import type { createAuth } from "@myapp/auth";
 import type { createDb } from "@myapp/db";
 import type { EmailProvider } from "@myapp/email";
+import type { FeatureFlagProvider } from "@myapp/feature-flags";
 import type { StorageProvider } from "@myapp/storage";
 import type { LanguageModel } from "ai";
 import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
-
+import { requireFeature } from "./middleware/feature-flags";
 import aiRouter from "./routes/ai";
 import assistantRouter from "./routes/assistant";
+import featuresRouter from "./routes/features";
 import { featuredRouter, feedRouter } from "./routes/feed";
 import interestsRouter from "./routes/interests";
 import karyaRouter from "./routes/karya";
@@ -29,6 +31,7 @@ export type AppVariables = {
   adminEmails: string[];
   // Storage for uploads. The app-owned port hides FlyDrive/native R2 details.
   storage: StorageProvider | undefined;
+  featureFlags: FeatureFlagProvider;
 };
 
 export type AppEnv = { Variables: AppVariables };
@@ -43,6 +46,7 @@ export interface AppServices {
   allowedOrigins: string[];
   adminEmails: string[];
   storage?: StorageProvider;
+  featureFlags: FeatureFlagProvider;
   gitSha?: string;
 }
 
@@ -57,6 +61,7 @@ export function createApp(services: AppServices) {
     allowedOrigins,
     adminEmails,
     storage,
+    featureFlags,
     gitSha,
   } = services;
 
@@ -90,6 +95,7 @@ export function createApp(services: AppServices) {
     c.set("emailFrom", emailFrom);
     c.set("adminEmails", adminEmails);
     c.set("storage", storage);
+    c.set("featureFlags", featureFlags);
     await next();
   });
 
@@ -120,6 +126,7 @@ export function createApp(services: AppServices) {
     const path = c.req.path;
     if (
       path === "/api/healthz" ||
+      path === "/api/features" ||
       path.startsWith("/api/auth/") ||
       path.startsWith("/api/otp/")
     ) {
@@ -135,8 +142,10 @@ export function createApp(services: AppServices) {
   });
 
   app.all("/api/auth/*", async (c) => auth.handler(c.req.raw));
+  app.route("/api/features", featuresRouter);
   app.route("/api/otp", otpRouter);
   app.route("/api/ai", aiRouter);
+  app.use("/api/assistant/*", requireFeature("aiAssistant"));
   app.route("/api/assistant", assistantRouter);
   app.route("/api", profileRouter);
   app.route("/api/members", membersRouter);

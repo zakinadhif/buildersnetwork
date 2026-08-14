@@ -99,6 +99,9 @@ importers:
       '@myapp/email':
         specifier: workspace:^
         version: link:../../libs/email
+      '@myapp/feature-flags':
+        specifier: workspace:^
+        version: link:../../libs/feature-flags
       '@myapp/storage':
         specifier: workspace:^
         version: link:../../libs/storage
@@ -157,6 +160,9 @@ importers:
       '@myapp/design-tokens':
         specifier: workspace:*
         version: link:../../libs/design-tokens
+      '@myapp/feature-flags':
+        specifier: workspace:*
+        version: link:../../libs/feature-flags
       '@myapp/ui':
         specifier: workspace:*
         version: link:../../libs/ui
@@ -435,6 +441,19 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 25.3.5
+
+  libs/feature-flags:
+    dependencies:
+      '@myapp/db':
+        specifier: workspace:^
+        version: link:../db
+      drizzle-orm:
+        specifier: 'catalog:'
+        version: 0.45.2(@cloudflare/workers-types@4.20260702.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.1)(kysely@0.29.3)
+    devDependencies:
+      vitest:
+        specifier: ^3.2.4
+        version: 3.2.7(@types/debug@4.1.13)(@types/node@25.3.5)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.0)(yaml@2.9.0)
 
   libs/storage:
     dependencies:
