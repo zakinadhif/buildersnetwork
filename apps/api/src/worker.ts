@@ -14,6 +14,7 @@ import {
   parseFeatureFlagBoolean,
   parseFeatureFlagProviderKind,
 } from "./lib/feature-flags";
+import { withWorkersAIStreamCompatibility } from "./lib/workers-ai-model";
 
 // Cloudflare Workers environment bindings + secrets.
 // Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
@@ -69,9 +70,11 @@ function getServices(env: Env): AppServices {
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
   const assistantModel = createWorkersAIProvider({
-    binding: env.AI as NonNullable<
-      Parameters<typeof createWorkersAIProvider>[0]["binding"]
-    >,
+    binding: withWorkersAIStreamCompatibility(
+      env.AI as NonNullable<
+        Parameters<typeof createWorkersAIProvider>[0]["binding"]
+      >,
+    ),
   })(env.AI_WORKERS_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct");
   const email = selectEmail(env);
 
