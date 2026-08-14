@@ -139,6 +139,147 @@ describe("GET /api/karya/:id/posts", () => {
   });
 });
 
+const POST_WITH_COMMENTS = [
+  {
+    id: "p1",
+    karyaId: "k1",
+    body: "post body",
+    createdAt: new Date("2026-06-10T00:00:00Z"),
+    authorId: "u-post-author",
+    authorName: "Post Author",
+    authorHandle: "post-author",
+    authorImage: null,
+    karyaTitle: "Loom",
+  },
+];
+const COMMENT_ROW = [
+  {
+    id: "c1",
+    postId: "p1",
+    body: "masukan yang berguna",
+    createdAt: new Date("2026-06-10T01:00:00Z"),
+    authorId: "u-comment-author",
+    authorName: "Comment Author",
+    authorHandle: "comment-author",
+    authorImage: null,
+  },
+];
+const KARYA_OWNER = [{ createdBy: "u-owner" }];
+
+describe("post comments — community response, not member-only posting", () => {
+  it("allows an authenticated non-member to comment", async () => {
+    const { app, writes } = mount({
+      user: MEMBER,
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW],
+    });
+    const res = await app.request(
+      "/api/karya/k1/posts/p1/comments",
+      json({ body: "  masukan dari komunitas  " }),
+    );
+
+    expect(res.status).toBe(200);
+    expect(writes.find((w) => w.op === "insert")?.values).toMatchObject({
+      postId: "p1",
+      authorId: MEMBER.id,
+      body: "masukan dari komunitas",
+    });
+  });
+
+  it("401 when an anonymous viewer tries to comment", async () => {
+    const { app } = mount({ user: null });
+    const res = await app.request(
+      "/api/karya/k1/posts/p1/comments",
+      json({ body: "hi" }),
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("400 when the comment body is blank after trimming", async () => {
+    const { app } = mount({ user: MEMBER, reads: [POST_WITH_COMMENTS] });
+    const res = await app.request(
+      "/api/karya/k1/posts/p1/comments",
+      json({ body: "   " }),
+    );
+    expect(res.status).toBe(400);
+  });
+
+  it("returns comments in the public read path", async () => {
+    const { app } = mount({
+      user: null,
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW],
+    });
+    const res = await app.request("/api/karya/k1/posts/p1/comments");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject([
+      { id: "c1", postId: "p1", author: { id: "u-comment-author" } },
+    ]);
+  });
+
+  it("includes the comment count and newest comment in post summaries", async () => {
+    const { app } = mount({
+      user: null,
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW],
+    });
+    const res = await app.request("/api/karya/k1/posts/p1");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject({
+      id: "p1",
+      commentCount: 1,
+      latestComment: { id: "c1", body: "masukan yang berguna" },
+    });
+  });
+
+  it("adds the same summary to the karya timeline response", async () => {
+    const { app } = mount({
+      user: null,
+      reads: [[{ id: "k1" }], POST_WITH_COMMENTS, COMMENT_ROW],
+    });
+    const res = await app.request("/api/karya/k1/posts");
+    expect(res.status).toBe(200);
+    expect(await res.json()).toMatchObject([
+      { id: "p1", commentCount: 1, latestComment: { id: "c1" } },
+    ]);
+  });
+});
+
+describe("DELETE /api/karya/:id/posts/:postId/comments/:commentId", () => {
+  it("403 when the viewer is neither the author nor the karya owner", async () => {
+    const { app, writes } = mount({
+      user: { id: "u-other", email: "other@test.com" },
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW, KARYA_OWNER],
+    });
+    const res = await app.request("/api/karya/k1/posts/p1/comments/c1", {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(403);
+    expect(writes.some((w) => w.op === "delete")).toBe(false);
+  });
+
+  it("allows the comment author to delete their own comment", async () => {
+    const { app, writes } = mount({
+      user: { id: "u-comment-author", email: "comment@test.com" },
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW, KARYA_OWNER],
+    });
+    const res = await app.request("/api/karya/k1/posts/p1/comments/c1", {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(200);
+    expect(writes.some((w) => w.op === "delete")).toBe(true);
+  });
+
+  it("allows the karya owner to remove another member's comment", async () => {
+    const { app, writes } = mount({
+      user: { id: "u-owner", email: "owner@test.com" },
+      reads: [POST_WITH_COMMENTS, COMMENT_ROW, KARYA_OWNER],
+    });
+    const res = await app.request("/api/karya/k1/posts/p1/comments/c1", {
+      method: "DELETE",
+    });
+    expect(res.status).toBe(200);
+    expect(writes.some((w) => w.op === "delete")).toBe(true);
+  });
+});
+
 describe("POST /api/karya/:id/feature — admin-only (DECISION-A)", () => {
   it("401 when unauthenticated", async () => {
     const { app } = mount({ user: null });

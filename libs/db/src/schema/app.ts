@@ -204,6 +204,30 @@ export const posts = sqliteTable(
   ],
 );
 
+// First-layer responses attached to a post (FR-21/FR-42). Comments belong to
+// the update event, not the karya page, and deliberately have no parent
+// comment: nesting/replies are a later scope decision.
+export const comments = sqliteTable(
+  "comments",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => posts.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    body: text("body").notNull(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+  },
+  (table) => [
+    // Thread reads are scoped to one post and displayed chronologically.
+    index("comments_postId_createdAt_idx").on(table.postId, table.createdAt),
+  ],
+);
+
 // Hand-curated "Top picked" karya for the homepage (FR-24). One row per featured
 // karya; `rank` gives the team explicit ordering (lower sorts first). Edited
 // in-app via the `ADMIN_EMAILS` allowlist toggle (DECISION-A) — not RBAC.
@@ -266,13 +290,25 @@ export const karyaScreenshotsRelations = relations(
   }),
 );
 
-export const postsRelations = relations(posts, ({ one }) => ({
+export const postsRelations = relations(posts, ({ one, many }) => ({
   karya: one(karya, {
     fields: [posts.karyaId],
     references: [karya.id],
   }),
   author: one(users, {
     fields: [posts.authorId],
+    references: [users.id],
+  }),
+  comments: many(comments),
+}));
+
+export const commentsRelations = relations(comments, ({ one }) => ({
+  post: one(posts, {
+    fields: [comments.postId],
+    references: [posts.id],
+  }),
+  author: one(users, {
+    fields: [comments.authorId],
     references: [users.id],
   }),
 }));

@@ -1,3 +1,4 @@
+import { commentSeeder } from "./seeders/comments";
 import { featuredSeeder } from "./seeders/featured";
 import { interestSeeder } from "./seeders/interests";
 import { karyaSeeder } from "./seeders/karya";
@@ -7,13 +8,14 @@ import type { Seeder } from "./types";
 
 // Order matters for FK dependencies: interests before members (members link to
 // interest rows via user_interests), and karya after members (rosters +
-// karya_interests reference seeded users/interests). Posts + featured come last
-// — both reference seeded karya (posts also reference roster members).
+// karya_interests reference seeded users/interests). Posts, comments, and
+// featured come last — they reference seeded karya/users.
 export const seeders: readonly Seeder[] = [
   interestSeeder,
   memberSeeder,
   karyaSeeder,
   postSeeder,
+  commentSeeder,
   featuredSeeder,
 ];
 

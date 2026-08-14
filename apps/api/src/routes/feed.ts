@@ -3,7 +3,7 @@ import { asc, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
 import { karyaListItems } from "../lib/karya";
-import { recentPosts, toPost } from "../lib/posts";
+import { commentSummariesForPosts, recentPosts, toPost } from "../lib/posts";
 
 // Fixed feed size — no ranking, no cursor pagination this sprint (DECISION-E,
 // NFR-6). Pull this many of each item type, merge, then slice to the same cap.
@@ -18,6 +18,10 @@ feedRouter.get("/", async (c) => {
   const db = c.get("db");
 
   const postRows = await recentPosts(db, FEED_LIMIT);
+  const commentSummaries = await commentSummariesForPosts(
+    db,
+    postRows.map((row) => row.id),
+  );
   const karyaRows = await db
     .select()
     .from(karya)
@@ -32,7 +36,7 @@ feedRouter.get("/", async (c) => {
     ...postRows.map((r) => ({
       sortAt: r.createdAt.getTime(),
       value: {
-        ...toPost(r),
+        ...toPost(r, commentSummaries.get(r.id)),
         type: "post" as const,
         karya: { id: r.karyaId, title: r.karyaTitle },
       },
