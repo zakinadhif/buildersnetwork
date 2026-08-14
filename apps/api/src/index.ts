@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { createGeminiAI } from "@myapp/ai";
+import { createGeminiAI, createGeminiModel } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { loadConfig } from "@myapp/config";
 import { createDb } from "@myapp/db";
@@ -28,6 +28,7 @@ const auth = createAuth({
   BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET,
 });
 const ai = createGeminiAI(config.GEMINI_API_KEY ?? "");
+const assistantModel = createGeminiModel(config.GEMINI_API_KEY ?? "");
 
 const email = config.RESEND_API_KEY
   ? createResendEmail({ apiKey: config.RESEND_API_KEY })
@@ -58,6 +59,7 @@ const app = createApp({
   db,
   auth,
   ai,
+  assistantModel,
   email,
   emailFrom: config.EMAIL_FROM ?? DEFAULT_EMAIL_FROM,
   allowedOrigins,

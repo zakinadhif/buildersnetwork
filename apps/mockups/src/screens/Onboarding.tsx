@@ -1,5 +1,5 @@
 /**
- * Al-Fath Berkarya — Asisten AI · P1 exploration
+ * Al-Fath Berkarya — Asisten AI workspace
  *
  * One canonical, action-capable AI workspace. Contextual ramps elsewhere may
  * open this surface, but they never host another chat. The center owns the
@@ -237,7 +237,7 @@ export default function OnboardingScreen() {
           </span>
           <div className="min-w-0">
             <h1 className="m-0 truncate font-display text-feature font-normal text-ink">{selected?.title ?? "Percakapan baru"}</h1>
-            <p className="m-0 font-body text-micro text-ink3">Asisten AI Al-Fath · Eksplorasi P1</p>
+            <p className="m-0 font-body text-micro text-ink3">Asisten AI Al-Fath · ruang kerja</p>
           </div>
         </header>
 

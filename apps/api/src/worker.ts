@@ -5,6 +5,7 @@ import * as schema from "@myapp/db/schema";
 import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
 import { createR2Storage } from "@myapp/storage/r2";
 import { drizzle } from "drizzle-orm/d1";
+import { createWorkersAI as createWorkersAIProvider } from "workers-ai-provider";
 
 import { type AppServices, createApp } from "./app";
 import { selectEmail } from "./lib/email";
@@ -60,6 +61,9 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
+  const assistantModel = createWorkersAIProvider({
+    binding: env.AI as Parameters<typeof createWorkersAIProvider>[0]["binding"],
+  })(env.AI_WORKERS_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct");
   const email = selectEmail(env);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
@@ -83,6 +87,7 @@ function getServices(env: Env): AppServices {
     db,
     auth,
     ai,
+    assistantModel,
     email,
     emailFrom,
     allowedOrigins,

@@ -120,7 +120,7 @@ test("daftar → verifikasi → profil → Scroll works without real email", asy
   });
 });
 
-test("entry surfaces expose sign-in and an optional AI path", async ({
+test("entry surfaces expose sign-in and the recovered conversational AI path", async ({
   page,
 }) => {
   await page.route("**/api/auth/get-session", (route) =>
@@ -157,7 +157,14 @@ test("entry surfaces expose sign-in and an optional AI path", async ({
   await expect(
     page.getByRole("button", { name: "Simpan, lalu buka asisten AI" }),
   ).toBeVisible();
-  await expect(page.getByText(/Asisten AI bersifat opsional/)).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Mulai onboarding dengan AI →" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Mulai onboarding dengan AI →" })
+    .click();
+  await expect(page).toHaveURL(/\/onboarding/);
+  await expect(page.getByText(/siapa nama kamu/)).toBeVisible();
 });
 
 test("seed accounts can submit the sign-in form", async ({ page }) => {

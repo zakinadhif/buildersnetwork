@@ -11,6 +11,8 @@ servers:
 tags:
   - name: ai
     description: AI completion
+  - name: assistant
+    description: Persistent, user-owned Asisten AI workspace
   - name: health
     description: Health check
   - name: members
@@ -92,6 +94,157 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
         "503":
           description: AI provider not configured
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assistant/conversations:
+    get:
+      operationId: listAssistantConversations
+      tags: [assistant]
+      summary: List the current user's assistant conversations
+      responses:
+        "200":
+          description: Reverse-chronological conversation list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AssistantConversationSummary"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    post:
+      operationId: createAssistantConversation
+      tags: [assistant]
+      summary: Create an assistant conversation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantConversationInput"
+      responses:
+        "201":
+          description: Conversation created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantConversation"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assistant/conversations/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getAssistantConversation
+      tags: [assistant]
+      summary: Get one user-owned assistant conversation and its messages
+      responses:
+        "200":
+          description: Conversation detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantConversation"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteAssistantConversation
+      tags: [assistant]
+      summary: Delete one user-owned assistant conversation
+      responses:
+        "200":
+          description: Conversation deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OkResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /assistant/conversations/{id}/messages:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+    post:
+      operationId: sendAssistantMessage
+      tags: [assistant]
+      summary: Persist a user turn and stream the assistant reply
+      description: >
+        The server owns prompt construction and conversation history. The text
+        response contains only the assistant reply; after it completes, refetch
+        the conversation to receive the persisted reply and any structured draft action.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantMessageInput"
+      responses:
+        "200":
+          description: Streamed assistant reply
+          content:
+            text/plain:
+              schema:
+                type: string
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Conversation not found
           content:
             application/json:
               schema:
@@ -652,6 +805,129 @@ components:
         text:
           type: string
       required: [text]
+
+    AssistantIntent:
+      type: string
+      enum: [general, profile, karya]
+
+    AssistantConversationInput:
+      type: object
+      properties:
+        intent:
+          $ref: "#/components/schemas/AssistantIntent"
+        title:
+          type: string
+          maxLength: 120
+      required: [intent]
+
+    AssistantMessageInput:
+      type: object
+      properties:
+        content:
+          type: string
+          minLength: 1
+          maxLength: 4000
+      required: [content]
+
+    AssistantProfileDraft:
+      type: object
+      properties:
+        name:
+          type: string
+        handle:
+          type: string
+        bio:
+          type: string
+        year:
+          type: string
+        major:
+          type: string
+        skills:
+          type: array
+          items:
+            type: string
+        interests:
+          type: array
+          items:
+            type: string
+      required: [name, handle, bio, year, major, skills, interests]
+
+    AssistantProfileAction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [profile_draft]
+        payload:
+          $ref: "#/components/schemas/AssistantProfileDraft"
+      required: [type, payload]
+
+    AssistantKaryaAction:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [karya_draft]
+        payload:
+          $ref: "#/components/schemas/KaryaInput"
+      required: [type, payload]
+
+    AssistantAction:
+      oneOf:
+        - $ref: "#/components/schemas/AssistantProfileAction"
+        - $ref: "#/components/schemas/AssistantKaryaAction"
+      discriminator:
+        propertyName: type
+        mapping:
+          profile_draft: "#/components/schemas/AssistantProfileAction"
+          karya_draft: "#/components/schemas/AssistantKaryaAction"
+
+    AssistantMessage:
+      type: object
+      properties:
+        id:
+          type: string
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        action:
+          anyOf:
+            - $ref: "#/components/schemas/AssistantAction"
+            - type: "null"
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, role, content, action, createdAt]
+
+    AssistantConversationSummary:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        intent:
+          $ref: "#/components/schemas/AssistantIntent"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required: [id, title, intent, createdAt, updatedAt]
+
+    AssistantConversation:
+      allOf:
+        - $ref: "#/components/schemas/AssistantConversationSummary"
+        - type: object
+          properties:
+            messages:
+              type: array
+              items:
+                $ref: "#/components/schemas/AssistantMessage"
+          required: [messages]
 
     ErrorResponse:
       type: object

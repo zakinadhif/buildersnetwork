@@ -160,7 +160,7 @@ function AppRoutes() {
         ))}
       </Route>
       <Route path="/assistant">
-        {shell((m) => (
+        {withProfile((m) => (
           <Assistant user={m} />
         ))}
       </Route>

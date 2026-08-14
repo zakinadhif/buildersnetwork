@@ -3,10 +3,12 @@ import type { createAuth } from "@myapp/auth";
 import type { createDb } from "@myapp/db";
 import type { EmailProvider } from "@myapp/email";
 import type { StorageProvider } from "@myapp/storage";
+import type { LanguageModel } from "ai";
 import { type Context, Hono } from "hono";
 import { cors } from "hono/cors";
 
 import aiRouter from "./routes/ai";
+import assistantRouter from "./routes/assistant";
 import { featuredRouter, feedRouter } from "./routes/feed";
 import interestsRouter from "./routes/interests";
 import karyaRouter from "./routes/karya";
@@ -19,6 +21,7 @@ export type AppVariables = {
   auth: ReturnType<typeof createAuth>;
   db: ReturnType<typeof createDb>;
   ai: AIProvider;
+  assistantModel: LanguageModel;
   email: EmailProvider;
   // Sender address for outgoing email (EMAIL_FROM, with a default).
   emailFrom: string;
@@ -34,6 +37,7 @@ export interface AppServices {
   db: ReturnType<typeof createDb>;
   auth: ReturnType<typeof createAuth>;
   ai: AIProvider;
+  assistantModel: LanguageModel;
   email: EmailProvider;
   emailFrom: string;
   allowedOrigins: string[];
@@ -47,6 +51,7 @@ export function createApp(services: AppServices) {
     db,
     auth,
     ai,
+    assistantModel,
     email,
     emailFrom,
     allowedOrigins,
@@ -70,7 +75,7 @@ export function createApp(services: AppServices) {
       },
       allowHeaders: ["Content-Type", "Authorization"],
       allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-      exposeHeaders: ["Content-Length"],
+      exposeHeaders: ["Content-Length", "x-vercel-ai-ui-message-stream"],
       maxAge: 600,
       credentials: true,
     }),
@@ -80,6 +85,7 @@ export function createApp(services: AppServices) {
     c.set("db", db);
     c.set("auth", auth);
     c.set("ai", ai);
+    c.set("assistantModel", assistantModel);
     c.set("email", email);
     c.set("emailFrom", emailFrom);
     c.set("adminEmails", adminEmails);
@@ -131,6 +137,7 @@ export function createApp(services: AppServices) {
   app.all("/api/auth/*", async (c) => auth.handler(c.req.raw));
   app.route("/api/otp", otpRouter);
   app.route("/api/ai", aiRouter);
+  app.route("/api/assistant", assistantRouter);
   app.route("/api", profileRouter);
   app.route("/api/members", membersRouter);
   app.route("/api/interests", interestsRouter);

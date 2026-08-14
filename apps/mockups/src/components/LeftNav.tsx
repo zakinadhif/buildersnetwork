@@ -5,7 +5,7 @@ import { cn, LeftNav as UiLeftNav, type NavItem } from "@myapp/ui";
 import { Eyebrow } from "@myapp/ui";
 
 /** The primary product surfaces. Cari Kolaborator, Minat Saya, and Karya Saya
- *  were retired from the sidebar — the first two remain reachable via the screen
+ *  remain outside the sidebar — the first two remain reachable via the screen
  *  switcher (SCREEN_META); Karya Saya has no surface of its own yet.
  *
  *  Icons are lucide-react (rounded caps/joins → a friendly line-icon vibe): a
@@ -36,7 +36,7 @@ const AI_NAV_ITEM = { label: "Asisten AI", icon: <Sparkles size={18} strokeWidth
  */
 export function LeftNav({ active, children }: { active: Screen; children?: ReactNode }) {
   const navigate = useNavigate();
-  const navItems = active === "onboarding" ? [...P0_NAV_ITEMS, AI_NAV_ITEM] : P0_NAV_ITEMS;
+  const navItems = [...P0_NAV_ITEMS, AI_NAV_ITEM];
 
   const items: NavItem[] = navItems.map((item) => {
     const target = NAV_SCREEN[item.label];

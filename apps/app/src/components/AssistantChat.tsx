@@ -1,4 +1,5 @@
 import { useStream } from "@myapp/ai/react";
+import { Paperclip, SendHorizontal, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { Dots, Loading } from "@/components/ui-atoms";
 import { callClaude, cleanJSON, type Member } from "@/lib/members";
@@ -43,10 +44,12 @@ export default function AssistantChat({
   intro,
   onProfile,
   genLabel = "lagi nyusun profil kamu",
+  workspace = false,
 }: {
   intro: string;
   onProfile: (draft: Member) => void;
   genLabel?: string;
+  workspace?: boolean;
 }) {
   const msgId = useRef(0);
   const [msgs, setMsgs] = useState<ChatMessage[]>([
@@ -151,47 +154,107 @@ Percakapan:\n${transcript}`;
     <div className="flex flex-col flex-1 min-h-0">
       <div className="flex-1 overflow-y-auto py-2 pb-6">
         <div className="flex flex-col gap-6">
-          {msgs.map((m) => (
-            <div
-              key={m.id}
-              className={
-                m.role === "ai"
-                  ? "text-feature text-ink leading-heading font-light max-w-[80%]"
-                  : "text-body text-ink2 leading-body self-end max-w-[80%] text-right"
-              }
-            >
-              {m.text}
-            </div>
-          ))}
-          {streamingText !== null && (
-            <div className="text-feature text-ink leading-heading font-light max-w-[80%]">
-              {streamingText || <Dots />}
-            </div>
+          {msgs.map((m) =>
+            m.role === "ai" && workspace ? (
+              <div key={m.id} className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-tint text-accent">
+                  <Sparkles size={14} strokeWidth={1.8} aria-hidden="true" />
+                </span>
+                <p className="m-0 max-w-[520px] whitespace-pre-wrap font-body text-body leading-body text-ink2">
+                  {m.text}
+                </p>
+              </div>
+            ) : (
+              <div
+                key={m.id}
+                className={
+                  m.role === "ai"
+                    ? "text-feature text-ink leading-heading font-light max-w-[80%]"
+                    : workspace
+                      ? "m-0 ml-auto max-w-[76%] rounded-panel bg-surface px-4 py-3 font-body text-body leading-body text-ink"
+                      : "text-body text-ink2 leading-body self-end max-w-[80%] text-right"
+                }
+              >
+                {m.text}
+              </div>
+            ),
           )}
+          {streamingText !== null &&
+            (workspace ? (
+              <div className="flex items-start gap-3">
+                <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-tint text-accent">
+                  <Sparkles size={14} strokeWidth={1.8} aria-hidden="true" />
+                </span>
+                <p className="m-0 max-w-[520px] font-body text-body leading-body text-ink2">
+                  {streamingText || <Dots />}
+                </p>
+              </div>
+            ) : (
+              <div className="text-feature text-ink leading-heading font-light max-w-[80%]">
+                {streamingText || <Dots />}
+              </div>
+            ))}
           <div ref={endRef} />
         </div>
       </div>
 
-      <div className="shrink-0 pt-3.5 bg-bg flex justify-center">
-        <div className="w-full flex items-end gap-3 p-1.5 pl-3 border border-line rounded-panel transition-colors focus-within:border-accent-line">
-          <textarea
-            className="chat-textarea flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
-            rows={1}
-            placeholder="balas…"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKey}
-          />
-          <button
-            type="button"
-            className="w-9 h-9 rounded-card bg-ink text-bg border-none flex items-center justify-center font-ui text-ui cursor-pointer shrink-0 transition-opacity hover:opacity-85 disabled:opacity-30 disabled:cursor-not-allowed"
-            onClick={send}
-            disabled={!input.trim() || busy}
-          >
-            ↑
-          </button>
+      {workspace ? (
+        <div className="sticky bottom-0 mt-6 bg-bg pb-6 pt-3">
+          <div className="rounded-panel border border-line bg-surface p-2 shadow-[0_8px_24px_oklch(0%_0_0_/_6%)]">
+            <textarea
+              className="chat-textarea w-full resize-none border-none bg-transparent px-2 py-1.5 font-body text-body leading-body text-ink outline-none placeholder:text-ink3"
+              rows={2}
+              placeholder="Minta bantuan atau tindakan…"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKey}
+            />
+            <div className="flex items-center justify-between">
+              <button
+                type="button"
+                aria-label="Lampirkan konteks"
+                className="rounded-full border-none bg-transparent p-2 text-ink3"
+              >
+                <Paperclip size={16} strokeWidth={1.8} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                aria-label="Kirim"
+                className="flex size-8 items-center justify-center rounded-full border-none bg-ink text-bg disabled:opacity-30"
+                onClick={send}
+                disabled={!input.trim() || busy}
+              >
+                <SendHorizontal
+                  size={15}
+                  strokeWidth={1.8}
+                  aria-hidden="true"
+                />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="shrink-0 pt-3.5 bg-bg flex justify-center">
+          <div className="w-full flex items-end gap-3 p-1.5 pl-3 border border-line rounded-panel transition-colors focus-within:border-accent-line">
+            <textarea
+              className="chat-textarea flex-1 bg-transparent border-none font-body text-body text-ink outline-none resize-none py-1.5 leading-body max-h-[100px] overflow-y-auto placeholder:text-ink3"
+              rows={1}
+              placeholder="balas…"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={onKey}
+            />
+            <button
+              type="button"
+              className="w-9 h-9 rounded-card bg-ink text-bg border-none flex items-center justify-center font-ui text-ui cursor-pointer shrink-0 transition-opacity hover:opacity-85 disabled:opacity-30 disabled:cursor-not-allowed"
+              onClick={send}
+              disabled={!input.trim() || busy}
+            >
+              ↑
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

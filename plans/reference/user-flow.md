@@ -11,14 +11,14 @@ flowchart LR
   W[Welcome] --> L[Login] --> V[Verify email] --> M["Mulai — one-field name"] --> H{{"Launchpad shell · /home"}}
 ```
 
-**Onboarding is not a gate.** A newly-verified member lands on `/mulai`, a one-field start (just a name), and goes straight into the Launchpad shell. Every shell route redirects a profile-less member to `/mulai` — *not* to the AI chat (`App.tsx:57`).
+**Onboarding is not a gate.** A newly-verified member lands on `/mulai`, the fast manual profile start, and can either enter the Launchpad shell directly or choose the recovered conversational AI path from the same screen. Every shell route redirects a profile-less member to `/mulai` — *not* to the AI chat (`App.tsx`).
 
 The two gates that *do* exist:
 
 - **Email verification.** A logged-in member without a verified email is redirected to `/verify-email` from anywhere (`App.tsx:44-47`).
 - **Auth.** Any shell or detail route redirects a logged-out visitor to `/welcome`.
 
-The optional enrichment flow (`/onboarding` → `/review` → `/home`) remains reachable for anyone who opts in. It saves an editable profile draft and returns to the P0 shell without generating or persisting match recommendations. The AI onboarding chat also survives as an always-available **assistant tab** (`/assistant`).
+The optional conversational flow (`/onboarding` → `/review` → `/home`) is directly discoverable from `/mulai`. It saves an editable profile draft and returns to the P0 shell without generating or persisting match recommendations. Existing members can also use the always-available Asisten AI workspace (`/assistant`). Its user-owned conversations and messages persist on the server; the server reconstructs model context and streams typed AI SDK message parts. Profile and karya intakes finish through native draft tools, whose structured results are persisted and handed to the existing review surfaces. A member must still open and edit that draft before the existing profile-save or karya-publish flow can mutate product data.
 
 ## The routes
 
@@ -43,7 +43,7 @@ The persistent left-sidebar shell (`Shell` + rail, `apps/app/src/components/Shel
 |---|---|---|
 | `/home` | Launchpad | **The hero.** Feed-first |
 | `/minat` | Minat Saya | Live |
-| `/assistant` | Assistant | Live — the AI chat, as a tab |
+| `/assistant` | Assistant | Live — persisted conversation history, AI SDK streaming/tool parts, server-owned context, and editable profile/karya draft handoff |
 | `/jelajahi` | *ComingSoon* | Placeholder — "segera hadir" |
 | `/karya-saya` | *ComingSoon* | Placeholder — "segera hadir" |
 

@@ -52,38 +52,149 @@ async function mockFeed(page: Page) {
   }
 }
 
+async function mockAssistant(page: Page) {
+  const now = new Date().toISOString();
+  let conversation: {
+    id: string;
+    title: string;
+    intent: string;
+    createdAt: string;
+    updatedAt: string;
+    messages: Record<string, unknown>[];
+  } | null = null;
+
+  await page.route("**/api/assistant/conversations", async (route) => {
+    if (route.request().method() === "GET") {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(
+          conversation
+            ? [
+                {
+                  id: conversation.id,
+                  title: conversation.title,
+                  intent: conversation.intent,
+                  createdAt: conversation.createdAt,
+                  updatedAt: conversation.updatedAt,
+                },
+              ]
+            : [],
+        ),
+      });
+      return;
+    }
+    conversation = {
+      id: "c-profile",
+      title: "Perjelas profil saya",
+      intent: "profile",
+      createdAt: now,
+      updatedAt: now,
+      messages: [
+        {
+          id: "m-intro",
+          role: "assistant",
+          content: "hei Test — bagian mana dari profilmu yang pengen dirapiin?",
+          action: null,
+          createdAt: now,
+        },
+      ],
+    };
+    await route.fulfill({
+      status: 201,
+      contentType: "application/json",
+      body: JSON.stringify(conversation),
+    });
+  });
+
+  await page.route(
+    "**/api/assistant/conversations/c-profile",
+    async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify(conversation),
+      });
+    },
+  );
+
+  await page.route(
+    "**/api/assistant/conversations/c-profile/messages",
+    async (route) => {
+      if (!conversation) throw new Error("conversation was not created");
+      const content = (route.request().postDataJSON() as { content: string })
+        .content;
+      const profileDraft = {
+        name: "Test User",
+        handle: "testu",
+        bio: "lagi bikin app buat komunitas kampus",
+        year: "Tingkat 2",
+        major: "Informatika",
+        skills: ["React"],
+        interests: ["Komunitas"],
+      };
+      conversation.messages.push(
+        {
+          id: "m-user",
+          role: "user",
+          content,
+          action: null,
+          createdAt: now,
+        },
+        {
+          id: "m-reply",
+          role: "assistant",
+          content: "mantap! oke, biar aku susun profil kamu sekarang.",
+          action: {
+            type: "profile_draft",
+            payload: profileDraft,
+          },
+          createdAt: now,
+        },
+      );
+      await route.fulfill({
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          "x-vercel-ai-ui-message-stream": "v1",
+        },
+        body: [
+          { type: "start", messageId: "m-reply" },
+          { type: "text-start", id: "text-1" },
+          {
+            type: "text-delta",
+            id: "text-1",
+            delta: "mantap! draft profilnya siap kamu tinjau.",
+          },
+          { type: "text-end", id: "text-1" },
+          {
+            type: "tool-input-available",
+            toolCallId: "call-profile",
+            toolName: "draftProfile",
+            input: profileDraft,
+          },
+          {
+            type: "tool-output-available",
+            toolCallId: "call-profile",
+            output: profileDraft,
+          },
+          { type: "finish" },
+        ]
+          .map((event) => `data: ${JSON.stringify(event)}\n\n`)
+          .join("")
+          .concat("data: [DONE]\n\n"),
+      });
+    },
+  );
+}
+
 authed(
   "new member: profile setup → Launchpad shell (no forced chat) → AI tab enriches profile",
   async ({ page }) => {
     const state = profileState(page);
     await mockFeed(page);
-
-    // The chat stream replies with the end signal; the extraction call returns a
-    // profile draft. (useStream reads /api/ai/stream as plain text.)
-    await page.route("**/api/ai/stream", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "text/plain",
-        body: "mantap! oke, biar aku susun profil kamu sekarang.",
-      }),
-    );
-    await page.route("**/api/ai/complete", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          text: JSON.stringify({
-            name: "Test User",
-            handle: "testu",
-            bio: "lagi bikin app buat komunitas kampus",
-            year: "Tingkat 2",
-            major: "Informatika",
-            skills: ["React"],
-            interests: ["Komunitas"],
-          }),
-        }),
-      }),
-    );
+    await mockAssistant(page);
 
     // 1) A profile-less member is sent to the minimal start, not the AI chat.
     await page.goto("/");
@@ -105,15 +216,30 @@ authed(
     await expect(
       page.locator(".bn-nav-user", { hasText: "Test User" }),
     ).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Asisten AI", exact: true }),
+    ).toBeVisible();
 
     // 3) Open the optional AI assistant from Scroll (not primary navigation).
     await page.getByRole("button", { name: /Butuh teman berpikir/ }).click();
     await expect(page).toHaveURL(/\/assistant/);
+    await expect(
+      page.getByRole("heading", { name: "Percakapan baru" }),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Sunting profil saya" }).click();
+    await expect(
+      page.getByRole("heading", { name: "Perjelas profil saya" }),
+    ).toBeVisible();
+    await expect(page.getByPlaceholder("Cari percakapan")).toBeVisible();
+    await expect(
+      page.getByRole("button", { name: "Percakapan baru" }),
+    ).toBeVisible();
 
     // 4) Run one turn — the reply carries the end signal, so a draft is built.
     const input = page.locator(".chat-textarea");
     await input.fill("aku lagi bikin app komunitas kampus");
     await input.press("Enter");
+    await page.getByRole("button", { name: "Tinjau perubahan" }).click();
 
     // 5) The editable draft review appears (AI-2: not written straight through).
     await expect(
