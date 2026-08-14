@@ -259,13 +259,13 @@ app.post("/conversations/:id/messages", async (c) => {
   const nextTitle = shouldRetitle
     ? assistantTitleFrom(content)
     : conversation.title;
+  const activeTools = activeAssistantTools(conversation.intent);
 
   const result = streamText({
     model: c.get("assistantModel"),
     system: assistantPrompt(conversation.intent),
     messages: history,
-    tools: assistantTools,
-    activeTools: activeAssistantTools(conversation.intent),
+    ...(activeTools.length > 0 ? { tools: assistantTools, activeTools } : {}),
     stopWhen: stepCountIs(2),
     maxOutputTokens: 1024,
   });
@@ -276,6 +276,7 @@ app.post("/conversations/:id/messages", async (c) => {
       const typedMessage = responseMessage as UIMessage;
       const reply = textFromUIMessage(typedMessage);
       const action = actionFromUIMessage(typedMessage);
+      if (!reply && !action) return;
       const completedAt = new Date();
       await atomicWrite(db, (executor) => [
         executor.insert(assistantMessages).values({

@@ -27,30 +27,34 @@ const ai: AIProvider = {
   },
 };
 
+let lastModelTools: unknown;
 const assistantModel = new MockLanguageModelV3({
-  doStream: async () => ({
-    stream: simulateReadableStream({
-      chunks: [
-        { type: "text-start", id: "text-1" },
-        { type: "text-delta", id: "text-1", delta: "halo " },
-        { type: "text-delta", id: "text-1", delta: "dari asisten" },
-        { type: "text-end", id: "text-1" },
-        {
-          type: "finish",
-          finishReason: { unified: "stop", raw: undefined },
-          usage: {
-            inputTokens: {
-              total: 1,
-              noCache: 1,
-              cacheRead: undefined,
-              cacheWrite: undefined,
+  doStream: async (options) => {
+    lastModelTools = options.tools;
+    return {
+      stream: simulateReadableStream({
+        chunks: [
+          { type: "text-start", id: "text-1" },
+          { type: "text-delta", id: "text-1", delta: "halo " },
+          { type: "text-delta", id: "text-1", delta: "dari asisten" },
+          { type: "text-end", id: "text-1" },
+          {
+            type: "finish",
+            finishReason: { unified: "stop", raw: undefined },
+            usage: {
+              inputTokens: {
+                total: 1,
+                noCache: 1,
+                cacheRead: undefined,
+                cacheWrite: undefined,
+              },
+              outputTokens: { total: 2, text: 2, reasoning: undefined },
             },
-            outputTokens: { total: 2, text: 2, reasoning: undefined },
           },
-        },
-      ],
-    }),
-  }),
+        ],
+      }),
+    };
+  },
 });
 
 function mount(opts: {
@@ -143,6 +147,7 @@ describe("persistent assistant routes", () => {
     );
     expect(response.status).toBe(200);
     const streamed = await response.text();
+    expect(lastModelTools).toBeUndefined();
     expect(streamed).toContain('"delta":"halo "');
     expect(streamed).toContain('"delta":"dari asisten"');
     const assistantWrite = writes.find(
@@ -176,6 +181,56 @@ describe("persistent assistant routes", () => {
         expect.objectContaining({ op: "update" }),
       ]),
     );
+  });
+
+  it("does not persist an empty assistant row when generation fails", async () => {
+    const now = new Date("2026-08-13T00:00:00Z");
+    const conversation = {
+      id: "c1",
+      userId: MEMBER.id,
+      title: "Percakapan baru",
+      intent: "general" as const,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const failedModel = new MockLanguageModelV3({
+      doStream: async () => ({
+        stream: simulateReadableStream({
+          chunks: [{ type: "error", error: new Error("provider failed") }],
+        }),
+      }),
+    });
+    const { app, writes } = mount({
+      user: MEMBER,
+      model: failedModel,
+      reads: [
+        [conversation],
+        [
+          {
+            id: "m-user",
+            conversationId: "c1",
+            role: "user",
+            content: "halo",
+            action: null,
+            createdAt: now,
+          },
+        ],
+      ],
+    });
+
+    const response = await app.request(
+      "/api/assistant/conversations/c1/messages",
+      json({ content: "halo" }),
+    );
+    expect(response.status).toBe(200);
+    expect(await response.text()).toContain('"type":"error"');
+    expect(
+      writes.some(
+        (write) =>
+          write.op === "insert" &&
+          (write.values as { role?: string } | undefined)?.role === "assistant",
+      ),
+    ).toBe(false);
   });
 });
 
