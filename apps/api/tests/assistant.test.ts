@@ -4,7 +4,7 @@ import { MockLanguageModelV3 } from "ai/test";
 import { Hono } from "hono";
 import { describe, expect, it } from "vitest";
 import type { AppEnv } from "../src/app";
-import { actionFromUIMessage } from "../src/lib/assistant";
+import { actionFromUIMessage, shouldFinalizeDraft } from "../src/lib/assistant";
 import assistantRouter from "../src/routes/assistant";
 import {
   createAuthMock,
@@ -28,9 +28,11 @@ const ai: AIProvider = {
 };
 
 let lastModelTools: unknown;
+let lastModelToolChoice: unknown;
 const assistantModel = new MockLanguageModelV3({
   doStream: async (options) => {
     lastModelTools = options.tools;
+    lastModelToolChoice = options.toolChoice;
     return {
       stream: simulateReadableStream({
         chunks: [
@@ -148,6 +150,7 @@ describe("persistent assistant routes", () => {
     expect(response.status).toBe(200);
     const streamed = await response.text();
     expect(lastModelTools).toBeUndefined();
+    expect(lastModelToolChoice).toBeUndefined();
     expect(streamed).toContain('"delta":"halo "');
     expect(streamed).toContain('"delta":"dari asisten"');
     const assistantWrite = writes.find(
@@ -232,9 +235,61 @@ describe("persistent assistant routes", () => {
       ),
     ).toBe(false);
   });
+
+  it("forces the profile draft tool when the user explicitly finalizes", async () => {
+    const now = new Date("2026-08-13T00:00:00Z");
+    const conversation = {
+      id: "c-profile",
+      userId: MEMBER.id,
+      title: "Perjelas profil saya",
+      intent: "profile" as const,
+      createdAt: now,
+      updatedAt: now,
+    };
+    const { app } = mount({
+      user: MEMBER,
+      reads: [
+        [conversation],
+        [
+          {
+            id: "m-user",
+            conversationId: conversation.id,
+            role: "user",
+            content: "itu aja",
+            action: null,
+            createdAt: now,
+          },
+        ],
+      ],
+    });
+
+    const response = await app.request(
+      `/api/assistant/conversations/${conversation.id}/messages`,
+      json({ content: "itu aja" }),
+    );
+    expect(response.status).toBe(200);
+    await response.text();
+    expect(lastModelToolChoice).toEqual({
+      type: "tool",
+      toolName: "draftProfile",
+    });
+  });
 });
 
 describe("assistant structured actions", () => {
+  it.each([
+    "itu aja",
+    "cukup",
+    "buat draftnya",
+    "draft sekarang",
+  ])("recognizes an explicit draft-finalization phrase: %s", (content) => {
+    expect(shouldFinalizeDraft(content)).toBe(true);
+  });
+
+  it("keeps ordinary discovery messages in automatic tool mode", () => {
+    expect(shouldFinalizeDraft("bio-nya bikin lebih santai")).toBe(false);
+  });
+
   it("maps a completed AI SDK profile tool result to a review action", () => {
     const action = actionFromUIMessage({
       id: "assistant-1",

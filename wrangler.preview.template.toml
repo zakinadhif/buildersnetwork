@@ -71,7 +71,7 @@ bucket_name = "buildersnetwork-pr-__PR_NUMBER__-uploads"
 # None of these are inheritable, so they stay absent without further effort.
 
 [vars]
-AI_WORKERS_MODEL = "@cf/meta/llama-4-scout-17b-16e-instruct"
+AI_WORKERS_MODEL = "@cf/zai-org/glm-4.7-flash"
 # Literal, non-secret preview feature settings live in this tracked template.
 # CI copies them unchanged into the ephemeral wrangler.preview.toml; edit these
 # values in a PR to change its next preview deployment.

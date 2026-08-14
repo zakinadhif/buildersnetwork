@@ -23,6 +23,7 @@ import {
   assistantTitleFrom,
   assistantTools,
   defaultAssistantTitle,
+  shouldFinalizeDraft,
   textFromUIMessage,
 } from "../lib/assistant";
 
@@ -260,12 +261,22 @@ app.post("/conversations/:id/messages", async (c) => {
     ? assistantTitleFrom(content)
     : conversation.title;
   const activeTools = activeAssistantTools(conversation.intent);
+  const forcedTool =
+    activeTools.length === 1 && shouldFinalizeDraft(content)
+      ? { type: "tool" as const, toolName: activeTools[0] }
+      : undefined;
 
   const result = streamText({
     model: c.get("assistantModel"),
     system: assistantPrompt(conversation.intent),
     messages: history,
-    ...(activeTools.length > 0 ? { tools: assistantTools, activeTools } : {}),
+    ...(activeTools.length > 0
+      ? {
+          tools: assistantTools,
+          activeTools,
+          ...(forcedTool ? { toolChoice: forcedTool } : {}),
+        }
+      : {}),
     stopWhen: stepCountIs(2),
     maxOutputTokens: 1024,
   });

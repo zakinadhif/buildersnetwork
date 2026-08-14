@@ -75,7 +75,7 @@ function getServices(env: Env): AppServices {
         Parameters<typeof createWorkersAIProvider>[0]["binding"]
       >,
     ),
-  })(env.AI_WORKERS_MODEL ?? "@cf/meta/llama-4-scout-17b-16e-instruct");
+  })(env.AI_WORKERS_MODEL ?? "@cf/zai-org/glm-4.7-flash");
   const email = selectEmail(env);
 
   const allowedOrigins = env.ALLOWED_ORIGINS

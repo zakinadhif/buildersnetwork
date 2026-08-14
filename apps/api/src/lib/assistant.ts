@@ -2,7 +2,7 @@ import type { AssistantAction, AssistantIntent } from "@myapp/db/schema";
 import { tool, type UIMessage } from "ai";
 import { z } from "zod";
 
-const BASE = `Kamu adalah Asisten AI Al-Fath Berkarya, komunitas builder mahasiswa Telkom University. Jawab dalam bahasa Indonesia yang hangat, santai, dan langsung. Pakai kamu/aku. Jangan mengarang fakta tentang anggota atau komunitas. Satu pertanyaan per pesan. Semua perubahan produk harus menjadi draft untuk ditinjau pengguna; jangan pernah mengklaim sudah menyimpan atau menerbitkan sesuatu.`;
+const BASE = `Kamu adalah Asisten AI Al-Fath Berkarya, komunitas builder mahasiswa Telkom University. Jawab dalam bahasa Indonesia yang hangat, santai, dan langsung. Pakai kamu/aku. Jangan mengarang fakta tentang anggota atau komunitas. Satu pertanyaan per pesan. Semua perubahan produk harus menjadi draft untuk ditinjau pengguna; jangan pernah mengklaim sudah menyimpan atau menerbitkan sesuatu. Saat tool tersedia, jangan pernah tulis nama tool, argumen, JSON, atau sintaks pemanggilannya sebagai teks; panggil tool secara terstruktur.`;
 
 const PROMPTS: Record<AssistantIntent, string> = {
   general: `${BASE}
@@ -57,6 +57,12 @@ export const activeAssistantTools = (
   if (intent === "karya") return ["draftKarya"];
   return [];
 };
+
+const FINALIZE_DRAFT_PATTERN =
+  /\b(?:itu\s+aja|cukup|(?:buat|bikin|siapkan|jadikan|langsung)\s+draft(?:nya)?|draft(?:nya)?\s+(?:aja|sekarang))\b/i;
+
+export const shouldFinalizeDraft = (content: string): boolean =>
+  FINALIZE_DRAFT_PATTERN.test(content.trim());
 
 export const assistantIntro = (intent: AssistantIntent, firstName: string) => {
   if (intent === "profile") {

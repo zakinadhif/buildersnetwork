@@ -47,7 +47,7 @@ describe("Workers AI stream compatibility", () => {
       binding: binding as NonNullable<
         Parameters<typeof createWorkersAIProvider>[0]["binding"]
       >,
-    })("@cf/meta/llama-4-scout-17b-16e-instruct");
+    })("@cf/zai-org/glm-4.7-flash");
 
     const result = streamText({ model, prompt: "mulai" });
 
