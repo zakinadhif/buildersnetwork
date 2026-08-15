@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
+import { useFeatureFlags } from "@/lib/feature-flags";
 
 const SKILLS = ["React", "Figma", "Python", "UI/UX", "Product", "Data"];
 const INTERESTS = [
@@ -76,6 +77,7 @@ export default function MinimalStart({
 }: {
   defaultName?: string;
 }) {
+  const { enabled } = useFeatureFlags();
   const [, navigate] = useLocation();
   const queryClient = useQueryClient();
   const [name, setName] = useState(defaultName);
@@ -251,16 +253,18 @@ export default function MinimalStart({
       </div>
 
       <div className="mt-5 flex flex-col-reverse items-stretch justify-between gap-3 sm:flex-row sm:items-center">
-        <Button
-          variant="ghost"
-          size="lg"
-          disabled={invalid || busyDestination !== null}
-          onClick={() => save("/assistant")}
-        >
-          {busyDestination === "/assistant"
-            ? "Menyimpan profil…"
-            : "Simpan, lalu buka asisten AI"}
-        </Button>
+        {enabled("aiAssistant") && (
+          <Button
+            variant="ghost"
+            size="lg"
+            disabled={invalid || busyDestination !== null}
+            onClick={() => save("/assistant")}
+          >
+            {busyDestination === "/assistant"
+              ? "Menyimpan profil…"
+              : "Simpan, lalu buka asisten AI"}
+          </Button>
+        )}
         <Button
           size="lg"
           disabled={invalid || busyDestination !== null}
@@ -270,8 +274,28 @@ export default function MinimalStart({
           {busyDestination === "/home" ? "Menyimpan profil…" : "Simpan & masuk"}
         </Button>
       </div>
+
+      <div className="mt-7 flex flex-col gap-3 rounded-panel border border-accent-line bg-accent-tint p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+        <div>
+          <Eyebrow as="div" className="mb-1.5 text-accent">
+            Lebih nyaman ngobrol?
+          </Eyebrow>
+          <p className="m-0 max-w-[520px] text-caption leading-body text-ink2">
+            Kenalan lewat chat AI, lalu edit draf profilnya sebelum kamu simpan.
+          </p>
+        </div>
+        <Button
+          type="button"
+          variant="secondary"
+          className="shrink-0 border-accent-line bg-bg"
+          onClick={() => navigate("/onboarding")}
+        >
+          Mulai onboarding dengan AI →
+        </Button>
+      </div>
+
       <p className="mt-3 text-right text-caption leading-body text-ink3">
-        Asisten AI bersifat opsional; kamu selalu bisa langsung masuk ke Scroll.
+        Keduanya opsional — pilih cara mulai yang paling nyaman buatmu.
       </p>
     </EntryLayout>
   );

@@ -22,8 +22,8 @@ export type Screen =
   | "onboarding";
 
 /** Which gallery screen a left-nav label routes to. The sidebar pins only the
- *  live surfaces — retired ones (see `retired` in SCREEN_META) were pulled from
- *  the rail and stay reachable through the screen switcher alone. */
+ *  live surfaces. Historical explorations (see `retired` in SCREEN_META) stay
+ *  reachable through the screen switcher alone. */
 export const NAV_SCREEN: Partial<Record<string, Screen>> = {
   Scroll: "scroll",
   Karya: "karya",
@@ -145,9 +145,9 @@ export const SCREEN_META: ScreenMeta[] = [
     label: "Asisten AI",
     group: "Surface",
     designStatus: "exploration",
-    productStatus: "retired",
-    scopeNote: "Shelved P1 exploration: canonical action-capable AI chat and conversation history",
-    excludes: ["P0 implementation", "actions without explicit confirmation"],
+    productStatus: "active",
+    scopeNote: "Canonical action-capable AI chat and conversation history",
+    excludes: ["actions without explicit confirmation"],
   },
   {
     key: "karya-detail",

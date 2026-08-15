@@ -5,9 +5,16 @@ import * as schema from "@myapp/db/schema";
 import { DEFAULT_EMAIL_FROM, type WorkersEmailBinding } from "@myapp/email";
 import { createR2Storage } from "@myapp/storage/r2";
 import { drizzle } from "drizzle-orm/d1";
+import { createWorkersAI as createWorkersAIProvider } from "workers-ai-provider";
 
 import { type AppServices, createApp } from "./app";
 import { selectEmail } from "./lib/email";
+import {
+  createAppFeatureFlagProvider,
+  parseFeatureFlagBoolean,
+  parseFeatureFlagProviderKind,
+} from "./lib/feature-flags";
+import { withWorkersAIStreamCompatibility } from "./lib/workers-ai-model";
 
 // Cloudflare Workers environment bindings + secrets.
 // Secrets (BETTER_AUTH_SECRET, etc.) are set via `wrangler secret put`.
@@ -37,6 +44,8 @@ interface Env {
   ALLOWED_ORIGINS?: string;
   ADMIN_EMAILS?: string;
   AI_WORKERS_MODEL?: string;
+  FEATURE_FLAG_PROVIDER?: string;
+  FEATURE_AI_ASSISTANT?: string;
   // R2 bucket binding for uploads (karya covers). Configured in wrangler.toml as
   // an [[r2_buckets]] entry. Optional — absent → the upload/serve routes 503.
   UPLOADS?: R2Bucket;
@@ -60,6 +69,13 @@ function getServices(env: Env): AppServices {
     BETTER_AUTH_SECRET: env.BETTER_AUTH_SECRET,
   });
   const ai = createWorkersAI(env.AI, env.AI_WORKERS_MODEL);
+  const assistantModel = createWorkersAIProvider({
+    binding: withWorkersAIStreamCompatibility(
+      env.AI as NonNullable<
+        Parameters<typeof createWorkersAIProvider>[0]["binding"]
+      >,
+    ),
+  })(env.AI_WORKERS_MODEL ?? "@cf/zai-org/glm-4.7-flash");
   const email = selectEmail(env);
 
   const allowedOrigins = env.ALLOWED_ORIGINS
@@ -78,16 +94,23 @@ function getServices(env: Env): AppServices {
   // Only build the storage adapter when the R2 binding is present; deploys
   // without it run fine and the cover upload/serve routes 503 until it's set.
   const storage = env.UPLOADS ? createR2Storage(env.UPLOADS) : undefined;
+  const featureFlags = createAppFeatureFlagProvider({
+    kind: parseFeatureFlagProviderKind(env.FEATURE_FLAG_PROVIDER),
+    db,
+    aiAssistant: parseFeatureFlagBoolean(env.FEATURE_AI_ASSISTANT),
+  });
 
   services = {
     db,
     auth,
     ai,
+    assistantModel,
     email,
     emailFrom,
     allowedOrigins,
     adminEmails,
     storage,
+    featureFlags,
   };
   return services;
 }

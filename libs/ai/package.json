@@ -8,8 +8,10 @@
     "./react": "./src/react.ts"
   },
   "dependencies": {
+    "@ai-sdk/google": "^3.0.107",
     "@anthropic-ai/sdk": "^0.53.0",
-    "@google/genai": "^1.0.0"
+    "@google/genai": "^1.0.0",
+    "ai": "^6.0.250"
   },
   "peerDependencies": {
     "react": ">=18"

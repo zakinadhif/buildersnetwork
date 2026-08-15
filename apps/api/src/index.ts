@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { serve } from "@hono/node-server";
 import { serveStatic } from "@hono/node-server/serve-static";
-import { createGeminiAI } from "@myapp/ai";
+import { createGeminiAI, createGeminiModel } from "@myapp/ai";
 import { createAuth } from "@myapp/auth";
 import { loadConfig } from "@myapp/config";
 import { createDb } from "@myapp/db";
@@ -14,6 +14,7 @@ import {
 import { createStorageFromEnv } from "@myapp/storage";
 
 import { createApp } from "./app";
+import { createAppFeatureFlagProvider } from "./lib/feature-flags";
 
 const config = loadConfig();
 
@@ -28,6 +29,7 @@ const auth = createAuth({
   BETTER_AUTH_SECRET: config.BETTER_AUTH_SECRET,
 });
 const ai = createGeminiAI(config.GEMINI_API_KEY ?? "");
+const assistantModel = createGeminiModel(config.GEMINI_API_KEY ?? "");
 
 const email = config.RESEND_API_KEY
   ? createResendEmail({ apiKey: config.RESEND_API_KEY })
@@ -53,16 +55,23 @@ const adminEmails = (config.ADMIN_EMAILS ?? "")
 // upload flow works without Docker or credentials. Production remains
 // explicitly configurable and may leave storage disabled.
 const storage = createStorageFromEnv(config);
+const featureFlags = createAppFeatureFlagProvider({
+  kind: config.FEATURE_FLAG_PROVIDER,
+  db,
+  aiAssistant: config.FEATURE_AI_ASSISTANT,
+});
 
 const app = createApp({
   db,
   auth,
   ai,
+  assistantModel,
   email,
   emailFrom: config.EMAIL_FROM ?? DEFAULT_EMAIL_FROM,
   allowedOrigins,
   adminEmails,
   storage,
+  featureFlags,
   gitSha: process.env.GIT_SHA,
 });
 

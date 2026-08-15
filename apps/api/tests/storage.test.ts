@@ -17,6 +17,8 @@ function config(overrides: Partial<Config> = {}): Config {
     STORAGE_REGION: "auto",
     STORAGE_FORCE_PATH_STYLE: false,
     BETTER_AUTH_SECRET: "dev-secret-change-me-this-is-at-least-32-chars",
+    FEATURE_FLAG_PROVIDER: "env",
+    FEATURE_AI_ASSISTANT: false,
     ...overrides,
   };
 }

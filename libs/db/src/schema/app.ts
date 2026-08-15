@@ -9,6 +9,36 @@ import {
 import type { KaryaStage } from "../karya";
 import { users } from "./auth";
 
+export type AssistantIntent = "general" | "profile" | "karya";
+
+export type AssistantAction =
+  | {
+      type: "profile_draft";
+      payload: {
+        name: string;
+        handle: string;
+        bio: string;
+        year: string;
+        major: string;
+        skills: string[];
+        interests: string[];
+      };
+    }
+  | {
+      type: "karya_draft";
+      payload: {
+        title: string;
+        description: string;
+        stages: KaryaStage[];
+        interests: string[];
+      };
+    };
+
+export type AssistantMessagePart = {
+  type: string;
+  [key: string]: unknown;
+};
+
 // Timestamps are Unix epoch *milliseconds* (`integer` + `mode: "timestamp_ms"`),
 // the SQLite counterpart of the old `timestamp ... default now()`. Milliseconds,
 // not seconds, to match what `better-auth:generate` emits into `./auth.ts` — one
@@ -40,6 +70,60 @@ export const profiles = sqliteTable("profiles", {
     .$onUpdate(() => new Date())
     .notNull(),
 });
+
+// User-owned Asisten AI workspaces. The server owns their prompt and history;
+// clients only send one new turn at a time. This keeps conversation context
+// private to its member and prevents clients from injecting arbitrary history.
+export const assistantConversations = sqliteTable(
+  "assistant_conversations",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    title: text("title").notNull().default("Percakapan baru"),
+    intent: text("intent")
+      .$type<AssistantIntent>()
+      .notNull()
+      .default("general"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(now)
+      .$onUpdate(() => new Date())
+      .notNull(),
+  },
+  (table) => [
+    index("assistant_conversations_userId_updatedAt_idx").on(
+      table.userId,
+      table.updatedAt,
+    ),
+  ],
+);
+
+export const assistantMessages = sqliteTable(
+  "assistant_messages",
+  {
+    id: text("id").primaryKey(),
+    conversationId: text("conversation_id")
+      .notNull()
+      .references(() => assistantConversations.id, { onDelete: "cascade" }),
+    role: text("role").$type<"user" | "assistant">().notNull(),
+    content: text("content").notNull(),
+    action: text("action", { mode: "json" }).$type<AssistantAction>(),
+    parts: text("parts", { mode: "json" }).$type<AssistantMessagePart[]>(),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(now)
+      .notNull(),
+  },
+  (table) => [
+    index("assistant_messages_conversationId_createdAt_idx").on(
+      table.conversationId,
+      table.createdAt,
+    ),
+  ],
+);
 
 // The shared interest vocabulary (FR-14/FR-15). One row per distinct interest,
 // deduped by `slug`. `curated` marks rows from the starter list vs free-text
@@ -248,9 +332,41 @@ export const featured = sqliteTable(
   ],
 );
 
+// Global product release switches. Valid keys and safe fallback values live in
+// @myapp/feature-flags; this table only persists production boolean overrides.
+export const featureFlags = sqliteTable("feature_flags", {
+  key: text("key").primaryKey(),
+  enabled: integer("enabled", { mode: "boolean" }).notNull(),
+  updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+    .default(now)
+    .$onUpdate(() => new Date())
+    .notNull(),
+});
+
 export const profilesRelations = relations(profiles, ({ one }) => ({
   user: one(users, { fields: [profiles.userId], references: [users.id] }),
 }));
+
+export const assistantConversationsRelations = relations(
+  assistantConversations,
+  ({ one, many }) => ({
+    user: one(users, {
+      fields: [assistantConversations.userId],
+      references: [users.id],
+    }),
+    messages: many(assistantMessages),
+  }),
+);
+
+export const assistantMessagesRelations = relations(
+  assistantMessages,
+  ({ one }) => ({
+    conversation: one(assistantConversations, {
+      fields: [assistantMessages.conversationId],
+      references: [assistantConversations.id],
+    }),
+  }),
+);
 
 export const interestsRelations = relations(interests, ({ many }) => ({
   userInterests: many(userInterests),

@@ -85,6 +85,10 @@ const schema = z.object({
 
   /** Workers AI model override — only used by the Cloudflare Workers entrypoint (worker.ts). */
   AI_WORKERS_MODEL: z.string().optional(),
+
+  // --- Product feature flags ---
+  FEATURE_FLAG_PROVIDER: z.enum(["env", "database"]).default("env"),
+  FEATURE_AI_ASSISTANT: envBool(false),
 });
 
 export type Config = z.infer<typeof schema>;

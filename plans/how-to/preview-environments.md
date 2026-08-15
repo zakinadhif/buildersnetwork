@@ -108,6 +108,18 @@ Every pull request **from a branch in this repo** gets a full ephemeral environm
 
 **Preview deploys from `wrangler.preview.toml`, rendered in CI from `wrangler.preview.template.toml`** — a separate file rather than an `[env.preview]` block, for the inheritable-`routes` reason above. Bindings are non-inheritable, so *omitting* `RESEND_API_KEY`, `GOOGLE_CLIENT_ID` and `[[send_email]]` is what disables email and Google sign-in in previews: absence is the flag.
 
+Product feature flags have a separate, explicit lifecycle. The git-tracked
+`wrangler.preview.template.toml` contains literal, reviewable, non-secret
+preview settings: `FEATURE_FLAG_PROVIDER = "env"` and each `FEATURE_*`
+boolean. CI substitutes only the PR number, D1 database ID, `APP_URL`, and the
+temporary `BETTER_AUTH_SECRET` to produce `wrangler.preview.toml`. That rendered
+file is ephemeral and gitignored because it contains live resource identifiers
+and a generated secret; all literal feature settings pass through unchanged.
+
+To change flags for a PR preview, edit the tracked template in that PR. The next
+preview deployment picks up those values. The SPA has no `VITE_FEATURE_*`
+configuration: it reads the server-evaluated snapshot from `/api/features`.
+
 The auth-signing secret is **generated fresh per run, not stored**.
 
 ## How preview login works

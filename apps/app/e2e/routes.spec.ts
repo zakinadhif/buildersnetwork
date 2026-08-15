@@ -89,16 +89,17 @@ authed(
   },
 );
 
-authed("rail exposes only Scroll, Karya, and People", async ({ page }) => {
+authed("rail exposes the enabled primary surfaces", async ({ page }) => {
   await mockHome(page);
   await page.goto("/home");
 
   const nav = page.getByRole("navigation", { name: "Navigasi utama" });
-  await expect(nav.getByRole("button")).toHaveCount(3);
+  await expect(nav.getByRole("button")).toHaveCount(4);
   expect(await nav.getByRole("button").allTextContents()).toEqual([
     "Scroll",
     "Karya",
     "People",
+    "Asisten AI",
   ]);
 
   await nav.getByRole("button", { name: "Karya" }).click();
@@ -112,3 +113,28 @@ authed("rail exposes only Scroll, Karya, and People", async ({ page }) => {
   await nav.getByRole("button", { name: "Scroll" }).click();
   await expect(page).toHaveURL(/\/home$/);
 });
+
+authed(
+  "disabled AI assistant is absent and its route redirects",
+  async ({ page }) => {
+    await page.route("**/api/features", (route) =>
+      route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ aiAssistant: false }),
+      }),
+    );
+    await mockHome(page);
+
+    await page.goto("/assistant");
+
+    await expect(page).toHaveURL(/\/home$/);
+    const nav = page.getByRole("navigation", { name: "Navigasi utama" });
+    await expect(
+      nav.getByRole("button", { name: "Asisten AI", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /Butuh teman berpikir/ }),
+    ).toHaveCount(0);
+  },
+);

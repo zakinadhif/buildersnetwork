@@ -1,6 +1,7 @@
 import { useGetFeed } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
+import { useFeatureFlags } from "@/lib/feature-flags";
 import type { Member } from "@/lib/members";
 
 /**
@@ -11,6 +12,7 @@ import type { Member } from "@/lib/members";
  */
 export default function MinatSaya({ user }: { user: Member }) {
   const [, navigate] = useLocation();
+  const { enabled } = useFeatureFlags();
   const { data: feed = [] } = useGetFeed();
 
   const mine = new Set(user.interests.map((i) => i.toLowerCase()));
@@ -35,13 +37,15 @@ export default function MinatSaya({ user }: { user: Member }) {
         <p className="py-12 font-mono text-body text-ink3 leading-body">
           Kamu belum nambahin minat.
           <br />
-          <button
-            type="button"
-            className="bg-transparent border-none p-0 cursor-pointer text-[13px] text-ink2 transition-colors hover:text-accent mt-2"
-            onClick={() => navigate("/assistant")}
-          >
-            Ngobrol sama asisten buat ngisi profilmu →
-          </button>
+          {enabled("aiAssistant") && (
+            <button
+              type="button"
+              className="bg-transparent border-none p-0 cursor-pointer text-[13px] text-ink2 transition-colors hover:text-accent mt-2"
+              onClick={() => navigate("/assistant")}
+            >
+              Ngobrol sama asisten buat ngisi profilmu →
+            </button>
+          )}
         </p>
       ) : shown.length === 0 ? (
         <p className="font-mono text-ui text-ink3 py-5">

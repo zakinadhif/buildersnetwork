@@ -12,7 +12,7 @@ export interface WorkersAIBinding {
 
 export function createWorkersAI(
   binding: WorkersAIBinding,
-  model = "@cf/meta/llama-4-scout-17b-16e-instruct",
+  model = "@cf/zai-org/glm-4.7-flash",
 ): AIProvider {
   return {
     async complete(messages: Message[], _opts: CompleteOptions = {}) {
