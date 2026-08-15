@@ -125,7 +125,7 @@ export function FontControls({
   onBackground: (pureWhite: boolean) => void;
 }) {
   return (
-    <div className="fixed right-4 bottom-4 left-4 z-[100] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 sm:right-5 sm:bottom-5 sm:left-auto">
+    <div className="fixed right-4 bottom-4 left-4 z-[100] flex max-w-[calc(100vw-2rem)] flex-col items-end gap-2 max-[900px]:hidden sm:right-5 sm:bottom-5 sm:left-auto">
       <BackgroundSwitcher pureWhite={pureWhite} onChange={onBackground} />
       <FontSwitcher options={DISPLAY_FONTS} activeIdx={displayIdx} onChange={onDisplay} />
       <FontSwitcher options={BODY_FONTS}    activeIdx={bodyIdx}    onChange={onBody}    />

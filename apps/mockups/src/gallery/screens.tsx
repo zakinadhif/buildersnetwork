@@ -101,7 +101,7 @@ export function ScreenSwitcher({ active, onChange }: {
     <div
       role="group"
       aria-label="Pilih layar"
-      className="fixed bottom-5 left-5 z-[100] flex max-w-[280px] flex-col gap-2 rounded-[14px] border border-line-dark bg-surface p-2 shadow-[0_4px_16px_oklch(0%_0_0_/_10%)]"
+      className="fixed bottom-5 left-5 z-[100] flex max-w-[280px] flex-col gap-2 rounded-[14px] border border-line-dark bg-surface p-2 shadow-[0_4px_16px_oklch(0%_0_0_/_10%)] max-[900px]:hidden"
     >
       {GROUP_ORDER.map((group) => {
         const items = visible.filter((s) => s.group === group);

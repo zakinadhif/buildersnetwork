@@ -50,6 +50,26 @@ body {
   height: 100%;
 }
 
+/* The shared shell is desktop-first. On mobile the app replaces its two rails
+   with the fixed chrome in components/Shell.tsx and keeps one readable content
+   column between them. */
+@media (max-width: 900px) {
+  .bn-shell-inner {
+    flex-direction: column;
+    gap: 0;
+    padding: 0 16px calc(5.5rem + env(safe-area-inset-bottom));
+  }
+
+  .bn-main {
+    padding-top: 16px !important;
+  }
+
+  .bn-nav,
+  .bn-rail {
+    display: none !important;
+  }
+}
+
 @keyframes up {
   from {
     opacity: 0;
