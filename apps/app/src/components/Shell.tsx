@@ -11,11 +11,11 @@ import {
 import {
   Bell,
   LayoutGrid,
+  type LucideIcon,
   Newspaper,
   Plus,
   Sparkles,
   Users,
-  type LucideIcon,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useFeatureFlags } from "@/lib/feature-flags";
@@ -188,9 +188,7 @@ export default function Shell({
     return {
       label: surface.label,
       icon: <Icon size={18} strokeWidth={1.75} />,
-      active: surface.match
-        ? surface.match(location)
-        : location === surface.to,
+      active: surface.match ? surface.match(location) : location === surface.to,
       onClick: () => navigate(surface.to),
     };
   });

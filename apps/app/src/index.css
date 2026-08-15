@@ -61,12 +61,12 @@ body {
   }
 
   .bn-main {
-    padding-top: 16px !important;
+    padding-top: 16px;
   }
 
   .bn-nav,
   .bn-rail {
-    display: none !important;
+    display: none;
   }
 }
 

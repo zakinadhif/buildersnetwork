@@ -109,32 +109,37 @@ authed(
   },
 );
 
-authed("the mobile shell uses app chrome and stable gutters", async ({ page }) => {
-  await mockHome(page);
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto("/home");
+authed(
+  "the mobile shell uses app chrome and stable gutters",
+  async ({ page }) => {
+    await mockHome(page);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto("/home");
 
-  await expect(page.locator(".bn-mobile-header")).toBeVisible();
-  await expect(page.locator(".bn-mobile-nav")).toBeVisible();
-  await expect(page.locator(".bn-mobile-create")).toBeVisible();
-  await expect(page.locator(".bn-nav")).toBeHidden();
-  await expect(page.locator(".bn-rail")).toBeHidden();
+    await expect(page.locator(".bn-mobile-header")).toBeVisible();
+    await expect(page.locator(".bn-mobile-nav")).toBeVisible();
+    await expect(page.locator(".bn-mobile-create")).toBeVisible();
+    await expect(page.locator(".bn-nav")).toBeHidden();
+    await expect(page.locator(".bn-rail")).toBeHidden();
 
-  const main = await page.locator(".bn-main").boundingBox();
-  if (!main) throw new Error("mobile main column did not render");
-  expect(Math.round(main.x)).toBe(16);
-  expect(Math.round(main.y)).toBe(64);
-  expect(Math.round(main.width)).toBe(358); // viewport minus both 16px gutters
-  await expect(page.locator(".bn-main")).toHaveCSS("padding-top", "16px");
+    const main = await page.locator(".bn-main").boundingBox();
+    if (!main) throw new Error("mobile main column did not render");
+    expect(Math.round(main.x)).toBe(16);
+    expect(Math.round(main.y)).toBe(64);
+    expect(Math.round(main.width)).toBe(358); // viewport minus both 16px gutters
+    await expect(page.locator(".bn-main")).toHaveCSS("padding-top", "16px");
 
-  const heading = await page.getByRole("heading", { name: "Scroll" }).boundingBox();
-  if (!heading) throw new Error("mobile page heading did not render");
-  expect(Math.round(heading.y)).toBe(80); // 64px app bar + 16px breathing room
+    const heading = await page
+      .getByRole("heading", { name: "Scroll" })
+      .boundingBox();
+    if (!heading) throw new Error("mobile page heading did not render");
+    expect(Math.round(heading.y)).toBe(80); // 64px app bar + 16px breathing room
 
-  const mobileNav = page.getByRole("navigation", {
-    name: "Navigasi utama",
-  });
-  await expect(
-    mobileNav.getByRole("button", { name: "Scroll", exact: true }),
-  ).toHaveAttribute("aria-current", "page");
-});
+    const mobileNav = page.getByRole("navigation", {
+      name: "Navigasi utama",
+    });
+    await expect(
+      mobileNav.getByRole("button", { name: "Scroll", exact: true }),
+    ).toHaveAttribute("aria-current", "page");
+  },
+);
