@@ -129,11 +129,7 @@ authed(
     expect(Math.round(main.width)).toBe(358); // viewport minus both 16px gutters
     await expect(page.locator(".bn-main")).toHaveCSS("padding-top", "16px");
 
-    const heading = await page
-      .getByRole("heading", { name: "Scroll" })
-      .boundingBox();
-    if (!heading) throw new Error("mobile page heading did not render");
-    expect(Math.round(heading.y)).toBe(80); // 64px app bar + 16px breathing room
+    await expect(page.getByRole("heading", { name: "Scroll" })).toBeHidden();
 
     const mobileNav = page.getByRole("navigation", {
       name: "Navigasi utama",

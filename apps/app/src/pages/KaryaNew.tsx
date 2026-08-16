@@ -357,7 +357,7 @@ export default function KaryaNew() {
 
   return (
     <>
-      <header className="mb-[26px]">
+      <header className="mb-[26px] hidden min-[901px]:block">
         <h1 className="m-0 font-display text-display font-normal tracking-heading leading-heading text-ink">
           Bikin karya baru.
         </h1>

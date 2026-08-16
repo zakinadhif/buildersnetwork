@@ -107,7 +107,7 @@ export default function KaryaCatalog({
 
   return (
     <>
-      <header className="mb-[18px]">
+      <header className="mb-[18px] hidden min-[901px]:block">
         <div className="flex items-baseline gap-2.5">
           <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
             Karya

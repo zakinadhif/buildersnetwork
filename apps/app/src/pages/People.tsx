@@ -191,7 +191,7 @@ export default function People({ user }: { user: Member }) {
     <Shell me={user} rail={rail}>
       <div className="flex flex-col gap-5">
         <div>
-          <div className="mb-3 flex items-baseline gap-2.5">
+          <div className="mb-3 hidden items-baseline gap-2.5 min-[901px]:flex">
             <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
               People
             </h1>

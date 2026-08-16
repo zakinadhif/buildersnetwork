@@ -17,7 +17,7 @@ export default function Scroll({ user }: { user: Member }) {
 
   return (
     <>
-      <div className="mb-1.5 flex items-baseline gap-2.5">
+      <div className="mb-1.5 hidden items-baseline gap-2.5 min-[901px]:flex">
         <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
           Scroll
         </h1>

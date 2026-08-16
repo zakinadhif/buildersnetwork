@@ -13,7 +13,7 @@ export default function ComingSoon({
 }) {
   return (
     <>
-      <div className="flex items-baseline gap-2.5 mb-6">
+      <div className="mb-6 hidden items-baseline gap-2.5 min-[901px]:flex">
         <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
           {title}
         </h1>
