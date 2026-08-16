@@ -1,6 +1,6 @@
 import { sendOtp } from "@myapp/api-client-react";
 import { Button, Eyebrow, Input } from "@myapp/ui";
-import { useEffect, useState, type FormEvent } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
 import { signIn, signUp, useSession } from "@/lib/auth-client";

@@ -1,5 +1,5 @@
-import { createContext, useContext } from "react";
 import type { FeatureKey } from "@myapp/feature-flags";
+import { createContext, useContext } from "react";
 
 export interface FeatureFlagsValue {
   enabled: (key: FeatureKey) => boolean;

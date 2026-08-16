@@ -288,7 +288,9 @@ export default function OwnProfile({ me }: { me: Member }) {
           <Eyebrow as="div" className="mb-1">
             Akun
           </Eyebrow>
-          <p className="m-0 text-ui text-ink3">Keluar dari akunmu di perangkat ini.</p>
+          <p className="m-0 text-ui text-ink3">
+            Keluar dari akunmu di perangkat ini.
+          </p>
         </div>
         <Button
           variant="danger"
