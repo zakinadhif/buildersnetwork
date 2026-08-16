@@ -4,7 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
-import { useFeatureFlags } from "@/lib/feature-flags";
+import { useFeatureFlags } from "@/lib/feature-flags-context";
 
 const SKILLS = ["React", "Figma", "Python", "UI/UX", "Product", "Data"];
 const INTERESTS = [

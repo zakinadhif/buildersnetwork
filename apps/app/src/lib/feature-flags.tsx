@@ -4,17 +4,13 @@ import {
 } from "@myapp/api-client-react";
 import {
   defaultFeatureSnapshot,
-  type FeatureKey,
   type FeatureSnapshot,
 } from "@myapp/feature-flags";
-import { createContext, type ReactNode, useContext, useMemo } from "react";
-
-interface FeatureFlagsValue {
-  enabled: (key: FeatureKey) => boolean;
-  isLoading: boolean;
-}
-
-const FeatureFlagsContext = createContext<FeatureFlagsValue | null>(null);
+import { type ReactNode, useMemo } from "react";
+import {
+  FeatureFlagsContext,
+  type FeatureFlagsValue,
+} from "@/lib/feature-flags-context";
 
 export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
   const { data, isLoading } = useGetFeatureFlags({
@@ -38,12 +34,4 @@ export function FeatureFlagsProvider({ children }: { children: ReactNode }) {
       {children}
     </FeatureFlagsContext.Provider>
   );
-}
-
-export function useFeatureFlags(): FeatureFlagsValue {
-  const value = useContext(FeatureFlagsContext);
-  if (!value) {
-    throw new Error("useFeatureFlags must be used inside FeatureFlagsProvider");
-  }
-  return value;
 }

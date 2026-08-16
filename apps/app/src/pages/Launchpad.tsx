@@ -2,7 +2,7 @@ import { useGetFeed, useListMembers } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
 import { Avatar, Eyebrow } from "@/components/ui-atoms";
-import { useFeatureFlags } from "@/lib/feature-flags";
+import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { firstName, type Member } from "@/lib/members";
 
 /**

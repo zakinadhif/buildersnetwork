@@ -40,12 +40,12 @@ async function mockHome(
 }
 
 // ---------------------------------------------------------------------------
-// Unauthenticated users are redirected to /welcome (the entry screen)
+// Unauthenticated users are redirected to /login (the entry screen)
 // ---------------------------------------------------------------------------
 
-unauthed("/ redirects to /welcome when unauthenticated", async ({ page }) => {
+unauthed("/ redirects to /login when unauthenticated", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveURL(/\/welcome/);
+  await expect(page).toHaveURL(/\/login/);
 });
 
 unauthed(
@@ -53,9 +53,9 @@ unauthed(
   async ({ page }) => {
     await page.goto("/does-not-exist");
     // The catch-all bounces off the bogus path back to the app root (whence an
-    // unauthenticated viewer continues toward /welcome) — never stranded on it.
+    // unauthenticated viewer continues toward /login — never stranded on it.
     await expect(page).not.toHaveURL(/does-not-exist/);
-    expect(new URL(page.url()).pathname).toMatch(/^\/(welcome)?$/);
+    expect(new URL(page.url()).pathname).toMatch(/^\/(login)?$/);
   },
 );
 

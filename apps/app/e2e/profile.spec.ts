@@ -1,5 +1,5 @@
 import type { Page } from "@playwright/test";
-import { authed, expect } from "./fixtures";
+import { authed, expect, MOCK_SESSION } from "./fixtures";
 
 function profileState(page: Page) {
   let profile: Record<string, unknown> | null = null;
@@ -83,3 +83,42 @@ authed(
     await expect(page.getByText("TypeScript", { exact: true })).toBeVisible();
   },
 );
+
+authed("Profil Saya can log out", async ({ page }) => {
+  let signedOut = false;
+  await page.route("**/api/auth/get-session", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: signedOut ? "null" : JSON.stringify(MOCK_SESSION),
+    }),
+  );
+  await page.route("**/api/auth/sign-out", (route) => {
+    signedOut = true;
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({}),
+    });
+  });
+  await page.route("**/api/me", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: "test-user-id",
+        name: "Test User",
+        handle: null,
+        bio: null,
+        interests: [],
+        year: "2023",
+        major: "Informatika",
+        skills: [],
+      }),
+    }),
+  );
+
+  await page.goto("/profil");
+  await page.getByRole("button", { name: "Keluar", exact: true }).click();
+  await expect(page).toHaveURL(/\/login/);
+});

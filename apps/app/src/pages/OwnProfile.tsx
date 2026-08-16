@@ -6,7 +6,9 @@ import {
 import { Avatar, Button, Eyebrow, Input, Tag, Textarea } from "@myapp/ui";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { InterestsEditor, SkillsEditor } from "@/components/ui-atoms";
+import { signOut } from "@/lib/auth-client";
 
 type Draft = Pick<
   Member,
@@ -50,9 +52,11 @@ function ProfileTags({
 
 export default function OwnProfile({ me }: { me: Member }) {
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
   const [editing, setEditing] = useState(false);
   const [draft, setDraft] = useState(() => fromMember(me));
   const [busy, setBusy] = useState(false);
+  const [loggingOut, setLoggingOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const set = <K extends keyof Draft>(key: K, value: Draft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
@@ -80,10 +84,23 @@ export default function OwnProfile({ me }: { me: Member }) {
     }
   }
 
+  async function logout() {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    setError(null);
+    try {
+      await signOut();
+      navigate("/login");
+    } catch {
+      setError("Belum bisa keluar. Coba lagi.");
+      setLoggingOut(false);
+    }
+  }
+
   return (
     <div className="pb-10 pt-1">
       <header className="mb-7 flex items-start justify-between gap-5">
-        <div>
+        <div className="hidden min-[901px]:block">
           <Eyebrow as="div" className="mb-2">
             Profil Saya
           </Eyebrow>
@@ -266,6 +283,21 @@ export default function OwnProfile({ me }: { me: Member }) {
           </div>
         )}
       </section>
+      <div className="mt-8 flex items-center justify-between gap-4 border-t border-line pt-5">
+        <div>
+          <Eyebrow as="div" className="mb-1">
+            Akun
+          </Eyebrow>
+          <p className="m-0 text-ui text-ink3">Keluar dari akunmu di perangkat ini.</p>
+        </div>
+        <Button
+          variant="danger"
+          disabled={loggingOut}
+          onClick={() => void logout()}
+        >
+          {loggingOut ? "Keluar…" : "Keluar"}
+        </Button>
+      </div>
     </div>
   );
 }

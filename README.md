@@ -37,7 +37,8 @@ Make the **karya** the center of gravity. A project isn't a static listing — i
 
 ```mermaid
 flowchart LR
-  W[Welcome] --> L[Login] --> V[Verify email] --> M["Mulai — one-field name"] --> H
+  L[Login] --> H
+  S[Sign up] --> V[Verify email] --> M["Mulai — one-field name"] --> H
   H{{"Launchpad shell · /home"}} --> A["AI assistant · /assistant"]
   H --> K["Karya · /karya/:id"]
   H --> F["Feed + featured"]

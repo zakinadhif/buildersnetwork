@@ -2,7 +2,7 @@ import type { Page } from "@playwright/test";
 import { authed, expect, unauthed } from "./fixtures";
 
 // Auth / entry-routing acceptance against the real app: unauthenticated users
-// land on /welcome, and an authenticated member with a profile lands on the
+// land on /login, and an authenticated member with a profile lands on the
 // feed-first home (not the old template "My App" shell).
 
 const PROFILE = {
@@ -37,9 +37,9 @@ async function mockHome(page: Page) {
   }
 }
 
-unauthed("unauthenticated: / redirects to /welcome", async ({ page }) => {
+unauthed("unauthenticated: / redirects to /login", async ({ page }) => {
   await page.goto("/");
-  await expect(page).toHaveURL(/\/welcome/);
+  await expect(page).toHaveURL(/\/login/);
 });
 
 authed(
@@ -48,7 +48,7 @@ authed(
     await mockHome(page);
     await page.goto("/");
     await expect(page).toHaveURL(/\/home/);
-    await expect(page).not.toHaveURL(/\/welcome/);
+    await expect(page).not.toHaveURL(/\/login/);
     await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
   },
 );

@@ -8,7 +8,7 @@ import { Redirect, Route, Router, Switch, useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { Loading } from "@/components/ui-atoms";
 import { useSession } from "@/lib/auth-client";
-import { useFeatureFlags } from "@/lib/feature-flags";
+import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { KaryaDraftProvider } from "@/lib/karya-draft-provider";
 import type { Member } from "@/lib/members";
 import { OnboardingProvider } from "@/lib/onboarding-provider";
@@ -20,6 +20,7 @@ import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
 import KaryaPost from "@/pages/KaryaPost";
 import Scroll, { ScrollRail } from "@/pages/Launchpad";
+import Login from "@/pages/Login";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
@@ -27,8 +28,8 @@ import Onboarding from "@/pages/Onboarding";
 import OwnProfile from "@/pages/OwnProfile";
 import People from "@/pages/People";
 import Review from "@/pages/Review";
+import Signup from "@/pages/Signup";
 import VerifyEmail from "@/pages/VerifyEmail";
-import Welcome from "@/pages/Welcome";
 
 function KaryaCatalogRoute({ me }: { me: Member }) {
   const [query, setQuery] = useState("");
@@ -70,9 +71,10 @@ function AppRoutes() {
       enabled: !!session?.user && !!session?.user?.emailVerified,
     },
   });
+  const isPublicAuthRoute = location === "/login" || location === "/signup";
 
   if (
-    isPending ||
+    (isPending && !isPublicAuthRoute) ||
     featuresLoading ||
     (!!session?.user?.emailVerified && meLoading)
   ) {
@@ -89,10 +91,10 @@ function AppRoutes() {
   }
 
   // A logged-in route that lives *inside* the persistent shell. Gates on auth
-  // (→ welcome) and profile (→ the minimal one-field start, not the AI chat).
+  // (→ login) and profile (→ the minimal one-field start, not the AI chat).
   // `rail` optionally supplies the shell's right column (issue #20).
   const withProfile = (page: (m: Member) => ReactNode) => {
-    if (!loggedIn) return <Redirect to="/welcome" />;
+    if (!loggedIn) return <Redirect to="/login" />;
     if (!me) return <Redirect to="/mulai" />;
     return page(me);
   };
@@ -113,12 +115,18 @@ function AppRoutes() {
       <Route path="/verify-email">
         <VerifyEmail />
       </Route>
+      <Route path="/login">
+        <Login />
+      </Route>
+      <Route path="/signup">
+        <Signup />
+      </Route>
       <Route path="/welcome">
-        <Welcome />
+        <Redirect to="/signup" />
       </Route>
       <Route path="/mulai">
         {!loggedIn ? (
-          <Redirect to="/welcome" />
+          <Redirect to="/login" />
         ) : hasProfile ? (
           <Redirect to="/home" />
         ) : (
@@ -126,10 +134,10 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/onboarding">
-        {!loggedIn ? <Redirect to="/welcome" /> : <Onboarding />}
+        {!loggedIn ? <Redirect to="/login" /> : <Onboarding />}
       </Route>
       <Route path="/review">
-        {!loggedIn ? <Redirect to="/welcome" /> : <Review />}
+        {!loggedIn ? <Redirect to="/login" /> : <Review />}
       </Route>
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
@@ -144,7 +152,7 @@ function AppRoutes() {
       </Route>
       <Route path="/karya">
         {!loggedIn ? (
-          <Redirect to="/welcome" />
+          <Redirect to="/login" />
         ) : !me ? (
           <Redirect to="/mulai" />
         ) : (
@@ -195,7 +203,7 @@ function AppRoutes() {
       <Route path="/member/:id">
         {(params) =>
           !loggedIn ? (
-            <Redirect to="/welcome" />
+            <Redirect to="/login" />
           ) : !me ? (
             <Redirect to="/mulai" />
           ) : (
@@ -205,7 +213,7 @@ function AppRoutes() {
       </Route>
       <Route path="/karya/new/ai">
         {!loggedIn ? (
-          <Redirect to="/welcome" />
+          <Redirect to="/login" />
         ) : !hasProfile ? (
           <Redirect to="/mulai" />
         ) : (
@@ -225,7 +233,7 @@ function AppRoutes() {
       <Route path="/karya/:karyaId/posts/:postId">
         {(params) =>
           !loggedIn ? (
-            <Redirect to="/welcome" />
+            <Redirect to="/login" />
           ) : !hasProfile ? (
             <Redirect to="/mulai" />
           ) : (
@@ -240,7 +248,7 @@ function AppRoutes() {
       <Route path="/karya/:id">
         {(params) =>
           !loggedIn ? (
-            <Redirect to="/welcome" />
+            <Redirect to="/login" />
           ) : !hasProfile ? (
             <Redirect to="/mulai" />
           ) : (
@@ -251,7 +259,7 @@ function AppRoutes() {
 
       <Route path="/">
         {!loggedIn ? (
-          <Redirect to="/welcome" />
+          <Redirect to="/login" />
         ) : !hasProfile ? (
           <Redirect to="/mulai" />
         ) : (

@@ -1,32 +1,32 @@
 import { sendOtp } from "@myapp/api-client-react";
 import { Button, Eyebrow, Input } from "@myapp/ui";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { useLocation } from "wouter";
 import { EntryAlert, EntryLayout } from "@/components/EntryLayout";
 import { signIn, signUp, useSession } from "@/lib/auth-client";
 
-type Mode = "signup" | "signin";
+type AuthMode = "login" | "signup";
 
-export default function Welcome() {
+export default function Auth({ mode }: { mode: AuthMode }) {
   const { data: session } = useSession();
   const [, navigate] = useLocation();
-  const [mode, setMode] = useState<Mode>("signup");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const isSignup = mode === "signup";
 
   useEffect(() => {
     if (session?.user) navigate("/");
   }, [session?.user, navigate]);
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
     const normalizedEmail = email.trim().toLowerCase();
     if (
-      mode === "signup" &&
+      isSignup &&
       !normalizedEmail.endsWith("@student.telkomuniversity.ac.id")
     ) {
       setError("Gunakan email @student.telkomuniversity.ac.id.");
@@ -39,7 +39,7 @@ export default function Welcome() {
 
     setLoading(true);
 
-    if (mode === "signup") {
+    if (isSignup) {
       const result = await signUp.email({
         email: normalizedEmail,
         password,
@@ -50,6 +50,7 @@ export default function Welcome() {
         setLoading(false);
         return;
       }
+
       let otpSent = false;
       try {
         await sendOtp({ email: normalizedEmail });
@@ -62,20 +63,21 @@ export default function Welcome() {
         `/verify-email?email=${encodeURIComponent(normalizedEmail)}${otpSent ? "&sent=1" : ""}`,
       );
       return;
-    } else {
-      const result = await signIn.email({ email: normalizedEmail, password });
-      if (result.error) {
-        setError(result.error.message ?? "Gagal masuk");
-        setLoading(false);
-        return;
-      }
+    }
+
+    const result = await signIn.email({
+      email: normalizedEmail,
+      password,
+    });
+    if (result.error) {
+      setError(result.error.message ?? "Gagal masuk");
+      setLoading(false);
+      return;
     }
 
     setLoading(false);
     navigate("/");
   }
-
-  const isSignup = mode === "signup";
 
   return (
     <EntryLayout
@@ -89,12 +91,12 @@ export default function Welcome() {
     >
       {error && <EntryAlert>{error}</EntryAlert>}
       <form onSubmit={handleSubmit} className="flex flex-col gap-[18px]">
-        <label htmlFor="entry-email">
+        <label htmlFor={`${mode}-email`}>
           <Eyebrow as="span" className="mb-1.5 block">
             {isSignup ? "Email kampus" : "Email"}
           </Eyebrow>
           <Input
-            id="entry-email"
+            id={`${mode}-email`}
             type="email"
             placeholder={
               isSignup ? "nama@student.telkomuniversity.ac.id" : "Email kamu"
@@ -109,12 +111,12 @@ export default function Welcome() {
             </span>
           )}
         </label>
-        <label htmlFor="entry-password">
+        <label htmlFor={`${mode}-password`}>
           <Eyebrow as="span" className="mb-1.5 block">
             Password
           </Eyebrow>
           <Input
-            id="entry-password"
+            id={`${mode}-password`}
             type="password"
             placeholder="Minimal 8 karakter"
             value={password}
@@ -141,10 +143,7 @@ export default function Welcome() {
         {isSignup ? "Sudah punya akun? " : "Belum punya akun? "}
         <button
           type="button"
-          onClick={() => {
-            setMode(isSignup ? "signin" : "signup");
-            setError(null);
-          }}
+          onClick={() => navigate(isSignup ? "/login" : "/signup")}
           className="border-none bg-transparent p-0 text-ui font-medium text-accent"
         >
           {isSignup ? "Buka halaman Masuk" : "Buka halaman Daftar"}

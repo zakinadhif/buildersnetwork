@@ -26,7 +26,7 @@ Two consequences worth internalizing:
 **Measure** *(standard)* — the width of a column of content. There are exactly two:
 
 - `--container-shell` (1052px), the three-column browsing shell.
-- `--container-page` (580px), the single reading column — auth, welcome, chat.
+- `--container-page` (580px), the single reading column — auth, chat.
 
 **`--container-shell` vs `--container-shell-outer`** — the distinction that caused the system's most expensive bug. `--container-shell` measures the **content the columns divide up**; `--container-shell-outer` derives from it by adding the six column-edge gutters and two rules. Under the shared `border-box` base, `max-width` sets the **outer** box, so a shell wanting 1052px of content must ask for `--container-shell-outer`. The same declaration once meant content in the gallery and outer width in the app, and the app's centre column was 48px short for months (#91). `outer` is derived, never written down twice.
 

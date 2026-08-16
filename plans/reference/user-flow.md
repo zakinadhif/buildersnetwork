@@ -8,7 +8,8 @@ This is the *what a user does* altitude. [content-model.md](content-model.md) sa
 
 ```mermaid
 flowchart LR
-  W[Welcome] --> L[Login] --> V[Verify email] --> M["Mulai — one-field name"] --> H{{"Launchpad shell · /home"}}
+  L[Login] --> H{{"Launchpad shell · /home"}}
+  S[Sign up] --> V[Verify email] --> M["Mulai — one-field name"] --> H
 ```
 
 **Onboarding is not a gate.** A newly-verified member lands on `/mulai`, the fast manual profile start, and can either enter the Launchpad shell directly or choose the recovered conversational AI path from the same screen. Every shell route redirects a profile-less member to `/mulai` — *not* to the AI chat (`App.tsx`).
@@ -16,20 +17,20 @@ flowchart LR
 The two gates that *do* exist:
 
 - **Email verification.** A logged-in member without a verified email is redirected to `/verify-email` from anywhere (`App.tsx:44-47`).
-- **Auth.** Any shell or detail route redirects a logged-out visitor to `/welcome`.
+- **Auth.** Any shell or detail route redirects a logged-out visitor to `/login`.
 
 The optional conversational flow (`/onboarding` → `/review` → `/home`) is directly discoverable from `/mulai`. It saves an editable profile draft and returns to the P0 shell without generating or persisting match recommendations. Existing members can also use the always-available Asisten AI workspace (`/assistant`). Its user-owned conversations and messages persist on the server; the server reconstructs model context and streams typed AI SDK message parts. Profile and karya intakes finish through native draft tools, whose structured results are persisted and handed to the existing review surfaces. A member must still open and edit that draft before the existing profile-save or karya-publish flow can mutate product data.
 
 ## The routes
 
-Wouter, base `/app` in production (`App.tsx:195`). `/` redirects by state — logged out → `/welcome`, no profile → `/mulai`, otherwise → `/home` — and anything unmatched redirects to `/`.
+Wouter, base `/app` in production (`App.tsx:195`). `/` redirects by state — logged out → `/login`, no profile → `/mulai`, otherwise → `/home` — and anything unmatched redirects to `/`.
 
 ### Outside the shell — auth, entry, opt-in onboarding
 
 | Route | Screen | Notes |
 |---|---|---|
-| `/welcome` | Welcome | The logged-out landing |
 | `/login` | Login | |
+| `/signup` | Sign up | New account registration |
 | `/verify-email` | VerifyEmail | Hard gate; carries `?email=` |
 | `/mulai` | MinimalStart | One-field start. Redirects to `/home` if a profile already exists |
 | `/onboarding` | Onboarding | The opt-in AI chat flow |

@@ -493,18 +493,19 @@ export default function Assistant({ user }: { user: Member }) {
   const [phase, setPhase] = useState<Phase>("workspace");
   const [profileDraft, setProfileDraft] = useState<Member>(user);
 
-  useEffect(() => {
-    if (!selectedId && !newConversation && conversations[0]) {
-      setSelectedId(conversations[0].id);
-    }
-    if (conversations.length === 0 && !isLoading) setNewConversation(true);
-  }, [conversations, isLoading, newConversation, selectedId]);
+  const activeConversationId =
+    selectedId ?? (newConversation ? null : (conversations[0]?.id ?? null));
+  const showingNewConversation =
+    newConversation ||
+    (!activeConversationId && !isLoading && conversations.length === 0);
 
   const { data: conversation, isLoading: conversationLoading } =
-    useGetAssistantConversation(selectedId ?? "", {
+    useGetAssistantConversation(activeConversationId ?? "", {
       query: {
-        queryKey: getGetAssistantConversationQueryKey(selectedId ?? ""),
-        enabled: Boolean(selectedId),
+        queryKey: getGetAssistantConversationQueryKey(
+          activeConversationId ?? "",
+        ),
+        enabled: Boolean(activeConversationId),
       },
     });
 
@@ -532,7 +533,7 @@ export default function Assistant({ user }: { user: Member }) {
       return;
     }
     await deleteAssistantConversation(id);
-    if (selectedId === id) {
+    if (activeConversationId === id) {
       setSelectedId(null);
       setNewConversation(true);
     }
@@ -554,10 +555,10 @@ export default function Assistant({ user }: { user: Member }) {
   };
 
   const refreshConversation = async () => {
-    if (!selectedId) return;
+    if (!activeConversationId) return;
     await Promise.all([
       queryClient.invalidateQueries({
-        queryKey: getGetAssistantConversationQueryKey(selectedId),
+        queryKey: getGetAssistantConversationQueryKey(activeConversationId),
       }),
       queryClient.invalidateQueries({
         queryKey: getListAssistantConversationsQueryKey(),
@@ -611,7 +612,7 @@ export default function Assistant({ user }: { user: Member }) {
     );
   }
 
-  const title = newConversation
+  const title = showingNewConversation
     ? "Percakapan baru"
     : (conversation?.title ?? "Asisten AI");
   const setProfile = <K extends keyof Member>(key: K, value: Member[K]) =>
@@ -624,7 +625,7 @@ export default function Assistant({ user }: { user: Member }) {
       rail={
         <ConversationRail
           conversations={conversations}
-          selectedId={selectedId}
+          selectedId={activeConversationId}
           onSelect={(id) => {
             setPendingMessage(null);
             setSelectedId(id);
@@ -641,7 +642,7 @@ export default function Assistant({ user }: { user: Member }) {
         />
       }
     >
-      <header className="mb-6 flex shrink-0 items-center gap-3 border-b border-line pb-5">
+      <header className="mb-6 hidden shrink-0 items-center gap-3 border-b border-line pb-5 min-[901px]:flex">
         <span className="flex size-9 items-center justify-center rounded-card bg-accent-tint text-accent">
           <Sparkles size={18} strokeWidth={1.7} aria-hidden="true" />
         </span>
@@ -750,7 +751,7 @@ export default function Assistant({ user }: { user: Member }) {
             </Button>
           </div>
         </div>
-      ) : newConversation ? (
+      ) : showingNewConversation ? (
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="flex flex-1 flex-col items-center justify-center py-8 text-center">
             <span className="mb-4 flex size-12 items-center justify-center rounded-panel bg-accent-tint text-accent">

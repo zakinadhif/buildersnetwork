@@ -92,7 +92,7 @@ test("daftar → verifikasi → profil → Scroll works without real email", asy
     );
   }
 
-  await page.goto("/welcome");
+  await page.goto("/signup");
   await page.getByLabel("Email kampus").fill("bukan@gmail.com");
   await page.getByLabel("Password").fill("password123");
   await page.getByRole("button", { name: "Daftar", exact: true }).click();
@@ -140,10 +140,14 @@ test("entry surfaces expose sign-in and the recovered conversational AI path", a
       body: "null",
     }),
   );
-  await page.goto("/welcome");
-  await page.getByRole("button", { name: "Buka halaman Masuk" }).click();
+  await page.goto("/login");
   await expect(
     page.getByRole("heading", { name: "Selamat datang kembali." }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Buka halaman Daftar" }).click();
+  await expect(page).toHaveURL(/\/signup/);
+  await expect(
+    page.getByRole("heading", { name: "Buat akun builder." }),
   ).toBeVisible();
 
   await page.route("**/api/auth/get-session", (route) =>
@@ -177,6 +181,38 @@ test("entry surfaces expose sign-in and the recovered conversational AI path", a
   await expect(page.getByText(/siapa nama kamu/)).toBeVisible();
 });
 
+test("login form stays mounted while the session is revalidated", async ({
+  page,
+}) => {
+  let releaseSession!: () => void;
+  const sessionPending = new Promise<void>((resolve) => {
+    releaseSession = resolve;
+  });
+
+  await page.route("**/api/auth/get-session", async (route) => {
+    await sessionPending;
+    await route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: "null",
+    });
+  });
+
+  await page.goto("/login");
+  await expect(
+    page.getByRole("heading", { name: "Selamat datang kembali." }),
+  ).toBeVisible();
+  await page.getByLabel("Email", { exact: true }).fill("builder@example.com");
+  await page.getByLabel("Password").fill("password123");
+
+  releaseSession();
+
+  await expect(page.getByLabel("Email", { exact: true })).toHaveValue(
+    "builder@example.com",
+  );
+  await expect(page.getByLabel("Password")).toHaveValue("password123");
+});
+
 test("seed accounts can submit the sign-in form", async ({ page }) => {
   await page.route("**/api/auth/get-session", (route) =>
     route.fulfill({
@@ -193,8 +229,7 @@ test("seed accounts can submit the sign-in form", async ({ page }) => {
     }),
   );
 
-  await page.goto("/welcome");
-  await page.getByRole("button", { name: "Buka halaman Masuk" }).click();
+  await page.goto("/login");
   await page.getByLabel("Email", { exact: true }).fill("hafiz@seed.local");
   await page.getByLabel("Password").fill("seedpassword123");
 

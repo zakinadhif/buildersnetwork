@@ -1,7 +1,7 @@
 import { useGetFeed } from "@myapp/api-client-react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import { useFeatureFlags } from "@/lib/feature-flags";
+import { useFeatureFlags } from "@/lib/feature-flags-context";
 import type { Member } from "@/lib/members";
 
 /**
@@ -24,7 +24,7 @@ export default function MinatSaya({ user }: { user: Member }) {
 
   return (
     <>
-      <div className="flex items-baseline gap-2.5 mb-6">
+      <div className="mb-6 hidden items-baseline gap-2.5 min-[901px]:flex">
         <h1 className="m-0 font-display text-display font-normal tracking-heading text-ink">
           Minat Saya
         </h1>
