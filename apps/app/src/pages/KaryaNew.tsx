@@ -3,6 +3,7 @@ import { Button, Eyebrow, Input, KaryaCover, Textarea } from "@myapp/ui";
 import { useEffect, useRef, useState } from "react";
 import { useLocation } from "wouter";
 import { InterestsEditor, StageMultiSelect } from "@/components/ui-atoms";
+import { useFeatureFlags } from "@/lib/feature-flags-context";
 import type { KaryaDraft } from "@/lib/karya-draft-context";
 import {
   failedUploadCount,
@@ -138,6 +139,7 @@ function ScreenshotGroup({
 
 export function KaryaNewRail() {
   const [, navigate] = useLocation();
+  const { enabled } = useFeatureFlags();
   return (
     <>
       <section>
@@ -148,14 +150,16 @@ export function KaryaNewRail() {
             Kamu memegang kendali penuh dan bisa langsung menerbitkan.
           </p>
         </div>
-        <Button
-          type="button"
-          variant="outline"
-          className="mt-2 w-full"
-          onClick={() => navigate("/karya/new/ai")}
-        >
-          Bantu susun pakai AI ✨
-        </Button>
+        {enabled("aiAssistant") && (
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2 w-full"
+            onClick={() => navigate("/karya/new/ai")}
+          >
+            Bantu susun pakai AI ✨
+          </Button>
+        )}
       </section>
       <section>
         <Eyebrow className="mb-3">Biar makin dilirik</Eyebrow>
@@ -362,8 +366,7 @@ export default function KaryaNew() {
           Bikin karya baru.
         </h1>
         <p className="mt-2 font-body text-body leading-body text-ink2">
-          Isi langsung di sini, atau minta AI membantu menyusun draft yang tetap
-          bisa kamu edit.
+          Isi detail karyamu di sini. Semuanya bisa kamu edit sebelum terbit.
         </p>
       </header>
 

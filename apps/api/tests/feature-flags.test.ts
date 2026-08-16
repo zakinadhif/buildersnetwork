@@ -15,6 +15,8 @@ function mount(featureFlags: FeatureFlagProvider) {
     await next();
   });
   app.route("/api/features", featuresRouter);
+  app.use("/api/ai/*", requireFeature("aiAssistant"));
+  app.post("/api/ai/complete", (c) => c.json({ ok: true }));
   app.use("/api/assistant/*", requireFeature("aiAssistant"));
   app.get("/api/assistant/conversations", (c) => c.json({ ok: true }));
   return app;
@@ -43,6 +45,23 @@ describe("feature flag API", () => {
     const app = mount(createFixedFeatureFlagProvider({ aiAssistant: true }));
 
     const response = await app.request("/api/assistant/conversations");
+
+    expect(response.status).toBe(200);
+  });
+
+  it("blocks the legacy AI API when disabled", async () => {
+    const app = mount(createFixedFeatureFlagProvider({ aiAssistant: false }));
+
+    const response = await app.request("/api/ai/complete", { method: "POST" });
+
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: "feature_disabled" });
+  });
+
+  it("allows the legacy AI API when enabled", async () => {
+    const app = mount(createFixedFeatureFlagProvider({ aiAssistant: true }));
+
+    const response = await app.request("/api/ai/complete", { method: "POST" });
 
     expect(response.status).toBe(200);
   });

@@ -144,6 +144,7 @@ export function createApp(services: AppServices) {
   app.all("/api/auth/*", async (c) => auth.handler(c.req.raw));
   app.route("/api/features", featuresRouter);
   app.route("/api/otp", otpRouter);
+  app.use("/api/ai/*", requireFeature("aiAssistant"));
   app.route("/api/ai", aiRouter);
   app.use("/api/assistant/*", requireFeature("aiAssistant"));
   app.route("/api/assistant", assistantRouter);

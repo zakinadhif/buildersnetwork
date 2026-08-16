@@ -134,7 +134,13 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/onboarding">
-        {!loggedIn ? <Redirect to="/login" /> : <Onboarding />}
+        {!loggedIn ? (
+          <Redirect to="/login" />
+        ) : enabled("aiAssistant") ? (
+          <Onboarding />
+        ) : (
+          <Redirect to="/mulai" />
+        )}
       </Route>
       <Route path="/review">
         {!loggedIn ? <Redirect to="/login" /> : <Review />}
@@ -216,6 +222,8 @@ function AppRoutes() {
           <Redirect to="/login" />
         ) : !hasProfile ? (
           <Redirect to="/mulai" />
+        ) : !enabled("aiAssistant") ? (
+          <Redirect to="/karya/new" />
         ) : (
           <KaryaAgent />
         )}
