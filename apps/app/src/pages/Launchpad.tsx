@@ -1,9 +1,25 @@
 import { useGetFeed, useListMembers } from "@myapp/api-client-react";
+import { X } from "lucide-react";
+import { useState } from "react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
 import { Avatar, Eyebrow } from "@/components/ui-atoms";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { firstName, type Member } from "@/lib/members";
+
+const assistantPromptDismissalKey = (memberId: string) =>
+  `builders-network:assistant-prompt-dismissed:${memberId}`;
+
+function assistantPromptIsDismissed(memberId: string) {
+  if (typeof localStorage === "undefined") return false;
+
+  try {
+    return localStorage.getItem(assistantPromptDismissalKey(memberId)) === "true";
+  } catch {
+    // Storage unavailable (private mode / quota) — degrade to the current session.
+    return false;
+  }
+}
 
 /**
  * Scroll is the Launchpad hero: a calm, reverse-chronological river of real
@@ -14,6 +30,18 @@ export default function Scroll({ user }: { user: Member }) {
   const [, navigate] = useLocation();
   const { enabled } = useFeatureFlags();
   const { data: feed = [] } = useGetFeed();
+  const [isAssistantPromptDismissed, setIsAssistantPromptDismissed] =
+    useState(() => assistantPromptIsDismissed(user.id));
+
+  const dismissAssistantPrompt = () => {
+    setIsAssistantPromptDismissed(true);
+
+    try {
+      localStorage.setItem(assistantPromptDismissalKey(user.id), "true");
+    } catch {
+      // Storage unavailable (private mode / quota) — remain dismissed in memory.
+    }
+  };
 
   return (
     <>
@@ -26,33 +54,43 @@ export default function Scroll({ user }: { user: Member }) {
         </span>
       </div>
 
-      {enabled("aiAssistant") && (
-        <button
-          type="button"
-          className="my-4 flex w-full cursor-pointer items-center gap-3.5 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5 text-left transition-opacity hover:opacity-85"
-          onClick={() => navigate("/assistant")}
-        >
-          <span
-            className="shrink-0 font-display text-[28px] leading-none text-accent"
-            aria-hidden="true"
+      {enabled("aiAssistant") && !isAssistantPromptDismissed && (
+        <div className="my-4 flex w-full items-center gap-2 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5">
+          <button
+            type="button"
+            className="flex min-w-0 flex-1 cursor-pointer items-center gap-3.5 border-none bg-transparent p-0 text-left transition-opacity hover:opacity-85"
+            onClick={() => navigate("/assistant")}
           >
-            ✦
-          </span>
-          <span className="min-w-0 flex-1">
-            <span className="mb-0.5 block font-display text-title leading-heading text-ink">
-              hei {firstName(user.name)} 👋
+            <span
+              className="shrink-0 font-display text-[28px] leading-none text-accent"
+              aria-hidden="true"
+            >
+              ✦
             </span>
-            <span className="block font-body text-body leading-body text-ink2">
-              Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
+            <span className="min-w-0 flex-1">
+              <span className="mb-0.5 block font-display text-title leading-heading text-ink">
+                hei {firstName(user.name)} 👋
+              </span>
+              <span className="block font-body text-body leading-body text-ink2">
+                Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
+              </span>
             </span>
-          </span>
-          <span
-            className="shrink-0 text-ui font-semibold text-accent"
-            aria-hidden="true"
+            <span
+              className="shrink-0 text-ui font-semibold text-accent"
+              aria-hidden="true"
+            >
+              Buka →
+            </span>
+          </button>
+          <button
+            type="button"
+            className="shrink-0 cursor-pointer rounded-card border-none bg-transparent p-1 text-ink3 transition-colors hover:bg-accent-line hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            aria-label="Tutup pengingat Asisten AI"
+            onClick={dismissAssistantPrompt}
           >
-            Buka →
-          </span>
-        </button>
+            <X aria-hidden="true" size={18} />
+          </button>
+        </div>
       )}
 
       <Eyebrow className="border-b border-line pb-2.5">Kabar terbaru</Eyebrow>
