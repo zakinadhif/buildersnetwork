@@ -14,7 +14,9 @@ function assistantPromptIsDismissed(memberId: string) {
   if (typeof localStorage === "undefined") return false;
 
   try {
-    return localStorage.getItem(assistantPromptDismissalKey(memberId)) === "true";
+    return (
+      localStorage.getItem(assistantPromptDismissalKey(memberId)) === "true"
+    );
   } catch {
     // Storage unavailable (private mode / quota) — degrade to the current session.
     return false;
@@ -30,8 +32,10 @@ export default function Scroll({ user }: { user: Member }) {
   const [, navigate] = useLocation();
   const { enabled } = useFeatureFlags();
   const { data: feed = [] } = useGetFeed();
-  const [isAssistantPromptDismissed, setIsAssistantPromptDismissed] =
-    useState(() => assistantPromptIsDismissed(user.id));
+  const posts = feed.filter((item) => item.type === "post");
+  const [isAssistantPromptDismissed, setIsAssistantPromptDismissed] = useState(
+    () => assistantPromptIsDismissed(user.id),
+  );
 
   const dismissAssistantPrompt = () => {
     setIsAssistantPromptDismissed(true);
@@ -72,7 +76,8 @@ export default function Scroll({ user }: { user: Member }) {
                 hei {firstName(user.name)} 👋
               </span>
               <span className="block font-body text-body leading-body text-ink2">
-                Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan saja.
+                Butuh teman berpikir? Asisten AI tetap bisa kamu buka kapan
+                saja.
               </span>
             </span>
             <span
@@ -93,13 +98,12 @@ export default function Scroll({ user }: { user: Member }) {
         </div>
       )}
 
-      <Eyebrow className="border-b border-line pb-2.5">Kabar terbaru</Eyebrow>
-      {feed.length === 0 ? (
+      {posts.length === 0 ? (
         <p className="py-8 text-center font-body text-body text-ink3">
-          Belum ada kabar progres.
+          Belum ada post progres.
         </p>
       ) : (
-        <Feed items={feed} />
+        <Feed items={posts} edgeToEdge />
       )}
     </>
   );

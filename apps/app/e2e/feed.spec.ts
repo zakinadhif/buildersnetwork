@@ -159,103 +159,120 @@ authed("non-member: sees the stream but no compose box", async ({ page }) => {
   await expect(page.getByRole("button", { name: "Posting" })).toHaveCount(0);
 });
 
-authed(
-  "Scroll renders a karya-first feed mixing a post and a new karya",
-  async ({ page }) => {
-    await mockMe(page);
+authed("Scroll renders posts without new-karya events", async ({ page }) => {
+  await mockMe(page);
 
-    await page.route("**/api/featured", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            id: "kf",
-            title: "Rasa",
-            description: "rekomendasi kuliner lokal",
-            stages: ["validating"],
-            interests: [],
-            roster: [],
-            memberCount: 0,
+  await page.route("**/api/featured", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        {
+          id: "kf",
+          title: "Rasa",
+          description: "rekomendasi kuliner lokal",
+          stages: ["validating"],
+          interests: [],
+          roster: [],
+          memberCount: 0,
+        },
+      ]),
+    }),
+  );
+
+  // The API can return both item types, but Scroll only shows posts.
+  await page.route("**/api/feed", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify([
+        {
+          type: "post",
+          id: "fp1",
+          karyaId: "kf",
+          body: "rekomendasi pertama tembus",
+          createdAt: new Date().toISOString(),
+          author: {
+            id: "m2",
+            name: "Fatimah Zahra",
+            handle: "fatimah",
+            image: null,
           },
-        ]),
+          karya: { id: "kf", title: "Rasa" },
+        },
+        {
+          type: "karya",
+          id: "kn",
+          title: "Saku",
+          description: "keuangan pribadi buat mahasiswa",
+          stages: ["idea"],
+          interests: [],
+          roster: [],
+          memberCount: 0,
+          createdAt: new Date(Date.now() - 86_400_000).toISOString(),
+        },
+      ]),
+    }),
+  );
+
+  await page.goto("/home");
+
+  await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
+
+  // Feed: the post is led by its karya, with author as metadata.
+  const postCard = page.locator(".post-card", {
+    hasText: "rekomendasi pertama tembus",
+  });
+  await expect(postCard).toBeVisible();
+  await expect(postCard.getByText("Rasa")).toBeVisible();
+  await expect(postCard.getByText(/diposting Fatimah Zahra/)).toBeVisible();
+  await expect(postCard.getByText(/progres|tantangan|capaian/)).toHaveCount(0);
+
+  // New-karya events are not part of the Scroll feed.
+  const karyaItem = page.locator(".feed .karya-card", { hasText: "Saku" });
+  await expect(karyaItem).toHaveCount(0);
+
+  // The whole post card opens its conversation page.
+  await page.route("**/api/karya/kf", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify(karyaDetail({ id: "kf", title: "Rasa" })),
+    }),
+  );
+  await page.route("**/api/karya/kf/posts", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: "[]",
+    }),
+  );
+  await page.route("**/api/karya/kf/posts/fp1", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        id: "fp1",
+        karyaId: "kf",
+        body: "rekomendasi pertama tembus",
+        createdAt: new Date().toISOString(),
+        author: {
+          id: "m2",
+          name: "Fatimah Zahra",
+          handle: "fatimah",
+          image: null,
+        },
+        commentCount: 0,
+        latestComment: null,
       }),
-    );
-
-    // A feed with both item types, already reverse-chron (post newest).
-    await page.route("**/api/feed", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify([
-          {
-            type: "post",
-            id: "fp1",
-            karyaId: "kf",
-            body: "rekomendasi pertama tembus",
-            createdAt: new Date().toISOString(),
-            author: {
-              id: "m2",
-              name: "Fatimah Zahra",
-              handle: "fatimah",
-              image: null,
-            },
-            karya: { id: "kf", title: "Rasa" },
-          },
-          {
-            type: "karya",
-            id: "kn",
-            title: "Saku",
-            description: "keuangan pribadi buat mahasiswa",
-            stages: ["idea"],
-            interests: [],
-            roster: [],
-            memberCount: 0,
-            createdAt: new Date(Date.now() - 86_400_000).toISOString(),
-          },
-        ]),
-      }),
-    );
-
-    await page.goto("/home");
-
-    await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
-
-    // Feed: the post is led by its karya, with author as metadata.
-    const postCard = page.locator(".post-card", {
-      hasText: "rekomendasi pertama tembus",
-    });
-    await expect(postCard).toBeVisible();
-    await expect(postCard.getByText("Rasa")).toBeVisible();
-    await expect(postCard.getByText(/diposting Fatimah Zahra/)).toBeVisible();
-    await expect(postCard.getByText(/progres|tantangan|capaian/)).toHaveCount(
-      0,
-    );
-
-    // Feed: the new-karya item renders with its tag.
-    const karyaItem = page.locator(".feed .karya-card", { hasText: "Saku" });
-    await expect(karyaItem).toBeVisible();
-    await expect(karyaItem.getByText("karya baru")).toBeVisible();
-
-    // The post's primary karya identity links out to the karya page.
-    await page.route("**/api/karya/kf", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify(karyaDetail({ id: "kf", title: "Rasa" })),
-      }),
-    );
-    await page.route("**/api/karya/kf/posts", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: "[]",
-      }),
-    );
-    await postCard.getByRole("button", { name: /Rasa/ }).click();
-    await expect(page).toHaveURL(/\/karya\/kf/);
-  },
-);
+    }),
+  );
+  await page.route("**/api/karya/kf/posts/fp1/comments", (route) =>
+    route.fulfill({ status: 200, contentType: "application/json", body: "[]" }),
+  );
+  await postCard.click();
+  await expect(page).toHaveURL(/\/karya\/kf\/posts\/fp1/);
+});
 
 authed(
   "Scroll rail: builders to meet (self excluded) + karya CTA",

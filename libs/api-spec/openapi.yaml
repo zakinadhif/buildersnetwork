@@ -1406,7 +1406,10 @@ components:
           type: string
         title:
           type: string
-      required: [id, title]
+        coverUrl:
+          type: string
+          nullable: true
+      required: [id, title, coverUrl]
 
     FeedPostItem:
       allOf:

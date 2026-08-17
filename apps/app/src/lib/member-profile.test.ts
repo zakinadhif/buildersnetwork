@@ -51,7 +51,7 @@ describe("member profile mapping", () => {
       author: { id: "m1", name: "Dinda", handle: "dinda", image: null },
       commentCount: 0,
       latestComment: null,
-      karya: { id: "k1", title: "Loom" },
+      karya: { id: "k1", title: "Loom", coverUrl: null },
     } satisfies FeedItem;
     expect(memberUpdates([post], "m1")).toHaveLength(1);
     expect(memberUpdates([post], "m2")).toHaveLength(0);

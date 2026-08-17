@@ -17,6 +17,7 @@ export interface PostRow {
   authorHandle: string | null;
   authorImage: string | null;
   karyaTitle: string;
+  karyaCoverKey: string | null;
 }
 
 export interface PostCommentSummary {
@@ -38,6 +39,7 @@ const postSelect = {
   authorHandle: profiles.handle,
   authorImage: users.image,
   karyaTitle: karya.title,
+  karyaCoverKey: karya.coverKey,
 };
 
 function baseQuery(db: Db) {

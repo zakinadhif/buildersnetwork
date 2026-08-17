@@ -2,6 +2,7 @@ import { featured, karya } from "@myapp/db/schema";
 import { asc, desc, eq } from "drizzle-orm";
 import { Hono } from "hono";
 import type { AppEnv } from "../app";
+import { coverUrlFor } from "../lib/cover";
 import { karyaListItems } from "../lib/karya";
 import { commentSummariesForPosts, recentPosts, toPost } from "../lib/posts";
 
@@ -38,7 +39,11 @@ feedRouter.get("/", async (c) => {
       value: {
         ...toPost(r, commentSummaries.get(r.id)),
         type: "post" as const,
-        karya: { id: r.karyaId, title: r.karyaTitle },
+        karya: {
+          id: r.karyaId,
+          title: r.karyaTitle,
+          coverUrl: coverUrlFor(r.karyaId, r.karyaCoverKey),
+        },
       },
     })),
     ...karyaRows.map((k, i) => ({
