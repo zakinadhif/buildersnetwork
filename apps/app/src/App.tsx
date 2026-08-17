@@ -11,11 +11,9 @@ import { useSession } from "@/lib/auth-client";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { KaryaDraftProvider } from "@/lib/karya-draft-provider";
 import type { Member } from "@/lib/members";
-import { OnboardingProvider } from "@/lib/onboarding-provider";
 import Assistant from "@/pages/Assistant";
 import ComingSoon from "@/pages/ComingSoon";
 import Karya from "@/pages/Karya";
-import KaryaAgent from "@/pages/KaryaAgent";
 import KaryaCatalog, { KaryaCatalogRail } from "@/pages/KaryaCatalog";
 import KaryaNew, { KaryaNewRail } from "@/pages/KaryaNew";
 import KaryaPost from "@/pages/KaryaPost";
@@ -24,10 +22,8 @@ import Login from "@/pages/Login";
 import MemberProfilePage from "@/pages/MemberProfile";
 import MinatSaya from "@/pages/MinatSaya";
 import MinimalStart from "@/pages/MinimalStart";
-import Onboarding from "@/pages/Onboarding";
 import OwnProfile from "@/pages/OwnProfile";
 import People from "@/pages/People";
-import Review from "@/pages/Review";
 import Signup from "@/pages/Signup";
 import VerifyEmail from "@/pages/VerifyEmail";
 
@@ -111,7 +107,7 @@ function AppRoutes() {
 
   return (
     <Switch>
-      {/* ── Outside the shell: auth, entry, and the opt-in onboarding flow ── */}
+      {/* ── Outside the shell: auth and entry ── */}
       <Route path="/verify-email">
         <VerifyEmail />
       </Route>
@@ -134,16 +130,10 @@ function AppRoutes() {
         )}
       </Route>
       <Route path="/onboarding">
-        {!loggedIn ? (
-          <Redirect to="/login" />
-        ) : enabled("aiAssistant") ? (
-          <Onboarding />
-        ) : (
-          <Redirect to="/mulai" />
-        )}
+        <Redirect to="/assistant" />
       </Route>
       <Route path="/review">
-        {!loggedIn ? <Redirect to="/login" /> : <Review />}
+        <Redirect to="/assistant" />
       </Route>
       {/* ── Inside the shell: the Launchpad rail destinations ── */}
       <Route path="/home">
@@ -204,7 +194,7 @@ function AppRoutes() {
         ))}
       </Route>
 
-      {/* ── Detail and AI flows remain focused full-screen. The approved manual
+      {/* ── Detail flows remain focused full-screen. The approved manual
            creation surface below stays inside the persistent shell. ── */}
       <Route path="/member/:id">
         {(params) =>
@@ -218,15 +208,7 @@ function AppRoutes() {
         }
       </Route>
       <Route path="/karya/new/ai">
-        {!loggedIn ? (
-          <Redirect to="/login" />
-        ) : !hasProfile ? (
-          <Redirect to="/mulai" />
-        ) : !enabled("aiAssistant") ? (
-          <Redirect to="/karya/new" />
-        ) : (
-          <KaryaAgent />
-        )}
+        <Redirect to="/assistant" />
       </Route>
       <Route path="/karya/new">
         {shell(
@@ -283,12 +265,10 @@ function AppRoutes() {
 
 export default function App() {
   return (
-    <OnboardingProvider>
-      <KaryaDraftProvider>
-        <Router base={import.meta.env.PROD ? "/app" : ""}>
-          <AppRoutes />
-        </Router>
-      </KaryaDraftProvider>
-    </OnboardingProvider>
+    <KaryaDraftProvider>
+      <Router base={import.meta.env.PROD ? "/app" : ""}>
+        <AppRoutes />
+      </Router>
+    </KaryaDraftProvider>
   );
 }

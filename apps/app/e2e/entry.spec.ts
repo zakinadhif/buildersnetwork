@@ -172,13 +172,10 @@ test("entry surfaces expose sign-in and the recovered conversational AI path", a
     page.getByRole("button", { name: "Simpan, lalu buka asisten AI" }),
   ).toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Mulai onboarding dengan AI →" }),
+    page.getByRole("button", { name: "Mulai dengan asisten AI →" }),
   ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Mulai onboarding dengan AI →" })
-    .click();
-  await expect(page).toHaveURL(/\/onboarding/);
-  await expect(page.getByText(/siapa nama kamu/)).toBeVisible();
+  await page.goto("/onboarding");
+  await expect(page).toHaveURL(/\/mulai/);
 });
 
 test("login form stays mounted while the session is revalidated", async ({

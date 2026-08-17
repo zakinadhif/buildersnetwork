@@ -291,9 +291,9 @@ export default function MinimalStart({
               type="button"
               variant="secondary"
               className="shrink-0 border-accent-line bg-bg"
-              onClick={() => navigate("/onboarding")}
+              onClick={() => navigate("/assistant")}
             >
-              Mulai onboarding dengan AI →
+              Mulai dengan asisten AI →
             </Button>
           </div>
 

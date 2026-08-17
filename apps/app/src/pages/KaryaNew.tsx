@@ -155,9 +155,9 @@ export function KaryaNewRail() {
             type="button"
             variant="outline"
             className="mt-2 w-full"
-            onClick={() => navigate("/karya/new/ai")}
+            onClick={() => navigate("/assistant")}
           >
-            Bantu susun pakai AI ✨
+            Buka asisten AI ✨
           </Button>
         )}
       </section>

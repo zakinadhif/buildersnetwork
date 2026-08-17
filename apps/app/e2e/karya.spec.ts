@@ -132,55 +132,6 @@ authed(
 );
 
 authed(
-  "AI pre-fill: extracted draft lands in the editable form before publish",
-  async ({ page }) => {
-    await mockCommon(page);
-
-    // The chat stream replies with the end signal, which triggers extraction.
-    await page.route("**/api/ai/stream", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "text/plain",
-        body: "oke, biar aku susun draft karyanya sekarang.",
-      }),
-    );
-    // Extraction returns the structured draft.
-    await page.route("**/api/ai/complete", (route) =>
-      route.fulfill({
-        status: 200,
-        contentType: "application/json",
-        body: JSON.stringify({
-          text: JSON.stringify({
-            title: "Rasa",
-            description: "rekomendasi kuliner lokal berbasis ML",
-            stages: ["validating"],
-            interests: ["Machine Learning"],
-          }),
-        }),
-      }),
-    );
-
-    await page.goto("/karya/new/ai");
-
-    const textarea = page.locator(".chat-textarea");
-    await textarea.fill("lagi bikin app rekomendasi kuliner");
-    await textarea.press("Enter");
-
-    // The agent hands the extracted draft to the editable form (DECISION-D).
-    await expect(page).toHaveURL(/\/karya\/new$/);
-    await expect(page.getByLabel("Judul")).toHaveValue("Rasa");
-    await expect(page.getByLabel("Deskripsi")).toHaveValue(
-      "rekomendasi kuliner lokal berbasis ML",
-    );
-    // The extracted stage is reflected in the multi-select.
-    const stageField = page.locator(".pf", { hasText: "Tahap" });
-    await expect(
-      stageField.getByRole("button", { name: "validasi" }),
-    ).toHaveAttribute("aria-pressed", "true");
-  },
-);
-
-authed(
   "karya page: roster faces render and a non-member sees Minta gabung",
   async ({ page }) => {
     await mockCommon(page);
