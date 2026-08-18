@@ -70,7 +70,11 @@ So each preview gets its **own R2 bucket**, `buildersnetwork-pr-<n>-uploads`, bo
 
 A single shared bucket namespaced by key prefix was considered and rejected. It would work, and it would let the teardown credential be scoped to one bucket. But it collides by default: `coverKeyFor` (`apps/api/src/lib/cover.ts`) returns `karya/${karyaId}/cover.${ext}` and the seeders plant fixed ids (`seed_k1`…`seed_k3`) into *every* preview database, so two reviewers uploading a cover for the same seeded karya write byte-identical keys — and `karya.ts` deletes the previous object when the extension differs. Avoiding that needs a prefix wrapper at the storage boundary plus a var threaded into `worker.ts`, i.e. application code that exists solely to serve previews. Per-PR buckets buy the same isolation with none of it.
 
-Nothing seeds into it. No seeder sets `coverKey` (`libs/db/src/schema/app.ts:94`, nullable → client shows a placeholder), so a preview bucket starts empty and the reviewer fills it by exercising the feature. That is the behaviour under test.
+The seeder writes the mockup catalog's deterministic covers and screenshots to
+each preview bucket, then records their keys in the seeded rows. This makes a
+fresh preview visually match the mockups. Reviewer uploads still exercise the
+same storage path and survive later reset-and-seed runs; only the fixed seed
+keys are overwritten.
 
 Two consequences worth stating before someone implements this:
 
@@ -98,7 +102,7 @@ Four things pin the design, all discovered the hard way:
 
 Schema still arrives the production way, `wrangler d1 migrations apply`, so previews exercise the same migration path and the same D1 ledger as prod. Nothing else can: the seeder writes rows, never DDL.
 
-**On a second push, seed data is reset and reloaded**, not merged. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The accepted cost: a seeded karya returns to `coverKey = NULL`, so a cover a reviewer uploaded on an earlier push is orphaned in the bucket until teardown. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
+**On a second push, seed data is reset and reloaded**, not merged. The alternative — `INSERT OR IGNORE` — is non-destructive but leaves a preview showing the seed data of the *first* push, which quietly defeats the point of previewing the commit under review. The fixed mockup-image keys are deterministically overwritten. **The bucket itself is never emptied** — reviewers' uploads survive every push, which is why an existing bucket is reused untouched rather than recreated.
 
 ## Operating it — what a PR actually gets
 
@@ -151,7 +155,7 @@ Every preview workflow follows the same secret-guard idiom as `release.yml`: it 
 | `CLOUDFLARE_API_TOKEN` | secret | ✅ | ✅ | Cloudflare API token wrangler authenticates with — creates/deletes D1, R2 buckets, Workers. |
 | `CLOUDFLARE_ACCOUNT_ID` | secret | ✅ | ✅ | Account id. Also builds the R2 S3 endpoint `https://<id>.r2.cloudflarestorage.com`. |
 | `CLOUDFLARE_WORKERS_SUBDOMAIN` | **variable** | ✅ | — | The `*.workers.dev` subdomain, used to compute `APP_URL` before deploy. |
-| `R2_S3_ACCESS_KEY_ID` | secret | — | ✅ | R2 **S3-API** access key id — the emptying phase only. |
+| `R2_S3_ACCESS_KEY_ID` | secret | — | ✅ | R2 **S3-API** access key id — used by preview seeding and the emptying phase. |
 | `R2_S3_SECRET_ACCESS_KEY` | secret | — | ✅ | R2 **S3-API** secret access key — paired with the above. |
 
 Until all four teardown inputs are set, `preview-teardown.yml` and `preview-reaper.yml` skip, and closed previews accumulate until reaped by hand (the 7-day object-lifecycle rule keeps buckets from filling forever in the meantime).

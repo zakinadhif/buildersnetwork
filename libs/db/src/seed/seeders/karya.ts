@@ -1,7 +1,14 @@
+import { MOCKUP_KARYA } from "@myapp/mockup-data";
 import { inArray } from "drizzle-orm";
 import { dedupeBySlug, slugifyInterest } from "../../interests";
-import type { KaryaStage } from "../../karya";
-import { interests, karya, karyaInterests, karyaMembers } from "../../schema";
+import { normalizeStages } from "../../karya";
+import {
+  interests,
+  karya,
+  karyaInterests,
+  karyaMembers,
+  karyaScreenshots,
+} from "../../schema";
 import { insertInChunks, selectInChunks } from "../chunk";
 import type { Seeder } from "../types";
 
@@ -11,49 +18,36 @@ import type { Seeder } from "../types";
 // faces), and ≥1 pending request (so the approve/decline UI has something to
 // act on). Stable IDs keep the seeder idempotent. Some interest names overlap
 // the curated list (reused by slug); the rest land as free-text rows.
-const SEED_KARYA = [
-  {
-    id: "seed_k1",
-    createdBy: "seed_m1",
-    title: "Loom — sinkronisasi file peer-to-peer",
-    description:
-      "Tool sinkronisasi file offline-first tanpa cloud. Lagi nyusun protokol gossip-nya biar hemat bandwidth di koneksi kampus.",
-    stages: ["building"] as KaryaStage[],
-    interests: ["Distributed Systems", "Systems Programming", "Open Source"],
-    members: ["seed_m3"],
-    pending: ["seed_m4"],
-  },
-  {
-    id: "seed_k2",
-    createdBy: "seed_m2",
-    title: "Rasa — rekomendasi kuliner lokal",
-    description:
-      "Rekomendasi kuliner berbasis ML yang privacy-first dan ngerti konteks Indonesia. Lagi validasi sama warung-warung sekitar.",
-    stages: ["validating", "building"] as KaryaStage[],
-    interests: ["Machine Learning", "Data Science", "Social Impact"],
-    members: ["seed_m5"],
-    pending: ["seed_m3"],
-  },
-  {
-    id: "seed_k3",
-    createdBy: "seed_m4",
-    title: "Saku — keuangan pribadi buat mahasiswa",
-    description:
-      "App keuangan yang fokus ke kejelasan pengeluaran, bukan optimasi. Masih tahap ide, nyari yang mau bareng dari awal.",
-    stages: ["idea"] as KaryaStage[],
-    interests: ["Fintech", "Product Design", "UI/UX Design"],
-    members: ["seed_m1"],
-    pending: ["seed_m5"],
-  },
-];
+// The app's stored lifecycle enum is deliberately narrower than the labels in
+// the visual mockup. This retains every mockup title, description, interest,
+// and image while translating its display-stage vocabulary at the boundary.
+const STAGES_BY_MOCKUP_LABEL: Record<string, string> = {
+  Ide: "idea",
+  Prototype: "building",
+  MVP: "building",
+  Beta: "validating",
+  Riset: "validating",
+  "Cari Kolaborator": "idea",
+};
+
+const SEED_KARYA = MOCKUP_KARYA.map((item, index) => ({
+  ...item,
+  id: `seed_k${item.id}`,
+  createdBy: `seed_m${(index % 5) + 1}`,
+  members: [`seed_m${((index + 2) % 5) + 1}`],
+  pending: [`seed_m${((index + 3) % 5) + 1}`],
+  stages: normalizeStages(
+    item.stages.map((stage) => STAGES_BY_MOCKUP_LABEL[stage]),
+  ),
+}));
 
 export const karyaSeeder: Seeder = {
   name: "karya",
   description: "Seed example karya with rosters and pending requests",
   // Owns karya + the roster/interest joins. NOT `interests` — that catalog is
   // owned by the interests seeder; here we find-or-create into it by slug.
-  tables: [karya, karyaMembers, karyaInterests],
-  async run({ db, log }) {
+  tables: [karya, karyaMembers, karyaInterests, karyaScreenshots],
+  async run({ db, log, uploadMockupImage }) {
     log("inserting seed karya…");
     const karyaRows = SEED_KARYA.map((k) => ({
       id: k.id,
@@ -61,10 +55,45 @@ export const karyaSeeder: Seeder = {
       description: k.description,
       stages: k.stages,
       createdBy: k.createdBy,
+      coverKey: uploadMockupImage ? `karya/${k.id}/cover.jpg` : null,
     }));
     await insertInChunks(karya, karyaRows, (chunk) =>
       db.insert(karya).values(chunk).onConflictDoNothing(),
     );
+
+    if (uploadMockupImage) {
+      log("uploading mockup cover and screenshot images…");
+      const screenshotRows = SEED_KARYA.flatMap((k) =>
+        (k.landscapeScreenshots ?? []).map((theme, position) => {
+          const id = `seed_shot_${k.id}_${position + 1}`;
+          return {
+            id,
+            karyaId: k.id,
+            key: `karya/${k.id}/screenshots/${id}.jpg`,
+            orientation: "landscape",
+            position,
+            theme,
+          };
+        }),
+      );
+      await Promise.all([
+        ...SEED_KARYA.map((k) =>
+          uploadMockupImage(k.cover, `karya/${k.id}/cover.jpg`),
+        ),
+        ...screenshotRows.map((shot) =>
+          uploadMockupImage(shot.theme, shot.key),
+        ),
+      ]);
+      await insertInChunks(
+        karyaScreenshots,
+        screenshotRows.map(({ theme: _theme, ...row }) => row),
+        (chunk) =>
+          db.insert(karyaScreenshots).values(chunk).onConflictDoNothing(),
+      );
+      log(
+        `uploaded ${SEED_KARYA.length + screenshotRows.length} mockup images`,
+      );
+    }
 
     log("inserting karya rosters…");
     const memberRows = SEED_KARYA.flatMap((k) => [

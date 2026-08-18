@@ -1,4 +1,5 @@
 import { parseArgs } from "node:util";
+import type { MockupCoverTheme } from "@myapp/mockup-data";
 import { getTableName } from "drizzle-orm";
 import type { D1HttpDb } from "../d1-http";
 import type { Db } from "../index";
@@ -30,6 +31,7 @@ export interface SeedRuntimeConfig {
   supportsTransactions?: boolean;
   /** Optional teardown for the underlying client, run after the last seeder. */
   close?: () => void | Promise<void>;
+  uploadMockupImage?: (theme: MockupCoverTheme, key: string) => Promise<void>;
 }
 
 export interface RunSeedOptions {
@@ -231,6 +233,7 @@ export async function runSeedCli(opts: RunSeedOptions): Promise<void> {
         await seeder.run({
           db: handle,
           log: (m) => process.stdout.write(`    ${m}\n`),
+          uploadMockupImage: config.uploadMockupImage,
         });
       };
 

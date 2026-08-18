@@ -24,20 +24,9 @@ import shot2 from "../images/shot-2.jpg";
 import shot3 from "../images/shot-3.jpg";
 import shot4 from "../images/shot-4.jpg";
 import writing from "../images/writing.jpg";
+import type { MockupCoverTheme } from "@myapp/mockup-data";
 
-export type CoverTheme =
-  | "community"
-  | "education"
-  | "data"
-  | "music"
-  | "productivity"
-  | "commerce"
-  | "ai"
-  | "environment"
-  | "maps"
-  | "writing"
-  | "devtools"
-  | "security";
+export type CoverTheme = MockupCoverTheme;
 
 export const covers: Record<CoverTheme, string> = {
   community,

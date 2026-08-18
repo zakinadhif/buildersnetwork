@@ -1,3 +1,4 @@
+import type { MockupCoverTheme } from "@myapp/mockup-data";
 import type { AnySQLiteTable } from "drizzle-orm/sqlite-core";
 import type { Db } from "../index";
 
@@ -13,6 +14,12 @@ export interface SeedContext {
   db: SeedDb;
   /** Indented logger scoped to the current seeder. */
   log: (msg: string) => void;
+  /**
+   * Optional Node-side bridge for the mockup image assets. The DB package
+   * deliberately owns no storage driver, so the API CLI supplies this when a
+   * storage provider is configured.
+   */
+  uploadMockupImage?: (theme: MockupCoverTheme, key: string) => Promise<void>;
 }
 
 export interface Seeder {

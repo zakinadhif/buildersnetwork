@@ -58,10 +58,12 @@ jobs:
         run: |
           if [ -n "${{ secrets.CLOUDFLARE_API_TOKEN }}" ] \
             && [ -n "${{ secrets.CLOUDFLARE_ACCOUNT_ID }}" ] \
+            && [ -n "${{ secrets.R2_S3_ACCESS_KEY_ID }}" ] \
+            && [ -n "${{ secrets.R2_S3_SECRET_ACCESS_KEY }}" ] \
             && [ -n "$SUBDOMAIN" ]; then
             echo "enabled=true" >> "$GITHUB_OUTPUT"
           else
-            echo "::notice::Preview provisioning skipped — set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID and the CLOUDFLARE_WORKERS_SUBDOMAIN repo variable to enable it."
+            echo "::notice::Preview provisioning skipped — set CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, R2_S3_ACCESS_KEY_ID, R2_S3_SECRET_ACCESS_KEY and the CLOUDFLARE_WORKERS_SUBDOMAIN repo variable to enable it."
           fi
 
       - name: Checkout
@@ -400,10 +402,9 @@ jobs:
       # without it the CLI would fall back to libSQL and read DATABASE_URL.
       #
       # Reset-then-seed, not INSERT OR IGNORE: a preview must show the seed data
-      # of the commit under review, not a stale first-push snapshot. Its one cost
-      # is known and accepted — seeded karya rows return to coverKey = NULL, so a
-      # cover a reviewer uploaded on an earlier push is orphaned in the bucket
-      # (harmless; teardown reaps it). The bucket itself is never emptied.
+      # of the commit under review, not a stale first-push snapshot. The seeder
+      # deterministically overwrites its mockup cover and screenshot keys; the
+      # bucket itself is never emptied, so reviewer-uploaded objects survive.
       #
       # `--reset` empties only the tables each seeder DECLARES, so a new table
       # belongs in its seeder's `tables` — there is nothing to update here.
@@ -417,6 +418,9 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           D1_DATABASE_ID: ${{ steps.db.outputs.id }}
+          R2_BUCKET: ${{ steps.names.outputs.bucket }}
+          R2_S3_ACCESS_KEY_ID: ${{ secrets.R2_S3_ACCESS_KEY_ID }}
+          R2_S3_SECRET_ACCESS_KEY: ${{ secrets.R2_S3_SECRET_ACCESS_KEY }}
         run: pnpm db:seed -- --reset --yes
 
       # Fills apps/api/public/ with the built SPA + landing, which the [assets]

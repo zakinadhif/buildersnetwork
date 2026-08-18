@@ -12,6 +12,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.4.0",
     "@myapp/design-tokens": "workspace:*",
+    "@myapp/mockup-data": "workspace:*",
     "@myapp/ui": "workspace:*",
     "@tailwindcss/vite": "catalog:",
     "embla-carousel-wheel-gestures": "^8.1.0",

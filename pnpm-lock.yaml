@@ -102,6 +102,9 @@ importers:
       '@myapp/feature-flags':
         specifier: workspace:^
         version: link:../../libs/feature-flags
+      '@myapp/mockup-data':
+        specifier: workspace:*
+        version: link:../../libs/mockup-data
       '@myapp/storage':
         specifier: workspace:^
         version: link:../../libs/storage
@@ -275,6 +278,9 @@ importers:
       '@myapp/design-tokens':
         specifier: workspace:*
         version: link:../../libs/design-tokens
+      '@myapp/mockup-data':
+        specifier: workspace:*
+        version: link:../../libs/mockup-data
       '@myapp/ui':
         specifier: workspace:*
         version: link:../../libs/ui
@@ -411,6 +417,9 @@ importers:
       '@libsql/client':
         specifier: ^0.17.4
         version: 0.17.4
+      '@myapp/mockup-data':
+        specifier: workspace:*
+        version: link:../mockup-data
       better-auth:
         specifier: ^1.5.5
         version: 1.6.23(@cloudflare/workers-types@4.20260702.1)(@opentelemetry/api@1.9.1)(drizzle-kit@0.31.10)(drizzle-orm@0.45.2(@cloudflare/workers-types@4.20260702.1)(@libsql/client@0.17.4)(@opentelemetry/api@1.9.1)(kysely@0.29.3))(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(vitest@3.2.7(@types/debug@4.1.13)(@types/node@25.3.5)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.0)(yaml@2.9.0))
@@ -454,6 +463,8 @@ importers:
       vitest:
         specifier: ^3.2.4
         version: 3.2.7(@types/debug@4.1.13)(@types/node@25.3.5)(jiti@2.7.0)(lightningcss@1.32.0)(tsx@4.23.0)(yaml@2.9.0)
+
+  libs/mockup-data: {}
 
   libs/storage:
     dependencies:

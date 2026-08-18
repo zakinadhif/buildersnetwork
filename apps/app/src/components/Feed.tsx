@@ -37,7 +37,7 @@ export default function Feed({
                 edgeToEdge ? "px-[var(--shell-gutter)] max-[900px]:px-4" : ""
               }`}
             >
-              <div className="relative size-12 shrink-0">
+              <div className="relative size-15 shrink-0">
                 {it.karya.coverUrl ? (
                   <KaryaCover
                     src={it.karya.coverUrl}
@@ -71,7 +71,7 @@ export default function Feed({
                     diposting {it.author.name} · {timeAgo(it.createdAt)}
                   </span>
                 </span>
-                <p className="mt-2.5 whitespace-pre-wrap text-body leading-body text-ink2">
+                <p className="mt-2.5 whitespace-pre-wrap text-body leading-body">
                   {it.body}
                 </p>
                 <span className="mt-3.5 inline-flex items-center gap-1.5 rounded-full border border-line bg-transparent px-[11px] py-[5px] text-caption font-medium text-ink2">
@@ -105,7 +105,7 @@ export default function Feed({
                             {timeAgo(it.latestComment.createdAt)}
                           </span>
                         </div>
-                        <p className="mt-0.5 line-clamp-2 text-ui leading-body text-ink2">
+                        <p className="mt-0.5 line-clamp-2 text-ui leading-body">
                           {it.latestComment.body}
                         </p>
                         <span className="mt-[7px] block text-micro font-medium text-accent-mid">

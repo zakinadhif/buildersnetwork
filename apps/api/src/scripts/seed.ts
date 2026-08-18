@@ -1,7 +1,17 @@
 import "dotenv/config";
+import { readFile } from "node:fs/promises";
 import { loadConfig } from "@myapp/config";
 import { createDb, runSeedCli, seeders } from "@myapp/db";
 import { createD1HttpDb } from "@myapp/db/d1-http";
+import {
+  MOCKUP_IMAGE_FILENAMES,
+  type MockupCoverTheme,
+} from "@myapp/mockup-data";
+import {
+  createS3Storage,
+  createStorageFromEnv,
+  type StorageProvider,
+} from "@myapp/storage";
 
 /**
  * Seed CLI. Dispatches to the seed runner in @myapp/db, which parses flags from
@@ -32,6 +42,43 @@ const d1DatabaseId = process.env.D1_DATABASE_ID;
 const cloudflareAccountId = process.env.CLOUDFLARE_ACCOUNT_ID;
 const cloudflareApiToken = process.env.CLOUDFLARE_API_TOKEN;
 
+function previewStorage(): StorageProvider | undefined {
+  const bucket = process.env.R2_BUCKET;
+  const accessKey = process.env.R2_S3_ACCESS_KEY_ID;
+  const secretKey = process.env.R2_S3_SECRET_ACCESS_KEY;
+  if (!bucket && !accessKey && !secretKey) return undefined;
+  if (!bucket || !accessKey || !secretKey || !cloudflareAccountId) {
+    throw new Error(
+      "seed: preview image upload requires R2_BUCKET, R2_S3_ACCESS_KEY_ID, R2_S3_SECRET_ACCESS_KEY, and CLOUDFLARE_ACCOUNT_ID.",
+    );
+  }
+  return createS3Storage({
+    bucket,
+    accessKeyId: accessKey,
+    secretAccessKey: secretKey,
+    region: "auto",
+    endpoint: `https://${cloudflareAccountId}.r2.cloudflarestorage.com`,
+    forcePathStyle: false,
+  });
+}
+
+const previewSeedStorage = previewStorage();
+
+async function uploadMockupImage(
+  storage: StorageProvider | undefined,
+  theme: MockupCoverTheme,
+  key: string,
+): Promise<void> {
+  if (!storage) return;
+  const image = await readFile(
+    new URL(
+      `../../../mockups/src/images/${MOCKUP_IMAGE_FILENAMES[theme]}`,
+      import.meta.url,
+    ),
+  );
+  await storage.put(key, image, { contentType: "image/jpeg" });
+}
+
 await runSeedCli({
   loadConfig: () => {
     if (d1DatabaseId) {
@@ -51,6 +98,10 @@ await runSeedCli({
         // can tell a preview database from the production one.
         isProduction: process.env.NODE_ENV === "production",
         supportsTransactions: false,
+        uploadMockupImage: previewSeedStorage
+          ? (theme: MockupCoverTheme, key: string) =>
+              uploadMockupImage(previewSeedStorage, theme, key)
+          : undefined,
       };
     }
 
@@ -58,9 +109,14 @@ await runSeedCli({
     const db = createDb(config.DATABASE_URL, {
       authToken: config.DATABASE_AUTH_TOKEN,
     });
+    const storage = createStorageFromEnv(config);
     return {
       db,
       isProduction: config.NODE_ENV === "production",
+      uploadMockupImage: storage
+        ? (theme: MockupCoverTheme, key: string) =>
+            uploadMockupImage(storage, theme, key)
+        : undefined,
       close: () => db.$client.close(),
     };
   },
