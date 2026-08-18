@@ -9,6 +9,7 @@ import {
   LeftNav as UiLeftNav,
 } from "@myapp/ui";
 import {
+  ArrowLeft,
   Bell,
   LayoutGrid,
   type LucideIcon,
@@ -21,6 +22,7 @@ import { useLocation } from "wouter";
 import PageHeader, { type PageHeaderProps } from "@/components/PageHeader";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import type { Member } from "@/lib/members";
+import { resolveBackDestination } from "@/lib/navigation";
 
 /**
  * The persistent Launchpad app shell (issue #8): a left-sidebar rail + a content
@@ -82,40 +84,62 @@ function MobileChrome({
   me,
   location,
   navigate,
+  header,
 }: {
   me: Member;
   location: string;
   navigate: (to: string) => void;
+  header?: PageHeaderProps;
 }) {
+  const backDestination = header?.backTo
+    ? resolveBackDestination(header.backTo)
+    : undefined;
+
   return (
     <>
       <header className="bn-mobile-header sticky top-0 z-40 hidden h-[64px] min-h-[64px] items-center justify-between border-b border-line bg-surface px-4 max-[900px]:flex">
-        <button
-          type="button"
-          aria-label="Buka Profil Saya"
-          onClick={() => navigate("/profil")}
-          className="flex size-10 cursor-pointer items-center justify-center rounded-full border border-line bg-bg"
-        >
-          <Avatar name={me.name} size={34} />
-        </button>
-
-        <button
-          type="button"
-          aria-label="Ke Scroll"
-          onClick={() => navigate("/home")}
-          className="absolute left-1/2 flex size-10 -translate-x-1/2 cursor-pointer items-center justify-center rounded-[12px] bg-accent font-display text-title font-semibold text-accent-fg shadow-[0_1px_2px_oklch(0%_0_0_/_12%)]"
-        >
-          B
-        </button>
-
-        <button
-          type="button"
-          aria-label="Notifikasi belum tersedia"
-          disabled
-          className="flex size-10 cursor-default items-center justify-center rounded-[12px] border border-line bg-surface text-ink shadow-[0_1px_3px_oklch(0%_0_0_/_8%)]"
-        >
-          <Bell size={22} strokeWidth={1.8} aria-hidden="true" />
-        </button>
+        {backDestination ? (
+          <div className="flex min-w-0 flex-1 items-center gap-3">
+            <button
+              type="button"
+              aria-label={`Kembali dari ${header?.title}`}
+              onClick={() => navigate(backDestination)}
+              className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full border border-line bg-surface text-ink transition-colors hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <ArrowLeft size={17} strokeWidth={2} aria-hidden="true" />
+            </button>
+            <h1 className="m-0 min-w-0 truncate font-display text-title font-normal text-ink">
+              {header?.title}
+            </h1>
+          </div>
+        ) : (
+          <>
+            <button
+              type="button"
+              aria-label="Buka Profil Saya"
+              onClick={() => navigate("/profil")}
+              className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full border border-line bg-bg"
+            >
+              <Avatar name={me.name} size={34} />
+            </button>
+            <button
+              type="button"
+              aria-label="Ke Scroll"
+              onClick={() => navigate("/home")}
+              className="absolute left-1/2 flex size-10 -translate-x-1/2 cursor-pointer items-center justify-center rounded-[12px] bg-accent font-display text-title font-semibold text-accent-fg shadow-[0_1px_2px_oklch(0%_0_0_/_12%)]"
+            >
+              B
+            </button>
+            <button
+              type="button"
+              aria-label="Notifikasi belum tersedia"
+              disabled
+              className="flex size-10 cursor-default items-center justify-center rounded-[12px] border border-line bg-surface text-ink shadow-[0_1px_3px_oklch(0%_0_0_/_8%)]"
+            >
+              <Bell size={22} strokeWidth={1.8} aria-hidden="true" />
+            </button>
+          </>
+        )}
       </header>
 
       <button
@@ -198,7 +222,12 @@ export default function Shell({
 
   return (
     <div className="min-h-screen bg-bg-layer text-ink font-body selection:bg-accent-tint selection:text-accent">
-      <MobileChrome me={me} location={location} navigate={navigate} />
+      <MobileChrome
+        me={me}
+        location={location}
+        navigate={navigate}
+        header={header}
+      />
       <ShellColumns>
         <UiLeftNav
           items={items}

@@ -1,8 +1,7 @@
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
 import {
-  type AppNavigationState,
-  isInternalAppPath,
+  resolveBackDestination,
 } from "@/lib/navigation";
 
 export interface PageHeaderProps {
@@ -17,15 +16,10 @@ export interface PageHeaderProps {
  */
 export default function PageHeader({ backTo, title }: PageHeaderProps) {
   const [, navigate] = useLocation();
-  const state =
-    typeof window === "undefined"
-      ? undefined
-      : (window.history.state as AppNavigationState | null);
-  const rememberedBack = isInternalAppPath(state?.back) ? state.back : undefined;
-  const destination = rememberedBack ?? backTo;
+  const destination = resolveBackDestination(backTo);
 
   return (
-    <header className="-mx-[var(--shell-gutter)] -mt-6 mb-6 flex h-[60px] items-center gap-3 border-b border-line px-[var(--shell-gutter)] max-[900px]:mx-0 max-[900px]:mt-0 max-[900px]:px-4">
+    <header className="-mx-[var(--shell-gutter)] -mt-6 mb-6 hidden h-[60px] items-center gap-3 border-b border-line px-[var(--shell-gutter)] min-[901px]:flex">
       {destination && (
         <button
           type="button"

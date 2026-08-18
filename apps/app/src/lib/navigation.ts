@@ -20,3 +20,13 @@ export function backNavigationState(pathname: string): AppNavigationState {
 export function isInternalAppPath(value: unknown): value is string {
   return typeof value === "string" && value.startsWith("/") && !value.startsWith("//");
 }
+
+/** Resolve a secondary screen's return target without consulting tab history. */
+export function resolveBackDestination(backTo?: string): string | undefined {
+  const state =
+    typeof window === "undefined"
+      ? undefined
+      : (window.history.state as AppNavigationState | null);
+
+  return isInternalAppPath(state?.back) ? state.back : backTo;
+}
