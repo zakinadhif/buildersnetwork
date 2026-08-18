@@ -6,6 +6,7 @@ import Feed from "@/components/Feed";
 import { Avatar, Eyebrow } from "@/components/ui-atoms";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { firstName, type Member } from "@/lib/members";
+import { backNavigationState } from "@/lib/navigation";
 
 const assistantPromptDismissalKey = (memberId: string) =>
   `builders-network:assistant-prompt-dismissed:${memberId}`;
@@ -114,7 +115,7 @@ export default function Scroll({ user }: { user: Member }) {
  * separate task; this rail is a small doorway into existing member pages.
  */
 export function ScrollRail({ user }: { user: Member }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { data: members = [] } = useListMembers();
   const toMeet = members.filter((member) => member.id !== user.id).slice(0, 5);
 
@@ -145,7 +146,11 @@ export function ScrollRail({ user }: { user: Member }) {
                 <button
                   type="button"
                   className="group flex w-full cursor-pointer items-start gap-2.5 border-none bg-transparent py-2.5 text-left"
-                  onClick={() => navigate(`/member/${member.id}`)}
+                  onClick={() =>
+                    navigate(`/member/${member.id}`, {
+                      state: backNavigationState(location),
+                    })
+                  }
                 >
                   <Avatar name={member.name} size={34} />
                   <span className="flex min-w-0 flex-1 flex-col gap-[3px]">

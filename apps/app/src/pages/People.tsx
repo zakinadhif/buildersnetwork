@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import type { Member } from "@/lib/members";
+import { backNavigationState } from "@/lib/navigation";
 
 function toggleValue(values: string[], value: string): string[] {
   return values.includes(value)
@@ -18,12 +19,12 @@ function uniqueValues(members: Member[], select: (member: Member) => string[]) {
 }
 
 function MemberRow({ member }: { member: Member }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   return (
     <button
       type="button"
-      onClick={() => navigate(`/member/${member.id}`)}
+      onClick={() => navigate(`/member/${member.id}`, { state: backNavigationState(location) })}
       aria-label={`Buka profil ${member.name}`}
       className="grid w-full cursor-pointer items-start gap-x-4 border-0 border-b border-line bg-transparent py-[18px] text-left transition-colors hover:bg-bg-layer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       style={{ gridTemplateColumns: "auto 1fr" }}

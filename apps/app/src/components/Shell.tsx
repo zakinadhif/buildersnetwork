@@ -18,6 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import { useLocation } from "wouter";
+import PageHeader, { type PageHeaderProps } from "@/components/PageHeader";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import type { Member } from "@/lib/members";
 
@@ -170,11 +171,13 @@ function MobileChrome({
 export default function Shell({
   me,
   rail,
+  header,
   mainClassName,
   children,
 }: {
   me: Member;
   rail?: React.ReactNode;
+  header?: PageHeaderProps;
   mainClassName?: string;
   children: React.ReactNode;
 }) {
@@ -203,6 +206,7 @@ export default function Shell({
           onUserClick={() => navigate("/profil")}
         />
         <MainColumn className={`flex flex-col ${mainClassName ?? ""}`}>
+          {header && <PageHeader {...header} />}
           {children}
         </MainColumn>
         {rail && (

@@ -14,6 +14,7 @@ import {
   memberProjects,
   memberUpdates,
 } from "@/lib/member-profile";
+import { backNavigationState } from "@/lib/navigation";
 
 export default function MemberProfilePage({
   id,
@@ -22,7 +23,7 @@ export default function MemberProfilePage({
   id: string;
   me: Member;
 }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const memberQuery = useGetMember(id);
   const karyaQuery = useListKarya();
   const feedQuery = useGetFeed();
@@ -41,14 +42,7 @@ export default function MemberProfilePage({
 
   if (state !== "ready" || !member) {
     return (
-      <Shell me={me}>
-        <button
-          type="button"
-          onClick={() => navigate("/people")}
-          className="mb-6 w-fit cursor-pointer border-none bg-transparent p-0 text-ui text-ink2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-        >
-          ← Kembali ke People
-        </button>
+      <Shell me={me} header={{ title: "Profil builder", backTo: "/people" }}>
         {state === "loading" ? (
           <div
             role="status"
@@ -125,14 +119,11 @@ export default function MemberProfilePage({
   );
 
   return (
-    <Shell me={me} rail={rail}>
-      <button
-        type="button"
-        onClick={() => navigate("/people")}
-        className="mb-6 w-fit cursor-pointer border-none bg-transparent p-0 text-ui text-ink2 transition-colors hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        ← Kembali ke People
-      </button>
+    <Shell
+      me={me}
+      rail={rail}
+      header={{ title: member.name, backTo: "/people" }}
+    >
 
       <div className="flex items-start gap-[18px]">
         <Avatar name={member.name} size={76} />
@@ -203,7 +194,11 @@ export default function MemberProfilePage({
               key={project.id}
               type="button"
               aria-label={`Buka karya ${project.title}`}
-              onClick={() => navigate(`/karya/${project.id}`)}
+              onClick={() =>
+                navigate(`/karya/${project.id}`, {
+                  state: backNavigationState(location),
+                })
+              }
               className="group -mx-[var(--shell-gutter)] flex w-[calc(100%+2*var(--shell-gutter))] cursor-pointer gap-3.5 border-x-0 border-b-0 border-t border-line bg-transparent px-[var(--shell-gutter)] py-3.5 text-left transition-colors duration-150 hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent max-[900px]:mx-0 max-[900px]:w-full max-[900px]:px-0"
             >
               <KaryaCover
@@ -259,7 +254,11 @@ export default function MemberProfilePage({
               key={update.id}
               type="button"
               aria-label={`Buka update ${update.karya.title}`}
-              onClick={() => navigate(`/karya/${update.karya.id}`)}
+              onClick={() =>
+                navigate(`/karya/${update.karya.id}`, {
+                  state: backNavigationState(location),
+                })
+              }
               className="group -mx-[var(--shell-gutter)] block w-[calc(100%+2*var(--shell-gutter))] cursor-pointer border-x-0 border-b-0 border-t border-line bg-transparent px-[var(--shell-gutter)] py-4 text-left transition-colors duration-150 hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent max-[900px]:mx-0 max-[900px]:w-full max-[900px]:px-0"
             >
               <span className="font-display text-title text-ink transition-colors duration-150 group-hover:text-accent">

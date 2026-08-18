@@ -3,6 +3,7 @@ import { Button, Eyebrow, Input, KaryaCard } from "@myapp/ui";
 import { useMemo } from "react";
 import { useLocation } from "wouter";
 import { STAGE_LABELS } from "@/components/ui-metadata";
+import { backNavigationState } from "@/lib/navigation";
 
 const ALL_INTERESTS = "Semua";
 
@@ -91,7 +92,7 @@ export default function KaryaCatalog({
   query: string;
   selectedInterest: string;
 }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const { data: karya = [], isLoading, isError, refetch } = useListKarya();
 
   const filtered = useMemo(
@@ -204,7 +205,11 @@ export default function KaryaCatalog({
                     src: shot.url,
                     alt: `${item.title} — layar ${index + 1}`,
                   }))}
-                onOpen={() => navigate(`/karya/${item.id}`)}
+                onOpen={() =>
+                  navigate(`/karya/${item.id}`, {
+                    state: backNavigationState(location),
+                  })
+                }
               />
             ))}
           </div>

@@ -16,9 +16,10 @@ import { useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
 import { karyaDetailState, orderedScreenshots } from "@/lib/karya-detail";
+import { backNavigationState } from "@/lib/navigation";
 
 export default function Karya({ id, me }: { id: string; me: Member }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
   const detail = useGetKarya(id);
   const postsQuery = useGetKaryaPosts(id);
   const [busy, setBusy] = useState(false);
@@ -65,14 +66,7 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
 
   if (state !== "ready" || !karya) {
     return (
-      <Shell me={me}>
-        <button
-          type="button"
-          className="mb-6 w-fit border-none bg-transparent p-0 text-ui text-ink2"
-          onClick={() => navigate("/karya")}
-        >
-          ← Kembali ke Karya
-        </button>
+      <Shell me={me} header={{ title: "Karya", backTo: "/karya" }}>
         {state === "loading" ? (
           <div
             role="status"
@@ -181,14 +175,11 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
   );
 
   return (
-    <Shell me={me} rail={rail}>
-      <button
-        type="button"
-        onClick={() => navigate("/karya")}
-        className="mb-5 w-fit border-none bg-transparent p-0 text-ui text-ink2"
-      >
-        ← Kembali ke Karya
-      </button>
+    <Shell
+      me={me}
+      rail={rail}
+      header={{ title: karya.title, backTo: "/karya" }}
+    >
 
       {karya.coverUrl ? (
         <img
@@ -232,7 +223,11 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
                 key={member.id}
                 type="button"
                 aria-label={`Buka profil ${member.name}`}
-                onClick={() => navigate(`/member/${member.id}`)}
+                onClick={() =>
+                  navigate(`/member/${member.id}`, {
+                    state: backNavigationState(location),
+                  })
+                }
                 className="relative border-none bg-transparent p-0"
                 style={{
                   marginLeft: index === 0 ? 0 : -8,
@@ -384,7 +379,11 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
               <button
                 type="button"
                 className="mt-3 cursor-pointer border-none bg-transparent p-0 text-left text-caption font-medium text-accent-mid"
-                onClick={() => navigate(`/karya/${id}/posts/${post.id}`)}
+                onClick={() =>
+                  navigate(`/karya/${id}/posts/${post.id}`, {
+                    state: backNavigationState(location),
+                  })
+                }
               >
                 {post.commentCount > 0
                   ? `${post.commentCount} komentar · Lihat percakapan →`
@@ -394,7 +393,11 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
                 <button
                   type="button"
                   className="mt-3 flex w-full gap-2.5 border-t border-line bg-transparent pt-3 text-left"
-                  onClick={() => navigate(`/karya/${id}/posts/${post.id}`)}
+                  onClick={() =>
+                    navigate(`/karya/${id}/posts/${post.id}`, {
+                      state: backNavigationState(location),
+                    })
+                  }
                 >
                   <Avatar
                     name={post.latestComment.author.name}

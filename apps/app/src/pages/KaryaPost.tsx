@@ -10,7 +10,6 @@ import {
 import { Avatar, Button, Eyebrow, Textarea } from "@myapp/ui";
 import { MessageCircle, Send, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "wouter";
 import Shell from "@/components/Shell";
 import { timeAgo } from "@/components/ui-metadata";
 
@@ -23,7 +22,6 @@ export default function KaryaPost({
   postId: string;
   me: Member;
 }) {
-  const [, navigate] = useLocation();
   const karyaQuery = useGetKarya(karyaId);
   const postQuery = useGetKaryaPost(karyaId, postId);
   const commentsQuery = useGetPostComments(karyaId, postId);
@@ -92,11 +90,11 @@ export default function KaryaPost({
 
   if (postQuery.isLoading) {
     return (
-      <Shell me={me} rail={rail}>
-        <BackButton
-          karyaId={karyaId}
-          onBack={() => navigate(`/karya/${karyaId}`)}
-        />
+      <Shell
+        me={me}
+        rail={rail}
+        header={{ title: "Update karya", backTo: `/karya/${karyaId}` }}
+      >
         <div role="status" aria-label="Memuat post" className="space-y-4">
           <div className="h-24 animate-pulse rounded-card bg-surface" />
           <div className="h-16 animate-pulse rounded-card bg-surface" />
@@ -108,11 +106,11 @@ export default function KaryaPost({
 
   if (postNotFound) {
     return (
-      <Shell me={me} rail={rail}>
-        <BackButton
-          karyaId={karyaId}
-          onBack={() => navigate(`/karya/${karyaId}`)}
-        />
+      <Shell
+        me={me}
+        rail={rail}
+        header={{ title: "Update karya", backTo: `/karya/${karyaId}` }}
+      >
         <div className="rounded-panel border border-line bg-surface px-6 py-10 text-center">
           <Eyebrow as="div" className="mb-3">
             404 · Post tidak ditemukan
@@ -130,11 +128,11 @@ export default function KaryaPost({
 
   if (postQuery.isError || !post) {
     return (
-      <Shell me={me} rail={rail}>
-        <BackButton
-          karyaId={karyaId}
-          onBack={() => navigate(`/karya/${karyaId}`)}
-        />
+      <Shell
+        me={me}
+        rail={rail}
+        header={{ title: "Update karya", backTo: `/karya/${karyaId}` }}
+      >
         <div
           role="alert"
           className="rounded-panel border border-line bg-surface px-6 py-10 text-center"
@@ -154,11 +152,11 @@ export default function KaryaPost({
   }
 
   return (
-    <Shell me={me} rail={rail}>
-      <BackButton
-        karyaId={karyaId}
-        onBack={() => navigate(`/karya/${karyaId}`)}
-      />
+    <Shell
+      me={me}
+      rail={rail}
+      header={{ title: karya?.title ?? "Update karya", backTo: `/karya/${karyaId}` }}
+    >
 
       <article className="border-b border-line pb-5">
         <div className="flex items-center gap-3">
@@ -297,24 +295,5 @@ export default function KaryaPost({
         )}
       </section>
     </Shell>
-  );
-}
-
-function BackButton({
-  karyaId,
-  onBack,
-}: {
-  karyaId: string;
-  onBack: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onBack}
-      aria-label={`Kembali ke karya ${karyaId}`}
-      className="mb-5 w-fit border-none bg-transparent p-0 text-title leading-none text-ink"
-    >
-      ←
-    </button>
   );
 }

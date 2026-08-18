@@ -1,6 +1,7 @@
 import type { FeedItem } from "@myapp/api-client-react";
 import { MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
+import { backNavigationState } from "@/lib/navigation";
 import { Avatar, KaryaCard, KaryaCover } from "@/components/ui-atoms";
 import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
 
@@ -16,7 +17,7 @@ export default function Feed({
   /** Let post separators reach the edges of the shell's main column. */
   edgeToEdge?: boolean;
 }) {
-  const [, navigate] = useLocation();
+  const [location, navigate] = useLocation();
 
   return (
     <div
@@ -31,7 +32,9 @@ export default function Feed({
               href={`/karya/${it.karya.id}/posts/${it.id}`}
               onClick={(event) => {
                 event.preventDefault();
-                navigate(`/karya/${it.karya.id}/posts/${it.id}`);
+                navigate(`/karya/${it.karya.id}/posts/${it.id}`, {
+                  state: backNavigationState(location),
+                });
               }}
               className={`post-card group flex cursor-pointer gap-3.5 border-b border-line py-[18px] transition-colors hover:bg-bg-hover focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent ${
                 edgeToEdge ? "px-[var(--shell-gutter)] max-[900px]:px-4" : ""
@@ -140,7 +143,9 @@ export default function Feed({
                 src: s.url,
                 alt: `${it.title} — layar ${i + 1}`,
               }))}
-            onOpen={() => navigate(`/karya/${it.id}`)}
+            onOpen={() =>
+              navigate(`/karya/${it.id}`, { state: backNavigationState(location) })
+            }
           />
         ),
       )}
