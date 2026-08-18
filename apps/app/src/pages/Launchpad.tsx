@@ -1,9 +1,15 @@
-import { useGetFeed, useListMembers } from "@myapp/api-client-react";
-import { X } from "lucide-react";
+import {
+  createPost,
+  useGetFeed,
+  useListKarya,
+  useListMembers,
+} from "@myapp/api-client-react";
+import { Button } from "@myapp/ui";
+import { ChevronDown, X } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import Feed from "@/components/Feed";
-import { Avatar, Eyebrow } from "@/components/ui-atoms";
+import { Avatar, Eyebrow, KaryaCover, Textarea } from "@/components/ui-atoms";
 import { useFeatureFlags } from "@/lib/feature-flags-context";
 import { firstName, type Member } from "@/lib/members";
 import { backNavigationState } from "@/lib/navigation";
@@ -24,15 +30,190 @@ function assistantPromptIsDismissed(memberId: string) {
   }
 }
 
-/**
- * Scroll is the Launchpad hero: a calm, reverse-chronological river of real
- * karya events. It deliberately has no ranking, leaderboard, composer,
- * comments, or appreciation controls.
- */
+function Composer({
+  user,
+  onPosted,
+}: {
+  user: Member;
+  onPosted: () => Promise<unknown>;
+}) {
+  const { data: karya = [], isLoading } = useListKarya();
+  const [chosenId, setChosenId] = useState<string | null>(null);
+  const [switching, setSwitching] = useState(false);
+  const [body, setBody] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // A kabar belongs to work, not to a person. The roster is also the access
+  // boundary enforced by the API: only a karya's members can publish to it.
+  const myKarya = karya.filter((item) =>
+    item.roster.some((member) => member.id === user.id),
+  );
+  const selected = myKarya.find((item) => item.id === chosenId) ?? myKarya[0];
+
+  async function submit() {
+    const trimmed = body.trim();
+    if (!selected || !trimmed || busy) return;
+
+    setBusy(true);
+    setError(null);
+    try {
+      await createPost(selected.id, { body: trimmed });
+      setBody("");
+      await onPosted();
+    } catch {
+      setError("Update belum terkirim. Isinya tetap aman—coba lagi.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="h-28 animate-pulse border-b border-line bg-surface" />
+    );
+  }
+
+  if (!selected) {
+    return (
+      <div className="mb-4 flex items-center gap-3.5 rounded-panel border border-line bg-surface p-4">
+        <div className="min-w-0 flex-1">
+          <p className="mb-0.5 font-body text-body font-medium text-ink">
+            Kabar selalu punya karya
+          </p>
+          <p className="m-0 font-body text-caption leading-compact text-ink3">
+            Yang tayang di sini kemajuan sebuah karya, dan karyanya yang jadi
+            penulis.
+          </p>
+        </div>
+        <a
+          href="/karya/new"
+          className="shrink-0 rounded-card bg-accent px-3.5 py-2 font-body text-ui font-medium text-accent-fg"
+        >
+          Bikin karya
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-4 flex flex-col gap-3 border-b border-line pb-4 sm:-mx-[var(--shell-gutter)] sm:px-[var(--shell-gutter)]">
+      <div className="flex items-center gap-3">
+        {selected.coverUrl ? (
+          <KaryaCover
+            src={selected.coverUrl}
+            size={40}
+            radius={11}
+            alt={`Logo ${selected.title}`}
+          />
+        ) : (
+          <span
+            className="flex size-10 shrink-0 items-center justify-center rounded-[11px] border border-line bg-accent-tint font-display text-title text-accent"
+            aria-hidden="true"
+          >
+            {selected.title.charAt(0)}
+          </span>
+        )}
+        <div className="min-w-0 flex-1">
+          <p className="m-0 truncate font-display text-title leading-heading text-ink">
+            {selected.title}
+          </p>
+          <p className="mt-px font-body text-micro text-ink3">
+            diposting {user.name}
+          </p>
+        </div>
+        {myKarya.length > 1 && (
+          <Button
+            variant="outline"
+            onClick={() => setSwitching((value) => !value)}
+            aria-expanded={switching}
+            className="h-auto shrink-0 rounded-full border-line bg-transparent px-[11px] py-[5px] font-body text-caption font-medium text-ink2 hover:bg-transparent hover:text-ink"
+          >
+            Ganti <ChevronDown size={13} strokeWidth={2} aria-hidden="true" />
+          </Button>
+        )}
+      </div>
+
+      {switching && (
+        <div className="border-t border-line pt-3">
+          <Eyebrow as="div" className="mb-2">
+            Posting sebagai
+          </Eyebrow>
+          <div className="flex flex-col gap-0.5">
+            {myKarya.map((item) => {
+              const active = item.id === selected.id;
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => {
+                    setChosenId(item.id);
+                    setSwitching(false);
+                  }}
+                  className={`flex cursor-pointer items-center gap-[9px] rounded-card border-none px-2 py-1.5 text-left font-body text-ui ${active ? "bg-accent-tint font-medium text-accent" : "bg-transparent font-normal text-ink2"}`}
+                >
+                  {item.coverUrl ? (
+                    <KaryaCover
+                      src={item.coverUrl}
+                      size={22}
+                      radius={7}
+                      alt=""
+                    />
+                  ) : (
+                    <span
+                      className="flex size-[22px] items-center justify-center rounded-[7px] bg-accent-tint font-display text-micro text-accent"
+                      aria-hidden="true"
+                    >
+                      {item.title.charAt(0)}
+                    </span>
+                  )}
+                  {item.title}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <Textarea
+        value={body}
+        onChange={(event) => setBody(event.target.value)}
+        rows={3}
+        placeholder="Ceritakan secukupnya. Yang paling berguna biasanya bagian yang tidak terduga."
+        aria-label="Isi kabar"
+        className="w-full resize-y font-body text-body leading-body text-ink"
+      />
+
+      {error && (
+        <p role="alert" className="m-0 text-caption text-danger">
+          {error}
+        </p>
+      )}
+
+      <div className="flex items-center gap-3">
+        <p className="m-0 font-body text-micro leading-compact text-ink3">
+          Tayang di halaman {selected.title}, lalu muncul di Scroll orang yang
+          mengikutinya.
+        </p>
+        <Button
+          variant="primary"
+          disabled={!body.trim() || busy}
+          onClick={submit}
+          className="ml-auto h-auto shrink-0 px-4 py-2 font-medium"
+        >
+          {busy ? "Memposting…" : "Posting"}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/** Scroll is the Launchpad hero: a calm, reverse-chronological river of karya events. */
 export default function Scroll({ user }: { user: Member }) {
   const [, navigate] = useLocation();
   const { enabled } = useFeatureFlags();
-  const { data: feed = [] } = useGetFeed();
+  const { data: feed = [], refetch } = useGetFeed();
   const posts = feed.filter((item) => item.type === "post");
   const [isAssistantPromptDismissed, setIsAssistantPromptDismissed] = useState(
     () => assistantPromptIsDismissed(user.id),
@@ -58,6 +239,8 @@ export default function Scroll({ user }: { user: Member }) {
           Kabar progres dari karya di komunitas
         </span>
       </div>
+
+      <Composer user={user} onPosted={() => refetch()} />
 
       {enabled("aiAssistant") && !isAssistantPromptDismissed && (
         <div className="my-4 flex w-full items-center gap-2 rounded-panel border border-accent-line bg-accent-tint px-[18px] py-3.5">
