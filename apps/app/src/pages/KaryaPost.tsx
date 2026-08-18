@@ -155,9 +155,11 @@ export default function KaryaPost({
     <Shell
       me={me}
       rail={rail}
-      header={{ title: karya?.title ?? "Update karya", backTo: `/karya/${karyaId}` }}
+      header={{
+        title: karya?.title ?? "Update karya",
+        backTo: `/karya/${karyaId}`,
+      }}
     >
-
       <article className="border-b border-line pb-5">
         <div className="flex items-center gap-3">
           <Avatar name={post.author.name} image={post.author.image} size={44} />

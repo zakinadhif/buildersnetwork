@@ -124,7 +124,6 @@ export default function MemberProfilePage({
       rail={rail}
       header={{ title: member.name, backTo: "/people" }}
     >
-
       <div className="flex items-start gap-[18px]">
         <Avatar name={member.name} size={76} />
         <div className="min-w-0 flex-1">

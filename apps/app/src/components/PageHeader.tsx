@@ -1,8 +1,6 @@
 import { ArrowLeft } from "lucide-react";
 import { useLocation } from "wouter";
-import {
-  resolveBackDestination,
-} from "@/lib/navigation";
+import { resolveBackDestination } from "@/lib/navigation";
 
 export interface PageHeaderProps {
   /** The destination used for a direct visit or refreshed page. */

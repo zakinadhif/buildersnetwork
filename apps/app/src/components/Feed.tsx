@@ -1,9 +1,9 @@
 import type { FeedItem } from "@myapp/api-client-react";
 import { MessageCircle } from "lucide-react";
 import { useLocation } from "wouter";
-import { backNavigationState } from "@/lib/navigation";
 import { Avatar, KaryaCard, KaryaCover } from "@/components/ui-atoms";
 import { STAGE_LABELS, timeAgo } from "@/components/ui-metadata";
+import { backNavigationState } from "@/lib/navigation";
 
 /**
  * The reverse-chron global feed (FR-22). A post leads with its karya: the
@@ -144,7 +144,9 @@ export default function Feed({
                 alt: `${it.title} — layar ${i + 1}`,
               }))}
             onOpen={() =>
-              navigate(`/karya/${it.id}`, { state: backNavigationState(location) })
+              navigate(`/karya/${it.id}`, {
+                state: backNavigationState(location),
+              })
             }
           />
         ),

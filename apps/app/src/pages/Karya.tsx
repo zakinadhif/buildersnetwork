@@ -180,7 +180,6 @@ export default function Karya({ id, me }: { id: string; me: Member }) {
       rail={rail}
       header={{ title: karya.title, backTo: "/karya" }}
     >
-
       {karya.coverUrl ? (
         <img
           src={karya.coverUrl}

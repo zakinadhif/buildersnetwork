@@ -18,7 +18,11 @@ export function backNavigationState(pathname: string): AppNavigationState {
 }
 
 export function isInternalAppPath(value: unknown): value is string {
-  return typeof value === "string" && value.startsWith("/") && !value.startsWith("//");
+  return (
+    typeof value === "string" &&
+    value.startsWith("/") &&
+    !value.startsWith("//")
+  );
 }
 
 /** Resolve a secondary screen's return target without consulting tab history. */
