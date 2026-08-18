@@ -396,6 +396,6 @@ authed("non-admin: feature toggle is absent", async ({ page }) => {
 
   await page.goto("/karya/km");
 
-  await expect(page.getByText("Loom")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Loom" })).toBeVisible();
   await expect(page.getByRole("button", { name: /unggulan/ })).toHaveCount(0);
 });

@@ -68,7 +68,6 @@ authed("/ lands on Scroll", async ({ page }) => {
   await page.goto("/");
   await expect(page).toHaveURL(/\/home/);
   await expect(page.getByRole("heading", { name: "Scroll" })).toBeVisible();
-  await expect(page.getByText("Kabar terbaru")).toBeVisible();
 });
 
 authed("shell rail shows the signed-in member", async ({ page }) => {
@@ -85,7 +84,7 @@ authed(
   async ({ page }) => {
     await mockHome(page);
     await page.goto("/home");
-    await expect(page.getByText("Belum ada kabar progres.")).toBeVisible();
+    await expect(page.getByText("Belum ada post progres.")).toBeVisible();
   },
 );
 

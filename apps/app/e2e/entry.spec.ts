@@ -175,7 +175,7 @@ test("entry surfaces expose sign-in and the recovered conversational AI path", a
     page.getByRole("button", { name: "Mulai dengan asisten AI →" }),
   ).toBeVisible();
   await page.goto("/onboarding");
-  await expect(page).toHaveURL(/\/mulai/);
+  await expect(page).toHaveURL(/\/assistant/);
 });
 
 test("login form stays mounted while the session is revalidated", async ({

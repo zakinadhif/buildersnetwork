@@ -101,7 +101,7 @@ authed(
       .click();
     await expect(page).toHaveURL(/\/karya\/new$/);
     await expect(
-      page.getByRole("button", { name: /Bantu susun pakai AI/ }),
+      page.getByRole("button", { name: /Buka asisten AI/ }),
     ).toBeVisible();
 
     await page.getByLabel("Judul").fill("Sync Tool");
@@ -164,7 +164,7 @@ authed(
 
     await page.goto("/karya/k1");
 
-    await expect(page.getByText("Loom")).toBeVisible();
+    await expect(page.getByRole("heading", { name: "Loom" })).toBeVisible();
     // Contributor faces (monograms) render as labelled images.
     await expect(
       page.getByRole("img", { name: "Hafiz Maulana" }),

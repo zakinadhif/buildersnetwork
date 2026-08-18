@@ -37,3 +37,7 @@ $env:PLAYWRIGHT_PORT = "5187"
 $env:CI = "true"
 pnpm --filter app exec playwright test e2e/entry.spec.ts
 ```
+
+## CI-aligned validation
+
+Before pushing, run the same validation commands that the CI runs.

@@ -28,9 +28,9 @@ export default function PageHeader({ backTo, title }: PageHeaderProps) {
           <ArrowLeft size={17} strokeWidth={2} aria-hidden="true" />
         </button>
       )}
-      <h1 className="m-0 min-w-0 truncate font-display text-title font-normal text-ink">
+      <span className="min-w-0 truncate font-display text-title font-normal text-ink">
         {title}
-      </h1>
+      </span>
     </header>
   );
 }
